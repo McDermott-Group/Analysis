@@ -1,14 +1,15 @@
 function [filenames, pathnames, status] = selectMeasurementDataFile(number_of_files, window_titles)
-% SelectMeasurementDataFile Open the file selection dialog to select a set of files. 
+%SelectMeasurementDataFile Open the file selection dialog to select a set
+%of files. 
 %
-%   FILENAMES, PATHNAMES, STATUS = SelectMeasurementDataFile(NUMBER_OF_FILES, WINDOW_TITLES) 
-%   opens the file selection dialog NUMBER_OF_FILES times. 
-%   WINDOW_TITLES should be a cell of strings. Each string specifies the window 
-%   title of the n-th file selection dialog window.
+%   FILENAMES, PATHNAMES, STATUS = SelectMeasurementDataFile(NUMBER_OF_FILES,
+%   WINDOW_TITLES) opens the file selection dialog NUMBER_OF_FILES times. 
+%   WINDOW_TITLES should be a cell of strings. Each string specifies
+%   the window title of the n-th file selection dialog window.
 %   The length of WINDOW_TITLES should be equal to NUMBER_OF_FILES.
 %   The function returns cell FILENAMES contaning the chosen filenames, 
-%   cell PATHNAMES containg corresponding pathes and STATUS flag that is true 
-%   if the file selection process is finised as expected.
+%   cell PATHNAMES containg corresponding pathes and STATUS flag that is
+%   true if the file selection process is finised as expected.
 %
 %   If NUMBER_OF_FILES is not specified an abitrary number of files could
 %   be selected. The selection process will stop upon pressing [Cancel]
@@ -16,7 +17,9 @@ function [filenames, pathnames, status] = selectMeasurementDataFile(number_of_fi
 %   each they will be converted to a simple string.
 
 MAX_NUMBER_OF_FILES = 100;
-status = true;       % True if the selection was not interrupted and non-zero number of files were chosen.
+% status is true if the selection was not interrupted and non-zero number
+% of files were chosen.
+status = true;
 
 if exist('number_of_files', 'var') && exist('window_titles', 'var') &&...
         number_of_files ~= length(window_titles)
