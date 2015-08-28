@@ -80,7 +80,7 @@ for data_index = 1:length(data1.dep)
                ['   ', filenames{1}, ' [', data1.Timestamp, ']'],...
                [' - ', filenames{2}, ' [', data2.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
 
-        savePlot((plts_path, [base_filename1, '-', base_filename2, '_', dep_name, '_simple']));
+        savePlot(fullfile(plts_path, [base_filename1, '-', base_filename2, '_', dep_name, '_simple']));
     end
 
     % Plot 2D data.
@@ -115,15 +115,7 @@ for data_index = 1:length(data1.dep)
             title({[strrep(dep_name, '_', ' '), ' Difference between Two Datasets:'],...
                    ['   ', filenames{1}, ' [', data1.Timestamp, ']'],...
                    [' - ', filenames{2}, ' [', data2.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-            try
-                saveas(gca, fullfile(plts_path, [base_filename1, '-', base_filename2, '_', dep_name, '_smooth']), 'png')
-            catch
-                if print_messages
-                    disp(['The plot for data variable ''', strrep(dep_name, '_', ' '), ''' has not been saved. ',...
-                          'The automatically created name ''',...
-                          fullfile(plts_path, [base_filename1, '-', base_filename2, '_', dep_name, '_smooth']), ''' is probably too long.'])
-                end
-            end
+            savePlot(fullfile(plts_path, [base_filename1, '-', base_filename2, '_', dep_name, '_smooth']));
         else % Create a polar (smooth) plot.
             if ~isempty(strfind(indep_name1, 'Phase'))
                 phase = indep_vals1;
