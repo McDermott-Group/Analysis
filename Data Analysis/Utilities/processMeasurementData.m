@@ -47,6 +47,17 @@ function data = processMeasurementData(data)
 
     % Convert units. 
     for k = 1:length(fields)
+        if isfield(data.units, fields{k})
+            switch data.units.(fields{k})
+                case 'DACUnits'
+                    data.units.(fields{k}) = 'DAC Units';
+                case 'ADCUnits'
+                    data.units.(fields{k}) = 'ADC Units';
+                case 'PreAmpTimeCounts'
+                    data.units.(fields{k}) = 'Pre-Amp Time Counts';
+            end
+        end
+        
         switch fields{k}
             case 'RF_Frequency'
                 if isfield(data.units, fields{k}) && strcmp(data.units.(fields{k}), 'Hz')

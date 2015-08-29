@@ -10,8 +10,7 @@ if ~status
     return
 end
 
-% Read probability data file, convert the variable names, and define
-% the units.
+% Read the data files, convert the variable names, and specify the units.
 data1 = processMeasurementData(importMeasurementData(fullfile(pathnames{1}, filenames{1})));
 data2 = processMeasurementData(importMeasurementData(fullfile(pathnames{2}, filenames{2})));
 
@@ -39,7 +38,8 @@ for data_index = 1:length(data1.dep)
     dep_rels2 = data2.rels.(dep_name);
      
     if (isempty(dep_rels1) || isempty (dep_rels2)) && print_messages
-        disp(['Independent (sweep) variables for data variable ''', strrep(dep_name, '_', ' '), ''' are not specified. ',...
+        disp(['Independent (sweep) variables for data variable ''',...
+              strrep(dep_name, '_', ' '), ''' are not specified. ',...
               'This data will not be plotted.'])
     end
     
@@ -103,6 +103,7 @@ for data_index = 1:length(data1.dep)
         
         xunits = getUnits(data1, indep_name1);
         yunits = getUnits(data1, indep_name2);
+        zunits = getUnits(data, dep_name);
         
         difference = dep_vals1 - dep_vals2;
         % Plot the data as a smooth surface.
@@ -112,7 +113,7 @@ for data_index = 1:length(data1.dep)
             plotSmooth(indep_vals1, indep_vals2, difference);
             xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
             ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-            title({[strrep(dep_name, '_', ' '), ' Difference between Two Datasets:'],...
+            title({[strrep(dep_name, '_', ' '), zunits, ' Difference between Two Datasets:'],...
                    ['   ', filenames{1}, ' [', data1.Timestamp, ']'],...
                    [' - ', filenames{2}, ' [', data2.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
             savePlot(fullfile(plts_path, [base_filename1, '-', base_filename2, '_', dep_name, '_smooth']));
@@ -121,16 +122,18 @@ for data_index = 1:length(data1.dep)
                 phase = indep_vals1;
                 radius = indep_vals2;
                 vals = difference';
-                indep_vars = ['Radius: ', strrep(indep_name2, '_', ' '), yunits, '; Phase: ', strrep(indep_name1, '_', ' '), xunits];
+                indep_vars = ['Radius: ', strrep(indep_name2, '_', ' '),...
+                    yunits, '; Phase: ', strrep(indep_name1, '_', ' '), xunits];
             else
                 phase = indep_vals2;
                 radius = indep_vals1;
                 vals = difference;
-                indep_vars = ['Radius: ', strrep(indep_name1, '_', ' '), xunits, '; Phase: ', strrep(indep_name2, '_', ' '), yunits];
+                indep_vars = ['Radius: ', strrep(indep_name1, '_', ' '),...
+                    xunits, '; Phase: ', strrep(indep_name2, '_', ' '), yunits];
             end
             createFigure;
             plotPolar(radius, phase, vals);
-            title({[strrep(dep_name, '_', ' '), ' Difference between Two Datasets:'],...
+            title({[strrep(dep_name, '_', ' '), zunits, ' Difference between Two Datasets:'],...
                    ['   ', filenames{1}, ' [', data1.Timestamp, ']'],...
                    [' - ', filenames{2}, ' [', data2.Timestamp, ']'], indep_vars}, 'Interpreter', 'none', 'FontSize', 10)
             savePlot(fullfile(plts_path, [base_filename1, '-', base_filename2, '_', dep_name, '_smooth']));
@@ -140,13 +143,14 @@ for data_index = 1:length(data1.dep)
         plotPixelated(indep_vals1, indep_vals2, difference');
         xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-        title({[strrep(dep_name, '_', ' '), ' Difference between Two Datasets:'],...
+        title({[strrep(dep_name, '_', ' '), zunits, ' Difference between Two Datasets:'],...
                ['   ', filenames{1}, ' [', data1.Timestamp, ']'],...
                [' - ', filenames{2}, ' [', data2.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
         savePlot(fullfile(plts_path, [base_filename1, '-', base_filename2, '_', dep_name, '_pixelated']));
     end
     if length(dep_rels1) > 2 && print_messages
-        disp(['Data variable ''', strrep(dep_name, '_', ' '), ''' depends on more than two sweep variables. ',...
+        disp(['Data variable ''', strrep(dep_name, '_', ' '),...
+              ''' depends on more than two sweep variables. ',...
               'The data will not be plotted.'])
     end
 end

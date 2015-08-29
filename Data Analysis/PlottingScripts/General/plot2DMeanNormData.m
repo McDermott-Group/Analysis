@@ -1,6 +1,7 @@
 function plot2DMeanNormData(normalization_direction)
-%plot2DMeanNormData(NORMALIZATION_DIRECTION) plots line-by-line mean normalized 2D data from a text
-%data file. NORMALIZATION_DIRCTION should be either 'along_x' or 'along_y'.
+%plot2DMeanNormData(NORMALIZATION_DIRECTION) Plot a line-by-line mean 
+%normalized 2D data from a text data file. NORMALIZATION_DIRCTION should be
+%either 'along_x' or 'along_y'.
 
 if ~exist('normalization_direction', 'var') ||...
     (~strcmp(normalization_direction, 'along_x') &&...
@@ -14,8 +15,7 @@ if ~status
     return
 end
 
-% Read probability data file, convert the variable names, and define
-% the units.
+% Read the data file, convert the variable names, and specify the units.
 data = processMeasurementData(importMeasurementData(fullfile(pathname, filename)));
 
 % Create folder Plots in the same directory as the selected data file
@@ -35,12 +35,14 @@ for data_index = 1:length(data.dep)
     dep_rels = data.rels.(dep_name);
     
     if isempty(dep_rels) && print_messages
-        disp(['Independent (sweep) variables for data variable ''', strrep(dep_name, '_', ' '), ''' are not specified. ',...
+        disp(['Independent (sweep) variables for data variable ''',...
+              strrep(dep_name, '_', ' '), ''' are not specified. ',...
               'This data will not be plotted.'])
     end
 
     if length(dep_rels) == 1
-        disp(['Data variable ''', strrep(dep_name, '_', ' '), ''' depends on only one sweep variable. ',...
+        disp(['Data variable ''', strrep(dep_name, '_', ' '),...
+              ''' depends on only one sweep variable. ',...
               'This data will not be plotted.'])
     end
 
@@ -71,9 +73,10 @@ for data_index = 1:length(data.dep)
         plotSmooth(indep_vals1, indep_vals2, dep_vals);
         xunits = getUnits(data, indep_name1);
         yunits = getUnits(data, indep_name2);
+        zunits = getUnits(data, dep_name);
         xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-        title({[extra_title, strrep(dep_name, '_', ' '), ':'],...
+        title({[extra_title, strrep(dep_name, '_', ' '), zunits, ':'],...
                [filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
         savePlot(saveas(gca, fullfile(plts_path, [base_filename, '_', dep_name, '_smooth', extra_filename]));
         % Plot the data as a pixeleated image.
@@ -81,12 +84,13 @@ for data_index = 1:length(data.dep)
         plotPixelated(indep_vals1, indep_vals2, dep_vals');
         xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-        title({[extra_title, strrep(dep_name, '_', ' '), ':'],...
+        title({[extra_title, strrep(dep_name, '_', ' '), zunits, ':'],...
                [filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
         savePlot(gca, fullfile(plts_path, [base_filename, '_', dep_name, '_pixelated', extra_filename]));
     end
     if length(dep_rels) > 2 && print_messages
-        disp(['Data variable ''', strrep(dep_name, '_', ' '), ''' depends on more than two sweep variables. ',...
+        disp(['Data variable ''', strrep(dep_name, '_', ' '),...
+              ''' depends on more than two sweep variables. ',...
               'This data will not be plotted.'])
     end
 end
