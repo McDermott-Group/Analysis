@@ -48,7 +48,7 @@ for data_index = 1:length(data1.dep)
     dep_rels1 = data1.rels.(dep_name);
     dep_rels2 = data2.rels.(dep_name);
      
-    if (isempty(dep_rels1) || isempty (dep_rels2)) && print_messages
+    if (isempty(dep_rels1) || isempty (dep_rels2))
         disp(['Independent (sweep) variables for data variable ''', strrep(dep_name, '_', ' '), ''' are not specified. ',...
               'This data will not be plotted.'])
     end
@@ -142,7 +142,7 @@ for data_index = 1:length(data1.dep)
                [' P(dark):   ', filenames{2}, ' [', data2.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
         savePlot(fullfile(plts_path, [base_filename1, '_', base_filename2, '_quant_eff_pixelated']));
     end
-    if length(dep_rels1) > 2 && print_messages
+    if length(dep_rels1) > 2
         disp(['Data variable ''', strrep(dep_name, '_', ' '), ''' depends on more than two sweep variables. ',...
               'The data will not be plotted.'])
     end
