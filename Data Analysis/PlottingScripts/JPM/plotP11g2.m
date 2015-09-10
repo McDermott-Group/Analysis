@@ -61,7 +61,7 @@ for data_index = 1:length(data.dep)
                 plot(indep_vals, PA_PB_prod,...
                     'r.', 'LineWidth', 1, 'MarkerSize', 15)
                 hold off
-                legend('P11', 'P_A*P_B')
+                legend('P_{11}', 'P_A*P_B')
                 ymin = min([dep_vals(:) - 1.96 * data.error.(dep_name)(:); PA_PB_prod(:)]);
                 ymax = max([dep_vals(:) + 1.96 * data.error.(dep_name)(:); PA_PB_prod(:)]);
             else
@@ -87,7 +87,7 @@ for data_index = 1:length(data.dep)
             plot(indep_vals, PA_PB_prod,...
                 'r.', 'LineWidth', 1, 'MarkerSize', 15)
             hold off
-            legend('P11', 'P_A*P_B')
+            legend('P_{11}', 'P_A*P_B')
             ymin = min([dep_vals(:); PA_PB_prod(:)]);
             ymax = max([dep_vals(:); PA_PB_prod(:)]);
         else
@@ -186,7 +186,7 @@ for data_index = 1:length(data.dep)
             ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
             title({'g2:',...
                    [filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-            savePlot(saveas(gca, fullfile(plts_path, [base_filename, '_', dep_name, '_g2_smooth']), 'png'));
+            savePlot(fullfile(plts_path, [base_filename, '_', dep_name, '_g2_smooth']));
             
             corrected_g2 = data.g2;
             corrected_g2(corrected_g2 > 2) = NaN;
