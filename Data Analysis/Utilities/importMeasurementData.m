@@ -113,17 +113,13 @@ while isempty(strfind(line, '====Data Variables===='))
     line = fgetl(fid);
 end
 
-line = fgetl(fid);
 dep_counter = 0;
-while ischar(line)
-    if ~isempty(line)
+while ischar(line)      % At the first interation line contains '====Data Variables===='.
+    line = fgetl(fid);
+    if ~isempty(line)   % Check whether the end of file is reached.
         pos = strfind(line, ':');
-        while isempty(pos)
-            if ~ischar(line)
-                error(['Data variables are not properly specified in ', filename, '.']);
-            end
-            line = fgetl(fid);
-            pos = strfind(line, ':');
+        if isempty(pos) % Get another line.
+            continue
         end
         ubra = strfind(line, '[');
         uket = strfind(line, ']');
@@ -191,7 +187,6 @@ while ischar(line)
             data.(data.dep{dep_counter}) = temp_data;
         end
     end
-    line = fgetl(fid);
 end
 
 fclose(fid);
