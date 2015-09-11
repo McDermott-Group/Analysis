@@ -19,8 +19,18 @@ if ~exist(plts_path, 'dir')
 end
 [~, base_filename] = fileparts(filename);
 
-if isfield(data, 'JPM_A_Switching_Probability') && isfield(data, 'JPM_B_Switching_Probability')
-    PA_PB_prod = data.JPM_A_Switching_Probability .* data.JPM_B_Switching_Probability;
+if isfield(data, 'JPM_A_Switching_Probability') &&...
+        isfield(data, 'JPM_B_Switching_Probability')
+    PA = data.JPM_A_Switching_Probability;
+    PB = data.JPM_B_Switching_Probability;
+    PA_PB_prod = PA .* PB;
+    if isfield(data.error, 'JPM_A_Switching_Probability') &&...
+            isfield(data.error, 'JPM_B_Switching_Probability')
+        PA_var = data.error.JPM_A_Switching_Probability.^2;
+        PB_var = data.error.JPM_B_Switching_Probability.^2;
+        PA_PB_prod_error = sqrt(PA_var .* PB_var +...
+            PA_var .* PB.^2 + PA.^2 .* PB_var);
+    end
 end
 
 for data_index = 1:length(data.dep)
@@ -38,9 +48,6 @@ for data_index = 1:length(data.dep)
     % Plot 1D P11.
     if length(dep_rels) == 1
         indep_name = dep_rels{1};
-        if ~isempty(strfind(dep_name, '_Std_Dev'))
-            continue
-        end
         indep_vals = data.(indep_name);
         
         xmin = min(indep_vals);
@@ -54,12 +61,17 @@ for data_index = 1:length(data.dep)
         
         if isfield(data, 'error') && isfield(data.error, dep_name) % Plot an errobar graph.
             createFigure('right');
-            errorbar(indep_vals, dep_vals, 1.96*data.error.(dep_name),...
-                'b.', 'LineWidth', 1, 'MarkerSize', 15)
-            if isfield(data, 'JPM_A_Switching_Probability') && isfield(data, 'JPM_B_Switching_Probability')
+            errorbar(indep_vals, dep_vals, 1.96 * data.error.(dep_name),...
+                '.', 'LineWidth', 1, 'MarkerSize', 15)
+            if exist('PA_PB_prod', 'var')
                 hold on
-                plot(indep_vals, PA_PB_prod,...
-                    'r.', 'LineWidth', 1, 'MarkerSize', 15)
+                if exist('PA_PB_prod_error', 'var')
+                    errorbar(indep_vals, PA_PB_prod, 1.96 * PA_PB_prod_error,...
+                        '.', 'LineWidth', 1, 'MarkerSize', 15)
+                else
+                    plot(indep_vals, PA_PB_prod,...
+                        '.', 'LineWidth', 1, 'MarkerSize', 15)
+                end
                 hold off
                 legend('P_{11}', 'P_A*P_B')
                 ymin = min([dep_vals(:) - 1.96 * data.error.(dep_name)(:); PA_PB_prod(:)]);
@@ -77,7 +89,7 @@ for data_index = 1:length(data.dep)
             xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
             ylabel([strrep(dep_name, '_', ' ') yunits], 'FontSize', 14);
             title({[filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-            savePlot(fullfile(plts_path, [base_filename, '_', dep_name, '_P11_errorbar']));
+            savePlot(fullfile(plts_path, [base_filename, '_', dep_name, '_errorbar']));
         end
         
         createFigure;
@@ -85,7 +97,7 @@ for data_index = 1:length(data.dep)
         if isfield(data, 'JPM_A_Switching_Probability') && isfield(data, 'JPM_B_Switching_Probability')
             hold on
             plot(indep_vals, PA_PB_prod,...
-                'r.', 'LineWidth', 1, 'MarkerSize', 15)
+                '.', 'LineWidth', 1, 'MarkerSize', 15)
             hold off
             legend('P_{11}', 'P_A*P_B')
             ymin = min([dep_vals(:); PA_PB_prod(:)]);
@@ -103,7 +115,7 @@ for data_index = 1:length(data.dep)
         xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(dep_name, '_', ' ') yunits], 'FontSize', 14);
         title({[filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-        savePlot(fullfile(plts_path, [base_filename, '_', dep_name, '_P11_simple']));
+        savePlot(fullfile(plts_path, [base_filename, '_', dep_name, '_simple']));
     end
 
     % Plot 2D P11.
@@ -122,7 +134,7 @@ for data_index = 1:length(data.dep)
         ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
         title({[strrep(dep_name, '_', ' '), ':'],...
                [filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-        savePlot(fullfile(plts_path, [base_filename, '_', dep_name, '_P11_smooth']));
+        savePlot(fullfile(plts_path, [base_filename, '_', dep_name, '_smooth']));
         % Plot the data as a pixeleated image.
         createFigure('right');
         plotPixelated(indep_vals1, indep_vals2, dep_vals');
@@ -130,7 +142,7 @@ for data_index = 1:length(data.dep)
         ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
         title({[strrep(dep_name, '_', ' '), ':'],...
                [filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-        savePlot(fullfile(plts_path, [base_filename, '_', dep_name, '_P11_pixelated']));
+        savePlot(fullfile(plts_path, [base_filename, '_', dep_name, '_pixelated']));
     end
     if length(dep_rels) > 2
         disp(['Data variable ''', strrep(dep_name, '_', ' '), ''' depends on more than two sweep variables. ',...
@@ -144,13 +156,6 @@ for data_index = 1:length(data.dep)
         if length(dep_rels) == 1
             indep_name = dep_rels{1};
             indep_vals = data.(indep_name);
-
-            xmin = min(indep_vals);
-            xmax = max(indep_vals);
-            if xmax == xmin
-                xmax = xmax + eps;
-            end
-
             xunits = getUnits(data, indep_name);
 
             if isfield(data, 'error') && isfield(data.error, 'g2') % Plot an errobar graph.
@@ -159,7 +164,7 @@ for data_index = 1:length(data.dep)
                 xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
                 ylabel('g_2 = P_{11} / P_A * P_B', 'FontSize', 14);
                 title({[filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-                savePlot(fullfile(plts_path, [base_filename, '_', dep_name, '_g2_errorbar']));
+                savePlot(fullfile(plts_path, [base_filename, '_g2_errorbar']));
             end
 
             createFigure;
@@ -167,7 +172,7 @@ for data_index = 1:length(data.dep)
             xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
             ylabel('g_2 = P_{11} / P_A * P_B', 'FontSize', 14);
             title({[filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-            savePlot(fullfile(plts_path, [base_filename, '_', dep_name, '_g2_simple']));
+            savePlot(fullfile(plts_path, [base_filename, '_g2_simple']));
         end
 
         % Plot 2D g2.
@@ -186,7 +191,7 @@ for data_index = 1:length(data.dep)
             ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
             title({'g2:',...
                    [filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-            savePlot(fullfile(plts_path, [base_filename, '_', dep_name, '_g2_smooth']));
+            savePlot(fullfile(plts_path, [base_filename, '_g2_smooth']));
             
             corrected_g2 = data.g2;
             corrected_g2(corrected_g2 > 2) = NaN;
@@ -196,7 +201,7 @@ for data_index = 1:length(data.dep)
             ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
             title({'g2:',...
                    [filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-            savePlot(fullfile(plts_path, [base_filename, '_', dep_name, '_g2_pixelated']));
+            savePlot(fullfile(plts_path, [base_filename, '_g2_pixelated']));
         end
         if length(dep_rels) > 2
             disp(['Data variable ''', strrep(dep_name, '_', ' '), ''' depends on more than two sweep variables. ',...
