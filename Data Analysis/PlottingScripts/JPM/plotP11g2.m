@@ -97,7 +97,7 @@ for data_index = 1:length(data.dep)
         if isfield(data, 'JPM_A_Switching_Probability') && isfield(data, 'JPM_B_Switching_Probability')
             hold on
             plot(indep_vals, PA_PB_prod,...
-                '.', 'LineWidth', 1, 'MarkerSize', 15)
+                '.-', 'LineWidth', 1, 'MarkerSize', 15)
             hold off
             legend('P_{11}', 'P_A*P_B')
             ymin = min([dep_vals(:); PA_PB_prod(:)]);
