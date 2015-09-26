@@ -212,3 +212,7 @@ end
 
 % Show a message box with the experiment parameters.
 showMessageBox(data);
+
+disp(['<g_2> = ', num2str(mean(data.g2(:))), ' ± ',...
+    num2str(1.96 * std(data.g2(:)) / sqrt(length(data.g2(:)))),...
+    ' (1.96 * standard error of the mean)'])
