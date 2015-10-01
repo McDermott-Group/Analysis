@@ -85,15 +85,16 @@ for data_index = 1:length(data1.dep)
         
         xunits = getUnits(data, indep_name);
         
+        dep_vals1(dep_vals1 < dep_vals2) = dep_vals2(dep_vals1 < dep_vals2);
+        quant_eff = log((1 - dep_vals2) ./ (1 - dep_vals1)) ./...
+            (1e-9 * kappa * data1.Fast_Pulse_Time .*...
+            (calibration_coeff * data1.Readout_Amplitude.^2));
+        quant_eff(~isfinite(quant_eff)) = 0;
+        quant_eff(quant_eff < 0) = 0;
+        quant_eff(quant_eff > 1) = 1;
+        
         if isfield(data1, 'error') && isfield(data1.error, dep_name) &&...
            isfield(data2, 'error') && isfield(data2.error, dep_name) % Plot an errobar graph.
-            dep_vals1(dep_vals1 < dep_vals2) = dep_vals2(dep_vals1 < dep_vals2);
-            quant_eff = log((1 - dep_vals2) ./ (1 - dep_vals1)) ./...
-                (1e-9 * kappa * data1.Fast_Pulse_Time .*...
-                (calibration_coeff * data1.Readout_Amplitude.^2));
-            quant_eff(~isfinite(quant_eff)) = 0;
-            quant_eff(quant_eff < 0) = 0;
-            quant_eff(quant_eff > 1) = 1;
             quant_eff_error = 1.96 * sqrt(data1.error.(dep_name).^2 ./ (1 - dep_vals1).^2 +...
                                           data2.error.(dep_name).^2 ./ (1 - dep_vals2).^2);
                                       

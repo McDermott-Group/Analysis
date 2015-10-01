@@ -103,7 +103,7 @@ for data_index = 1:length(data1.dep)
         
         xunits = getUnits(data1, indep_name1);
         yunits = getUnits(data1, indep_name2);
-        zunits = getUnits(data, dep_name);
+        zunits = getUnits(data1, dep_name);
         
         difference = dep_vals1 - dep_vals2;
         % Plot the data as a smooth surface.
