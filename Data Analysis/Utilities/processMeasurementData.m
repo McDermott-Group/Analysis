@@ -41,6 +41,9 @@ function data = processMeasurementData(data)
                 
             case 'Detection_Time_Diff_Std_Dev'
                 data = renameVariable(data, fields{k}, 'Detection_Time_Difference_Std_Dev');
+            
+            case 'Corr_Coef'
+                data = renameVariable(data, fields{k}, 'Correlation_Coefficient');
         end
     end
 
