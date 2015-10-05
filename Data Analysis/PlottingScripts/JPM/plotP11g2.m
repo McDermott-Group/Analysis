@@ -98,7 +98,7 @@ if length(dep_rels) == 1
         grid on
 
         xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-        ylabel([strrep('P11', '_', ' ') yunits], 'FontSize', 14);
+        ylabel('P11', 'FontSize', 14);
         title({[filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
         savePlot(fullfile(plts_path, [base_filename, '_', 'P11', '_errorbar']));
     end
@@ -143,15 +143,14 @@ if length(dep_rels) == 2
     yunits = getUnits(data, indep_name2);
     xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
     ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-    title({[strrep(dep_name, '_', ' '), ':'],...
-           [filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-    savePlot(fullfile(plts_path, [base_filename, '_', dep_name, '_smooth']));
+    title({['P11:'], [filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+    savePlot(fullfile(plts_path, [base_filename, '_P11_smooth']));
     % Plot the data as a pixeleated image.
     createFigure('right');
     plotPixelated(indep_vals1, indep_vals2, P11');
     xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
     ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-    title({['P11:'],...
+    title({'P11:',...
            [filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
     savePlot(fullfile(plts_path, [base_filename, '_P11_pixelated']));
 end
