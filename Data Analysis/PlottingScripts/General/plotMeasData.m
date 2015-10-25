@@ -1,5 +1,5 @@
-function plotMeasurementData
-%plotMeasurementData Plot data from a text data file.
+function plotMeasData
+%plotMeasData Plot data from a text data file.
 
 % Select a file to plot.
 [filename, pathname, status] = selectMeasurementDataFile(1);

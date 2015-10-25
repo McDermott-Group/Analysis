@@ -1,5 +1,5 @@
-function plot2DMaxNormData(normalization_direction)
-%plot2DMaxNormData(NORMALIZATION_DIRECTION) Plot a line-by-line maximum
+function plotMaxNorm2DMeasData(normalization_direction)
+%plotMaxNorm2DMeasData(NORMALIZATION_DIRECTION) Plot a line-by-line maximum
 %normalized 2D data from a text data file. NORMALIZATION_DIRCTION should be
 %either 'along_x' or 'along_y'.
 

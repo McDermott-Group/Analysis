@@ -43,7 +43,6 @@ for k = 1:length(prob)
         BV = BV(P == 1);
         t_threshold = .75 * max(t(t < 1000));
         BV = BV(t > t_threshold & t < 1253);
-        
         if ~isempty(BV)
             if min(BV) < max(BV)
                 disp(['Suitable bias voltage range for ', name{k}, ' is from ', num2str(min(BV)),...

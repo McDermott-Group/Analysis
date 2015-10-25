@@ -1,6 +1,5 @@
-function plotMeasurementDataDifference
-%plotMeasurementDataDifference Plot the difference between two text data
-% sets.
+function plotMeasDataDiff
+%plotMeasDataDiff Plot the difference between two text data sets.
 
 % Select files to compute the difference.
 [filenames, pathnames, status] = selectMeasurementDataFile(2,...

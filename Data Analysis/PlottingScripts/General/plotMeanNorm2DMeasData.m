@@ -1,5 +1,5 @@
-function plot2DMeanNormData(normalization_direction)
-%plot2DMeanNormData(NORMALIZATION_DIRECTION) Plot a line-by-line mean 
+function plotMeanNorm2DMeasData(normalization_direction)
+%plotMeanNorm2DMeasData(NORMALIZATION_DIRECTION) Plot a line-by-line mean 
 %normalized 2D data from a text data file. NORMALIZATION_DIRCTION should be
 %either 'along_x' or 'along_y'.
 
