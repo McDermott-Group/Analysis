@@ -61,7 +61,7 @@ for data_index = 1:length(data.dep)
             elseif strcmp(normalization_direction, 'along_x')
                 dep_vals = dep_vals ./ (ones(size(dep_vals, 1), 1) * max(dep_vals));   
             end
-            extra_title = 'Line-by-Line Mean Normalized ';
+            extra_title = 'Line-by-Line Max Normalized ';
             extra_filename = ['_max_', normalization_direction];
         else
             extra_title = '';
