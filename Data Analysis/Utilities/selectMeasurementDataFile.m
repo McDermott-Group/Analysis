@@ -58,7 +58,8 @@ for k = 1:number_of_files
         window_title = window_titles{k};
     end
     window_filename = fullfile(pathname, ['MeasurementData_', num2str(k, '%03d')]);
-    [filename, pathname] = uigetfile({'*.txt', 'Text Files';...
+    [filename, pathname] = uigetfile({'*.txt', 'Text Files';
+              '*.mat', 'MATLAB Files';...
               '*.*', 'All Files' }, window_title, window_filename);
 
     % Check whether the file selection process should be interrupted.

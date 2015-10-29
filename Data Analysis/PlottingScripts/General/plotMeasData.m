@@ -1,5 +1,5 @@
-function plotMeasurementData
-%plotMeasurementData Plot data from a text data file.
+function plotMeasData
+%plotMeasData Plot data from a text data file.
 
 % Select a file to plot.
 [filename, pathname, status] = selectMeasurementDataFile(1);
@@ -26,7 +26,7 @@ for data_index = 1:length(data.dep)
     dep_vals = data.(dep_name);
     dep_rels = data.rels.(dep_name);
     
-    if isempty(dep_rels) && print_messages
+    if isempty(dep_rels)
         disp(['Independent (sweep) variables for data variable ''',...
               strrep(dep_name, '_', ' '), ''' are not specified. ',...
               'This data will not be plotted.'])
@@ -107,7 +107,7 @@ for data_index = 1:length(data.dep)
                [filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
         savePlot(fullfile(plts_path, [base_filename, '_', dep_name, '_pixelated']));
     end
-    if length(dep_rels) > 2 && print_messages
+    if length(dep_rels) > 2
         disp(['Data variable ''', strrep(dep_name, '_', ' '),...
               ''' depends on more than two sweep variables. ',...
               'This data will not be plotted.'])

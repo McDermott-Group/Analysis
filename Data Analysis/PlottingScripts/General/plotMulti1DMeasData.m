@@ -1,5 +1,5 @@
-function plot1DMultipleData
-%plot1DMultipleData Plot multiple 1D graphs in the same plot.
+function plotMulti1DMeasData
+%plotMulti1DMeasData Plot multiple 1D graphs in the same plot.
 
 % Select files to plot.
 [filenames, pathnames, status] = selectMeasurementDataFile;
@@ -35,7 +35,7 @@ for data_index = 1:length(data{1}.dep)
     if ~isempty(strfind(dep_name, '_Std_Dev'))
         continue
     end
-    if isempty(data{1}.rels.(dep_name)) && print_messages
+    if isempty(data{1}.rels.(dep_name))
         disp(['Independent (sweep) variables for data variable ''',...
               strrep(dep_name, '_', ' '), ''' are not specified. ',...
               'This data will not be plotted.'])
@@ -184,7 +184,7 @@ for data_index = 1:length(data{1}.dep)
         
         savePlot(fullfile(plts_path, [dep_name, '_simple']));
     end
-    if length(data{1}.rels.(dep_name)) > 1 && print_messages
+    if length(data{1}.rels.(dep_name)) > 1
         disp(['Data variable ''', strrep(dep_name, '_', ' '),...
               ''' depends on more than one sweep variable. ',...
               'The data will not be plotted.'])

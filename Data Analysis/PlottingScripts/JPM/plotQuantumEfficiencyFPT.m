@@ -66,7 +66,7 @@ for data_index = 1:length(data1.dep)
     dep_rels1 = data1.rels.(dep_name);
     dep_rels2 = data2.rels.(dep_name);
      
-    if (isempty(dep_rels1) || isempty (dep_rels2)) && print_messages
+    if (isempty(dep_rels1) || isempty (dep_rels2))
         disp(['Independent (sweep) variables for data variable ''', strrep(dep_name, '_', ' '), ''' are not specified. ',...
               'This data will not be plotted.'])
     end
@@ -85,15 +85,16 @@ for data_index = 1:length(data1.dep)
         
         xunits = getUnits(data, indep_name);
         
+        dep_vals1(dep_vals1 < dep_vals2) = dep_vals2(dep_vals1 < dep_vals2);
+        quant_eff = log((1 - dep_vals2) ./ (1 - dep_vals1)) ./...
+            (1e-9 * kappa * data1.Fast_Pulse_Time .*...
+            (calibration_coeff * data1.Readout_Amplitude.^2));
+        quant_eff(~isfinite(quant_eff)) = 0;
+        quant_eff(quant_eff < 0) = 0;
+        quant_eff(quant_eff > 1) = 1;
+        
         if isfield(data1, 'error') && isfield(data1.error, dep_name) &&...
            isfield(data2, 'error') && isfield(data2.error, dep_name) % Plot an errobar graph.
-            dep_vals1(dep_vals1 < dep_vals2) = dep_vals2(dep_vals1 < dep_vals2);
-            quant_eff = log((1 - dep_vals2) ./ (1 - dep_vals1)) ./...
-                (1e-9 * kappa * data1.Fast_Pulse_Time .*...
-                (calibration_coeff * data1.Readout_Amplitude.^2));
-            quant_eff(~isfinite(quant_eff)) = 0;
-            quant_eff(quant_eff < 0) = 0;
-            quant_eff(quant_eff > 1) = 1;
             quant_eff_error = 1.96 * sqrt(data1.error.(dep_name).^2 ./ (1 - dep_vals1).^2 +...
                                           data2.error.(dep_name).^2 ./ (1 - dep_vals2).^2);
                                       
@@ -169,7 +170,7 @@ for data_index = 1:length(data1.dep)
                [' P(dark):   ', filenames{2}, ' [', data2.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
         savePlot(fullfile(plts_path, [base_filename1, '_', base_filename2, '_quant_eff_pixelated']));
     end
-    if length(dep_rels1) > 2 && print_messages
+    if length(dep_rels1) > 2
         disp(['Data variable ''', strrep(dep_name, '_', ' '), ''' depends on more than two sweep variables. ',...
               'The data will not be plotted.'])
     end

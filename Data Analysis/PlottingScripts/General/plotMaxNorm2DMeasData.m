@@ -1,5 +1,5 @@
-function plot2DMaxNormData(normalization_direction)
-%plot2DMaxNormData(NORMALIZATION_DIRECTION) Plot a line-by-line maximum
+function plotMaxNorm2DMeasData(normalization_direction)
+%plotMaxNorm2DMeasData(NORMALIZATION_DIRECTION) Plot a line-by-line maximum
 %normalized 2D data from a text data file. NORMALIZATION_DIRCTION should be
 %either 'along_x' or 'along_y'.
 
@@ -34,7 +34,7 @@ for data_index = 1:length(data.dep)
     dep_vals = data.(dep_name);
     dep_rels = data.rels.(dep_name);
     
-    if isempty(dep_rels) && print_messages
+    if isempty(dep_rels)
         disp(['Independent (sweep) variables for data variable ''',...
               strrep(dep_name, '_', ' '), ''' are not specified. ',...
               'This data will not be plotted.'])
@@ -61,7 +61,7 @@ for data_index = 1:length(data.dep)
             elseif strcmp(normalization_direction, 'along_x')
                 dep_vals = dep_vals ./ (ones(size(dep_vals, 1), 1) * max(dep_vals));   
             end
-            extra_title = 'Line-by-Line Mean Normalized ';
+            extra_title = 'Line-by-Line Max Normalized ';
             extra_filename = ['_max_', normalization_direction];
         else
             extra_title = '';
@@ -88,7 +88,7 @@ for data_index = 1:length(data.dep)
                [filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
         savePlot(fullfile(plts_path, [base_filename, '_', dep_name, '_pixelated', extra_filename]));
     end
-    if length(dep_rels) > 2 && print_messages
+    if length(dep_rels) > 2
         disp(['Data variable ''', strrep(dep_name, '_', ' '),...
               ''' depends on more than two sweep variables. ',...
               'This data will not be plotted.'])

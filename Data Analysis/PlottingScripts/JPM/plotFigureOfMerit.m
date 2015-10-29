@@ -1,11 +1,8 @@
-function plotQuantumEfficiencyNPhotons(number_of_photons)
-%plotQuantumEfficiencyNPhotons(NUMBER_OF_PHOTONS) Plot the quantum efficiency 
-% estimated from two text data sets based on specified number of photons
-% in the measuremnet interval (NUMBER_OF_PHOTONS).
-
-if ~exist('number_of_photons', 'var')
-    error('Number of photons in the measurment interval should be specified as the function argument.')
-end
+function plotFigureOfMerit
+%plotFigureOfMerit Plot a figure of merit, specifically, quantum efficiency 
+% multiplied by photon flux and divided by the dark tunneling rate. This
+% figure could be estimated from two text data sets: data sets with bright
+% and dark switching probabilities.
 
 % Select files for quantum efficiency estimation.
 [filenames, pathnames, status] = selectMeasurementDataFile(2,...
@@ -62,44 +59,27 @@ for data_index = 1:length(data1.dep)
             error('The selected files do not match.')
         end
 
-        xunits = getUnits(data, indep_name);
+        xunits = getUnits(data1, indep_name);
         
-        dep_vals1(dep_vals1 < dep_vals2) = dep_vals2(dep_vals1 < dep_vals2);
-        quant_eff = log((1 - dep_vals2) ./ (1 - dep_vals1)) / number_of_photons;
-        quant_eff(dep_vals1 == 1) = 0;
-        quant_eff(quant_eff < 0) = 0;
-        quant_eff(quant_eff > 1) = 1;
-        
-        if isfield(data1, 'error') && isfield(data1.error, dep_name) &&...
-           isfield(data2, 'error') && isfield(data2.error, dep_name) % Plot an errobar graph.
-            quant_eff_error = 1.96 * sqrt(data1.error.(dep_name).^2 ./ (1 - dep_vals1).^2 +...
-                                          data2.error.(dep_name).^2 ./ (1 - dep_vals2).^2);
-            createFigure('right');
-            plotErrorbar(indep_vals, quant_eff, quant_eff_error);
-            xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-            ylabel('Quantum Efficiency', 'FontSize', 14);
-            title({'Quantum Efficiency Estimated from Two Datasets:',...
-                   [' P(bright): ', filenames{1}, ' [', data1.Timestamp, ']'],...
-                   [' P(dark):   ', filenames{2}, ' [', data2.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-            savePlot(fullfile(plts_path, [base_filename1, '_', base_filename2, '_quant_eff_errorbar']));
-        end
+        figure_of_merit = log((1 - dep_vals1) ./ (1 - dep_vals2)) ./ log(1 - dep_vals2);
+        figure_of_merit(dep_vals1 == 1) = 0;
+        figure_of_merit(figure_of_merit < 0) = 0;
         
         createFigure;
-        plotSemilog(indep_vals, quant_eff);  % Plot a semilog 1D graph.
+        plotSemilog(indep_vals, figure_of_merit);  % Plot a semilog 1D graph.
         xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-        ylabel('Quantum Efficiency', 'FontSize', 14);
-        title({'Quantum Efficiency Estimated from Two Datasets:',...
+        ylabel('Figure of Merit: \eta\lambda/\gamma_0  (dimensionless)', 'FontSize', 14);
+        title({'Figure of Merit Estimated from Two Datasets:',...
                [' P(bright): ', filenames{1}, ' [', data1.Timestamp, ']'],...
                [' P(dark):   ', filenames{2}, ' [', data2.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-        savePlot(fullfile(plts_path, [base_filename1, '_', base_filename2, '_quant_eff']));
+        savePlot(fullfile(plts_path, [base_filename1, '_', base_filename2, '_fom']));
     end
 
     % Plot 2D data.
     if length(dep_rels1) == 2
         indep_name1 = dep_rels1{1};
         indep_name2 = dep_rels1{2};
-        if length(dep_rels2) ~= 2 || ~strcmp(indep_name1, dep_rels2{1}) ||...
-                ~strcmp(indep_name2, dep_rels2{2})
+        if length(dep_rels2) ~= 2 || ~strcmp(indep_name1, dep_rels2{1}) || ~strcmp(indep_name2, dep_rels2{2})
             error('The selected files do not match.')
         end
         indep_vals1 = data1.(indep_name1);
@@ -115,31 +95,30 @@ for data_index = 1:length(data1.dep)
         
         % Plot the data as a smooth surface.
         dep_vals1(dep_vals1 < dep_vals2) = dep_vals2(dep_vals1 < dep_vals2);
-        quant_eff = log((1 - dep_vals2) ./ (1 - dep_vals1)) / number_of_photons;
-        quant_eff(dep_vals1 == 1) = 0;
-        quant_eff(quant_eff < 0) = 0;
-        quant_eff(quant_eff > 1) = 1;
+        figure_of_merit = log((1 - dep_vals1) ./ (1 - dep_vals2)) ./ log(1 - dep_vals2);
+        figure_of_merit(dep_vals1 == 1) = 0;
+        figure_of_merit(figure_of_merit < 0) = 0;
      
         createFigure;
-        plotSmooth(indep_vals1, indep_vals2, quant_eff);
+        plotSmooth(indep_vals1, indep_vals2, figure_of_merit);
      
         xunits = getUnits(data1, indep_name1);
         yunits = getUnits(data1, indep_name2);
         xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-        title({'Quantum Efficiency Estimated from Two Datasets:',...
+        title({'Figure of Merit Estimated from Two Datasets:',...
                [' P(bright): ', filenames{1}, ' [', data1.Timestamp, ']'],...
                [' P(dark):   ', filenames{2}, ' [', data2.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-        savePlot(fullfile(plts_path, [base_filename1, '_', base_filename2, '_quant_eff_smooth']));
+        savePlot(fullfile(plts_path, [base_filename1, '_', base_filename2, '_fom_smooth']));
         % Plot the data as a pixeleated image.
         createFigure('right');
-        plotPixelated(indep_vals1, indep_vals2, quant_eff');
+        plotPixelated(indep_vals1, indep_vals2, figure_of_merit');
         xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-        title({'Quantum Efficiency Estimated from Two Datasets:',...
+        title({'Figure of Merit Estimated from Two Datasets:',...
                [' P(bright): ', filenames{1}, ' [', data1.Timestamp, ']'],...
                [' P(dark):   ', filenames{2}, ' [', data2.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-        savePlot(fullfile(plts_path, [base_filename1, '_', base_filename2, '_quant_eff_pixelated']));
+        savePlot(fullfile(plts_path, [base_filename1, '_', base_filename2, '_fom_pixelated']));
     end
     if length(dep_rels1) > 2
         disp(['Data variable ''', strrep(dep_name, '_', ' '), ''' depends on more than two sweep variables. ',...

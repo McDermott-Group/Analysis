@@ -18,7 +18,11 @@ if ymin == ymax
     ymax = Inf;
 end
 
-axis([xmin xmax ymin ymax])
+if isfinite(ymin) && isfinite(ymax)
+    axis([xmin xmax ymin ymax])
+else
+    xlim([xmin xmax])
+end
 grid on
 set(gca, 'FontSize', 14);
 

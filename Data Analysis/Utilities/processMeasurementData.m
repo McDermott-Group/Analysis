@@ -7,10 +7,9 @@ function data = processMeasurementData(data)
 %   of some required fields. The fed DATA structure should be taken from 
 %   the output of the importMeasurementData function.
 
-    fields = fieldnames(data); 
-
-    % Define full names of the variables
-    for k = 1:length(fields)
+    % Redefine variable full names.
+    fields = fieldnames(data);
+    for k = 1:length(fieldnames(data))
         switch fields{k}
             case 'Init_Time'
                 data = renameVariable(data, fields{k}, 'Initialization_Time');
@@ -42,10 +41,14 @@ function data = processMeasurementData(data)
                 
             case 'Detection_Time_Diff_Std_Dev'
                 data = renameVariable(data, fields{k}, 'Detection_Time_Difference_Std_Dev');
+            
+            case 'Corr_Coef'
+                data = renameVariable(data, fields{k}, 'Correlation_Coefficient');
         end
     end
 
-    % Convert units. 
+    % Convert units.
+    fields = fieldnames(data);
     for k = 1:length(fields)
         if isfield(data.units, fields{k})
             switch data.units.(fields{k})
@@ -54,7 +57,7 @@ function data = processMeasurementData(data)
                 case 'ADCUnits'
                     data.units.(fields{k}) = 'ADC Units';
                 case 'PreAmpTimeCounts'
-                    data.units.(fields{k}) = 'Pre-Amp Time Counts';
+                    data.units.(fields{k}) = 'Preamp Time Counts';
             end
         end
         
@@ -95,15 +98,22 @@ function data = processMeasurementData(data)
     for data_index = 1:length(data.dep)
         dep_name = data.dep{data_index};
 
+        N = 1;
+        if isfield(data, 'Number_of_Repetitions')
+            N = double(N * data.Number_of_Repetitions);
+        end
+        if isfield(data, 'Number_of_Runs')
+            N = double(N * data.Number_of_Runs);
+        end
+        if N > 1
+            N = N - 1;
+        end
         if strcmp(data.distr.(dep_name), 'binomial')
-            data.error.(dep_name) = sqrt(data.(dep_name) .* (1 - data.(dep_name)) / data.Number_of_Repetitions);
+            data.error.(dep_name) = sqrt(data.(dep_name) .*...
+                (1 - data.(dep_name)) / N);
         elseif strcmp(data.distr.(dep_name), 'normal')
             if isfield(data, [dep_name, '_Std_Dev'])
-                if data.Number_of_Repetitions > 1
-                    data.error.(dep_name) = data.([dep_name, '_Std_Dev']) / sqrt(data.Number_of_Repetitions - 1);
-                else
-                    data.error.(dep_name) = data.([dep_name, '_Std_Dev']);
-                end
+                data.error.(dep_name) = data.([dep_name, '_Std_Dev']) / sqrt(N);
             end
         elseif strcmp(data.distr.(dep_name), 'std')
             continue
@@ -121,20 +131,26 @@ function data = processMeasurementData(data)
     if isempty(data)
         error(['File ', selected_file, ' does not contain any data.']);
     elseif ~isfield(data, 'indep') || isempty(data.indep)
-        error(['The independent (sweep) variables are not specified in file ', selected_file, '.']);
+        error(['The independent (sweep) variables are not specified in file ',...
+            selected_file, '.']);
     elseif ~isfield(data, 'dep') || isempty(data.dep)
-        error(['The dependent (data) variables are not specified in file ', selected_file, '.']);
+        error(['The dependent (data) variables are not specified in file ',...
+            selected_file, '.']);
     elseif ~isfield(data, 'rels') || isempty(data.rels)
-        error(['The relationships between the dependent (data) and independent (sweep) variables are not specified in file ', selected_file, '.']);
+        error(['The relationships between the dependent (data) and ',...
+            'independent (sweep) variables are not specified in file ',...
+            selected_file, '.']);
     else
         for k = 1:length(data.indep)
             if isempty(data.(data.indep{k}))
-                error(['File ', selected_file, ' does not specify the independent (sweep) variables.']);
+                error(['File ', selected_file,...
+                    ' does not specify the independent (sweep) variables.']);
             end
         end
         for k = 1:length(data.dep)
             if isempty(data.(data.dep{k}))
-                error(['File ', selected_file, ' does not contain any actual data.']);
+                error(['File ', selected_file,...
+                    ' does not contain any actual data.']);
             end
         end
         RelationshipsFlag = false; 
@@ -144,7 +160,9 @@ function data = processMeasurementData(data)
             end
         end
         if ~RelationshipsFlag
-            error(['The relationships between the dependent (data) and independent (sweep) variables are not specified in file ', selected_file, '.']);
+            error(['The relationships between the dependent (data) and',...
+                ' independent (sweep) variables are not specified in file ',...
+                selected_file, '.']);
         end
     end
     

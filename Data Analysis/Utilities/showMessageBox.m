@@ -12,7 +12,7 @@ for k = 1:length(fields)
                 units = '';
             end
             params{k} = [strrep(fields{k},  '_', ' '), ' = ',...
-                        num2str(data.(fields{k})), ' ', units];
+                        num2str(data.(fields{k})), units];
         end
     end
     if strcmp(fields{k}, 'Timestamp')
