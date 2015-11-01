@@ -29,12 +29,9 @@ end
 data1 = processMeasurementData(importMeasurementData(fullfile(pathnames{1}, filenames{1})));
 data2 = processMeasurementData(importMeasurementData(fullfile(pathnames{2}, filenames{2})));
 
-% Create folder Plots in the same directory as the selected data file
-% if it does not exist.
-plts_path = fullfile(pathnames{1}, 'Plots');
-if ~exist(plts_path, 'dir')
-    mkdir(pathnames{1}, 'Plots')
-end
+% Create folder Plots if necessary.
+plts_path = makeDirPlots(pathnames{1});
+
 [~, base_filename1] = fileparts(filenames{1});
 [~, base_filename2] = fileparts(filenames{2});
 

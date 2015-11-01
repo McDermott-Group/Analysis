@@ -1,13 +1,5 @@
-function plotMeanNorm2DMeasData(normalization_direction)
-%plotMeanNorm2DMeasData(NORMALIZATION_DIRECTION) Plot a line-by-line mean 
-%normalized 2D data. NORMALIZATION_DIRCTION should be either 'along_x' or
-%'along_y'.
-
-if ~exist('normalization_direction', 'var') ||...
-    (~strcmp(normalization_direction, 'along_x') &&...
-     ~strcmp(normalization_direction, 'along_y'))
-    normalization_direction = 'along_y'; 
-end
+function plotHistEq2DMeasData
+%plotHistEq2DMeasData Plot a histogram-equalized 2D data.
 
 % Select a file to plot.
 [filename, pathname, status] = selectMeasurementDataFile(1);
@@ -18,8 +10,7 @@ end
 % Read the data file, convert the variable names, and specify the units.
 data = processMeasurementData(importMeasurementData(fullfile(pathname, filename)));
 
-% Create folder Plots in the same directory as the selected data file
-% if it does not exist.
+% Create folder Plots if necessary.
 plts_path = makeDirPlots(pathname);
 
 [~, base_filename] = fileparts(filename);
@@ -56,13 +47,12 @@ for data_index = 1:length(data.dep)
                 ~isempty(strfind(dep_name, 'Phase')) ||...
                 strcmp(dep_name, 'I') ||...
                 strcmp(dep_name, 'Q')
-            if strcmp(normalization_direction, 'along_y')
-                dep_vals = dep_vals ./ (mean(dep_vals, 2) * ones(1, size(dep_vals, 2)));
-            elseif strcmp(normalization_direction, 'along_x')
-                dep_vals = dep_vals ./ (ones(size(dep_vals, 1), 1) * mean(dep_vals));   
-            end
-            extra_title = 'Line-by-Line Mean-Normalized ';
-            extra_filename = ['_mean_', normalization_direction];
+            
+            dep_vals = (dep_vals - min(dep_vals(:))) ./...
+                       (max(dep_vals(:)) - min(dep_vals(:)));
+            dep_vals = histeq(dep_vals);
+            extra_title = 'Line-by-Line Histogram-Equalized ';
+            extra_filename = '_histeq_';
         else
             extra_title = '';
             extra_filename = '';

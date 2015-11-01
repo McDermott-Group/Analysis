@@ -23,12 +23,8 @@ catch
     error('The selected files contain unmatched data.')
 end
 
-% Create folder Plots in the same directory as the selected data file
-% if it does not exist.
-plts_path = fullfile(pathnames{1}, 'Plots');
-if ~exist(plts_path, 'dir')
-    mkdir(pathnames{1}, 'Plots')
-end
+% Create folder Plots if necessary.
+plts_path = makeDirPlots(pathnames{1});
 
 for data_index = 1:length(data{1}.dep)
     dep_name = data{1}.dep{data_index};

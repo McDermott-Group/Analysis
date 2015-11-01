@@ -31,12 +31,9 @@ if ~strcmp(data.rels.P00{1}, data.rels.JPM_A_Switching_Probability{1}) ||...
     error('The independent (sweep) variable should be the same for all probability data variables.')
 end
 
-% Create folder Plots in the same directory as the selected data file
-% if it does not exist.
-plts_path = fullfile(pathname, 'Plots');
-if ~exist(plts_path, 'dir')
-    mkdir(pathname, 'Plots')
-end
+% Create folder Plots if necessary.
+plts_path = makeDirPlots(pathname);
+
 [~, base_filename] = fileparts(filename);
 
 createFigure;

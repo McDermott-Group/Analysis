@@ -11,12 +11,9 @@ end
 % the units.
 data = processMeasurementData(importMeasurementData(fullfile(pathname, filename)));
 
-% Create folder Plots in the same directory as the selected data file
-% if it does not exist.
-plts_path = fullfile(pathname, 'Plots');
-if ~exist(plts_path, 'dir')
-    mkdir(pathname, 'Plots')
-end
+% Create folder Plots if necessary.
+plts_path = makeDirPlots(pathname);
+
 [~, base_filename] = fileparts(filename);
 
 if ~isfield(data, 'P11')

@@ -1,6 +1,6 @@
 function plotMaxNorm2DMeasData(normalization_direction)
 %plotMaxNorm2DMeasData(NORMALIZATION_DIRECTION) Plot a line-by-line maximum
-%normalized 2D data from a text data file. NORMALIZATION_DIRCTION should be
+%normalized 2D data. NORMALIZATION_DIRCTION should be
 %either 'along_x' or 'along_y'.
 
 if ~exist('normalization_direction', 'var') ||...
@@ -18,12 +18,9 @@ end
 % Read the data file, convert the variable names, and specify the units.
 data = processMeasurementData(importMeasurementData(fullfile(pathname, filename)));
 
-% Create folder Plots in the same directory as the selected data file
-% if it does not exist.
-plts_path = fullfile(pathname, 'Plots');
-if ~exist(plts_path, 'dir')
-    mkdir(pathname, 'Plots')
-end
+% Create folder Plots if necessary.
+plts_path = makeDirPlots(pathname);
+
 [~, base_filename] = fileparts(filename);
 
 for data_index = 1:length(data.dep)
@@ -56,14 +53,14 @@ for data_index = 1:length(data.dep)
         if ~isempty(strfind(dep_name, 'Probability')) ||...
                 ~isempty(strfind(dep_name, 'Amplitude')) ||...
                 ~isempty(strfind(dep_name, 'Phase')) ||...
-                strcmp(dep_name, 'I') ||...
-                strcmp(dep_name, 'Q')
+                ~isempty(strfind(dep_name, 'I')) ||...
+                ~isempty(strfind(dep_name, 'Q'))
             if strcmp(normalization_direction, 'along_y')
                 dep_vals = dep_vals ./ (max(dep_vals, [], 2) * ones(1, size(dep_vals, 2)));
             elseif strcmp(normalization_direction, 'along_x')
                 dep_vals = dep_vals ./ (ones(size(dep_vals, 1), 1) * max(dep_vals));   
             end
-            extra_title = 'Line-by-Line Max Normalized ';
+            extra_title = 'Line-by-Line Max-Normalized ';
             extra_filename = ['_max_', normalization_direction];
         else
             extra_title = '';
