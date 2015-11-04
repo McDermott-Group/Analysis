@@ -1,7 +1,7 @@
-function plotMeanNorm2DMeasData(normalization_direction)
-%plotMeanNorm2DMeasData(NORMALIZATION_DIRECTION) Plot a line-by-line mean 
-%normalized 2D data. NORMALIZATION_DIRECTION should be either 'along_x' or
-%'along_y'.
+function plotMinNorm2DMeasData(normalization_direction)
+%plotMinNorm2DMeasData(NORMALIZATION_DIRECTION) Plot a line-by-line minimum
+%normalized 2D data. NORMALIZATION_DIRECTION should be
+%either 'along_x' or 'along_y'.
 
 if ~exist('normalization_direction', 'var') ||...
     (~strcmp(normalization_direction, 'along_x') &&...
@@ -18,8 +18,7 @@ end
 % Read the data file, convert the variable names, and specify the units.
 data = processMeasurementData(importMeasurementData(fullfile(pathname, filename)));
 
-% Create folder Plots in the same directory as the selected data file
-% if it does not exist.
+% Create folder Plots if necessary.
 plts_path = makeDirPlots(pathname);
 
 [~, base_filename] = fileparts(filename);
@@ -54,15 +53,15 @@ for data_index = 1:length(data.dep)
         if ~isempty(strfind(dep_name, 'Probability')) ||...
                 ~isempty(strfind(dep_name, 'Amplitude')) ||...
                 ~isempty(strfind(dep_name, 'Phase')) ||...
-                strcmp(dep_name, 'I') ||...
-                strcmp(dep_name, 'Q')
+                ~isempty(strfind(dep_name, 'I')) ||...
+                ~isempty(strfind(dep_name, 'Q'))
             if strcmp(normalization_direction, 'along_y')
-                dep_vals = dep_vals ./ (mean(dep_vals, 2) * ones(1, size(dep_vals, 2)));
+                dep_vals = dep_vals ./ (min(dep_vals, [], 2) * ones(1, size(dep_vals, 2)));
             elseif strcmp(normalization_direction, 'along_x')
-                dep_vals = dep_vals ./ (ones(size(dep_vals, 1), 1) * mean(dep_vals));   
+                dep_vals = dep_vals ./ (ones(size(dep_vals, 1), 1) * min(dep_vals));   
             end
-            extra_title = 'Line-by-Line Mean-Normalized ';
-            extra_filename = ['_mean_', normalization_direction];
+            extra_title = 'Line-by-Line Min-Normalized ';
+            extra_filename = ['_min_', normalization_direction];
         else
             extra_title = '';
             extra_filename = '';

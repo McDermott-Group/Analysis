@@ -1,5 +1,5 @@
 function plotMeasDataDiff
-%plotMeasDataDiff Plot the difference between two text data sets.
+%plotMeasDataDiff Plot the difference between two data sets.
 
 % Select files to compute the difference.
 [filenames, pathnames, status] = selectMeasurementDataFile(2,...
@@ -33,7 +33,7 @@ for data_index = 1:length(data1.dep)
     dep_rels1 = data1.rels.(dep_name);
     dep_rels2 = data2.rels.(dep_name);
      
-    if (isempty(dep_rels1) || isempty (dep_rels2))
+    if (isempty(dep_rels1) || isempty(dep_rels2))
         disp(['Independent (sweep) variables for data variable ''',...
               strrep(dep_name, '_', ' '), ''' are not specified. ',...
               'This data will not be plotted.'])
@@ -54,9 +54,9 @@ for data_index = 1:length(data1.dep)
         xunits = getUnits(data1, indep_name);
         yunits = getUnits(data1, dep_name);
         
+        difference = dep_vals1 - dep_vals2;
         if isfield(data1, 'error') && isfield(data1.error, dep_name) &&...
            isfield(data2, 'error') && isfield(data2.error, dep_name) % Plot an errobar graph.
-            difference = dep_vals1 - dep_vals2;
             difference_error = 1.96 * sqrt(data1.error.(dep_name).^2 + data2.error.(dep_name).^2);
             createFigure('right');
             plotErrorbar(indep_vals, difference, difference_error);
@@ -132,7 +132,7 @@ for data_index = 1:length(data1.dep)
             title({[strrep(dep_name, '_', ' '), zunits, ' Difference between Two Datasets:'],...
                    ['   ', filenames{1}, ' [', data1.Timestamp, ']'],...
                    [' - ', filenames{2}, ' [', data2.Timestamp, ']'], indep_vars}, 'Interpreter', 'none', 'FontSize', 10)
-            savePlot(fullfile(plts_path, [base_filename1, '-', base_filename2, '_', dep_name, '_smooth']));
+            savePlot(fullfile(plts_path, [base_filename1, '-', base_filename2, '_', dep_name, '_polar']));
         end
         % Plot the data as a pixeleated image.
         createFigure('right');

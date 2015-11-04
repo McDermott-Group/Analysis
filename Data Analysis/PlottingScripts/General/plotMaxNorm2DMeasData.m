@@ -1,6 +1,6 @@
 function plotMaxNorm2DMeasData(normalization_direction)
 %plotMaxNorm2DMeasData(NORMALIZATION_DIRECTION) Plot a line-by-line maximum
-%normalized 2D data. NORMALIZATION_DIRCTION should be
+%normalized 2D data. NORMALIZATION_DIRECTION should be
 %either 'along_x' or 'along_y'.
 
 if ~exist('normalization_direction', 'var') ||...
