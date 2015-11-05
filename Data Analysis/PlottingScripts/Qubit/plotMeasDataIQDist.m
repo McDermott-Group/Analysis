@@ -1,10 +1,10 @@
-function plotMeasDataIQDiff
-%plotMeasDataDiff Plot the difference between two data sets.
+function plotMeasDataIQDist
+%plotMeasDataIQDist Plot IQ-distance between two data sets.
 
 % Select files to compute the difference.
 [filenames, pathnames, status] = selectMeasurementDataFile(2,...
-    {'Select the first data file to subtract from...',...
-     'Select the second data file to be subtracted...'});
+    {'Select the first data file...',...
+     'Select the second data file...'});
 if ~status
     return
 end
@@ -48,8 +48,8 @@ for data_index = 1:length(data1.dep)
     I2_rels = data2.rels.(I_name);
     Q2_rels = data2.rels.(Q_name);
     
-    if (isempty(I1_rels) || isempty(Q1_rels)) ||...
-        (isempty(I2_rels) || isempty(Q2_rels))
+    if isempty(I1_rels) || isempty(Q1_rels) ||...
+        isempty(I2_rels) || isempty(Q2_rels)
         continue
     end
     

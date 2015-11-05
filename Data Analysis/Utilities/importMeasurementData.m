@@ -202,7 +202,7 @@ function data = importTxt_v0p1(filename, fid, first_line)
                 data.units.(data.indep{indep_counter}) = line(pos+2:end);
             elseif ~isempty(strfind(line, 'Type: ')) &&... 
                     isempty(strfind(line, 'independent'))
-                error(['Unknown type detected among the sweep ',...
+                error(['Unknown type detected among the ',...
                     '(independent) variables.']);
             elseif ~isempty(strfind(line, 'Size: '))
                 pos = strfind(line, ':');
@@ -225,7 +225,7 @@ function data = importTxt_v0p1(filename, fid, first_line)
         if ~isempty(strfind(line, 'Name:'))
             pos = strfind(line, char(39));
             if length(pos) ~= 2
-                error(['Cannot recognize an dependent variable ',...
+                error(['Cannot recognize a dependent variable ',...
                     'name in ', filename, '.']);
             end
             dep_counter = dep_counter + 1;
@@ -233,6 +233,7 @@ function data = importTxt_v0p1(filename, fid, first_line)
                 ' ', '_');
             data.units.(data.dep{dep_counter}) = '';
             data.distr.(data.dep{dep_counter}) =  '';
+            data.rels.(data.dep{dep_counter}) = {};
         elseif ~isempty(strfind(line, 'Units: '))
             pos = strfind(line, ': ');
             data.units.(data.dep{dep_counter}) = line(pos+2:end);

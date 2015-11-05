@@ -25,8 +25,11 @@ for data_index = 1:length(data.dep)
     
     if isempty(dep_rels)
         disp(['Independent (sweep) variables for data variable ''',...
-              strrep(dep_name, '_', ' '), ''' are not specified. ',...
-              'This data will not be plotted.'])
+              strrep(dep_name, '_', ' '), ''' are not specified.'])
+    end
+    
+    if ~isempty(strfind(dep_name, 'Phase'))
+        dep_vals = unwrap(dep_vals);
     end
     
     % Plot 1D data.
