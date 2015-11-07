@@ -66,7 +66,7 @@ for data_index = 1:length(data.dep)
             createFigure('right');
             plotErrorbar(indep_vals, res_vals, res_err)
             hold on
-                 plotErrorbar(indep_vals, dep_vals, res_err)
+                 plotErrorbar(indep_vals, dep_vals, dep_err)
             hold off
             legend(res_name, dep_name)
             xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
