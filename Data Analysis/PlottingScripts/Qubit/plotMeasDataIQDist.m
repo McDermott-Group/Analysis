@@ -88,7 +88,7 @@ for data_index = 1:length(data1.dep)
                [filenames{1}, ' [', data1.Timestamp, ']'],...
                [filenames{2}, ' [', data2.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
 
-        savePlot(fullfile(plts_path, [base_filename1, '-', base_filename2, '_', dep_name, '_iq_dist']));
+        savePlot(fullfile(plts_path, [base_filename1, '-', base_filename2, '_', dep_name]));
     end
 
     % Plot 2D data.
@@ -113,7 +113,7 @@ for data_index = 1:length(data1.dep)
             title({[strrep(dep_name, '_', ' '), zunits, ' between Two Datasets:'],...
                    [filenames{1}, ' [', data1.Timestamp, ']'],...
                    [filenames{2}, ' [', data2.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-            savePlot(fullfile(plts_path, [base_filename1, '-', base_filename2, '_', dep_name, '_iq_dist_smooth']));
+            savePlot(fullfile(plts_path, [base_filename1, '-', base_filename2, '_', dep_name, '_smooth']));
         else % Create a polar (smooth) plot.
             if ~isempty(strfind(indep_name1, 'Phase'))
                 phase = indep_vals1;
@@ -133,7 +133,7 @@ for data_index = 1:length(data1.dep)
             title({[strrep(dep_name, '_', ' '), zunits, ' between Two Datasets:'],...
                    [filenames{1}, ' [', data1.Timestamp, ']'],...
                    [filenames{2}, ' [', data2.Timestamp, ']'], indep_vars}, 'Interpreter', 'none', 'FontSize', 10)
-            savePlot(fullfile(plts_path, [base_filename1, '-', base_filename2, '_', dep_name, '_iq_dist_polar']));
+            savePlot(fullfile(plts_path, [base_filename1, '-', base_filename2, '_', dep_name, '_polar']));
         end
         % Plot the data as a pixeleated image.
         createFigure('right');
