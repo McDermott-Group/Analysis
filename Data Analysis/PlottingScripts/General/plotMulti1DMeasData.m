@@ -139,7 +139,8 @@ for data_index = 1:length(data{1}.dep)
                 break
             end
         end
-        if errorbar_flag % Plot an errobar graph.
+
+        if errorbar_flag && choice > 0 % Plot an errobar graph.
             createFigure('right');
 
             hold on
@@ -155,26 +156,24 @@ for data_index = 1:length(data{1}.dep)
             xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
             ylabel([strrep(dep_name, '_', ' ') yunits], 'FontSize', 14);
             title(strrep(dep_name, '_', ' '), 'Interpreter', 'none', 'FontSize', 10)
-            if choice > 0
-                legend(legend_entries, 'Interpreter', 'none')
-            end
+            legend(legend_entries, 'Interpreter', 'none')
             savePlot(fullfile(plts_path, [dep_name, '_errorbar']));
         end
 
-        createFigure;
-        hold on
-        for k = 1:length(filenames)
-            plot(data{k}.(indep_name), data{k}.(dep_name),...
-                '.-', 'LineWidth', 1, 'MarkerSize', 15)
-        end
-        hold off
-        xlim([xmin xmax])
-        grid on
+        if choice > 0 % Plot a simple graph.
+            createFigure;
+            hold on
+            for k = 1:length(filenames)
+                plot(data{k}.(indep_name), data{k}.(dep_name),...
+                    '.-', 'LineWidth', 1, 'MarkerSize', 15)
+            end
+            hold off
+            xlim([xmin xmax])
+            grid on
 
-        xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-        ylabel([strrep(dep_name, '_', ' ') yunits], 'FontSize', 14);
-        title(strrep(dep_name, '_', ' '), 'Interpreter', 'none', 'FontSize', 10)
-        if choice > 0
+            xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
+            ylabel([strrep(dep_name, '_', ' ') yunits], 'FontSize', 14);
+            title(strrep(dep_name, '_', ' '), 'Interpreter', 'none', 'FontSize', 10)
             legend(legend_entries, 'Interpreter', 'none')
         end
         
