@@ -1,10 +1,15 @@
-function plotSimple(indep, dep)
+function plotSimple(indep, dep, style)
 %plotSimple Simple 1D data plot.
 %
-%   plotSimple(INDEP, DEP) plots 1D data. INDEP is an indepedent 
-%   variable (x coordinate), DEP is a dependent variable (y coordinate).
+%   plotSimple(INDEP, DEP, STYLE) plots 1D data. INDEP is an indepedent 
+%   variable (x coordinate), DEP is a dependent variable (y coordinate),
+%   STYLE is the desired line style.
 
-plot(indep, dep, '.-', 'LineWidth', 1, 'MarkerSize', 15)
+if ~exist('style', 'var')
+    style = '.-';
+end
+
+plot(indep, dep, style, 'LineWidth', 1, 'MarkerSize', 15)
 
 xmin = min(indep);
 xmax = max(indep);
