@@ -1,5 +1,5 @@
 function plotMeasDataDiff
-%plotMeasDataDiff Plot the difference between two data sets.
+%plotMeasDataDiff   Plot the difference between two data sets.
 
 % Select files to compute the difference.
 [filenames, pathnames, status] = selectMeasurementDataFile(2,...
@@ -61,7 +61,7 @@ for data_index = 1:length(data1.dep)
             createFigure('right');
             plotErrorbar(indep_vals, difference, difference_error);
             xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-            ylabel([strrep(dep_name, '_', ' ') yunits], 'FontSize', 14);
+            ylabel(['\Delta ', strrep(dep_name, '_', ' ') yunits], 'FontSize', 14);
             title({[strrep(dep_name, '_', ' '), ' Difference between Two Datasets:'],...
                    ['   ', filenames{1}, ' [', data1.Timestamp, ']'],...
                    [' - ', filenames{2}, ' [', data2.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
@@ -71,7 +71,7 @@ for data_index = 1:length(data1.dep)
         createFigure;
         plotSimple(indep_vals, difference)  % Plot a simple 1D graph.
         xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-        ylabel([strrep(dep_name, '_', ' ') yunits], 'FontSize', 14);
+        ylabel(['\Delta ', strrep(dep_name, '_', ' '), yunits], 'FontSize', 14);
         title({[strrep(dep_name, '_', ' '), ' Difference between Two Datasets:'],...
                ['   ', filenames{1}, ' [', data1.Timestamp, ']'],...
                [' - ', filenames{2}, ' [', data2.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
@@ -134,7 +134,7 @@ for data_index = 1:length(data1.dep)
                    [' - ', filenames{2}, ' [', data2.Timestamp, ']'], indep_vars}, 'Interpreter', 'none', 'FontSize', 10)
             savePlot(fullfile(plts_path, [base_filename1, '-', base_filename2, '_', dep_name, '_polar']));
         end
-        % Plot the data as a pixeleated image.
+        % Plot the data as a pixelated image.
         createFigure('right');
         plotPixelated(indep_vals1, indep_vals2, difference');
         xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);

@@ -1,5 +1,5 @@
 function plts_path = makeDirPlots(pathname, plts_dir_name)
-%makeDirPlots Create folder Plots in the given path.
+%makeDirPlots   Create folder Plots in the given path.
 %
 %   makeDirPlots(PATHNAME, PLTS_DIR_NAME) creates folder PLTS_DIR_NAME in
 %   folder PATHNAME if the former does not exist.

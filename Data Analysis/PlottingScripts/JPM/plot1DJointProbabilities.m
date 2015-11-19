@@ -1,15 +1,16 @@
 function plot1DJointProbabilities
-%plot1DJointProbabilies Plot probabilities from a text data file.
+%plot1DJointProbabilies Plot probabilities from a data file.
 
-% Select a file to plot.
-[filename, pathname, status] = selectMeasurementDataFile(1);
-if ~status
+% Select a file.
+data = loadMeasurementData;
+if isempty(fields(data))
     return
 end
 
-% Read probability data file, convert the variable names, and define
-% the units.
-data = processMeasurementData(importMeasurementData(fullfile(pathname, filename)));
+[pathname, filename, ext] = fileparts(data.Filename);
+
+% Create folder Plots if necessary.
+plts_path = makeDirPlots(pathname);
 
 % Sanity checks.
 if ~isfield(data, 'JPM_A_Switching_Probability') || length(data.rels.JPM_A_Switching_Probability) ~= 1 ||...
@@ -31,11 +32,6 @@ if ~strcmp(data.rels.P00{1}, data.rels.JPM_A_Switching_Probability{1}) ||...
     error('The independent (sweep) variable should be the same for all probability data variables.')
 end
 
-% Create folder Plots if necessary.
-plts_path = makeDirPlots(pathname);
-
-[~, base_filename] = fileparts(filename);
-
 createFigure;
 
 plot(data.(data.rels.JPM_A_Switching_Probability{1}), data.JPM_A_Switching_Probability, 'r.-',...
@@ -53,9 +49,9 @@ legend('P_{JPM A}', 'P_{JPM B}',...
 xunits = getUnits(data, data.rels.P00{1});
 xlabel([strrep(data.rels.P00{1}, '_', ' '), xunits], 'FontSize', 14);
 ylabel('Switching Probability', 'FontSize', 14);
-title({[filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+title({[filename, ext, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
 
-savePlot(fullfile(plts_path, [base_filename, '_prob_simple']));
+savePlot(fullfile(plts_path, [filename, '_prob_simple']));
 
 createFigure('right');
 
@@ -94,9 +90,9 @@ legend('P_{JPM A}', 'P_{JPM B}',...
 xunits = getUnits(data, data.rels.P00{1});
 xlabel([strrep(data.rels.P00{1}, '_', ' '), xunits], 'FontSize', 14);
 ylabel('Switching Probability', 'FontSize', 14);
-title({[filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+title({[filename, ext, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
 
-savePlot(fullfile(plts_path, [base_filename, '_prob_errobar']));
+savePlot(fullfile(plts_path, [filename, '_prob_errobar']));
 
 % Show a message box with the experiment parameters.
 showMessageBox(data);

@@ -1,5 +1,5 @@
 function plotPolar(radius, phase, dep)
-%plotPolar Polar 2D data plot.
+%plotPolar  Polar 2D data plot.
 %
 %   plotPolar(RADIUS, PHASE, DEP) plots 2D data in polar coordinates. 
 %   RADIUS and PHASE are polar and phase coordinates, correspondingly. 

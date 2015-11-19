@@ -1,98 +1,48 @@
-function plotMaxNorm2DMeasData(normalization_direction)
-%plotMaxNorm2DMeasData(NORMALIZATION_DIRECTION) Plot a line-by-line maximum
-%normalized 2D data. NORMALIZATION_DIRECTION should be
+function plotMaxNorm2DMeasData(data_variable, normalization_direction)
+%plotMaxNorm2DMeasData(DATA_VARIABLE, NORMALIZATION_DIRECTION)  Plot
+%a line-by-line maximum normalized 2D data. DATA_VARIABLE should be a name
+%of the data variable to plot. NORMALIZATION_DIRECTION should be
 %either 'along_x' or 'along_y'.
 
-if ~exist('normalization_direction', 'var') ||...
-    (~strcmp(normalization_direction, 'along_x') &&...
-     ~strcmp(normalization_direction, 'along_y'))
-    normalization_direction = 'along_y'; 
+if exist('normalization_direction', 'var') &&...
+        ~isempty(strfind(normalization_direction, 'x'))
+    normalization_direction = 'along_x';
+else
+    normalization_direction = 'along_y';
 end
 
-% Select a file to plot.
-[filename, pathname, status] = selectMeasurementDataFile(1);
-if ~status
+% Select a file.
+data = loadMeasurementData;
+if isempty(fields(data))
     return
 end
 
-% Read the data file, convert the variable names, and specify the units.
-data = processMeasurementData(importMeasurementData(fullfile(pathname, filename)));
+% Check that the data variable exists (compute it if necessary).
+[data, data_variable] = checkDataVar(data, data_variable);
 
-% Create folder Plots if necessary.
-plts_path = makeDirPlots(pathname);
-
-[~, base_filename] = fileparts(filename);
-
-for data_index = 1:length(data.dep)
-    dep_name = data.dep{data_index};
-    if ~isempty(strfind(dep_name, '_Std_Dev'))
-        continue
-    end
-    dep_vals = data.(dep_name);
-    dep_rels = data.rels.(dep_name);
+dep_vals = data.(data_variable);
+dep_rels = data.rels.(data_variable);
     
-    if isempty(dep_rels)
-        disp(['Independent (sweep) variables for data variable ''',...
-              strrep(dep_name, '_', ' '), ''' are not specified. ',...
-              'This data will not be plotted.'])
-    end
-
-    if length(dep_rels) == 1
-        disp(['Data variable ''', strrep(dep_name, '_', ' '),...
-              ''' depends on only one sweep variable. ',...
-              'This data will not be plotted.'])
-    end
-
-    % Plot 2D data.
-    if length(dep_rels) == 2
-        indep_name1 = dep_rels{1};
-        indep_name2 = dep_rels{2};
-        indep_vals1 = data.(indep_name1);
-        indep_vals2 = data.(indep_name2);
-        
-        if ~isempty(strfind(dep_name, 'Probability')) ||...
-                ~isempty(strfind(dep_name, 'Amplitude')) ||...
-                ~isempty(strfind(dep_name, 'Phase')) ||...
-                ~isempty(strfind(dep_name, 'I')) ||...
-                ~isempty(strfind(dep_name, 'Q'))
-            if strcmp(normalization_direction, 'along_y')
-                dep_vals = dep_vals ./ (max(dep_vals, [], 2) * ones(1, size(dep_vals, 2)));
-            elseif strcmp(normalization_direction, 'along_x')
-                dep_vals = dep_vals ./ (ones(size(dep_vals, 1), 1) * max(dep_vals));   
-            end
-            extra_title = 'Line-by-Line Max-Normalized ';
-            extra_filename = ['_max_', normalization_direction];
-        else
-            extra_title = '';
-            extra_filename = '';
-        end
-        
-        % Plot the data as a smooth surface.
-        createFigure;
-        plotSmooth(indep_vals1, indep_vals2, dep_vals);
-        xunits = getUnits(data, indep_name1);
-        yunits = getUnits(data, indep_name2);
-        zunits = getUnits(data, dep_name);
-        xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-        ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-        title({[extra_title, strrep(dep_name, '_', ' '), zunits, ':'],...
-               [filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-        savePlot(fullfile(plts_path, [base_filename, '_', dep_name, '_smooth', extra_filename]));
-        % Plot the data as a pixeleated image.
-        createFigure('right');
-        plotPixelated(indep_vals1, indep_vals2, dep_vals');
-        xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-        ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-        title({[extra_title, strrep(dep_name, '_', ' '), zunits, ':'],...
-               [filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-        savePlot(fullfile(plts_path, [base_filename, '_', dep_name, '_pixelated', extra_filename]));
-    end
-    if length(dep_rels) > 2
-        disp(['Data variable ''', strrep(dep_name, '_', ' '),...
-              ''' depends on more than two sweep variables. ',...
-              'This data will not be plotted.'])
-    end
+if isempty(dep_rels)
+    error(['Independent (sweep) variables for data variable ''',...
+          strrep(data_variable, '_', ' '), ''' are not specified.'])
 end
 
-% Show a message box with the experiment parameters.
-showMessageBox(data);
+% Plot 2D data.
+if length(dep_rels) == 2
+    if strcmp(normalization_direction, 'along_y')
+        dep_vals = dep_vals ./ (max(dep_vals, [], 2) * ones(1, size(dep_vals, 2)));
+    elseif strcmp(normalization_direction, 'along_x')
+        dep_vals = dep_vals ./ (ones(size(dep_vals, 1), 1) * max(dep_vals));   
+    end
+    processed_data_var = ['MaxNorm_', data_variable];
+    data.(processed_data_var) = dep_vals;
+    data.units.(processed_data_var) = '';
+    data.rels.(processed_data_var) = data.rels.(data_variable);
+    data.dep{length(data.dep)+1} = processed_data_var;
+    data.plotting.(processed_data_var).full_name =...
+        ['Line-by-Line Maximum-Normalized ', strrep(data_variable, '_', ' ')];
+    data.plotting.(processed_data_var).extra_filename = ['_', normalization_direction];
+
+    plotDataVar(data, processed_data_var);
+end

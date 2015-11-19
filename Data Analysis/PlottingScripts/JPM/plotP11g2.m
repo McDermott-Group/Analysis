@@ -1,20 +1,16 @@
 function plotP11g2
 %plotMeasurementData Plot data from a text data file.
 
-% Select a file to plot.
-[filename, pathname, status] = selectMeasurementDataFile(1);
-if ~status
+% Select a file.
+data = loadMeasurementData;
+if isempty(fields(data))
     return
 end
 
-% Read probability data file, convert the variable names, and define
-% the units.
-data = processMeasurementData(importMeasurementData(fullfile(pathname, filename)));
+[pathname, filename, ext] = fileparts(data.Filename);
 
 % Create folder Plots if necessary.
 plts_path = makeDirPlots(pathname);
-
-[~, base_filename] = fileparts(filename);
 
 if ~isfield(data, 'P11')
     error('The selected data set does not contain joint switching probability.')
@@ -83,10 +79,8 @@ if length(dep_rels) == 1
             ymax = max([P11(:) + 1.96 * data.error.P11(:);...
                 PA_PB_prod(:) - PA_PB_prod_error(:)]);
         else
-            ymin = min([P11(:) - 1.96 * data.error.P11(:);...
-                PA_PB_prod(:) - PA_PB_prod_error(:)]);
-            ymax = max([P11(:) + 1.96 * data.error.P11(:);...
-                PA_PB_prod(:) - PA_PB_prod_error(:)]);
+            ymin = min(P11(:) - 1.96 * data.error.P11(:));
+            ymax = max(P11(:) + 1.96 * data.error.P11(:));
         end
         if ymin == ymax
             ymax = Inf;
@@ -97,7 +91,7 @@ if length(dep_rels) == 1
         xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
         ylabel('P11', 'FontSize', 14);
         title({[filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-        savePlot(fullfile(plts_path, [base_filename, '_', 'P11', '_errorbar']));
+        savePlot(fullfile(plts_path, [filename, '_', 'P11', '_errorbar']));
     end
 
     createFigure;
@@ -123,7 +117,7 @@ if length(dep_rels) == 1
     xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
     ylabel(['P_{11}', yunits], 'FontSize', 14);
     title({[filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-    savePlot(fullfile(plts_path, [base_filename, '_P11_simple']));
+    savePlot(fullfile(plts_path, [filename, '_P11_simple']));
 end
 
 % Plot 2D P11.
@@ -140,16 +134,16 @@ if length(dep_rels) == 2
     yunits = getUnits(data, indep_name2);
     xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
     ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-    title({['P11:'], [filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-    savePlot(fullfile(plts_path, [base_filename, '_P11_smooth']));
+    title({'P11:', [filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+    savePlot(fullfile(plts_path, [filename, '_P11_smooth']));
     % Plot the data as a pixeleated image.
     createFigure('right');
     plotPixelated(indep_vals1, indep_vals2, P11');
     xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
     ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
     title({'P11:',...
-           [filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-    savePlot(fullfile(plts_path, [base_filename, '_P11_pixelated']));
+           [filename, ext, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+    savePlot(fullfile(plts_path, [filename, '_P11_pixelated']));
 end
 if length(dep_rels) > 2
     disp(['Data variable ''''P11'''' depends on more than two sweep variables. ',...
@@ -167,16 +161,16 @@ if length(dep_rels) == 1
         plotErrorbar(indep_vals, g2, 1.96 * sqrt(g2_var));
         xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
         ylabel('g_2 = P_{11} / P_AP_B', 'FontSize', 14);
-        title({[filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-        savePlot(fullfile(plts_path, [base_filename, '_g2_errorbar']));
+        title({[filename, ext, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+        savePlot(fullfile(plts_path, [filename, '_g2_errorbar']));
     end
 
     createFigure;
     plotSimple(indep_vals, g2);    % Plot a simple 1D graph.
     xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
     ylabel('g_2 = P_{11} / P_AP_B', 'FontSize', 14);
-    title({[filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-    savePlot(fullfile(plts_path, [base_filename, '_g2_simple']));
+    title({[filename, ext, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+    savePlot(fullfile(plts_path, [filename, '_g2_simple']));
 end
 
 % Plot 2D g2.
@@ -194,8 +188,8 @@ if length(dep_rels) == 2
     xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
     ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
     title({'g2:',...
-           [filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-    savePlot(fullfile(plts_path, [base_filename, '_g2_smooth']));
+           [filename, ext, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+    savePlot(fullfile(plts_path, [filename, '_g2_smooth']));
 
     corrected_g2 = g2;
     corrected_g2(corrected_g2 > 2) = NaN;
@@ -204,8 +198,8 @@ if length(dep_rels) == 2
     xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
     ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
     title({'g2:',...
-           [filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-    savePlot(fullfile(plts_path, [base_filename, '_g2_pixelated']));
+           [filename, ext, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+    savePlot(fullfile(plts_path, [filename, '_g2_pixelated']));
 end
 
 if length(dep_rels) > 2

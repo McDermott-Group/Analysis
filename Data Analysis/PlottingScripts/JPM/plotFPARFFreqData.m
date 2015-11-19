@@ -3,20 +3,16 @@ function plotFPARFFreqData
 % excitation. The selected data should be a 2D array of probability values
 % with FastPulse Amplitude and RF Frequency as independent variables.
 
-% Select a file to plot.
-[filename, pathname, status] = selectMeasurementDataFile(1);
-if ~status
+% Select a file.
+data = loadMeasurementData;
+if isempty(fields(data))
     return
 end
 
-% Read probability data file, convert the variable names, and define
-% the units.
-data = processMeasurementData(importMeasurementData(fullfile(pathname, filename)));
+[pathname, filename, ext] = fileparts(data.Filename);
 
 % Create folder Plots if necessary.
 plts_path = makeDirPlots(pathname);
-
-[~, base_filename] = fileparts(filename);
 
 for data_index = 1:length(data.dep)
     dep_name = data.dep{data_index};
@@ -44,16 +40,16 @@ for data_index = 1:length(data.dep)
             plotErrorbar(indep_vals, dep_vals, data.error.(dep_name));
             xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
             ylabel([strrep(dep_name, '_', ' ') yunits], 'FontSize', 14);
-            title({[filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-            savePlot(fullfile(plts_path, [base_filename, '_', dep_name, '_errorbar']));
+            title({[filename, ext, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+            savePlot(fullfile(plts_path, [filename, '_', dep_name, '_errorbar']));
         end
         
         createFigure;
         plotSimple(indep_vals, dep_vals)  % Plot a simple 1D graph.
         xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(dep_name, '_', ' ') yunits], 'FontSize', 14);
-        title({[filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-        savePlot(fullfile(plts_path, [base_filename, '_', dep_name, '_delta_prob_simple']));
+        title({[filename, ext, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+        savePlot(fullfile(plts_path, [filename, '_', dep_name, '_delta_prob_simple']));
     end
 
     % Plot 2D data.
@@ -74,16 +70,16 @@ for data_index = 1:length(data.dep)
         xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
         title({'RF-Induced Increase in Switching Probability:',...
-               [filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-        savePlot(fullfile(plts_path, [base_filename, '_', dep_name, '_delta_prob_smooth']));
+               [filename, ext, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+        savePlot(fullfile(plts_path, [filename, '_', dep_name, '_delta_prob_smooth']));
         % Plot the data as a pixeleated image.
         createFigure('right');
         plotPixelated(indep_vals1, indep_vals2, dep_vals');
         xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
         title({'RF-Induced Increase in Switching Probability:',...
-               [filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-        savePlot(fullfile(plts_path, [base_filename, '_', dep_name, '_delta_prob_pixelated']));
+               [filename, ext, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+        savePlot(fullfile(plts_path, [filename, '_', dep_name, '_delta_prob_pixelated']));
     end
     if length(dep_rels) > 2
         disp(['Data variable ''', strrep(dep_name, '_', ' '), ''' depends on more than two sweep variables. ',...

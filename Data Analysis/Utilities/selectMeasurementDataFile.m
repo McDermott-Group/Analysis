@@ -1,5 +1,5 @@
 function [filenames, pathnames, status] = selectMeasurementDataFile(number_of_files, window_titles)
-%SelectMeasurementDataFile Open the file selection dialog to select a set
+%SelectMeasurementDataFile  Open the file selection dialog to select a set
 %of files. 
 %
 %   FILENAMES, PATHNAMES, STATUS = SelectMeasurementDataFile(NUMBER_OF_FILES,

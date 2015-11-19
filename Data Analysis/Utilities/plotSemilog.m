@@ -1,5 +1,5 @@
 function plotSemilog(indep, dep)
-%plotSemilog Semilog 1D data plot.
+%plotSemilog    Semilog 1D data plot.
 %
 %   plotSemilog(INDEP, DEP) plots 1D data in a graph with the semilog y
 %   axis. INDEP is an indepedent  variable (x coordinate), DEP is

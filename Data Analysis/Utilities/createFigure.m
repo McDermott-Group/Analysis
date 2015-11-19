@@ -1,5 +1,5 @@
 function createFigure(position)
-%createFigure Create a figure.
+%createFigure   Create a figure.
 %
 %   createFigure(POSITION) creates a figure in the POSITION that is defined
 %   relatively to the screen size.

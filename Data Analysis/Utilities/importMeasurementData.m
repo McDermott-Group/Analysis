@@ -1,13 +1,13 @@
 function data = importMeasurementData(filename)
-%importMeasurementData Import data from a text file created with the JPM
-%Experiment code.
+%importMeasurementData  Import data from a .txt or .mat file created with
+% the LabRAD\Measurements\General\experiment.py code.
 %
 %   DATA = importMeasurementData(FILENAME) reads data from a file specified
 %   by FILENAME and returns structure DATA containing the data from
-%   the FILENAME file. Only 1D and 2D dataseta are supported.
+%   the FILENAME file. Only 1D and 2D datasets are supported.
 
     if nargin ~= 1
-        error('Function requires one and only one input parameter: FILENAME.');
+        error('Function requires only one input parameter: FILENAME.');
     end
 
     [~, ~, ext] = fileparts(filename);

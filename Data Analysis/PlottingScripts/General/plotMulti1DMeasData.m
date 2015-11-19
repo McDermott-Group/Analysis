@@ -1,5 +1,5 @@
 function plotMulti1DMeasData
-%plotMulti1DMeasData Plot multiple 1D graphs in the same plot.
+%plotMulti1DMeasData    Plot multiple 1D graphs in the same plot.
 
 % Select files to plot.
 [filenames, pathnames, status] = selectMeasurementDataFile;

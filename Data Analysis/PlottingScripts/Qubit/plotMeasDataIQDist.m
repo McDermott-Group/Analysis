@@ -135,7 +135,7 @@ for data_index = 1:length(data1.dep)
                    [filenames{2}, ' [', data2.Timestamp, ']'], indep_vars}, 'Interpreter', 'none', 'FontSize', 10)
             savePlot(fullfile(plts_path, [base_filename1, '-', base_filename2, '_', dep_name, '_polar']));
         end
-        % Plot the data as a pixeleated image.
+        % Plot the data as a pixelated image.
         createFigure('right');
         plotPixelated(indep_vals1, indep_vals2, distance');
         xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);

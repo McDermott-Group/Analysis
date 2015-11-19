@@ -1,7 +1,7 @@
 function savePlot(full_filename)
-%savePlot Save current figure plot in a png file.
+%savePlot   Save current figure plot in a png file.
 %
-%   savePlot(FULL_FILENAME) saves the plot in a current figure to a png
+%   savePlot(FULL_FILENAME) saves the plot in a current figure to a .png
 %   file. FULL_FILENAME specifies the name of the png file and its location.
 
 

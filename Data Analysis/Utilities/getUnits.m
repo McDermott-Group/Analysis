@@ -1,5 +1,5 @@
 function units = getUnits(data, var_name)
-%getUnits Return variable units.
+%getUnits   Return variable units.
 %
 %   UNITS = getUnits(DATA, VAR_NAME) returns a string that specify the
 %   variable units. The units are placed in brackets. If no units are
