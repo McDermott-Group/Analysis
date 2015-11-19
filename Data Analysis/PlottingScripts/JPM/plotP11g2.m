@@ -64,8 +64,8 @@ if length(dep_rels) == 1
         if exist('PA_PB_prod', 'var')
             hold on
             if exist('PA_PB_prod_var', 'var')
-                PA_PB_prod_error = 1.96 * sqrt(PA_PB_prod_var);
-                errorbar(indep_vals, PA_PB_prod, PA_PB_prod_error,...
+                PA_PB_prod_error = sqrt(PA_PB_prod_var);
+                errorbar(indep_vals, PA_PB_prod, 1.96 * PA_PB_prod_error,...
                     '.', 'LineWidth', 1, 'MarkerSize', 15)
             else
                 plot(indep_vals, PA_PB_prod,...
@@ -75,9 +75,9 @@ if length(dep_rels) == 1
             hold off
             legend('P_{11}', 'P_A*P_B')
             ymin = min([P11(:) - 1.96 * data.error.P11(:);...
-                PA_PB_prod(:) - PA_PB_prod_error(:)]);
+                PA_PB_prod(:) - 1.96 * PA_PB_prod_error(:)]);
             ymax = max([P11(:) + 1.96 * data.error.P11(:);...
-                PA_PB_prod(:) - PA_PB_prod_error(:)]);
+                PA_PB_prod(:) + 1.96 * PA_PB_prod_error(:)]);
         else
             ymin = min(P11(:) - 1.96 * data.error.P11(:));
             ymax = max(P11(:) + 1.96 * data.error.P11(:));

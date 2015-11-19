@@ -23,7 +23,8 @@ status = true;
 
 if exist('number_of_files', 'var') && exist('window_titles', 'var') &&...
         number_of_files ~= length(window_titles)
-    error('The number of files to be selected and the length of the cell containg the file selection dialog titles do not match.') 
+    error(['The number of files to be selected and the length of the cell ',...
+        'that contains the file selection dialog titles do not match.']) 
 end
 
 % Retrive the path that was used last time.

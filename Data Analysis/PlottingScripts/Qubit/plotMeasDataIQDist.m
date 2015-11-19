@@ -21,16 +21,12 @@ plts_path = makeDirPlots(pathnames{1});
 
 for data_index = 1:length(data1.dep)
     I_name = data1.dep{data_index};
-    if ~isempty(strfind(I_name, '_Std_Dev'))
-        continue
-    end
-    
-    if ~isempty(strfind(I_name, 'I'))
+
+    if isempty(strfind(I_name, '_Std_Dev')) && ~isempty(strfind(I_name, 'I'))
         Q_name = strrep(I_name, 'I', 'Q');
         if ~isfield(data1, Q_name)
             continue
         end
-        dep_name = strrep(I_name, 'I', 'IQ-Distance');
     else
         continue
     end
@@ -61,7 +57,9 @@ for data_index = 1:length(data1.dep)
     for k = 1:length(I1_rels)
         if ~strcmp(I1_rels{k}, I2_rels{k}) ||...
                ~strcmp(Q1_rels{k}, Q2_rels{k}) ||...
-               ~strcmp(I1_rels{k}, Q1_rels{k})
+               ~strcmp(I1_rels{k}, Q1_rels{k}) ||...
+               any(I1_rels{k} ~= I2_rels{k}) ||...
+               any(Q1_rels{k} ~= Q2_rels{k})
             error('The selected files do not match.')
         end
     end
@@ -71,83 +69,20 @@ for data_index = 1:length(data1.dep)
     catch
         error('The selected files do not match.')
     end
-    
-    % Plot 1D data.
-    if dim == 1
-        indep_name = I1_rels{1};
-        indep_vals = data1.(indep_name);
 
-        xunits = getUnits(data1, indep_name);
-        yunits = getUnits(data1, I_name);
-        
-        createFigure;
-        plotSimple(indep_vals, distance)  % Plot a simple 1D graph.
-        xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-        ylabel([strrep(dep_name, '_', ' ') yunits], 'FontSize', 14);
-        title({[strrep(dep_name, '_', ' '), ' between Two Datasets:'],...
-               [filenames{1}, ' [', data1.Timestamp, ']'],...
-               [filenames{2}, ' [', data2.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-
-        savePlot(fullfile(plts_path, [base_filename1, '-', base_filename2, '_', dep_name]));
-    end
-
-    % Plot 2D data.
-    if dim == 2
-        indep_name1 = I1_rels{1};
-        indep_name2 = I1_rels{2};
-
-        indep_vals1 = data1.(indep_name1);
-        indep_vals2 = data1.(indep_name2);
-        
-        xunits = getUnits(data1, indep_name1);
-        yunits = getUnits(data1, indep_name2);
-        zunits = getUnits(data1, dep_name);
-        
-        % Plot the data as a smooth surface.
-        if isempty(strfind(indep_name1, 'Phase')) && isempty(strfind(indep_name2, 'Phase'))
-            % Plot the data as a smooth surface.
-            createFigure;
-            plotSmooth(indep_vals1, indep_vals2, distance);
-            xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-            ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-            title({[strrep(dep_name, '_', ' '), zunits, ' between Two Datasets:'],...
-                   [filenames{1}, ' [', data1.Timestamp, ']'],...
-                   [filenames{2}, ' [', data2.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-            savePlot(fullfile(plts_path, [base_filename1, '-', base_filename2, '_', dep_name, '_smooth']));
-        else % Create a polar (smooth) plot.
-            if ~isempty(strfind(indep_name1, 'Phase'))
-                phase = indep_vals1;
-                radius = indep_vals2;
-                vals = distance';
-                indep_vars = ['Radius: ', strrep(indep_name2, '_', ' '),...
-                    yunits, '; Phase: ', strrep(indep_name1, '_', ' '), xunits];
-            else
-                phase = indep_vals2;
-                radius = indep_vals1;
-                vals = distance;
-                indep_vars = ['Radius: ', strrep(indep_name1, '_', ' '),...
-                    xunits, '; Phase: ', strrep(indep_name2, '_', ' '), yunits];
-            end
-            createFigure;
-            plotPolar(radius, phase, vals);
-            title({[strrep(dep_name, '_', ' '), zunits, ' between Two Datasets:'],...
-                   [filenames{1}, ' [', data1.Timestamp, ']'],...
-                   [filenames{2}, ' [', data2.Timestamp, ']'], indep_vars}, 'Interpreter', 'none', 'FontSize', 10)
-            savePlot(fullfile(plts_path, [base_filename1, '-', base_filename2, '_', dep_name, '_polar']));
-        end
-        % Plot the data as a pixelated image.
-        createFigure('right');
-        plotPixelated(indep_vals1, indep_vals2, distance');
-        xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-        ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-        title({[strrep(dep_name, '_', ' '), zunits, ' between Two Datasets:'],...
-               [filenames{1}, ' [', data1.Timestamp, ']'],...
-               [filenames{2}, ' [', data2.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-        savePlot(fullfile(plts_path, [base_filename1, '-', base_filename2, '_', dep_name, '_pixelated']));
-    end
-    if length(dim) > 2
-        disp(['Data variable ''', strrep(dep_name, '_', ' '),...
-              ''' depends on more than two sweep variables. ',...
-              'The data will not be plotted.'])
-    end
+    data = data1;
+    dist_name = strrep(I_name, 'I', 'Phase_Space_Distance');
+    data.(dist_name) = distance;
+    data.units.(dist_name) = data1.units.(I_name);
+    data.rels.(dist_name) = I1_rels;
+    data.dep{length(data.dep)+1} = dist_name;
+    data.plotting.(dist_name).full_name = strrep(dist_name, '_', ' ');
+    data.plotting.(dist_name).plot_title =...
+        {[strrep(dist_name, '_', ' '), getUnits(data1, I_name), ' between Two Datasets:'],...
+         [filenames{1}, ' [', data1.Timestamp, ']'],...
+         [filenames{2}, ' [', data2.Timestamp, ']']};
+    data.plotting.(dist_name).plot_filename =...
+        fullfile(plts_path, [base_filename1, '-', base_filename2, '_', dist_name]);
+     
+    plotDataVar(data, dist_name);
 end

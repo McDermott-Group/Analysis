@@ -22,14 +22,21 @@ end
 [pathname, filename, ext] = fileparts(data.Filename);
 plts_path = makeDirPlots(pathname);
 
-extra_filename = '';
 full_dep_name = strrep(dependent_variable, '_', ' ');
+plot_filename = fullfile(plts_path, [filename, '_', dependent_variable]);
+extra_filename = '';
 if isfield(data, 'plotting') && isfield(data.plotting, dependent_variable)
     if isfield(data.plotting.(dependent_variable), 'full_name')
         full_dep_name = data.plotting.(dependent_variable).full_name;
     end
+    if isfield(data.plotting.(dependent_variable), 'plot_filename')
+        plot_filename = data.plotting.(dependent_variable).plot_filename;
+    end
     if isfield(data.plotting.(dependent_variable), 'extra_filename')
         extra_filename = data.plotting.(dependent_variable).extra_filename;
+    end
+    if isfield(data.plotting.(dependent_variable), 'plot_title')
+        plot_title = data.plotting.(dependent_variable).plot_title;
     end
 end
 
@@ -52,12 +59,15 @@ if length(dep_rels) == 1
         createFigure('right');
         plotErrorbar(indep_vals, dep_vals, data.error.(dependent_variable))
         xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-        ylabel([full_dep_name, yunits],...
-            'FontSize', 14);
-        title({[filename, ext, ' [', data.Timestamp, ']']},...
-            'Interpreter', 'none', 'FontSize', 10)
-        savePlot(fullfile(plts_path, [filename, '_', dependent_variable,...
-            extra_filename, '_errorbar']));
+        ylabel([full_dep_name, yunits], 'FontSize', 14);
+        if exist('plot_title', 'var')
+            title({strrep(plot_title{1}, yunits, ''), plot_title{2:end}},...
+                'Interpreter', 'none', 'FontSize', 10)
+        else
+            title({[filename, ext, ' [', data.Timestamp, ']']},...
+                'Interpreter', 'none', 'FontSize', 10)
+        end
+        savePlot([plot_filename, extra_filename, '_errorbar']);
     end
 
     createFigure;
@@ -65,10 +75,14 @@ if length(dep_rels) == 1
     xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
     ylabel([full_dep_name, yunits],...
         'FontSize', 14);
-    title({[filename, ext, ' [', data.Timestamp, ']']},...
-        'Interpreter', 'none', 'FontSize', 10)
-    savePlot(fullfile(plts_path, [filename, '_', dependent_variable,...
-        extra_filename, '_simple']));
+    if exist('plot_title', 'var')
+        title({strrep(plot_title{1}, yunits, ''), plot_title{2:end}},...
+            'Interpreter', 'none', 'FontSize', 10)
+    else
+        title({[filename, ext, ' [', data.Timestamp, ']']},...
+            'Interpreter', 'none', 'FontSize', 10)
+    end
+    savePlot([plot_filename, extra_filename, '_simple']);
 end
 
 % Plot 2D data.
@@ -88,11 +102,14 @@ if length(dep_rels) == 2
         plotSmooth(indep_vals1, indep_vals2, dep_vals);
         xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-        title({[full_dep_name, zunits, ':'],...
-               [filename, ext, ' [', data.Timestamp, ']']},...
-               'Interpreter', 'none', 'FontSize', 10)
-        savePlot(fullfile(plts_path, [filename, '_', dependent_variable,...
-            extra_filename, '_smooth']));
+        if exist('plot_title', 'var')
+            title(plot_title, 'Interpreter', 'none', 'FontSize', 10)
+        else
+            title({[full_dep_name, zunits, ':'],...
+                   [filename, ext, ' [', data.Timestamp, ']']},...
+                   'Interpreter', 'none', 'FontSize', 10)
+        end
+        savePlot([plot_filename, extra_filename, '_smooth']);
     else % Create a polar (smooth) plot.
         if ~isempty(strfind(indep_name1, 'Phase'))
             phase = indep_vals1;
@@ -109,21 +126,28 @@ if length(dep_rels) == 2
         end
         createFigure;
         plotPolar(radius, phase, vals);
-        title({[full_dep_name, zunits, ':'],...
-               [filename, ext, ' [', data.Timestamp, ']'], indep_vars},...
-               'Interpreter', 'none', 'FontSize', 10)
-        savePlot(fullfile(plts_path, [filename, '_', dependent_variable,...
-            extra_filename, '_smooth']));
+        if exist('plot_title', 'var')
+            title(plot_title, 'Interpreter', 'none', 'FontSize', 10)
+        else
+            title({[full_dep_name, zunits, ':'],...
+                   [filename, ext, ' [', data.Timestamp, ']'], indep_vars},...
+                   'Interpreter', 'none', 'FontSize', 10)
+        end
+        savePlot([plot_filename, extra_filename, '_smooth']);
     end
     % Plot the data as a pixelated image.
     createFigure('right');
     plotPixelated(indep_vals1, indep_vals2, dep_vals');
     xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
     ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-    title({[full_dep_name, zunits, ':'],...
-           [filename, ext, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
-    savePlot(fullfile(plts_path, [filename, '_', dependent_variable,...
-        extra_filename, '_pixelated']));
+    if exist('plot_title', 'var')
+        title(plot_title, 'Interpreter', 'none', 'FontSize', 10)
+    else
+        title({[full_dep_name, zunits, ':'],...
+               [filename, ext, ' [', data.Timestamp, ']']},...
+               'Interpreter', 'none', 'FontSize', 10)
+    end
+    savePlot([plot_filename, extra_filename, '_pixelated']);
 end
 if length(dep_rels) > 2
     disp(['Data variable ''', strrep(dependent_variable, '_', ' '),...
