@@ -1,6 +1,6 @@
 function plotQuantumEfficiencyFPT(calibration_coeff, kappa)
 % plotQuantumEfficiencyFPT Qunatum efficiency estimation based on the two
-% data sets
+% data sets.
 %   plotQuantumEfficiencyFPT(CALIBRATION_COEFFICIENT, KAPPA) plots quantum
 %   efficiency estimated from two text data sets. CALIBRATION_COEFFICIENT
 %   [photons/(DAC units)^2] is defined as

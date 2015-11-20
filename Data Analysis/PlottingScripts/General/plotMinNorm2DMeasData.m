@@ -1,8 +1,10 @@
 function plotMinNorm2DMeasData(data_variable, normalization_direction)
 %plotMinNorm2DMeasData(DATA_VARIABLE, NORMALIZATION_DIRECTION)  Plot
-%a line-by-line minimum normalized 2D data. DATA_VARIABLE should be a name
-%of the data variable to plot. NORMALIZATION_DIRECTION should be
-%either 'along_x' or 'along_y'.
+%a line-by-line minimum normalized 2D data. 
+%   plotMinNorm2DMeasData(DATA_VARIABLE, NORMALIZATION_DIRECTION) plots
+%   line-by-line minimum normalized data for vairable DATA_VARIABLE along
+%   NORMALIZATION_DIRECTION. NORMALIZATION_DIRECTION should be either
+%   'along_x' or 'along_y'.
 
 if exist('normalization_direction', 'var') &&...
         ~isempty(strfind(normalization_direction, 'x'))

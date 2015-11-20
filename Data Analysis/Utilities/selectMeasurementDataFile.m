@@ -2,7 +2,7 @@ function [filenames, pathnames, status] = selectMeasurementDataFile(number_of_fi
 %SelectMeasurementDataFile  Open the file selection dialog to select a set
 %of files. 
 %
-%   FILENAMES, PATHNAMES, STATUS = SelectMeasurementDataFile(NUMBER_OF_FILES,
+%   FILENAMES, PATHNAMES, STATUS = selectMeasurementDataFile(NUMBER_OF_FILES,
 %   WINDOW_TITLES) opens the file selection dialog NUMBER_OF_FILES times. 
 %   WINDOW_TITLES should be a cell of strings. Each string specifies
 %   the window title of the n-th file selection dialog window.
