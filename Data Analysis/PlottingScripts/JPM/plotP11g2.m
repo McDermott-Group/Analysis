@@ -90,13 +90,15 @@ if length(dep_rels) == 1
 
         xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
         ylabel('P11', 'FontSize', 14);
-        title({[filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+        title({[filename, ' [', data.Timestamp, ']']},...
+            'Interpreter', 'none', 'FontSize', 10)
         savePlot(fullfile(plts_path, [filename, '_', 'P11', '_errorbar']));
     end
 
     createFigure;
     plot(indep_vals, P11, '.-', 'LineWidth', 1, 'MarkerSize', 15)  % Plot a simple 1D graph.
-    if isfield(data, 'JPM_A_Switching_Probability') && isfield(data, 'JPM_B_Switching_Probability')
+    if isfield(data, 'JPM_A_Switching_Probability') &&...
+            isfield(data, 'JPM_B_Switching_Probability')
         hold on
         plot(indep_vals, PA_PB_prod,...
             '.-', 'LineWidth', 1, 'MarkerSize', 15)
@@ -116,7 +118,8 @@ if length(dep_rels) == 1
 
     xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
     ylabel(['P_{11}', yunits], 'FontSize', 14);
-    title({[filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+    title({[filename, ' [', data.Timestamp, ']']},...
+        'Interpreter', 'none', 'FontSize', 10)
     savePlot(fullfile(plts_path, [filename, '_P11_simple']));
 end
 
@@ -134,7 +137,8 @@ if length(dep_rels) == 2
     yunits = getUnits(data, indep_name2);
     xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
     ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-    title({'P11:', [filename, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+    title({'P11:', [filename, ' [', data.Timestamp, ']']},...
+        'Interpreter', 'none', 'FontSize', 10)
     savePlot(fullfile(plts_path, [filename, '_P11_smooth']));
     % Plot the data as a pixeleated image.
     createFigure('right');
@@ -142,7 +146,8 @@ if length(dep_rels) == 2
     xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
     ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
     title({'P11:',...
-           [filename, ext, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+           [filename, ext, ' [', data.Timestamp, ']']},...
+           'Interpreter', 'none', 'FontSize', 10)
     savePlot(fullfile(plts_path, [filename, '_P11_pixelated']));
 end
 if length(dep_rels) > 2

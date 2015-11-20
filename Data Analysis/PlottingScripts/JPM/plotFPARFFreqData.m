@@ -36,7 +36,7 @@ for data_index = 1:length(data.dep)
         data.(processed_data_var) = dep_vals;
         data.units.(processed_data_var) = '';
         data.rels.(processed_data_var) = data.rels.(dep_name);
-        data.dep{length(data.dep)+1} = processed_data_var;
+        data.dep{length(data.dep) + 1} = processed_data_var;
         data.plotting.(processed_data_var).full_name =...
             ['RF-Induced Increase in ', strrep(dep_name, '_', ' ')];
 

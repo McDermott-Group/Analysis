@@ -30,7 +30,7 @@ processed_data_var = ['HistEqual_', data_variable];
 data.(processed_data_var) = histeq(dep_vals);
 data.units.(processed_data_var) = data.units.(data_variable);
 data.rels.(processed_data_var) = data.rels.(data_variable);
-data.dep{length(data.dep)+1} = processed_data_var;
+data.dep{length(data.dep) + 1} = processed_data_var;
 data.plotting.(processed_data_var).full_name =...
     ['Histogram-Equalized ', strrep(data_variable, '_', ' ')];
 

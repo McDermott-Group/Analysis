@@ -39,7 +39,7 @@ if length(dep_rels) == 2
     data.(processed_data_var) = dep_vals;
     data.units.(processed_data_var) = '';
     data.rels.(processed_data_var) = data.rels.(data_variable);
-    data.dep{length(data.dep)+1} = processed_data_var;
+    data.dep{length(data.dep) + 1} = processed_data_var;
     data.plotting.(processed_data_var).full_name =...
         ['Line-by-Line Minimum-Normalized ', strrep(data_variable, '_', ' ')];
     data.plotting.(processed_data_var).extra_filename = ['_', normalization_direction];

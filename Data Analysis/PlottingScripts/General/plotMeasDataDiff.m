@@ -57,7 +57,7 @@ for data_index = 1:length(data1.dep)
     end
     data.units.(diff_name) = data1.units.(dep_name);
     data.rels.(diff_name) = dep_rels1;
-    data.dep{length(data.dep)+1} = diff_name;
+    data.dep{length(data.dep) + 1} = diff_name;
     data.plotting.(diff_name).full_name = strrep(diff_name, '_', ' ');
     data.plotting.(diff_name).plot_title =...
         {[strrep(diff_name, '_', ' '), getUnits(data1, dep_name), ' between Two Datasets:'],...
