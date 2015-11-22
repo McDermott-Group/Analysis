@@ -8,23 +8,7 @@ function plotErrorbar(indep, dep, dep_error)
 
 errorbar(indep, dep, 1.96 * dep_error, '.', 'LineWidth', 1, 'MarkerSize', 15)
 
-xmin = min(indep);
-xmax = max(indep);
-if xmax == xmin
-    xmax = Inf;
-end
-
-ymin = min(dep - 1.96 * dep_error);
-ymax = max(dep + 1.96 * dep_error);
-if ymin == ymax
-    ymax = Inf;
-end
-
-if isfinite(ymin) && isfinite(ymax)
-    axis([xmin xmax ymin ymax])
-else
-    xlim([xmin xmax])
-end
+axis tight
 grid on
 set(gca, 'FontSize', 14)
 

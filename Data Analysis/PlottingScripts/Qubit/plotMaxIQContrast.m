@@ -56,8 +56,9 @@ for data_index = 1:length(data.dep)
             hold off
             legend(strrep(res_name, '_', ' '), strrep(dep_name, '_', ' '))
             xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-            ylabel([strrep(dep_name, '_', ' ') yunits], 'FontSize', 14);
-            title({[filename, ext, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+            ylabel([strrep(dep_name, '_', ' '), yunits], 'FontSize', 14);
+            title({[filename, ext, ' [', data.Timestamp, ']']},...
+                    'Interpreter', 'none', 'FontSize', 10)
             savePlot(fullfile(plts_path, [filename, '_', dep_name, '_rotframe_errorbar']));
         end
         
@@ -68,8 +69,9 @@ for data_index = 1:length(data.dep)
         hold off
         legend(strrep(res_name, '_', ' '), strrep(dep_name, '_', ' '))
         xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-        ylabel([strrep(dep_name, '_', ' ') yunits], 'FontSize', 14);
-        title({[filename, ext, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+        ylabel([strrep(dep_name, '_', ' '), yunits], 'FontSize', 14);
+        title({[filename, ext, ' [', data.Timestamp, ']']},...
+                'Interpreter', 'none', 'FontSize', 10)
         savePlot(fullfile(plts_path, [filename, '_', dep_name, '_rotframe_simple']));
     end
 
@@ -84,14 +86,16 @@ for data_index = 1:length(data.dep)
         yunits = getUnits(data, indep_name2);
         zunits = getUnits(data, I_name);
 
-        if isempty(strfind(indep_name1, 'Phase')) && isempty(strfind(indep_name2, 'Phase'))
+        if isempty(strfind(indep_name1, 'Phase')) &&...
+                isempty(strfind(indep_name2, 'Phase'))
             % Plot the data as a smooth surface.
             createFigure;
             plotSmooth(indep_vals1, indep_vals2, dep_vals);
             xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
             ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
             title({[strrep(dep_name, '_', ' '), zunits, ':'],...
-                   [filename, ext, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+                   [filename, ext, ' [', data.Timestamp, ']']},...
+                   'Interpreter', 'none', 'FontSize', 10)
             savePlot(fullfile(plts_path, [filename, '_', dep_name, '_rotframe_smooth']));
             
             createFigure;
@@ -99,7 +103,8 @@ for data_index = 1:length(data.dep)
             xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
             ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
             title({[strrep(res_name, '_', ' '), zunits, ':'],...
-                   [filename, ext, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+                   [filename, ext, ' [', data.Timestamp, ']']},...
+                   'Interpreter', 'none', 'FontSize', 10)
         else % Create a polar (smooth) plot.
             if ~isempty(strfind(indep_name1, 'Phase'))
                 phase = indep_vals1;
@@ -134,7 +139,8 @@ for data_index = 1:length(data.dep)
         xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
         title({[strrep(dep_name, '_', ' '), zunits, ':'],...
-               [filename, ext, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+               [filename, ext, ' [', data.Timestamp, ']']},...
+               'Interpreter', 'none', 'FontSize', 10)
         savePlot(fullfile(plts_path, [filename, '_', dep_name, '_rotframe_pixelated']));
         
         createFigure('right');
@@ -142,7 +148,8 @@ for data_index = 1:length(data.dep)
         xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
         title({[strrep(res_name, '_', ' '), zunits, ':'],...
-               [filename, ext, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+               [filename, ext, ' [', data.Timestamp, ']']},...
+               'Interpreter', 'none', 'FontSize', 10)
     end
     if length(dep_rels) > 2
         disp(['Data variable ''', strrep(dep_name, '_', ' '),...

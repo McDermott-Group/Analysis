@@ -70,18 +70,22 @@ for data_index = 1:length(data{1}.dep)
     end
 
     if errorbar_flag % Plot an errobar graph.
-        createFigure('right');
+        createFigure([.9, .1, .88, .8]);
+        marker_types = {'o', 's', 'd', '^', 'v', '>', '<', 'p', 'h'};
         hold on
-        for k = 1:length(filenames);
+        for k = 1:length(filenames)
             scatter(data{k}.(I_name), data{k}.(Q_name),...
-                1.96^2 * (data{k}.(I_name).^2 + data{k}.(Q_name).^2))
+                1.96^2 * (data{k}.(I_name).^2 + data{k}.(Q_name).^2),...
+                linspace(1, 10, length(data{k}.(I_name))),...
+                marker_types{mod(k - 1, length(marker_types)) + 1})
         end
+        colormap(jet)
         hold off
         grid on
 
         xlabel([strrep(I_name, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(Q_name, '_', ' '), yunits], 'FontSize', 14);
-        title([strrep(I_name, '_', ' '), ' - ', strrep(Q_name, '_', ' '),...
+        title([strrep(I_name, '_', ' '), ' — ', strrep(Q_name, '_', ' '),...
                ' Trajectories'], 'Interpreter', 'none', 'FontSize', 10)
         legend(legend_entries, 'Interpreter', 'none')
         axis equal
@@ -89,7 +93,7 @@ for data_index = 1:length(data{1}.dep)
     end
 
     % Plot a simple trajectories.
-    createFigure;
+    createFigure([.01, .1, .88, .8]);
     hold on
     for k = 1:length(filenames);
         plot(data{k}.(I_name), data{k}.(Q_name),...
@@ -100,7 +104,7 @@ for data_index = 1:length(data{1}.dep)
 
     xlabel([strrep(I_name, '_', ' '), xunits], 'FontSize', 14);
     ylabel([strrep(Q_name, '_', ' '), yunits], 'FontSize', 14);
-    title([strrep(I_name, '_', ' '), ' - ', strrep(Q_name, '_', ' '),...
+    title([strrep(I_name, '_', ' '), ' — ', strrep(Q_name, '_', ' '),...
            ' Trajectories'], 'Interpreter', 'none', 'FontSize', 10)
     legend(legend_entries, 'Interpreter', 'none')
     axis equal

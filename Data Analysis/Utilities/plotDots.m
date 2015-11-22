@@ -6,19 +6,7 @@ function plotDots(indep, dep)
 
 plot(indep, dep, '+', 'MarkerSize', 5)
 
-xmin = min(indep);
-xmax = max(indep);
-if xmax == xmin
-    xmax = Inf;
-end
-
-ymin = min(dep);
-ymax = max(dep);
-if ymin == ymax
-    ymax = Inf;
-end
-
-axis([xmin xmax ymin ymax])
+axis tight
 grid on
 set(gca, 'FontSize', 14);
 

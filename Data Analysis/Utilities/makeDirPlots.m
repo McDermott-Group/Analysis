@@ -1,16 +1,17 @@
-function plts_path = makeDirPlots(pathname, plts_dir_name)
-%makeDirPlots   Create folder Plots in the given path.
+function plts_path = makeDirPlots(pathname, plots_dir_name)
+%makeDirPlots   Create plot folder in the given path.
 %
-%   makeDirPlots(PATHNAME, PLTS_DIR_NAME) creates folder PLTS_DIR_NAME in
-%   folder PATHNAME if the former does not exist.
+%   makeDirPlots(PATHNAME, PLOTS_DIR_NAME) creates folder PLOTS_DIR_NAME in
+%   folder PATHNAME if the former does not exist. PLOTS_DIR_NAME is set
+%   to Plots by default.
 
 if ~exist('plots_dir_name', 'var')
-    plts_dir_name = 'Plots';
+    plots_dir_name = 'Plots';
 end
 
-plts_path = fullfile(pathname, plts_dir_name);
+plts_path = fullfile(pathname, plots_dir_name);
 if ~exist(plts_path, 'dir')
-    mkdir(pathname, plts_dir_name)
+    mkdir(pathname, plots_dir_name)
 end
 
 end
