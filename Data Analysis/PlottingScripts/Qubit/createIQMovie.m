@@ -71,7 +71,7 @@ for data_index = 1:length(data.dep)
             [strrep(indep, '_', ' '), ' = ', num2str(indep_vals(k)), iunits]},...
             'Interpreter', 'none', 'FontSize', 10)
         % Write each frame to the file.
-        writeVideo(vidObj, getframe);
+        writeVideo(vidObj, getframe(gcf));
     end
     % Close the file.
     close(vidObj);
