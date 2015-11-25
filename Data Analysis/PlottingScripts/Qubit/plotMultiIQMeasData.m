@@ -38,7 +38,7 @@ for data_index = 1:length(data{1}.dep)
         continue
     end
 
-    for k = 1:length(filenames)
+    for k = 1:length(data)
         if ~isfield(data{k}, I_name) ||...
                 ~isfield(data{k}, Q_name) ||...
                 length(data{k}.rels.(I_name)) ~= 1 ||...
@@ -50,17 +50,24 @@ for data_index = 1:length(data{1}.dep)
         end
     end
 
-    [legend_entries, choice] = selectLegendEntries(data,...
-        [I_name, ' - ', Q_name]);
-    if choice == 0
-        continue
+    if length(data) > 1
+        [legend_entries, choice] = selectLegendEntries(data,...
+            [I_name, ' - ', Q_name]);
+        if choice == 0
+            continue
+        end
+        plot_title = [strrep(I_name, '_', ' '), ' — ',...
+                      strrep(Q_name, '_', ' '), ' Trajectories'];
+    else
+        [~, filename, ext] = fileparts(filenames{1});
+        plot_title = [filename, ext, ' [', data{1}.Timestamp, ']'];
     end
 
     xunits = getUnits(data{1}, I_name);
     yunits = getUnits(data{1}, Q_name);
 
     errorbar_flag = true;
-    for k = 1:length(filenames)
+    for k = 1:length(data)
         if ~isfield(data{k}, 'error') ||...
                 ~isfield(data{k}.error, I_name) ||...
                 ~isfield(data{k}.error, Q_name)
@@ -73,7 +80,7 @@ for data_index = 1:length(data{1}.dep)
         createFigure([.9, .1, .88, .8]);
         marker_types = {'o', 's', 'd', '^', 'v', '>', '<', 'p', 'h'};
         hold on
-        for k = 1:length(filenames)
+        for k = 1:length(data)
             scatter(data{k}.(I_name), data{k}.(Q_name),...
                 1.96^2 * (data{k}.(I_name).^2 + data{k}.(Q_name).^2),...
                 linspace(1, 10, length(data{k}.(I_name))),...
@@ -82,32 +89,35 @@ for data_index = 1:length(data{1}.dep)
         colormap(jet)
         hold off
         grid on
+        axis equal
 
         xlabel([strrep(I_name, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(Q_name, '_', ' '), yunits], 'FontSize', 14);
-        title([strrep(I_name, '_', ' '), ' — ', strrep(Q_name, '_', ' '),...
-               ' Trajectories'], 'Interpreter', 'none', 'FontSize', 10)
-        legend(legend_entries, 'Interpreter', 'none')
-        axis equal
+        title(plot_title, 'Interpreter', 'none', 'FontSize', 10)
+        if length(data) > 1
+            legend(legend_entries, 'Interpreter', 'none')
+        end
+
         savePlot(fullfile(plts_path, [I_name, '-', Q_name, '_errorcirc']));
     end
 
     % Plot a simple trajectories.
     createFigure([.01, .1, .88, .8]);
     hold on
-    for k = 1:length(filenames);
+    for k = 1:length(data);
         plot(data{k}.(I_name), data{k}.(Q_name),...
             '.', 'MarkerSize', 15)
     end
     hold off
     grid on
+    axis equal
 
     xlabel([strrep(I_name, '_', ' '), xunits], 'FontSize', 14);
     ylabel([strrep(Q_name, '_', ' '), yunits], 'FontSize', 14);
-    title([strrep(I_name, '_', ' '), ' — ', strrep(Q_name, '_', ' '),...
-           ' Trajectories'], 'Interpreter', 'none', 'FontSize', 10)
-    legend(legend_entries, 'Interpreter', 'none')
-    axis equal
+    title(plot_title, 'Interpreter', 'none', 'FontSize', 10)
+    if length(data) > 1
+        legend(legend_entries, 'Interpreter', 'none')
+    end
 
     savePlot(fullfile(plts_path, [I_name, '-', Q_name, '_simple']));
 end

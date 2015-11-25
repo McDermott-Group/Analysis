@@ -32,7 +32,8 @@ plts_path = makeDirPlots(pathnames{1});
 for data_index = 1:length(data{1}.dep)
     dep_name = data{1}.dep{data_index};
     if ~isempty(strfind(dep_name, '_Std_Dev')) ||...
-            (exist('data_variable', 'var') && ~strcmp(dep_name, data_variable))
+            (exist('data_variable', 'var') &&...
+            ~strcmp(dep_name, data_variable))
         continue
     end
     if isempty(data{1}.rels.(dep_name))

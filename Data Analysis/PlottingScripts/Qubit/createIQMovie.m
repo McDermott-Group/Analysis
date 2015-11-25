@@ -25,11 +25,13 @@ for data_index = 1:length(data.dep)
         end
     end
     
-    if strcmp(data.rels.(I_name){1}, 'Repetition_Index')
+    if strcmp(data.rels.(I_name){1}, 'Repetition_Index') ||...
+            strcmp(data.rels.(I_name){1}, 'Long_Repetition_Index')
         I = data.(I_name);
         Q = data.(Q_name);
         indep = data.rels.(I_name){2};
-    elseif strcmp(data.rels.(I_name){2}, 'Repetition_Index')
+    elseif strcmp(data.rels.(I_name){2}, 'Repetition_Index') ||...
+            strcmp(data.rels.(I_name){2}, 'Long_Repetition_Index')
         I = data.(I_name)';
         Q = data.(Q_name)';
         indep = data.rels.(I_name){1};
