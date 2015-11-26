@@ -34,8 +34,8 @@ for data_index = 1:length(data.dep)
     I = data.(I_name);
     Q = data.(Q_name);
     
-    I = I - mean(I(:));
-    Q = Q - mean(Q(:));
+    I = I - trimmean(I(:), 66);
+    Q = Q - trimmean(Q(:), 66);
     phi = findAngle(I(:), Q(:));
     dep_vals = I * cos(phi) - Q * sin(phi);
     res_vals = I * sin(phi) + Q * cos(phi);
