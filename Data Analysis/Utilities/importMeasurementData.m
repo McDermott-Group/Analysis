@@ -3,11 +3,11 @@ function data = importMeasurementData(filename)
 % the LabRAD\Measurements\General\experiment.py code.
 %
 %   DATA = importMeasurementData(FILENAME) reads data from a file specified
-%   by FILENAME and returns structure DATA containing the data from
-%   the FILENAME file. Only 1D and 2D datasets are supported.
+%   by FILENAME and returns structure DATA containing the data imported
+%   from the FILENAME file.
 
     if nargin ~= 1
-        error('Function requires only one input parameter: FILENAME.');
+        error('The function requires one input parameter: FILENAME.');
     end
 
     [~, ~, ext] = fileparts(filename);
@@ -22,9 +22,9 @@ function data = importMeasurementData(filename)
 
         line = fgetl(fid);
         if ~ischar(line)
-            error(['Datafile ', filename, ' is empty. The first line should be',...
-                'either the format version (or the name of the experiment',...
-                ' for the  data sets).']);
+            error(['Datafile ', filename, ' is empty. The first line ',...
+                'should be either the format version (or the name of ',...
+                'the experiment for the  data sets).']);
         elseif strcmp(line, 'Format Version: 0.1')
             data = importTxt_v0p1(filename, fid, line);
         else

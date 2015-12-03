@@ -82,7 +82,7 @@ for data_index = 1:length(data{1}.dep)
         hold on
         for k = 1:length(data)
             scatter(data{k}.(I_name), data{k}.(Q_name),...
-                1.96^2 * (data{k}.(I_name).^2 + data{k}.(Q_name).^2),...
+                pi * 1.96^2 * data{k}.error.(I_name) .* data{k}.error.(Q_name),...
                 linspace(1, 10, length(data{k}.(I_name))),...
                 marker_types{mod(k - 1, length(marker_types)) + 1})
         end
@@ -106,7 +106,7 @@ for data_index = 1:length(data{1}.dep)
     hold on
     for k = 1:length(data);
         plot(data{k}.(I_name), data{k}.(Q_name),...
-            '.', 'MarkerSize', 15)
+            '.-', 'MarkerSize', 15)
     end
     hold off
     grid on

@@ -1,11 +1,12 @@
 function data = processMeasurementData(data)
 %postProcessMeasurementData Rename some data fields, convert the units 
-%if necessary, estimate errors and check that the data are properly specified.
+%if necessary, estimate errors and check that the data are properly
+%specified.
 %
 %   DATA = postProcessMeasurementData(DATA) renames some DATA fields,
-%   converts the units, estimates errors when possible and check the presence
-%   of some required fields. The fed DATA structure should be taken from 
-%   the output of the importMeasurementData function.
+%   converts the units, estimates errors when possible and check
+%   the presence of some required fields. The fed DATA structure should
+%   be taken from the output of the importMeasurementData function.
 
     % Redefine variable full names.
     fields = fieldnames(data);
@@ -63,31 +64,36 @@ function data = processMeasurementData(data)
         
         switch fields{k}
             case 'RF_Frequency'
-                if isfield(data.units, fields{k}) && strcmp(data.units.(fields{k}), 'Hz')
+                if isfield(data.units, fields{k}) &&...
+                        strcmp(data.units.(fields{k}), 'Hz')
                     data.units.(fields{k}) = 'GHz';
                     data.(fields{k}) = data.(fields{k}) / 1e9;
                 end
     
             case 'Readout_Frequency'
-                if isfield(data.units, fields{k}) && strcmp(data.units.(fields{k}), 'Hz')
+                if isfield(data.units, fields{k}) &&...
+                        strcmp(data.units.(fields{k}), 'Hz')
                     data.units.(fields{k}) = 'GHz';
                     data.(fields{k}) = data.(fields{k}) / 1e9;
                 end
 
             case 'Qubit_Frequency'
-                if isfield(data.units, fields{k}) && strcmp(data.units.(fields{k}), 'Hz')
+                if isfield(data.units, fields{k}) &&...
+                        strcmp(data.units.(fields{k}), 'Hz')
                     data.units.(fields{k}) = 'GHz';
                     data.(fields{k}) = data.(fields{k}) / 1e9;
                 end 
                 
             case 'RF1_Frequency'
-                if isfield(data.units, fields{k}) && strcmp(data.units.(fields{k}), 'Hz')
+                if isfield(data.units, fields{k}) &&...
+                        strcmp(data.units.(fields{k}), 'Hz')
                     data.units.(fields{k}) = 'GHz';
                     data.(fields{k}) = data.(fields{k}) / 1e9;
                 end
             
             case 'RF2_Frequency'
-                if isfield(data.units, fields{k}) && strcmp(data.units.(fields{k}), 'Hz')
+                if isfield(data.units, fields{k}) &&...
+                        strcmp(data.units.(fields{k}), 'Hz')
                     data.units.(fields{k}) = 'GHz';
                     data.(fields{k}) = data.(fields{k}) / 1e9;
                 end 
@@ -166,6 +172,27 @@ function data = processMeasurementData(data)
         end
     end
     
+    % Delete dependent variables that don't contain any meaningful data.
+    for data_index = 1:length(data.dep)
+        dep_name = data.dep{data_index};
+        if all(~isfinite(data.(dep_name)))
+            data = rmfield(data, dep_name);
+            data.dep{data_index} = [];
+            if isfield(data, 'rels') && isfield(data.rels, dep_name)
+                data.rels = rmfield(data.rels, dep_name);
+            end
+            if isfield(data, 'distr') && isfield(data.distr, dep_name)
+                data.distr = rmfield(data.distr, dep_name);
+            end
+            if isfield(data, 'units') && isfield(data.units, dep_name)
+                data.units = rmfield(data.units, dep_name);
+            end
+            if isfield(data, 'error') && isfield(data.error, dep_name)
+                data.units = rmfield(data.units, dep_name);
+            end
+        end
+    end
+    data.dep = data.dep(~cellfun('isempty', data.dep));
 end
 
 function data = renameVariable(data, old_name, new_name)
