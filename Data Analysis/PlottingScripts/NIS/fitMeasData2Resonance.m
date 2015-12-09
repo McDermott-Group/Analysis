@@ -39,7 +39,7 @@ if length(dep_rels) == 1
     xunits = getUnits(data, indep_name);
     yunits = getUnits(data, data_variable);
     
-    f0 = ['Resonance frequency = ', num2str(params(1)), xunits, ';'];
+    f0 = ['Resonance Frequency = ', num2str(params(1)), xunits, ';'];
     Qs = ['Internal Q = ', num2str(params(2)),...
         '; Coupling Q = ', num2str(params(3)), ';'];
     mismatch = ['Mismatch = ', num2str(params(4))];
@@ -134,7 +134,7 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     savePlot(fullfile(plts_path, [filename, '_', data_variable, '_rmismatch_simple']));
    
     createFigure;
-    plotPixelated(indep_vals1, indep_vals2, fit)
+    plotPixelated(indep_vals2, indep_vals1, fit')
     ylabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
     xlabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
     title({'S21 Fit', [filename, ext, ' [', data.Timestamp, ']']},...
@@ -142,7 +142,7 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     savePlot(fullfile(plts_path, [filename, '_', data_variable, '_s21fit_pixelated']));
     
     createFigure('right');
-    plotPixelated(indep_vals1, indep_vals2, dep_vals)
+    plotPixelated(indep_vals2, indep_vals1, dep_vals')
     ylabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
     xlabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
     title({'S21 Data', [filename, ext, ' [', data.Timestamp, ']']},...
