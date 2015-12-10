@@ -96,7 +96,7 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     L = zeros(size(f0));
     fit = zeros(size(dep_vals));
     for k = 1:length(indep_vals1)
-        [params, model] = skewfitquarterwave(indep_vals2, dep_vals(k, :));
+        [params, model] = skewfitquarterwave(indep_vals2(:)', dep_vals(k, :));
         f0(k) = params(1);
         Qi(k) = params(2);
         Qc(k) = params(3);
