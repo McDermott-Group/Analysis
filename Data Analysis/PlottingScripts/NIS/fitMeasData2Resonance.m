@@ -42,24 +42,25 @@ if length(dep_rels) == 1
     f0 = ['Resonance Frequency = ', num2str(params(1)), xunits, ';'];
     Qs = ['Internal Q = ', num2str(params(2)),...
         '; Coupling Q = ', num2str(params(3)), ';'];
-    mismatch = ['Mismatch = ', num2str(params(4))];
+    mismatch_A0 = ['Mismatch = ', num2str(params(4)),...
+        '; Normalization Amplitude = ', num2str(params(5)), yunits];
     dep_vals = dep_vals / params(5);
     
+    [~, fit] = model(params);
     if isfield(data, 'error') && isfield(data.error, data_variable) % Plot an errobar graph.
         createFigure('right');
         plotErrorbar(indep_vals, dep_vals, data.error.(data_variable))
         hold on
-            plot(indep_vals, model(indep_vals), 'r', 'Linewidth', 2)
+            plot(indep_vals, fit, 'r', 'Linewidth', 2)
         hold off
         legend('data', 'fit')
         xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(data_variable, '_', ' ') yunits], 'FontSize', 14);
         title({[filename, ext, ' [', data.Timestamp, ']'],...
-               f0, Qs, mismatch}, 'Interpreter', 'none', 'FontSize', 10)
+               f0, Qs, mismatch_A0}, 'Interpreter', 'none', 'FontSize', 10)
         savePlot(fullfile(plts_path, [filename, '_', data_variable, '_resfit_errorbar']));
     end
 
-    [~, fit] = model(params);
     createFigure;
     plotSimple(indep_vals, dep_vals, '.')  % Plot a simple 1D graph.
     hold on
@@ -67,35 +68,35 @@ if length(dep_rels) == 1
     hold off
     legend('data', 'fit')
     xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-    ylabel('S_{21}', 'FontSize', 14);
+    ylabel('|S_{21}|', 'FontSize', 14);
         title({[filename, ext, ' [', data.Timestamp, ']'],...
-               f0, Qs, mismatch}, 'Interpreter', 'none', 'FontSize', 10)
+               f0, Qs, mismatch_A0}, 'Interpreter', 'none', 'FontSize', 10)
     savePlot(fullfile(plts_path, [filename, '_', data_variable, '_resfit_simple']));
 elseif length(dep_rels) == 2 % Plot 2D data.
     if strcmp(dep_rels{1}, 'RF_Frequency')
-        indep_name1 = dep_rels{1};
-        indep_name2 = dep_rels{2};
-        indep_vals1 = data.(dep_rels{1});
-        indep_vals2 = data.(dep_rels{2});
-        dep_vals = dep_vals';
-    elseif strcmp(dep_rels{2}, 'RF_Frequency')
         indep_name1 = dep_rels{2};
         indep_name2 = dep_rels{1};
         indep_vals1 = data.(dep_rels{2});
         indep_vals2 = data.(dep_rels{1});
+        dep_vals = dep_vals';
+    elseif strcmp(dep_rels{2}, 'RF_Frequency')
+        indep_name1 = dep_rels{1};
+        indep_name2 = dep_rels{2};
+        indep_vals1 = data.(dep_rels{1});
+        indep_vals2 = data.(dep_rels{2});
     else
         error('The data does not appear to depenend on ''RF Frequency''.')
     end
 
     xunits = getUnits(data, indep_name1);
     yunits = getUnits(data, indep_name2);
-    f0 = zeros(1, length(indep_vals2));
+    f0 = zeros(size(indep_vals1));
     Qi = zeros(size(f0));
     Qc = zeros(size(f0));
     L = zeros(size(f0));
     fit = zeros(size(dep_vals));
-    for k = 1:length(indep_vals2)
-        [params, model] = skewfitquarterwave(indep_vals1, dep_vals(k, :));
+    for k = 1:length(indep_vals1)
+        [params, model] = skewfitquarterwave(indep_vals2, dep_vals(k, :));
         f0(k) = params(1);
         Qi(k) = params(2);
         Qc(k) = params(3);
@@ -106,19 +107,19 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     end
     
     createFigure;
-    plotSimple(indep_vals2, f0, '.-')  % Plot a simple 1D graph.
-    xlabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-    ylabel(['Resonance Frequency ', xunits], 'FontSize', 14);
+    plotSimple(indep_vals1, f0, '.-')
+    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
+    ylabel(['Resonance Frequency ', yunits], 'FontSize', 14);
     title({[filename, ext, ' [', data.Timestamp, ']']},...
             'Interpreter', 'none', 'FontSize', 10)
     savePlot(fullfile(plts_path, [filename, '_', data_variable, '_resfreq_simple']));
     
     createFigure('right');
-    plotSimple(indep_vals2, Qi, '.-')  % Plot a simple 1D graph.
+    plotSimple(indep_vals1, Qi, '.-')
     hold on
-        plotSimple(indep_vals2, Qc, '.-')  % Plot a simple 1D graph.
+        plotSimple(indep_vals1, Qc, '.-')
     hold off
-    xlabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
+    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
     ylabel(['Quality Factor'], 'FontSize', 14);
     legend('internal', 'coupling')
     title({[filename, ext, ' [', data.Timestamp, ']']},...
@@ -126,26 +127,26 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     savePlot(fullfile(plts_path, [filename, '_', data_variable, '_qualfact_simple']));
     
     createFigure;
-    plotSimple(indep_vals2, L, '.-')  % Plot a simple 1D graph.
-    xlabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
+    plotSimple(indep_vals1, L, '.-')
+    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
     ylabel('Mismatch', 'FontSize', 14);
     title({[filename, ext, ' [', data.Timestamp, ']']},...
             'Interpreter', 'none', 'FontSize', 10)
     savePlot(fullfile(plts_path, [filename, '_', data_variable, '_rmismatch_simple']));
    
     createFigure;
-    plotPixelated(indep_vals2, indep_vals1, fit')
-    ylabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-    xlabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-    title({'S21 Fit', [filename, ext, ' [', data.Timestamp, ']']},...
+    plotPixelated(indep_vals1, indep_vals2, fit')
+    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
+    ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
+    title({'|S21| Fit', [filename, ext, ' [', data.Timestamp, ']']},...
             'Interpreter', 'none', 'FontSize', 10)
     savePlot(fullfile(plts_path, [filename, '_', data_variable, '_s21fit_pixelated']));
     
     createFigure('right');
-    plotPixelated(indep_vals2, indep_vals1, dep_vals')
-    ylabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-    xlabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-    title({'S21 Data', [filename, ext, ' [', data.Timestamp, ']']},...
+    plotPixelated(indep_vals1, indep_vals2, dep_vals')
+    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
+    ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
+    title({'|S21| Data', [filename, ext, ' [', data.Timestamp, ']']},...
             'Interpreter', 'none', 'FontSize', 10)
     savePlot(fullfile(plts_path, [filename, '_', data_variable, '_s21data_pixelated']));
 end
