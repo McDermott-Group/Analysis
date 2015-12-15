@@ -81,17 +81,28 @@ for data_index = 1:length(data{1}.dep)
         marker_types = {'o', 's', 'd', '^', 'v', '>', '<', 'p', 'h'};
         hold on
         for k = 1:length(data)
+            scatter(data{k}.(I_name), data{k}.(Q_name))
+        end
+        hold off
+        currentunits = get(gca, 'Units');
+        set(gca, 'Units', 'Points');
+        axpos = get(gca, 'Position');
+        set(gca, 'Units', currentunits);
+        coeff = axpos(3) / diff(xlim);
+        clf
+        for k = 1:length(data)
             scatter(data{k}.(I_name), data{k}.(Q_name),...
-                pi * 1.96^2 * data{k}.error.(I_name) .* data{k}.error.(Q_name),...
+                4 * 1.96^2 * coeff^2 *...
+                data{k}.error.(I_name) .* data{k}.error.(Q_name),...
                 linspace(1, 10, length(data{k}.(I_name))),...
                 marker_types{mod(k - 1, length(marker_types)) + 1},...
-                'filled', 'LineWidth', 1)
+                'LineWidth', 1.5)
         end
         colormap(jet)
         hold off
         grid on
         axis equal
-
+        
         xlabel([strrep(I_name, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(Q_name, '_', ' '), yunits], 'FontSize', 14);
         title(plot_title, 'Interpreter', 'none', 'FontSize', 10)
