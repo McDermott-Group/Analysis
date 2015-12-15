@@ -3,7 +3,7 @@ function plotHistEqMeasData(data_variable)
 %DATA_VARIABLE should be a name of the data variable to plot.
 
 if ~exist('data_variable', 'var')
-    error('No dependent data variable name is given as an input argument.')
+    error('Specify dependent variable name as the first input argument.')
 end
 
 % Select a file.

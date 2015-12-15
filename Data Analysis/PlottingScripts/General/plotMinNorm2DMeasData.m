@@ -6,6 +6,10 @@ function plotMinNorm2DMeasData(data_variable, normalization_direction)
 %   NORMALIZATION_DIRECTION. NORMALIZATION_DIRECTION should be either
 %   'along_x' or 'along_y'.
 
+if ~exist('data_variable', 'var')
+    error('Specify dependent variable name as the first input argument.')
+end
+
 if exist('normalization_direction', 'var') &&...
         ~isempty(strfind(normalization_direction, 'x'))
     normalization_direction = 'along_x';
