@@ -10,8 +10,10 @@ if ~status
 end
 
 % Read the data files, convert the variable names, and specify the units.
-data1 = processMeasurementData(importMeasurementData(fullfile(pathnames{1}, filenames{1})));
-data2 = processMeasurementData(importMeasurementData(fullfile(pathnames{2}, filenames{2})));
+file1 = fullfile(pathnames{1}, filenames{1});
+file2 = fullfile(pathnames{2}, filenames{2});
+data1 = processMeasurementData(importMeasurementData(file1));
+data2 = processMeasurementData(importMeasurementData(file2));
 
 % Create folder Plots if necessary.
 plts_path = makeDirPlots(pathnames{1});
@@ -60,11 +62,13 @@ for data_index = 1:length(data1.dep)
     data.dep{length(data.dep) + 1} = diff_name;
     data.plotting.(diff_name).full_name = strrep(diff_name, '_', ' ');
     data.plotting.(diff_name).plot_title =...
-        {[strrep(diff_name, '_', ' '), getUnits(data1, dep_name), ' between Two Datasets:'],...
+        {[strrep(diff_name, '_', ' '), getUnits(data1, dep_name),...
+        ' between Two Datasets:'],...
          ['   ', filenames{1}, ' [', data1.Timestamp, ']'],...
          [' - ', filenames{2}, ' [', data2.Timestamp, ']']};
     data.plotting.(diff_name).plot_filename =...
-        fullfile(plts_path, [base_filename1, '-', base_filename2, '_', diff_name]);
+        fullfile(plts_path, [base_filename1, '-', base_filename2, '_',...
+        diff_name]);
      
     plotDataVar(data, diff_name);
 end

@@ -1,10 +1,12 @@
-function plotRescaled2DMeasData(data_variable, normalization_direction)
+function data = plotRescaled2DMeasData(data_variable,...
+    normalization_direction)
 %plotRescaled2DMeasData(DATA_VARIABLE, NORMALIZATION_DIRECTION) Plot
 %a line-by-line rescaled 2D data.
-%   plotRescaled2DMeasData(DATA_VARIABLE, NORMALIZATION_DIRECTION) plots
-%   line-by-line rescaled data for vairable DATA_VARIABLE along
+%   DATA = plotRescaled2DMeasData(DATA_VARIABLE, NORMALIZATION_DIRECTION)
+%   plots line-by-line rescaled data for vairable DATA_VARIABLE along
 %   NORMALIZATION_DIRECTION. NORMALIZATION_DIRECTION should be either
-%   'along_x' or 'along_y'.
+%   'along_x' or 'along_y'. The function returns structure DATA containing
+%   the normalized data.
 
 if ~exist('data_variable', 'var')
     error('Specify dependent variable name as the first input argument.')
@@ -52,7 +54,8 @@ if length(dep_rels) == 2
     data.dep{length(data.dep) + 1} = processed_data_var;
     data.plotting.(processed_data_var).full_name =...
         ['Line-by-Line Rescaled ', strrep(data_variable, '_', ' ')];
-    data.plotting.(processed_data_var).extra_filename = ['_', normalization_direction];
+    data.plotting.(processed_data_var).extra_filename =...
+        ['_', normalization_direction];
 
     plotDataVar(data, processed_data_var);
 end

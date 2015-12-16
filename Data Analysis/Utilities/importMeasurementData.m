@@ -1,6 +1,5 @@
 function data = importMeasurementData(filename)
-%importMeasurementData  Import data from a .txt or .mat file created with
-% the LabRAD\Measurements\General\experiment.py code.
+%importMeasurementData  Import data from a .txt or .mat file.
 %
 %   DATA = importMeasurementData(FILENAME) reads data from a file specified
 %   by FILENAME and returns structure DATA containing the data imported
@@ -39,7 +38,13 @@ end
 function data = importMat_v0p0(filename)
     [~, fn, ~] = fileparts(filename);
     data = load(filename);
-    data = data.(fn);
+    
+    if isfield(data, fn)
+        data = data.(fn);
+    elseif isfield(data, 'data')
+        data = data.data;
+        return
+    end
     
     data.Filename = filename;
     data.Timestamp = data.Time;

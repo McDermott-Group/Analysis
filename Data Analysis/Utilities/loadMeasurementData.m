@@ -10,4 +10,5 @@ if ~status
 end
 
 % Read the data file, convert the variable names, and specify the units.
-data = processMeasurementData(importMeasurementData(fullfile(pathname, filename)));
+file = fullfile(pathname, filename);
+data = processMeasurementData(importMeasurementData(file));

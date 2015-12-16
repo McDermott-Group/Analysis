@@ -1,10 +1,12 @@
-function plotMaxNorm2DMeasData(data_variable, normalization_direction)
+function data = plotMaxNorm2DMeasData(data_variable,...
+    normalization_direction)
 %plotMaxNorm2DMeasData(DATA_VARIABLE, NORMALIZATION_DIRECTION)  Plot
 %a line-by-line maximum normalized 2D data. 
-%   plotMaxNorm2DMeasData(DATA_VARIABLE, NORMALIZATION_DIRECTION) plots
-%   line-by-line maximum normalized data for vairable DATA_VARIABLE along
-%   NORMALIZATION_DIRECTION. NORMALIZATION_DIRECTION should be either
-%   'along_x' or 'along_y'.
+%   DATA = plotMaxNorm2DMeasData(DATA_VARIABLE, NORMALIZATION_DIRECTION)
+%   plots line-by-line maximum normalized data for vairable DATA_VARIABLE
+%   along NORMALIZATION_DIRECTION. NORMALIZATION_DIRECTION should be either
+%   'along_x' or 'along_y'. The function returns structure DATA containing
+%   the normalized data.
 
 if ~exist('data_variable', 'var')
     error('Specify dependent variable name as the first input argument.')
@@ -37,9 +39,11 @@ end
 % Plot 2D data.
 if length(dep_rels) == 2
     if strcmp(normalization_direction, 'along_y')
-        dep_vals = dep_vals ./ (max(dep_vals, [], 2) * ones(1, size(dep_vals, 2)));
+        dep_vals = dep_vals ./ (max(dep_vals, [], 2) *...
+            ones(1, size(dep_vals, 2)));
     elseif strcmp(normalization_direction, 'along_x')
-        dep_vals = dep_vals ./ (ones(size(dep_vals, 1), 1) * max(dep_vals));   
+        dep_vals = dep_vals ./ (ones(size(dep_vals, 1), 1) *...
+            max(dep_vals));   
     end
     processed_data_var = ['MaxNorm_', data_variable];
     data.(processed_data_var) = dep_vals;
@@ -47,8 +51,10 @@ if length(dep_rels) == 2
     data.rels.(processed_data_var) = data.rels.(data_variable);
     data.dep{length(data.dep) + 1} = processed_data_var;
     data.plotting.(processed_data_var).full_name =...
-        ['Line-by-Line Maximum-Normalized ', strrep(data_variable, '_', ' ')];
-    data.plotting.(processed_data_var).extra_filename = ['_', normalization_direction];
+        ['Line-by-Line Maximum-Normalized ',...
+        strrep(data_variable, '_', ' ')];
+    data.plotting.(processed_data_var).extra_filename =...
+        ['_', normalization_direction];
 
     plotDataVar(data, processed_data_var);
 end

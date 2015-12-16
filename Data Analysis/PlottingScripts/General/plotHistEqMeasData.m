@@ -1,6 +1,9 @@
-function plotHistEqMeasData(data_variable)
+function data = plotHistEqMeasData(data_variable)
 %plotHistEqMeasData(DATA_VARIABLE)  Plot a histogram-equalized data.
 %DATA_VARIABLE should be a name of the data variable to plot.
+%   DATA = plotHistEq2DMeasData(DATA_VARIABLE)
+%   plots a histogram-equalized data. The function returns structure DATA
+%   containing the histogram-equalized data.
 
 if ~exist('data_variable', 'var')
     error('Specify dependent variable name as the first input argument.')
@@ -24,7 +27,7 @@ if isempty(dep_rels)
 end
 
 dep_vals = (dep_vals - min(dep_vals(:))) ./...
-           (max(dep_vals(:)) - min(dep_vals(:)));
+    (max(dep_vals(:)) - min(dep_vals(:)));
 
 processed_data_var = ['HistEqual_', data_variable];
 data.(processed_data_var) = histeq(dep_vals);

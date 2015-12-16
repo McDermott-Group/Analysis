@@ -101,25 +101,28 @@ function data = processMeasurementData(data)
     end
     
     % Estimate errors.
+    N = 1;
+    if isfield(data, 'Number_of_Repetitions')
+        N = double(N * data.Number_of_Repetitions);
+    end
+    if isfield(data, 'Number_of_Runs')
+        N = double(N * data.Number_of_Runs);
+    end
+    if N > 1
+        N = N - 1;
+    end
     for data_index = 1:length(data.dep)
         dep_name = data.dep{data_index};
-
-        N = 1;
-        if isfield(data, 'Number_of_Repetitions')
-            N = double(N * data.Number_of_Repetitions);
-        end
-        if isfield(data, 'Number_of_Runs')
-            N = double(N * data.Number_of_Runs);
-        end
-        if N > 1
-            N = N - 1;
-        end
+        if ~isfield(data.distr, dep_name)
+            continue
+        end 
         if strcmp(data.distr.(dep_name), 'binomial')
             data.error.(dep_name) = sqrt(data.(dep_name) .*...
                 (1 - data.(dep_name)) / N);
         elseif strcmp(data.distr.(dep_name), 'normal')
             if isfield(data, [dep_name, '_Std_Dev'])
-                data.error.(dep_name) = data.([dep_name, '_Std_Dev']) / sqrt(N);
+                data.error.(dep_name) = data.([dep_name, '_Std_Dev']) /...
+                    sqrt(N);
             end
         elseif strcmp(data.distr.(dep_name), 'std')
             continue

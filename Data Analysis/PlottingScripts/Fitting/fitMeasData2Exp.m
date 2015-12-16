@@ -29,26 +29,14 @@ if isempty(dep_rels)
           strrep(data_variable, '_', ' '), ''' are not specified.'])
 end
 
-% if exist('independent_variable', 'var')
-%     found = false;
-%     for k = 1:length(dep_rels)
-%         if strcmp(dep_rels{k}, indepenedent_variable)
-%             found = true;
-%             break
-%         end
-%     end
-%     if ~found
-%         error('Dependent data variable is not specified.')
-%     end
-% end
-
 % Plot 1D data.
 if length(dep_rels) == 1
     indep_name = dep_rels{1};
     indep_vals = data.(indep_name);
 
     f = fit(indep_vals(:), dep_vals(:),...
-        'a * exp(-b * x) + c', 'StartPoint', [1, 0, 2*rand()-1]);
+        'a * exp(-b * x) + c', 'StartPoint',...
+        [std(dep_vals), 0, mean(dep_vals)]);
     
     xunits = getUnits(data, indep_name);
     yunits = getUnits(data, data_variable);
