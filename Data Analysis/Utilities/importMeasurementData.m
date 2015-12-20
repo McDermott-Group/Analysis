@@ -70,15 +70,16 @@ function data = importMat_v0p0(filename)
     rels = fieldnames(data.rels);
     for q = 1:length(rels)
         rels_str = data.rels.(rels{q});
-        rels_pos = strfind(rels_str, char(39));    % char(39) is a single quotation mark
+        % char(39) is a single quotation mark.
+        rels_pos = strfind(rels_str, char(39));
         if mod(length(rels_pos), 2) ~= 0
             error(['Data variable dependencies are not properly',...
                 'specified in ', filename, '.']);
         end
         relationships = cell(1, length(rels_pos)/2);
         for k = 1:2:length(rels_pos)
-            relationships{(k+1)/2} = strrep(rels_str(rels_pos(k)+1:rels_pos(k+1)-1),...
-                ' ', '_');
+            relationships{(k+1)/2} = ...
+                strrep(rels_str(rels_pos(k)+1:rels_pos(k+1)-1), ' ', '_');
         end
         data.rels.(rels{q}) = relationships;
     end
@@ -170,7 +171,12 @@ function data = importTxt_v0p1(filename, fid, first_line)
                     comment_counter = comment_counter + 1;
                     data.Comments{comment_counter} = line(2:end);
                 else
-                    data.(fieldname) = sscanf(line, '%f %*s');
+                    value = sscanf(line, '%f %*s');
+                    if isempty(value)
+                        data.(fieldname) = line(2:end);
+                    else
+                        data.(fieldname) = value;
+                    end
                 end
                 ubra = strfind(line, '[');
                 uket = strfind(line, ']');

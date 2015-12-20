@@ -4,22 +4,26 @@ function showMessageBox(data)
 fields = fieldnames(data);
 params = cell(length(fields), 1);
 for k = 1:length(fields)
-    if isnumeric(data.(fields{k}))
-        if length(data.(fields{k})) == 1
-            if isfield(data.units, fields{k}) && ~isempty(data.units.(fields{k}))
-                units = [' ', data.units.(fields{k})];
+    field = fields{k};
+    value = data.(fields{k});
+    if isnumeric(value)
+        if length(value) == 1
+            if isfield(data.units, field) && ~isempty(data.units.(field))
+                units = [' ', data.units.(field)];
             else
                 units = '';
             end
-            params{k} = [strrep(fields{k},  '_', ' '), ' = ',...
-                        num2str(data.(fields{k})), units];
+            params{k} = [strrep(field,  '_', ' '), ' = ',...
+                num2str(value), units];
         end
-    end
-    if strcmp(fields{k}, 'Timestamp')
-        params{k} = data.(fields{k});
-    end
-    if strcmp(fields{k}, 'Comments')
-        params{k} = ['Comments: ', [data.(fields{k}){:}]];
+    elseif strcmp(field, 'Timestamp')
+        params{k} = ['Time: ', data.(field)];
+    elseif strcmp(field, 'Comments')
+        params{k} = ['Comments: ', [value{:}]];
+    elseif strcmp(field, 'Filename') || strcmp(field, 'Name') 
+        continue
+    elseif ischar(value)
+        params{k} = [strrep(field,  '_', ' '), ': ', value];
     end
 end
 temp_struct.Interpreter = 'tex';
