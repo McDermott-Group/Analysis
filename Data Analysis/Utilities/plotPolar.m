@@ -10,13 +10,15 @@ function plotPolar(radius, phase, dep)
 
 hndl = surf(X, Y, dep);
 set(gca, 'View', [0 90])
-set(hndl, 'LineStyle', 'none', 'FaceColor', 'interp', 'FaceLighting', 'phong');
+set(hndl, 'LineStyle', 'none', 'FaceColor', 'interp',...
+    'FaceLighting', 'phong');
 zmin = min(dep(:));
 zmax = max(dep(:));
 if zmin == zmax
     zmax = Inf;
 end
-axis([-max(radius), max(radius), -max(radius), max(radius), zmin, zmax, caxis])
+axis([-max(radius), max(radius), -max(radius), max(radius), zmin, zmax,...
+    caxis])
 axis equal
 axis off
 colormap(jet)

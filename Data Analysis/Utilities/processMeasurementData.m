@@ -13,38 +13,50 @@ function data = processMeasurementData(data)
     for k = 1:length(fieldnames(data))
         switch fields{k}
             case 'Init_Time'
-                data = renameVariable(data, fields{k}, 'Initialization_Time');
+                data = renameVariable(data, fields{k},...
+                    'Initialization_Time');
 
             case 'Probability'
-                data = renameVariable(data, fields{k}, 'Switching_Probability');
+                data = renameVariable(data, fields{k},...
+                    'Switching_Probability');
 
             case 'Reps'
-                if isfield(data, 'Actual_Reps') || isfield(data, 'Number_of_Repetitions')
-                    data = renameVariable(data, fields{k}, 'Requested_Number_of_Repetitions');
+                if isfield(data, 'Actual_Reps') ||...
+                        isfield(data, 'Number_of_Repetitions')
+                    data = renameVariable(data, fields{k},...
+                        'Requested_Number_of_Repetitions');
                 else
-                    data = renameVariable(data, fields{k}, 'Number_of_Repetitions');
+                    data = renameVariable(data, fields{k},...
+                        'Number_of_Repetitions');
                 end
 
             case 'Actual_Reps'
-                data = renameVariable(data, fields{k}, 'Number_of_Repetitions');
+                data = renameVariable(data, fields{k},...
+                    'Number_of_Repetitions');
             
             case 'Runs'
-                data = renameVariable(data, fields{k}, 'Number_of_Runs');
+                data = renameVariable(data, fields{k},...
+                    'Number_of_Runs');
             
             case 'Pa'
-                data = renameVariable(data, fields{k}, 'JPM_A_Switching_Probability');
+                data = renameVariable(data, fields{k},...
+                    'JPM_A_Switching_Probability');
             
             case 'Pb'
-                data = renameVariable(data, fields{k}, 'JPM_B_Switching_Probability');
+                data = renameVariable(data, fields{k},...
+                    'JPM_B_Switching_Probability');
                 
             case 'Detection_Time_Diff'
-                data = renameVariable(data, fields{k}, 'Detection_Time_Difference');
+                data = renameVariable(data, fields{k},...
+                    'Detection_Time_Difference');
                 
             case 'Detection_Time_Diff_Std_Dev'
-                data = renameVariable(data, fields{k}, 'Detection_Time_Difference_Std_Dev');
+                data = renameVariable(data, fields{k},...
+                    'Detection_Time_Difference_Std_Dev');
             
             case 'Corr_Coef'
-                data = renameVariable(data, fields{k}, 'Correlation_Coefficient');
+                data = renameVariable(data, fields{k},...
+                    'Correlation_Coefficient');
         end
     end
 
@@ -103,7 +115,10 @@ function data = processMeasurementData(data)
     % Estimate errors.
     N = 1;
     if isfield(data, 'Number_of_Repetitions')
-        N = double(N * data.Number_of_Repetitions);
+        if ~isfield(data, 'Time')  || length(data.Time) ~= 4096 ||...
+                any(data.Time(:)' ~= 0:2:8190)
+            N = double(N * data.Number_of_Repetitions);
+        end
     end
     if isfield(data, 'Number_of_Runs')
         N = double(N * data.Number_of_Runs);
@@ -140,20 +155,20 @@ function data = processMeasurementData(data)
     if isempty(data)
         error(['File ', selected_file, ' does not contain any data.']);
     elseif ~isfield(data, 'indep') || isempty(data.indep)
-        error(['The independent (sweep) variables are not specified in file ',...
-            selected_file, '.']);
+        error(['The independent (sweep) variables are not specified ',...
+            'in ', selected_file, '.']);
     elseif ~isfield(data, 'dep') || isempty(data.dep)
-        error(['The dependent (data) variables are not specified in file ',...
+        error(['The dependent (data) variables are not specified in ',...
             selected_file, '.']);
     elseif ~isfield(data, 'rels') || isempty(data.rels)
         error(['The relationships between the dependent (data) and ',...
-            'independent (sweep) variables are not specified in file ',...
+            'independent (sweep) variables are not specified in ',...
             selected_file, '.']);
     else
         for k = 1:length(data.indep)
             if isempty(data.(data.indep{k}))
-                error(['File ', selected_file,...
-                    ' does not specify the independent (sweep) variables.']);
+                error(['File ', selected_file, ' does not specify',...
+                    ' the independent (sweep) variables.']);
             end
         end
         for k = 1:length(data.dep)
@@ -170,7 +185,7 @@ function data = processMeasurementData(data)
         end
         if ~RelationshipsFlag
             error(['The relationships between the dependent (data) and',...
-                ' independent (sweep) variables are not specified in file ',...
+                ' independent (sweep) variables are not specified in ',...
                 selected_file, '.']);
         end
     end

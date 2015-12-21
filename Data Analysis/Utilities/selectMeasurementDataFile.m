@@ -24,13 +24,14 @@ status = true;
 
 if exist('number_of_files', 'var') && exist('window_titles', 'var') &&...
         number_of_files ~= length(window_titles)
-    error(['The number of files to be selected and the length of the cell ',...
-        'that contains the file selection dialog titles do not match.']) 
+    error(['The number of files to be selected and the length of the ',...
+        ' cell that contains the selection window titles do not match.']) 
 end
 
 % Retrive the path that was used last time.
 pathname = '';
-fid = fopen(fullfile(tempdir, 'plotMeasurementData_last_pathname.txt'), 'r');
+fid = fopen(fullfile(tempdir, 'plotMeasurementData_last_pathname.txt'),...
+    'r');
 if fid ~= -1
     pathname = fgetl(fid);
     fclose(fid);
@@ -59,7 +60,8 @@ for k = 1:number_of_files
     else
         window_title = window_titles{k};
     end
-    window_filename = fullfile(pathname, ['MeasurementData_', num2str(k, '%03d')]);
+    window_filename = fullfile(pathname, ['MeasurementData_',...
+        num2str(k, '%03d')]);
     [filename, pathname] = uigetfile({'*.txt', 'Text Files';
               '*.mat', 'MATLAB Files';...
               '*.*', 'All Files' }, window_title, window_filename);
@@ -77,7 +79,8 @@ for k = 1:number_of_files
     end
 
     % Save the last path used.
-    fid = fopen(fullfile(tempdir, 'plotMeasurementData_last_pathname.txt'), 'w');
+    fid = fopen(fullfile(tempdir,...
+        'plotMeasurementData_last_pathname.txt'), 'w');
     if fid ~= -1
         fprintf(fid, '%s', pathname);
         fclose(fid);
@@ -88,8 +91,9 @@ filenames = filenames(~cellfun('isempty', filenames));
 pathnames = pathnames(~cellfun('isempty', pathnames));
 
 if ~isempty(filenames)
-    if (isfinite(number_of_files) && length(filenames) == number_of_files) ||...
-       ~isfinite(number_of_files)
+    if (isfinite(number_of_files) &&...
+            length(filenames) == number_of_files) ||...
+            ~isfinite(number_of_files)
         status = true;
     end
     if length(filenames) == 1

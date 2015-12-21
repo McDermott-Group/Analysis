@@ -6,7 +6,8 @@ function saveMeasData(data, filename)
 
 % Retrive the path that was used last time.
 pathname = '';
-fid = fopen(fullfile(tempdir, 'plotMeasurementData_last_pathname.txt'), 'r');
+fid = fopen(fullfile(tempdir, 'plotMeasurementData_last_pathname.txt'),...
+    'r');
 if fid ~= -1
     pathname = fgetl(fid);
     fclose(fid);
@@ -19,11 +20,11 @@ if strcmp(pathname, '') || ~exist(pathname, 'dir')
         pathname = 'Z:\mcdermott-group\Data\Data Analysis';
     elseif exist('Z:\Data\Data Analysis', 'dir')
         pathname = 'Z:\Data\Data Analysis';
-    elseif exist('\\afs\physics.wisc.edu\mcdermott-group\Data\Data Analysis', 'dir')
+    elseif exist('\\afs\physics.wisc.edu\mcdermott-group\Data\Data Analysis',...
+            'dir')
         pathname = '\\afs\physics.wisc.edu\mcdermott-group\Data\Data Analysis';
     end
 end
 
 file = fullfile(pathname, filename);
-
 save(file, 'data');
