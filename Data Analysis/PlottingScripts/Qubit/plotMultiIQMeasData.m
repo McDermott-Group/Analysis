@@ -91,6 +91,7 @@ for data_index = 1:length(data{1}.dep)
         set(gca, 'Units', currentunits);
         coeff = axpos(3) / diff(xlim);
         clf
+        hold on
         for k = 1:length(data)
             scatter(data{k}.(I_name), data{k}.(Q_name),...
                 4 * 1.96^2 * coeff^2 *...
@@ -119,7 +120,7 @@ for data_index = 1:length(data{1}.dep)
     hold on
     for k = 1:length(data);
         plot(data{k}.(I_name), data{k}.(Q_name),...
-            '.-', 'MarkerSize', 15)
+            '.', 'MarkerSize', 15)
     end
     hold off
     grid on

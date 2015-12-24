@@ -14,7 +14,7 @@ if ~isfield(data, data_variable)
     end
     if ~isfield(data, data_variable)
         error(['Data variable ''', strrep(data_variable, '_', ' '),...
-            ''' is not found in the data structure.'])
+            ''' is not found in the data.'])
     end
 end
 
