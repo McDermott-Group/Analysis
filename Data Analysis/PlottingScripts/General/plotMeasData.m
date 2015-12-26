@@ -9,7 +9,8 @@ end
 
 for data_index = 1:length(data.dep)
     dep_name = data.dep{data_index};
-    if ~isempty(strfind(dep_name, '_Std_Dev'))
+    if ~isempty(strfind(dep_name, '_Std_Dev')) ||...
+             ~isempty(strfind(dep_name, '_Error'))
         continue
     end
     if ~isempty(strfind(dep_name, 'Phase'))

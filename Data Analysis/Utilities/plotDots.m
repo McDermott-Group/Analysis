@@ -4,7 +4,7 @@ function plotDots(indep, dep)
 %   plotDots(INDEP, DEP) plots 1D data. INDEP is an indepedent 
 %   variable (x coordinate), DEP is a dependent variable (y coordinate).
 
-plot(indep, dep, '+', 'MarkerSize', 5)
+plot(indep, dep, '.', 'MarkerSize', 10)
 
 axis tight
 grid on
