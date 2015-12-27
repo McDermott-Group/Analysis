@@ -33,6 +33,7 @@ plts_path = makeDirPlots(pathnames{1});
 for data_index = 1:length(data{1}.dep)
     dep_name = data{1}.dep{data_index};
     if ~isempty(strfind(dep_name, '_Std_Dev')) ||...
+            ~isempty(strfind(dep_name, '_Error')) ||...
             (exist('data_variable', 'var') &&...
             ~strcmp(dep_name, data_variable))
         continue
@@ -63,24 +64,13 @@ for data_index = 1:length(data{1}.dep)
             continue
         end
 
-        xmin = min(data{1}.(indep_name)(:));
-        xmax = max(data{1}.(indep_name)(:));
-        if length(data) > 1
-            for k = 2:length(data)
-                xmin = min([xmin, min(data{k}.(indep_name)(:))]);
-                xmax = max([xmax, max(data{k}.(indep_name)(:))]);
-            end
-        end
-        if xmax == xmin
-            xmax = xmax + eps;
-        end
-
         xunits = getUnits(data{1}, indep_name);
         yunits = getUnits(data{1}, dep_name);
 
         errorbar_flag = true;
         for k = 1:length(filenames)
-            if ~isfield(data{k}, 'error') || ~isfield(data{k}.error, dep_name)
+            if ~isfield(data{k}, 'error') ||...
+                    ~isfield(data{k}.error, dep_name)
                 errorbar_flag = false;
                 break
             end
@@ -95,12 +85,13 @@ for data_index = 1:length(data{1}.dep)
                     '.', 'LineWidth', 1, 'MarkerSize', 15)
             end
             hold off
-            xlim([xmin xmax])
+            axis tight
             grid on
 
             xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
             ylabel([strrep(dep_name, '_', ' '), yunits], 'FontSize', 14);
-            title(strrep(dep_name, '_', ' '), 'Interpreter', 'none', 'FontSize', 10)
+            title(strrep(dep_name, '_', ' '), 'Interpreter', 'none',...
+                'FontSize', 10)
             legend(legend_entries, 'Interpreter', 'none')
             savePlot(fullfile(plts_path, [dep_name, '_errorbar']));
         end
@@ -113,18 +104,19 @@ for data_index = 1:length(data{1}.dep)
                 '.-', 'LineWidth', 1, 'MarkerSize', 15)
         end
         hold off
-        xlim([xmin xmax])
+        axis tight
         grid on
 
         xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(dep_name, '_', ' '), yunits], 'FontSize', 14);
-        title(strrep(dep_name, '_', ' '), 'Interpreter', 'none', 'FontSize', 10)
+        title(strrep(dep_name, '_', ' '), 'Interpreter', 'none',...
+            'FontSize', 10)
         legend(legend_entries, 'Interpreter', 'none')
         
         savePlot(fullfile(plts_path, [dep_name, '_simple']));
     end
     if length(data{1}.rels.(dep_name)) > 1
         disp(['Data variable ''', strrep(dep_name, '_', ' '),...
-              ''' depends on more than one sweep variable. '])
+              ''' depends on more than one independent variable.'])
     end
 end

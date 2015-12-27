@@ -1,7 +1,7 @@
 function plotDataVar(data, dependent_variable)
 %plotDataVar    Create plots for a data variable.
 %
-%   plotDataVar(DATA, DEPENDENT_VARIABL) creates all plots for
+%   plotDataVar(DATA, DEPENDENT_VARIABLE) creates plots for
 %   DEPENDENT_VARIABLE in structure DATA.
 
 if isempty(fields(data))

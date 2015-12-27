@@ -1,4 +1,5 @@
-function data = plotMeanNorm2DMeasData(data_variable, normalization_direction)
+function data = plotMeanNorm2DMeasData(data_variable,...
+    normalization_direction)
 %plotMeanNorm2DMeasData(DATA_VARIABLE, NORMALIZATION_DIRECTION) Plot
 %a line-by-line mean normalized 2D data.
 %   DATA = plotMeanNorm2DMeasData(DATA_VARIABLE, NORMALIZATION_DIRECTION)

@@ -22,8 +22,8 @@ function data = importMeasurementData(filename)
         line = fgetl(fid);
         if ~ischar(line)
             error(['Datafile ', filename, ' is empty. The first line ',...
-                'should be either the format version (or the name of ',...
-                'the experiment for the  data sets).']);
+                'should be either the format version ',...
+                '(or the experiment name).']);
         elseif strcmp(line, 'Format Version: 0.1')
             data = importTxt_v0p1(filename, fid, line);
         else
@@ -128,31 +128,33 @@ function data = importTxt_v0p1(filename, fid, first_line)
     
     line = fgetl(fid);
     if ~ischar(line)
-        error(['Datafile ', filename, ' is empty. The first line should',...
-            ' be the experiment name.']);
+        error(['Datafile ', filename, ' is empty. The first line ',...
+            ' should be the experiment name.']);
     else
         data.Experiment_Name = line;
     end
     
     line = fgetl(fid);
     if ~ischar(line)
-        error(['Datafile ', filename, ' is empty. The second line should',...
-            ' be the timestamp.']);
+        error(['Datafile ', filename, ' is empty. The second line ',...
+            'should be the timestamp.']);
     else
         data.Timestamp = line;
     end
 
     line = fgetl(fid);
     if isempty(strfind(line, '====Experiment Parameters===='))
-        error(['"====Experiment Parameters====" line is expected in ',...
+        error(['''====Experiment Parameters===='' line is expected in ',...
             filename, '.']);
     end
 
     comment_counter = 0;
     line = fgetl(fid);
-    while isempty(strfind(line, '====Sweep Variables===='))
+    while isempty(strfind(line, '====Sweep Variables====')) &&...
+            isempty(strfind(line, '====Independent Variables===='))
         if ~ischar(line)
-            error(['"====Sweep Variables====" line is expected in ',...
+            error(['''====Independent Variables===='' or ',...
+                '''====Sweep Variables===='' is expected in ',...
                 filename, '.']);
         end
         if ~isempty(line)
@@ -205,7 +207,8 @@ function data = importTxt_v0p1(filename, fid, first_line)
                         'name in ', filename, '.']);
                 end
                 indep_counter = indep_counter + 1;
-                data.indep{indep_counter} = strrep(line(pos(1)+1:pos(2)-1),...
+                data.indep{indep_counter} =...
+                    strrep(line(pos(1)+1:pos(2)-1),...
                     ' ', '_');
                 data.units.(data.indep{indep_counter}) = '';
             elseif ~isempty(strfind(line, 'Units: '))
@@ -258,14 +261,16 @@ function data = importTxt_v0p1(filename, fid, first_line)
         elseif ~isempty(strfind(line, 'Dependencies: '))
             pos = strfind(line, ': ');
             deps_line = line(pos+2:end);
-            rels_pos = strfind(deps_line, char(39));    % char(39) is a single quotation mark
+            % char(39) is a single quotation mark.
+            rels_pos = strfind(deps_line, char(39));
             if mod(length(rels_pos), 2) ~= 0
                 error(['Data variable dependencies are not properly',...
                     'specified in ', filename, '.']);
             end
             relationships = cell(1, length(rels_pos)/2);
             for k = 1:2:length(rels_pos)
-                relationships{(k+1)/2} = strrep(deps_line(rels_pos(k)+1:rels_pos(k+1)-1),...
+                relationships{(k+1)/2} =...
+                    strrep(deps_line(rels_pos(k)+1:rels_pos(k+1)-1),...
                     ' ', '_');
             end
             data.rels.(data.dep{dep_counter}) = relationships;
@@ -282,18 +287,21 @@ function data = importTxt_v0p1(filename, fid, first_line)
             if length(sz) == 1
                 data.(data.dep{dep_counter}) = fscanf(fid, '%f', sz);
             elseif length(sz) == 2
-                data.(data.dep{dep_counter}) = (fscanf(fid, '%f', [sz(2), sz(1)]))';
+                data.(data.dep{dep_counter}) = (fscanf(fid, '%f',...
+                    [sz(2), sz(1)]))';
             elseif length(sz) == 3
                 temp_data = nan(sz');
                 for k = 1:sz(1)
-                    temp_data(k, :, :) = (fscanf(fid, '%f', [sz(3), sz(2)]))';
+                    temp_data(k, :, :) = (fscanf(fid, '%f',...
+                        [sz(3), sz(2)]))';
                 end
                 data.(data.dep{dep_counter}) = temp_data;
             elseif length(sz) == 4
                 temp_data = nan(sz');
                 for k1 = 1:sz(1)
                     for k2 = 1:sz(2)
-                        temp_data(k1, k2, :, :) = (fscanf(fid, '%f', [sz(4), sz(3)]))';
+                        temp_data(k1, k2, :, :) = (fscanf(fid, '%f',...
+                            [sz(4), sz(3)]))';
                     end
                 end
                 data.(data.dep{dep_counter}) = temp_data;
@@ -384,10 +392,13 @@ function data = importTxt_v0p0(filename, fid, first_line)
             end
             indep_counter = indep_counter + 1;
             if ubra(1) < pos && uket(1) < pos
-                data.indep{indep_counter} = strrep(line(1:ubra-2), ' ', '_');
-                data.units.(data.indep{indep_counter}) = line(ubra+1:uket-1);
+                data.indep{indep_counter} =...
+                    strrep(line(1:ubra-2), ' ', '_');
+                data.units.(data.indep{indep_counter}) =...
+                    line(ubra+1:uket-1);
             else
-                data.indep{indep_counter} = strrep(line(1:pos-1), ' ', '_');
+                data.indep{indep_counter} = strrep(line(1:pos-1),...
+                    ' ', '_');
                 data.units.(data.indep{indep_counter}) = '';
             end
             sz = sscanf(line(pos+1:end), '%*c%f');
@@ -395,7 +406,8 @@ function data = importTxt_v0p0(filename, fid, first_line)
                 error('Sweep variables should not be empty.')
             end
             if length(sz) > 1
-                error('Sweep variables should not have more than one dimension.')
+                error(['Sweep variables should not have more than one ',...
+                    'dimension.'])
             end
             data.(data.indep{indep_counter}) = fscanf(fid, '%f', sz);
         end
@@ -403,7 +415,8 @@ function data = importTxt_v0p0(filename, fid, first_line)
     end
 
     dep_counter = 0;
-    while ischar(line)      % At the first interation line contains '====Data Variables===='.
+    while ischar(line)
+        % At the first interation line contains '====Data Variables===='.
         line = fgetl(fid);
         if ~isempty(line)   % Check whether the end of file is reached.
             pos = strfind(line, ':');
@@ -413,7 +426,8 @@ function data = importTxt_v0p0(filename, fid, first_line)
             ubra = strfind(line, '[');
             uket = strfind(line, ']');
             if isempty(ubra) || isempty(uket)
-                error(['Data variables are not properly specified in ', filename, '.']);
+                error(['Data variables are not properly specified in ',...
+                    filename, '.']);
             end
             dep_counter = dep_counter + 1;
             if ubra(1) < pos(1) && uket(1) < pos(1)
@@ -429,15 +443,16 @@ function data = importTxt_v0p0(filename, fid, first_line)
             if ~isempty(rels_pos)
                 sz = sscanf(line(pos(1)+1:rels_pos-1), '%*c%f');
                 deps_line = line(rels_pos+2:end);
-                rels_pos = strfind(deps_line, char(39));     % single quote
+                rels_pos = strfind(deps_line, char(39));
                 if mod(length(rels_pos), 2) ~= 0
-                    error(['Data variable dependencies are not properly specified in ',...
-                        filename, '.']);
+                    error(['Data variable dependencies are not ',...
+                        'properly specified in ', filename, '.']);
                 else
                     relationships = cell(1, length(rels_pos)/2);
                     for k = 1:2:length(rels_pos)
-                        relationships{(k+1)/2} = strrep(deps_line(rels_pos(k)+1:rels_pos(k+1)-1),...
-                        ' ', '_');
+                        relationships{(k+1)/2} =...
+                            strrep(deps_line(rels_pos(k)+1:rels_pos(k+1)-1),...
+                            ' ', '_');
                     end
                 end
             else
@@ -462,18 +477,21 @@ function data = importTxt_v0p0(filename, fid, first_line)
             if length(sz) == 1
                 data.(data.dep{dep_counter}) = fscanf(fid, '%f', sz);
             elseif length(sz) == 2
-                data.(data.dep{dep_counter}) = (fscanf(fid, '%f', [sz(2), sz(1)]))';
+                data.(data.dep{dep_counter}) = (fscanf(fid, '%f',...
+                    [sz(2), sz(1)]))';
             elseif length(sz) == 3
                 temp_data = nan(sz');
                 for k = 1:sz(1)
-                    temp_data(k, :, :) = (fscanf(fid, '%f', [sz(3), sz(2)]))';
+                    temp_data(k, :, :) = (fscanf(fid, '%f',...
+                        [sz(3), sz(2)]))';
                 end
                 data.(data.dep{dep_counter}) = temp_data;
             elseif length(sz) == 4
                 temp_data = nan(sz');
                 for k1 = 1:sz(1)
                     for k2 = 1:sz(2)
-                        temp_data(k1, k2, :, :) = (fscanf(fid, '%f', [sz(4), sz(3)]))';
+                        temp_data(k1, k2, :, :) = (fscanf(fid, '%f',...
+                            [sz(4), sz(3)]))';
                     end
                 end
                 data.(data.dep{dep_counter}) = temp_data;
