@@ -36,7 +36,8 @@ if length(dep_rels) == 1
 
     f = fit(indep_vals(:), dep_vals(:),...
         'a * exp(-b * x) + c', 'StartPoint',...
-        [std(dep_vals), 0, mean(dep_vals)]);
+        [dep_vals(1), 1 / (max(indep_vals) - min(indep_vals) + 9 * eps),...
+        dep_vals(end)]);
     
     xunits = getUnits(data, indep_name);
     yunits = getUnits(data, data_variable);

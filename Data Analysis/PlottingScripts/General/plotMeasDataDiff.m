@@ -23,7 +23,8 @@ plts_path = makeDirPlots(pathnames{1});
 
 for data_index = 1:length(data1.dep)
     dep_name = data1.dep{data_index};
-    if ~isempty(strfind(dep_name, '_Std_Dev'))
+    if ~isempty(strfind(dep_name, '_Std_Dev')) ||...
+             ~isempty(strfind(dep_name, '_Error'))
         continue
     end
     dep_vals1 = data1.(dep_name);
