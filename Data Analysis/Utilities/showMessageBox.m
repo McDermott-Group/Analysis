@@ -14,7 +14,7 @@ for k = 1:length(fields)
                 units = '';
             end
             params{k} = [strrep(field,  '_', ' '), ' = ',...
-                num2str(value), units];
+                num2str(value, 6), units];
         end
     elseif strcmp(field, 'Timestamp')
         params{k} = ['Time: ', data.(field)];

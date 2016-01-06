@@ -7,6 +7,9 @@ function [data, data_variable] = checkDataVar(data, data_variable)
 %compute it. The returned DATA_VARIABLE has its witespaces replaced by
 %underscores.
 
+if ~ischar(data_variable)
+    error('The data variable name should be specified as a string.')
+end
 data_variable = strrep(data_variable, ' ', '_');
 if ~isfield(data, data_variable)
     if ~isempty(strfind(data_variable, 'Phase_Space'))

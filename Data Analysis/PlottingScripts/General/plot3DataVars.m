@@ -7,7 +7,7 @@ function plot3DataVars(x_data_variable, y_data_variable, z_data_variable)
 
 if ~exist('x_data_variable', 'var') &&...
         ~exist('y_data_variable', 'var') &&...
-        ~exist('x_data_variable', 'var')
+        ~exist('z_data_variable', 'var')
     error('Specify three dependent variable names as the input argument.')
 end
 
