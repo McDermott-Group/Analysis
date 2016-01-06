@@ -4,7 +4,8 @@ function fitMeasData2Exp(data_variable)
 %DATA_VARIABLE should be a name of the data variable.
 
 if ~exist('data_variable', 'var')
-    error('No dependent data variable name is given as an input argument.')
+    error(['No dependent data variable to fit the exponent to is ',...
+        'given as an input argument.'])
 end
 
 % Select a file.
