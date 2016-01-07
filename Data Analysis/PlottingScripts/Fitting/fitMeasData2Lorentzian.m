@@ -47,20 +47,19 @@ if length(dep_rels) == 1
     else
         ampl_units = [yunits(1:end-1), '*', xunits(3:end-1), '^2)'];
     end
-    ampl = ['Amplitude = ', num2str(f.a), ' ± ', num2str(ae),...
-        ampl_units, ';'];
+    ampl = ['Amplitude = ', num2str(f.a), ' ± ', num2str(ae), ampl_units];
     be = max([abs(ci(1, 2) - f.b), abs(ci(2, 2) - f.b)]);
     f0 = ['Resonance Frequency = ', num2str(f.b), ' ± ',...
         num2str(be),  xunits];
     ce = max([abs(ci(1, 3) - f.c), abs(ci(2, 3) - f.c)]);
-    FWHM = ['FWHM = ', num2str(f.c) ' ± ', num2str(ce), xunits, ';'];
+    FWHM = ['FWHM = ', num2str(f.c) ' ± ', num2str(ce), xunits];
     de = max([abs(ci(1, 4) - f.d), abs(ci(2, 4) - f.d)]);
     if strcmp(yunits, '')
         slp_units = [' (1/', xunits(3:end)];
     else
         slp_units = [yunits(1:end-1), '/', xunits(3:end)];
     end
-    slope = ['Slope = ', num2str(f.d),' ± ', num2str(de), slp_units, ';'];
+    slope = ['Slope = ', num2str(f.d),' ± ', num2str(de), slp_units];
     ee = max([abs(ci(1, 5) - f.e), abs(ci(2, 5) - f.e)]);
     background = ['Background = ', num2str(f.e), ' ± ', num2str(ee), yunits];
 
