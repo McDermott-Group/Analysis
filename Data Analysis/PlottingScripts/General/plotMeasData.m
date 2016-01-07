@@ -1,5 +1,8 @@
-function plotMeasData
+function plotMeasData(data_variable)
 %plotMeasData   Plot data from a data file.
+%   plotDataVar(DATA_VARIABLE) plots data from a selected data file.
+%   If DATA_VARIABLE is specified, only the corresponding data will be
+%   plotted.
 
 % Select a file.
 data = loadMeasurementData;
@@ -7,17 +10,21 @@ if isempty(fields(data))
     return
 end
 
-for data_index = 1:length(data.dep)
-    dep_name = data.dep{data_index};
-    if ~isempty(strfind(dep_name, '_Std_Dev')) ||...
-             ~isempty(strfind(dep_name, '_Error'))
-        continue
+if ~exist('data_variable', 'var')
+    for data_index = 1:length(data.dep)
+        dep_name = data.dep{data_index};
+        if ~isempty(strfind(dep_name, '_Std_Dev')) ||...
+                 ~isempty(strfind(dep_name, '_Error'))
+            continue
+        end
+        if ~isempty(strfind(dep_name, 'Phase'))
+            data.(dep_name) = unwrap(data.(dep_name));
+        end
+        plotDataVar(data, dep_name);
     end
-    if ~isempty(strfind(dep_name, 'Phase'))
-        data.(dep_name) = unwrap(data.(dep_name));
-    end
-    plotDataVar(data, dep_name);
+    
+    % Show a message box with the experiment parameters.
+    showMessageBox(data);
+else
+    plotDataVar(data, data_variable);
 end
-
-% Show a message box with the experiment parameters.
-showMessageBox(data);
