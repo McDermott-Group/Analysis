@@ -1,8 +1,8 @@
 function plotFigureOfMerit
-%plotFigureOfMerit Plot a figure of merit, specifically, quantum efficiency 
-% multiplied by photon flux and divided by the dark tunneling rate. This
-% figure could be estimated from two data sets that contain bright
-% and dark switching probabilities.
+%plotFigureOfMerit Plot the figure of merit, specifically,
+% quantum efficiency multiplied by photon flux and divided by the dark
+% tunneling rate. This figure could be estimated from two data sets that
+% contain bright and dark switching probabilities.
 
 % Select files for quantum efficiency estimation.
 [filenames, pathnames, status] = selectMeasurementDataFile(2,...
@@ -14,8 +14,10 @@ end
 
 % Read probability data file, convert the variable names, and define
 % the units.
-data1 = processMeasurementData(importMeasurementData(fullfile(pathnames{1}, filenames{1})));
-data2 = processMeasurementData(importMeasurementData(fullfile(pathnames{2}, filenames{2})));
+file1 = fullfile(pathnames{1}, filenames{1});
+file2 = fullfile(pathnames{2}, filenames{2});
+data1 = processMeasurementData(importMeasurementData(file1));
+data2 = processMeasurementData(importMeasurementData(file2));
 
 % Create folder Plots if necessary.
 plts_path = makeDirPlots(pathnames{1});
@@ -55,7 +57,8 @@ for data_index = 1:length(data1.dep)
     end
     
     dep_vals1(dep_vals1 < dep_vals2) = dep_vals2(dep_vals1 < dep_vals2);
-    figure_of_merit = log((1 - dep_vals1) ./ (1 - dep_vals2)) ./ log(1 - dep_vals2);
+    figure_of_merit = log((1 - dep_vals1) ./ (1 - dep_vals2)) ./...
+        log(1 - dep_vals2);
     figure_of_merit(~isfinite(figure_of_merit)) = 0;
     figure_of_merit(figure_of_merit < 0) = 0;
     
@@ -70,8 +73,10 @@ for data_index = 1:length(data1.dep)
         'Figure of Merit (dimensionless): \eta\lambda/\gamma_0';
     data.plotting.(figure_of_merit_name).plot_title =...
         {'Figure of Merit Estimated from Two Datasets:',...
-        [' P(bright): ', filenames{1}, ' [', data1.Timestamp, ']'],...
-        [' P(dark):   ', filenames{2}, ' [', data2.Timestamp, ']']};
+        [' P(bright): ', strrep(filenames{1}, '_', '\_'),...
+        ' [', data1.Timestamp, ']'],...
+        [' P(dark):   ', strrep(filenames{2}, '_', '\_'),...
+        ' [', data2.Timestamp, ']']};
     data.plotting.(figure_of_merit_name).plot_filename =...
             fullfile(plts_path, [base_filename1, '_',...
             base_filename2, '_figofmer']);

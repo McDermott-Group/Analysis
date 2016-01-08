@@ -2,7 +2,6 @@ function data = processMeasurementData(data)
 %postProcessMeasurementData Rename some data fields, convert the units 
 %if necessary, estimate errors and check that the data are properly
 %specified.
-%
 %   DATA = postProcessMeasurementData(DATA) renames some DATA fields,
 %   converts the units, estimates errors when possible and check
 %   the presence of some required fields. The fed DATA structure should

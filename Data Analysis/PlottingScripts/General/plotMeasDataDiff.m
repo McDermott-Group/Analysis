@@ -1,5 +1,8 @@
-function plotMeasDataDiff
+function plotMeasDataDiff(data_variable)
 %plotMeasDataDiff   Plot the difference between two data sets.
+%   plotMeasDataDiff(data_variable) Plots the difference between two data
+%   sets. If DATA_VARIABLE is specified, only the difference for this data
+%   variable is splooted.
 
 % Select files to compute the difference.
 [filenames, pathnames, status] = selectMeasurementDataFile(2,...
@@ -21,14 +24,24 @@ plts_path = makeDirPlots(pathnames{1});
 [~, base_filename1] = fileparts(filenames{1});
 [~, base_filename2] = fileparts(filenames{2});
 
-for data_index = 1:length(data1.dep)
-    dep_name = data1.dep{data_index};
+if exist('data_variable', 'var')
+    % Check that the data variable exists (compute it if necessary).
+    [~, data_variable] = checkDataVar(data1, data_variable);
+    [~, data_variable] = checkDataVar(data2, data_variable);
+    range = {data_variable};
+else
+    range = data1.dep;
+end
+
+for data_index = 1:length(range)
+    dep_name = range{data_index};
     if ~isempty(strfind(dep_name, '_Std_Dev')) ||...
              ~isempty(strfind(dep_name, '_Error'))
         continue
     end
     dep_vals1 = data1.(dep_name);
     if ~isfield(data2, dep_name)
+        disp(dep_name)
         error('The selected files do not match.')
     else
         dep_vals2 = data2.(dep_name);
@@ -65,8 +78,10 @@ for data_index = 1:length(data1.dep)
     data.plotting.(diff_name).plot_title =...
         {[strrep(diff_name, '_', ' '), getUnits(data1, dep_name),...
         ' between Two Datasets:'],...
-         ['   ', filenames{1}, ' [', data1.Timestamp, ']'],...
-         [' - ', filenames{2}, ' [', data2.Timestamp, ']']};
+         ['   ', strrep(filenames{1}, '_', '\_'),...
+         ' [', data1.Timestamp, ']'],...
+         [' - ', strrep(filenames{2}, '_', '\_'),...
+         ' [', data2.Timestamp, ']']};
     data.plotting.(diff_name).plot_filename =...
         fullfile(plts_path, [base_filename1, '-', base_filename2, '_',...
         diff_name]);

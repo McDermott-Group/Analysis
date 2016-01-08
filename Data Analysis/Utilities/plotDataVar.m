@@ -1,13 +1,20 @@
-function plotDataVar(data, dependent_variable)
+function plotDataVar(data, dependent_variable, type)
 %plotDataVar    Create plots for a data variable.
 %
 %   plotDataVar(DATA, DEPENDENT_VARIABLE) creates plots for
-%   DEPENDENT_VARIABLE in structure DATA.
+%   DEPENDENT_VARIABLE in structure DATA. Specify plot TYPE if only
+%   a specific plot is desired. Supported plot types: 'simple' (1D),
+%   'errorbar' (1D), 'smooth' (2D), 'pixelated' (2D), and 'polar' (2D).
 
 if isempty(fields(data))
     return
 end
 
+if ~exist('type', 'var')
+    type = '';
+else
+    type = lower(type);
+end
 if ~isfield(data, dependent_variable)
     if isfield(data, strrep(dependent_variable, '_', ' '))
         dependent_variable = strrep(dependent_variable, '_', ' ');
@@ -55,34 +62,48 @@ if length(dep_rels) == 1
     xunits = getUnits(data, indep_name);
     yunits = getUnits(data, dependent_variable);
 
-    if isfield(data, 'error') && isfield(data.error, dependent_variable) % Plot an errobar graph.
+    % Plot an errobar graph.
+    if (strcmp(type, '') || strcmp(type, 'errorbar')) &&...
+            isfield(data, 'error') &&...
+            isfield(data.error, dependent_variable)
         createFigure('right');
-        plotErrorbar(indep_vals, dep_vals, data.error.(dependent_variable))
+        err = data.error.(dependent_variable);
+        if (size(err, 1) == 1 || size(err, 2) == 1) &&...
+                length(err) == length(indep_vals)
+            plotErrorbar(indep_vals, dep_vals, err)
+        elseif size(err, 1) == 2 && size(err, 2) == length(indep_vals)
+            plotAssymErrorbar(indep_vals, dep_vals, err(1, :), err(2, :))
+        elseif size(err, 2) == 2 && size(err, 1) == length(indep_vals)
+             plotAssymErrorbar(indep_vals, dep_vals, err(:, 1), err(:, 2))
+        end
         xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
         ylabel([full_dep_name, yunits], 'FontSize', 14);
         if exist('plot_title', 'var')
-            title({strrep(plot_title{1}, yunits, ''), plot_title{2:end}},...
-                'Interpreter', 'none', 'FontSize', 10)
+            title({strrep(plot_title{1}, yunits, ''),...
+                plot_title{2:end}}, 'FontSize', 10)
         else
-            title({[filename, ext, ' [', data.Timestamp, ']']},...
-                'Interpreter', 'none', 'FontSize', 10)
+            title({[strrep(filename, '_', '\_'), ext,...
+                ' [', data.Timestamp, ']']}, 'FontSize', 10)
         end
         savePlot([plot_filename, extra_filename, '_errorbar']);
     end
 
-    createFigure;
-    plotSimple(indep_vals, dep_vals)  % Plot a simple 1D graph.
-    xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-    ylabel([full_dep_name, yunits],...
-        'FontSize', 14);
-    if exist('plot_title', 'var')
-        title({strrep(plot_title{1}, yunits, ''), plot_title{2:end}},...
-            'Interpreter', 'none', 'FontSize', 10)
-    else
-        title({[filename, ext, ' [', data.Timestamp, ']']},...
-            'Interpreter', 'none', 'FontSize', 10)
+    % Plot a simple 1D graph.
+    if strcmp(type, '') || strcmp(type, 'simple')
+        createFigure;
+        plotSimple(indep_vals, dep_vals)
+        xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
+        ylabel([full_dep_name, yunits],...
+            'FontSize', 14);
+        if exist('plot_title', 'var')
+            title({strrep(plot_title{1}, yunits, ''),...
+                plot_title{2:end}}, 'FontSize', 10)
+        else
+            title({[strrep(filename, '_', '\_'), ext,...
+                ' [', data.Timestamp, ']']}, 'FontSize', 10)
+        end
+        savePlot([plot_filename, extra_filename, '_simple']);
     end
-    savePlot([plot_filename, extra_filename, '_simple']);
 end
 
 % Plot 2D data.
@@ -96,21 +117,24 @@ if length(dep_rels) == 2
     yunits = getUnits(data, indep_name2);
     zunits = getUnits(data, dependent_variable);
 
-    if isempty(strfind(indep_name1, 'Phase')) && isempty(strfind(indep_name2, 'Phase'))
+    if (strcmp(type, '') || strcmp(type, 'smooth')) &&...
+            isempty(strfind(indep_name1, 'Phase')) &&...
+            isempty(strfind(indep_name2, 'Phase'))
         % Plot the data as a smooth surface.
         createFigure;
         plotSmooth(indep_vals1, indep_vals2, dep_vals);
         xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
         if exist('plot_title', 'var')
-            title(plot_title, 'Interpreter', 'none', 'FontSize', 10)
+            title(plot_title, 'FontSize', 10)
         else
             title({[full_dep_name, zunits, ':'],...
-                   [filename, ext, ' [', data.Timestamp, ']']},...
-                   'Interpreter', 'none', 'FontSize', 10)
+                   [strrep(filename, '_', '\_'), ext,...
+                   ' [', data.Timestamp, ']']}, 'FontSize', 10)
         end
         savePlot([plot_filename, extra_filename, '_smooth']);
-    else % Create a polar (smooth) plot.
+    elseif strcmp(type, '') || strcmp(type, 'polar')
+        % Create a polar (smooth) plot.
         if ~isempty(strfind(indep_name1, 'Phase'))
             phase = indep_vals1;
             radius = indep_vals2;
@@ -127,29 +151,31 @@ if length(dep_rels) == 2
         createFigure;
         plotPolar(radius, phase, vals);
         if exist('plot_title', 'var')
-            title(plot_title, 'Interpreter', 'none', 'FontSize', 10)
+            title(plot_title, 'FontSize', 10)
         else
             title({[full_dep_name, zunits, ':'],...
-                   [filename, ext, ' [', data.Timestamp, ']'], indep_vars},...
-                   'Interpreter', 'none', 'FontSize', 10)
+                   [strrep(filename, '_', '\_'), ext,...
+                   ' [', data.Timestamp, ']'], indep_vars}, 'FontSize', 10)
         end
         savePlot([plot_filename, extra_filename, '_smooth']);
     end
-    % Plot the data as a pixelated image.
-    createFigure('right');
-    plotPixelated(indep_vals1, indep_vals2, dep_vals');
-    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-    ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-    if exist('plot_title', 'var')
-        title(plot_title, 'Interpreter', 'none', 'FontSize', 10)
-    else
-        title({[full_dep_name, zunits, ':'],...
-               [filename, ext, ' [', data.Timestamp, ']']},...
-               'Interpreter', 'none', 'FontSize', 10)
+    if strcmp(type, '') || strcmp(type, 'pixelated')
+        % Plot the data as a pixelated image.
+        createFigure('right');
+        plotPixelated(indep_vals1, indep_vals2, dep_vals');
+        xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
+        ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
+        if exist('plot_title', 'var')
+            title(plot_title, 'FontSize', 10)
+        else
+            title({[full_dep_name, zunits, ':'],...
+                   [strrep(filename, '_', '\_'), ext,...
+                   ' [', data.Timestamp, ']']}, 'FontSize', 10)
+        end
+        savePlot([plot_filename, extra_filename, '_pixelated']);
     end
-    savePlot([plot_filename, extra_filename, '_pixelated']);
 end
-if length(dep_rels) > 2
+if length(dep_rels) > 2 && strcmp(type, '')
     disp(['Data variable ''', strrep(dependent_variable, '_', ' '),...
           ''' depends on more than two sweep variables. ',...
           'This data will not be plotted.'])

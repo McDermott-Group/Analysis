@@ -90,8 +90,7 @@ for data_index = 1:length(data{1}.dep)
 
             xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
             ylabel([strrep(dep_name, '_', ' '), yunits], 'FontSize', 14);
-            title(strrep(dep_name, '_', ' '), 'Interpreter', 'none',...
-                'FontSize', 10)
+            title(strrep(dep_name, '_', ' '), 'FontSize', 10)
             legend(legend_entries, 'Interpreter', 'none')
             savePlot(fullfile(plts_path, [dep_name, '_errorbar']));
         end
@@ -109,8 +108,7 @@ for data_index = 1:length(data{1}.dep)
 
         xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(dep_name, '_', ' '), yunits], 'FontSize', 14);
-        title(strrep(dep_name, '_', ' '), 'Interpreter', 'none',...
-            'FontSize', 10)
+        title(strrep(dep_name, '_', ' '), 'FontSize', 10)
         legend(legend_entries, 'Interpreter', 'none')
         
         savePlot(fullfile(plts_path, [dep_name, '_simple']));

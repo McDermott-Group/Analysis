@@ -1,7 +1,10 @@
-function fitMeasData2Lorentzian(data_variable)
-%fitMeasData2Lorentzian(DATA_VARIABLE) Fit data to a Lorentzian curve,
-%plot the data and the fit. DATA_VARIABLE should be a name of the data
-%variable.
+function data = fitMeasData2Lorentzian(data_variable)
+%fitMeasData2Lorentzian(DATA_VARIABLE) Fit data to Lorentzians
+% superimposed on linear backgrounds, plot the data and the fit.
+%   data = fitMeasData2Lorentzian(DATA_VARIABLE)
+%   fits data for DATA_VARIABLE to Lorentzians superimposed on linear
+%   backgrounds, plots the data and the fit, and returns the data structure
+%   DATA with the fit appended to it.
 
 if ~exist('data_variable', 'var')
     error(['No dependent data variable to fit the Lorentzian to is ',...
@@ -47,21 +50,34 @@ if length(dep_rels) == 1
     else
         ampl_units = [yunits(1:end-1), '*', xunits(3:end-1), '^2)'];
     end
-    ampl = ['Amplitude = ', num2str(f.a), ' ± ', num2str(ae), ampl_units];
+    amplitude_txt = ['Amplitude = ', num2str(f.a), ' ± ', num2str(ae),...
+        ampl_units];
     be = max([abs(ci(1, 2) - f.b), abs(ci(2, 2) - f.b)]);
-    f0 = ['Resonance Frequency = ', num2str(f.b), ' ± ',...
+    f_c_txt = ['Resonance Frequency = ', num2str(f.b), ' ± ',...
         num2str(be),  xunits];
     ce = max([abs(ci(1, 3) - f.c), abs(ci(2, 3) - f.c)]);
-    FWHM = ['FWHM = ', num2str(f.c) ' ± ', num2str(ce), xunits];
+    FWHM_txt = ['FWHM = ', num2str(f.c) ' ± ', num2str(ce), xunits];
     de = max([abs(ci(1, 4) - f.d), abs(ci(2, 4) - f.d)]);
     if strcmp(yunits, '')
         slp_units = [' (1/', xunits(3:end)];
     else
         slp_units = [yunits(1:end-1), '/', xunits(3:end)];
     end
-    slope = ['Slope = ', num2str(f.d),' ± ', num2str(de), slp_units];
+    slope_txt = ['Slope = ', num2str(f.d),' ± ', num2str(de), slp_units];
     ee = max([abs(ci(1, 5) - f.e), abs(ci(2, 5) - f.e)]);
-    background = ['Background = ', num2str(f.e), ' ± ', num2str(ee), yunits];
+    background_txt = ['Background = ', num2str(f.e), ' ± ', num2str(ee),...
+        yunits];
+    
+    full_title = {[strrep(filename, '_', '\_'), ext,...
+        ' [', data.Timestamp, ']'], f_c_txt, FWHM_txt, amplitude_txt,...
+        [slope_txt, '; ', background_txt]};
+
+    name = ['Fitted_', data_variable];
+    data.units.(name) = data.units.(data_variable);
+    data.rels.(name) = data.rels.(data_variable);
+    data.dep{length(data.dep) + 1} = name;
+    data.plotting.(name).plot_title = full_title;
+    data.(name) = f(indep_vals);
 
     % Plot an errobar graph.
     if isfield(data, 'error') && isfield(data.error, data_variable)
@@ -73,13 +89,11 @@ if length(dep_rels) == 1
         legend('data', 'fit')
         xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(data_variable, '_', ' ') yunits], 'FontSize', 14);
-        title({[filename, ext, ' [', data.Timestamp, ']'],...
-               f0, FWHM, ampl, slope, background},...
-               'Interpreter', 'none', 'FontSize', 10)
+        title(full_title, 'FontSize', 10)
         savePlot(fullfile(plts_path, [filename, '_', data_variable,...
             '_lorentzianfit_errorbar']));
     end
-
+    
     % Plot a simple 1D graph.
     createFigure;
     plotSimple(indep_vals, dep_vals, '.')
@@ -89,11 +103,10 @@ if length(dep_rels) == 1
     legend('data', 'fit')
     xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
     ylabel(strrep(data_variable, '_', ' '), 'FontSize', 14);
-    title({[filename, ext, ' [', data.Timestamp, ']'],...
-           f0, FWHM, ampl, slope, background},...
-           'Interpreter', 'none', 'FontSize', 10)
+    title(full_title, 'FontSize', 10)
     savePlot(fullfile(plts_path, [filename, '_', data_variable,...
         '_lorentzianfit_errorbar']));
+
 elseif length(dep_rels) == 2 % Plot 2D data.
     if ~isempty(strfind(dep_rels{1}, 'Frequency'))
         indep_name1 = dep_rels{2};
@@ -111,96 +124,82 @@ elseif length(dep_rels) == 2 % Plot 2D data.
             '''Frequency'' variable.'])
     end
 
-    xunits = getUnits(data, indep_name1);
-    yunits = getUnits(data, indep_name2);
-    dep_units = getUnits(data, data_variable);
+    dep_units = data.units.(data_variable);
+    indep2_units = data.units.(indep_name2);
 
-    f0 = zeros(length(indep_vals1), 3);
-    FWHM = zeros(size(f0));
-    amplitudes = zeros(size(f0));
-    backgrounds = zeros(size(f0));
-    slopes = zeros(size(dep_vals));
+    f_c = zeros(length(indep_vals1), 3);
+    FWHM = zeros(size(f_c));
+    amplitudes = zeros(size(f_c));
+    backgrounds = zeros(size(f_c));
+    slopes = zeros(size(f_c));
     fit = zeros(size(dep_vals));
     for k = 1:length(indep_vals1)
         f = BiasedLorentzian(indep_vals2, dep_vals(k, :));
         ci = confint(f);
         amplitudes(k, :) = [f.a, f.a - ci(2, 1), ci(1, 1) - f.a];
-        f0(k, :) = [f.b, f.b - ci(2, 2), ci(1, 2) - f.b];
+        f_c(k, :) = [f.b, f.b - ci(2, 2), ci(1, 2) - f.b];
         FWHM(k, :) = [f.c, f.c - ci(2, 3), ci(1, 3) - f.c];
-        amplitudes(k, :) = [f.d, f.d - ci(2, 4), ci(1, 4) - f.d];
+        slopes(k, :) = [f.d, f.d - ci(2, 4), ci(1, 4) - f.d];
         backgrounds(k, :) = [f.e, f.e - ci(2, 5), ci(1, 5) - f.e];
         fit(k, :) = f(indep_vals2);
     end
     
-    createFigure;
-    plotAssymErrorbar(indep_vals1, f0(:, 1), f0(:, 2), f0(:, 3))
-    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-    ylabel(['Resonance Frequency ', yunits], 'FontSize', 14);
-    title({[filename, ext, ' [', data.Timestamp, ']']},...
-            'Interpreter', 'none', 'FontSize', 10)
-    savePlot(fullfile(plts_path, [filename, '_', data_variable,...
-        '_resfreq_errbar']));
-    
-    createFigure('right');
-    plotAssymErrorbar(indep_vals1, FWHM(:, 1), FWHM(:, 2), FWHM(:, 3))
-    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-    ylabel(['FWHM ', yunits], 'FontSize', 14);
-    title({[filename, ext, ' [', data.Timestamp, ']']},...
-            'Interpreter', 'none', 'FontSize', 10)
-    savePlot(fullfile(plts_path, [filename, '_', data_variable,...
-        '_fwhm_errbar']));
-    
-    createFigure('right');
-    plotAssymErrorbar(indep_vals1, backgrounds(:, 1), backgrounds(:, 2),...
-        backgrounds(:, 3))
-    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-    ylabel(['Background ', dep_units], 'FontSize', 14);
-    title({[filename, ext, ' [', data.Timestamp, ']']},...
-            'Interpreter', 'none', 'FontSize', 10)
-    savePlot(fullfile(plts_path, [filename, '_', data_variable,...
-        '_background_errbar']));
-    
-    createFigure('right');
-    plotAssymErrorbar(indep_vals1, amplitudes(:, 1), amplitudes(:, 2),...
-        amplitudes(:, 3))
-    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
+    name = 'Extracted_Amplitude';
+    data.(name) = amplitudes(:, 1);
+    data.error.(name) = amplitudes(:, 2:3);
     if strcmp(dep_units, '')
-        ampl_units = [yunits(1:end-1), '^2)'];
+        data.units.(name) = [indep2_units, '^2'];
     else
-        ampl_units = [dep_units(1:end-1), '*', yunits(3:end-1), '^2)'];
+        data.units.(name) = [dep_units, '*', indep2_units, '^2'];
     end
-    ylabel(['Amplitude ', ampl_units], 'FontSize', 14);
-    title({[filename, ext, ' [', data.Timestamp, ']']},...
-            'Interpreter', 'none', 'FontSize', 10)
-    savePlot(fullfile(plts_path, [filename, '_', data_variable,...
-        '_amplitude_errbar']));
+    data.rels.(name){1} = indep_name1;
+    data.dep{length(data.dep) + 1} = name;
+    plotDataVar(data, name, 'errorbar')
     
-    createFigure('right');
-    plotAssymErrorbar(indep_vals1, slopes(:, 1), slopes(:, 2), slopes(:, 3))
-    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
+    name = 'Extracted_Resonance_Frequency';
+    data.(name) = f_c(:, 1);
+    data.error.(name) = f_c(:, 2:3);
+    data.units.(name) = indep2_units;
+    data.rels.(name){1} = indep_name1;
+    data.dep{length(data.dep) + 1} = name;
+    plotDataVar(data, name, 'errorbar')
+    
+    name = 'Extracted_FWHM';
+    data.(name) = FWHM(:, 1);
+    data.error.(name) = FWHM(:, 2:3);
+    data.units.(name) = indep2_units;
+    data.rels.(name){1} = indep_name1;
+    data.dep{length(data.dep) + 1} = name;
+    plotDataVar(data, name, 'errorbar')
+
+    name = 'Extracted_Slope';
+    data.(name) = slopes(:, 1);
+    data.error.(name) = slopes(:, 2:3);
     if strcmp(dep_units, '')
-        slope_units = [' (1/', yunits(3:end)];
+        data.units.(name) = ['1/', indep2_units];
     else
-        slope_units = [dep_units(1:end-1), '/', yunits(3:end)];
+        data.units.(name) = [dep_units, '/', indep2_units];
     end
-    ylabel(['Slope', slope_units], 'FontSize', 14);
-    title({[filename, ext, ' [', data.Timestamp, ']']},...
-            'Interpreter', 'none', 'FontSize', 10)
-    savePlot(fullfile(plts_path, [filename, '_', data_variable,...
-        '_errbar_errbar']));
+    data.rels.(name){1} = indep_name1;
+    data.dep{length(data.dep) + 1} = name;
+    plotDataVar(data, name, 'errorbar')
+    
+    name = 'Extracted_Background_Level';
+    data.(name) = backgrounds(:, 1);
+    data.error.(name) = backgrounds(:, 2:3);
+    data.units.(name) = dep_units;
+    data.rels.(name){1} = indep_name1;
+    data.dep{length(data.dep) + 1} = name;
+    plotDataVar(data, name, 'errorbar')
    
-    plotDataVar(data, data_variable);
-    
-    createFigure;
-    plotPixelated(indep_vals1, indep_vals2, fit')
-    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-    ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-    title({['Lorentzian Fit with Linear Background to ',...
-        strrep(data_variable, '_', ' '), dep_units],...
-        [filename, ext, ' [', data.Timestamp, ']']},...
-        'Interpreter', 'none', 'FontSize', 10)
-    savePlot(fullfile(plts_path, [filename, '_', data_variable,...
-        '_lorentzianfit_pixelated']));
+    plotDataVar(data, data_variable, 'pixelated');
+
+    name = ['Fitted_', data_variable];
+    data.(name) = fit;
+    data.units.(name) = dep_units;
+    data.rels.(name) = data.rels.(data_variable);
+    data.dep{length(data.dep) + 1} = name;
+    plotDataVar(data, name, 'pixelated');
 end
 end
 
@@ -229,6 +228,6 @@ end
 
 start_point = [.5 * (max_y - min_y) * width^2 / 4,...
     start, width, 0, background];
-f = fit(x(:), y(:), '(a / ((x - b)^2 + (c / 2)^2)) + d * x + e',...
+f = fit(x(:), y(:), '(a / ((x - b)^2 + (c / 2)^2)) + d * (x - b) + e',...
         'StartPoint', start_point);
 end

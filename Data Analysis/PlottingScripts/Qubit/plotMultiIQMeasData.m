@@ -107,7 +107,7 @@ for data_index = 1:length(data{1}.dep)
         
         xlabel([strrep(I_name, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(Q_name, '_', ' '), yunits], 'FontSize', 14);
-        title(plot_title, 'Interpreter', 'none', 'FontSize', 10)
+        title(plot_title, 'FontSize', 10)
         if length(data) > 1
             legend(legend_entries, 'Interpreter', 'none')
         end
@@ -128,7 +128,7 @@ for data_index = 1:length(data{1}.dep)
 
     xlabel([strrep(I_name, '_', ' '), xunits], 'FontSize', 14);
     ylabel([strrep(Q_name, '_', ' '), yunits], 'FontSize', 14);
-    title(plot_title, 'Interpreter', 'none', 'FontSize', 10)
+    title(plot_title, 'FontSize', 10)
     if length(data) > 1
         legend(legend_entries, 'Interpreter', 'none')
     end

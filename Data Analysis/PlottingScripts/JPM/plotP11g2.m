@@ -13,11 +13,13 @@ end
 plts_path = makeDirPlots(pathname);
 
 if ~isfield(data, 'P11')
-    error('The selected data set does not contain joint switching probability.')
+    error(['The selected data set does not contain joint ',...
+        'switching probability.'])
 end
 if ~isfield(data, 'JPM_A_Switching_Probability') &&...
         isfield(data, 'JPM_B_Switching_Probability')
-    error('The selected data set does not contain individual switching probabilities.')
+    error(['The selected data set does not contain individual ',...
+        'switching probabilities.'])
 end
 
 P11 = data.P11;
@@ -57,7 +59,8 @@ if length(dep_rels) == 1
     xunits = getUnits(data, indep_name);
     yunits = getUnits(data, 'P11');
 
-    if isfield(data, 'error') && isfield(data.error, 'P11') % Plot an errobar graph.
+    % Plot an errobar graph.
+    if isfield(data, 'error') && isfield(data.error, 'P11')
         createFigure('right');
         errorbar(indep_vals, P11, 1.96 * data.error.P11,...
             '.', 'LineWidth', 1, 'MarkerSize', 15)
@@ -65,7 +68,8 @@ if length(dep_rels) == 1
             hold on
             if exist('PA_PB_prod_var', 'var')
                 PA_PB_prod_error = sqrt(PA_PB_prod_var);
-                errorbar(indep_vals, PA_PB_prod, 1.96 * PA_PB_prod_error,...
+                errorbar(indep_vals, PA_PB_prod,...
+                    1.96 * PA_PB_prod_error,...
                     '.', 'LineWidth', 1, 'MarkerSize', 15)
             else
                 plot(indep_vals, PA_PB_prod,...
@@ -90,13 +94,14 @@ if length(dep_rels) == 1
 
         xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
         ylabel('P11', 'FontSize', 14);
-        title({[filename, ' [', data.Timestamp, ']']},...
-            'Interpreter', 'none', 'FontSize', 10)
+        title({[strrep(filename, '_', '\_'),...
+            ' [', data.Timestamp, ']']}, 'FontSize', 10)
         savePlot(fullfile(plts_path, [filename, '_', 'P11', '_errorbar']));
     end
 
+    % Plot a simple 1D graph.
     createFigure;
-    plot(indep_vals, P11, '.-', 'LineWidth', 1, 'MarkerSize', 15)  % Plot a simple 1D graph.
+    plot(indep_vals, P11, '.-', 'LineWidth', 1, 'MarkerSize', 15)
     if isfield(data, 'JPM_A_Switching_Probability') &&...
             isfield(data, 'JPM_B_Switching_Probability')
         hold on
@@ -145,14 +150,13 @@ if length(dep_rels) == 2
     plotPixelated(indep_vals1, indep_vals2, P11');
     xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
     ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-    title({'P11:',...
-           [filename, ext, ' [', data.Timestamp, ']']},...
-           'Interpreter', 'none', 'FontSize', 10)
+    title({'P11:', [strrep(filename, '_', '\_'), ext,...
+        ' [', data.Timestamp, ']']}, 'FontSize', 10)
     savePlot(fullfile(plts_path, [filename, '_P11_pixelated']));
 end
 if length(dep_rels) > 2
-    disp(['Data variable ''''P11'''' depends on more than two sweep variables. ',...
-          'This data will not be plotted.'])
+    disp(['Data variable ''''P11'''' depends on more than two ',...
+          'sweep variables. This data will not be plotted.'])
 end
 
 % Plot 1D g2.
@@ -166,7 +170,8 @@ if length(dep_rels) == 1
         plotErrorbar(indep_vals, g2, 1.96 * sqrt(g2_var));
         xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
         ylabel('g_2 = P_{11} / P_AP_B', 'FontSize', 14);
-        title({[filename, ext, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+        title({[strrep(filename, '_', '\_'), ext,...
+            ' [', data.Timestamp, ']']}, 'FontSize', 10)
         savePlot(fullfile(plts_path, [filename, '_g2_errorbar']));
     end
 
@@ -174,7 +179,8 @@ if length(dep_rels) == 1
     plotSimple(indep_vals, g2);    % Plot a simple 1D graph.
     xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
     ylabel('g_2 = P_{11} / P_AP_B', 'FontSize', 14);
-    title({[filename, ext, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+    title({[strrep(filename, '_', '\_'), ext,...
+        ' [', data.Timestamp, ']']}, 'FontSize', 10)
     savePlot(fullfile(plts_path, [filename, '_g2_simple']));
 end
 
@@ -192,8 +198,8 @@ if length(dep_rels) == 2
     yunits = getUnits(data, indep_name2);
     xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
     ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-    title({'g2:',...
-           [filename, ext, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+    title({'g2:', [strrep(filename, '_', '\_'), ext,...
+           ' [', data.Timestamp, ']']}, 'FontSize', 10)
     savePlot(fullfile(plts_path, [filename, '_g2_smooth']));
 
     corrected_g2 = g2;
@@ -202,14 +208,9 @@ if length(dep_rels) == 2
     plotPixelated(indep_vals1, indep_vals2, corrected_g2');
     xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
     ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-    title({'g2:',...
-           [filename, ext, ' [', data.Timestamp, ']']}, 'Interpreter', 'none', 'FontSize', 10)
+    title({'g2:', [strrep(filename, '_', '\_'), ext,...
+        ' [', data.Timestamp, ']']}, 'FontSize', 10)
     savePlot(fullfile(plts_path, [filename, '_g2_pixelated']));
-end
-
-if length(dep_rels) > 2
-    disp(['Data variable ''''P11'''' depends on more than two sweep variables.',...
-          'Plotting is not implemented.'])
 end
 
 % Show a message box with the experiment parameters.

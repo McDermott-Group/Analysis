@@ -1,7 +1,9 @@
-function fitMeasData2Exp(data_variable)
-%fitMeasData2Exp(DATA_VARIABLE) Fit data to 
-%an exponetial function, plot the data and the fit. 
-%DATA_VARIABLE should be a name of the data variable.
+function fitMeasData2Exponent(data_variable)
+%fitMeasData2Exponent(DATA_VARIABLE) Fit data to an exponetial function,
+%plot the data and the fit. 
+%   data = fitMeasData2Exponent(DATA_VARIABLE) fits data for DATA_VARIABLE
+%   to an exponent, and returns the data structure DATA with the fit
+%   appended to it.
 
 if ~exist('data_variable', 'var')
     error(['No dependent data variable to fit the exponent to is ',...
@@ -52,7 +54,21 @@ if length(dep_rels) == 1
     ce = max([abs(ci(1, 3) - f.c), abs(ci(2, 3) - f.c)]);
     cstr = ['c = ', num2str(f.c), ' ± ', num2str(ce), yunits];
     
-    if isfield(data, 'error') && isfield(data.error, data_variable) % Plot an errobar graph.
+    full_title = {[strrep(filename, '_', '\_'), ext,...
+            ' [', data.Timestamp, ']'],...
+            [strrep(data_variable, '_', ' '),' = a * exp(-b * ',...
+            strrep(indep_name, '_', ' '), ') + c'],...
+            [astr, '; ', invbstr, '; ' cstr]};
+
+    name = ['Fitted_', data_variable];
+    data.units.(name) = data.units.(data_variable);
+    data.rels.(name) = data.rels.(data_variable);
+    data.dep{length(data.dep) + 1} = name;
+    data.plotting.(name).plot_title = full_title;
+    data.(name) = f(indep_vals);
+    
+    % Plot an errobar graph.
+    if isfield(data, 'error') && isfield(data.error, data_variable)
         createFigure('right');
         plotErrorbar(indep_vals, dep_vals, data.error.(data_variable))
         hold on
@@ -61,22 +77,21 @@ if length(dep_rels) == 1
         legend('data', 'fit')
         xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(data_variable, '_', ' ') yunits], 'FontSize', 14);
-        title({[filename, ext, ' [', data.Timestamp, ']'],...
-               ['y(a,b,c,x) = a * exp(-b * x) + c: ', astr],...
-               [invbstr, '; ' cstr]}, 'Interpreter', 'none', 'FontSize', 10)
-        savePlot(fullfile(plts_path, [filename, '_', data_variable, '_expfit_errorbar']));
+        title(full_title, 'FontSize', 10)
+        savePlot(fullfile(plts_path, [filename, '_', data_variable,...
+            '_expfit_errorbar']));
     end
 
+    % Plot a simple 1D graph.
     createFigure;
-    plotSimple(indep_vals, dep_vals, '.')  % Plot a simple 1D graph.
+    plotSimple(indep_vals, dep_vals, '.')
     hold on
         plot(indep_vals, f(indep_vals), 'r', 'Linewidth', 2)
     hold off
     legend('data', 'fit')
     xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
     ylabel([strrep(data_variable, '_', ' ') yunits], 'FontSize', 14);
-    title({[filename, ext, ' [', data.Timestamp, ']'],...
-           ['y(a,b,c,x) = a * exp(-b * x) + c: ', astr],...
-           [invbstr, '; ' cstr]}, 'Interpreter', 'none', 'FontSize', 10)
-    savePlot(fullfile(plts_path, [filename, '_', data_variable, '_expfit_simple']));
+    title(full_title, 'FontSize', 10)
+    savePlot(fullfile(plts_path, [filename, '_', data_variable,...
+        '_expfit_simple']));
 end

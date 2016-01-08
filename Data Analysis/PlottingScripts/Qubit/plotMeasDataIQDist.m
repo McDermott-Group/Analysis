@@ -10,8 +10,10 @@ if ~status
 end
 
 % Read the data files, convert the variable names, and specify the units.
-data1 = processMeasurementData(importMeasurementData(fullfile(pathnames{1}, filenames{1})));
-data2 = processMeasurementData(importMeasurementData(fullfile(pathnames{2}, filenames{2})));
+file1 = fullfile(pathnames{1}, filenames{1});
+file2 = fullfile(pathnames{2}, filenames{2});
+data1 = processMeasurementData(importMeasurementData(file1));
+data2 = processMeasurementData(importMeasurementData(file2));
 
 % Create folder Plots if necessary.
 plts_path = makeDirPlots(pathnames{1});
@@ -22,7 +24,8 @@ plts_path = makeDirPlots(pathnames{1});
 for data_index = 1:length(data1.dep)
     I_name = data1.dep{data_index};
 
-    if isempty(strfind(I_name, '_Std_Dev')) && ~isempty(strfind(I_name, 'I'))
+    if isempty(strfind(I_name, '_Std_Dev')) &&...
+            ~isempty(strfind(I_name, 'I'))
         Q_name = strrep(I_name, 'I', 'Q');
         if ~isfield(data1, Q_name)
             continue
@@ -81,11 +84,13 @@ for data_index = 1:length(data1.dep)
     data.dep{length(data.dep) + 1} = dist_name;
     data.plotting.(dist_name).full_name = strrep(dist_name, '_', ' ');
     data.plotting.(dist_name).plot_title =...
-        {[strrep(dist_name, '_', ' '), getUnits(data1, I_name), ' between Two Datasets:'],...
-         [filenames{1}, ' [', data1.Timestamp, ']'],...
-         [filenames{2}, ' [', data2.Timestamp, ']']};
+        {[strrep(dist_name, '_', ' '), getUnits(data1, I_name),...
+        ' between Two Datasets:'],...
+         [strrep(filenames{1}, '_', '\_'), ' [', data1.Timestamp, ']'],...
+         [strrep(filenames{2}, '_', '\_'), ' [', data2.Timestamp, ']']};
     data.plotting.(dist_name).plot_filename =...
-        fullfile(plts_path, [base_filename1, '-', base_filename2, '_', dist_name]);
+        fullfile(plts_path, [base_filename1, '-', base_filename2,...
+        '_', dist_name]);
      
     plotDataVar(data, dist_name);
 end

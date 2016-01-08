@@ -19,7 +19,8 @@ data = maximizeIQContrast(data);
 for data_index = 1:length(data.dep)
     I_name = data.dep{data_index};
     
-    if ~isempty(strfind(I_name, '_Std_Dev')) || isempty(strfind(I_name, 'I'))
+    if ~isempty(strfind(I_name, '_Std_Dev')) ||...
+            isempty(strfind(I_name, 'I'))
         continue
     else
         Q_name = strrep(I_name, 'I', 'Q');
@@ -57,9 +58,10 @@ for data_index = 1:length(data.dep)
             legend(strrep(res_name, '_', ' '), strrep(dep_name, '_', ' '))
             xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
             ylabel([strrep(dep_name, '_', ' '), yunits], 'FontSize', 14);
-            title({[filename, ext, ' [', data.Timestamp, ']']},...
-                    'Interpreter', 'none', 'FontSize', 10)
-            savePlot(fullfile(plts_path, [filename, '_', dep_name, '_rotframe_errorbar']));
+            title({[strrep(filename, '_', '\_'), ext,...
+                ' [', data.Timestamp, ']']}, 'FontSize', 10)
+            savePlot(fullfile(plts_path, [filename, '_', dep_name,...
+                '_rotframe_errorbar']));
         end
         
         createFigure;
@@ -72,7 +74,8 @@ for data_index = 1:length(data.dep)
         ylabel([strrep(dep_name, '_', ' '), yunits], 'FontSize', 14);
         title({[filename, ext, ' [', data.Timestamp, ']']},...
                 'Interpreter', 'none', 'FontSize', 10)
-        savePlot(fullfile(plts_path, [filename, '_', dep_name, '_rotframe_simple']));
+        savePlot(fullfile(plts_path, [filename, '_', dep_name,...
+            '_rotframe_simple']));
     end
 
     % Plot 2D data.
@@ -94,9 +97,10 @@ for data_index = 1:length(data.dep)
             xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
             ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
             title({[strrep(dep_name, '_', ' '), zunits, ':'],...
-                   [filename, ext, ' [', data.Timestamp, ']']},...
-                   'Interpreter', 'none', 'FontSize', 10)
-            savePlot(fullfile(plts_path, [filename, '_', dep_name, '_rotframe_smooth']));
+                   [strrep(filename, '_', '\_'), ext,...
+                   ' [', data.Timestamp, ']']}, 'FontSize', 10)
+            savePlot(fullfile(plts_path, [filename, '_', dep_name,...
+                '_rotframe_smooth']));
             
             createFigure;
             plotSmooth(indep_vals1, indep_vals2, res_vals);
@@ -112,26 +116,30 @@ for data_index = 1:length(data.dep)
                 vals = dep_vals';
                 res_vals = res_vals';
                 indep_vars = ['Radius: ', strrep(indep_name2, '_', ' '),...
-                    yunits, '; Phase: ', strrep(indep_name1, '_', ' '), xunits];
+                    yunits, '; Phase: ', strrep(indep_name1, '_', ' '),...
+                    xunits];
             else
                 phase = indep_vals2;
                 radius = indep_vals1;
                 vals = dep_vals;
                 indep_vars = ['Radius: ', strrep(indep_name1, '_', ' '),...
-                    xunits, '; Phase: ', strrep(indep_name2, '_', ' '), yunits];
+                    xunits, '; Phase: ', strrep(indep_name2, '_', ' '),...
+                    yunits];
             end
             createFigure;
             plotPolar(radius, phase, vals);
             title({[strrep(dep_name, '_', ' '), zunits, ':'],...
-                   [filename, ext, ' [', data.Timestamp, ']'], indep_vars},...
-                   'Interpreter', 'none', 'FontSize', 10)
-            savePlot(fullfile(plts_path, [filename, '_', dep_name, '_rotframe_smooth']));
+                   [strrep(filename, '_', '\_'), ext,...
+                   ' [', data.Timestamp, ']'], indep_vars}, 'FontSize', 10)
+            savePlot(fullfile(plts_path, [filename, '_', dep_name,...
+                '_rotframe_smooth']));
             
             createFigure;
             plotPolar(radius, phase, res_vals);
             title({[res_name, zunits, ':'],...
-                   [filename, ext, ' [', data.Timestamp, ']'], indep_vars},...
-                   'Interpreter', 'none', 'FontSize', 10)
+                   [strrep(filename, '_', '\_'), ext,...
+                   ' [', data.Timestamp, ']'], indep_vars},...
+                   'FontSize', 10)
         end
         % Plot the data as a pixeleated image.
         createFigure('right');
@@ -139,22 +147,18 @@ for data_index = 1:length(data.dep)
         xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
         title({[strrep(dep_name, '_', ' '), zunits, ':'],...
-               [filename, ext, ' [', data.Timestamp, ']']},...
-               'Interpreter', 'none', 'FontSize', 10)
-        savePlot(fullfile(plts_path, [filename, '_', dep_name, '_rotframe_pixelated']));
+               [strrep(filename, '_', '\_'), ext,...
+               ' [', data.Timestamp, ']']}, 'FontSize', 10)
+        savePlot(fullfile(plts_path, [filename, '_', dep_name,...
+            '_rotframe_pixelated']));
         
         createFigure('right');
         plotPixelated(indep_vals1, indep_vals2, res_vals');
         xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
         title({[strrep(res_name, '_', ' '), zunits, ':'],...
-               [filename, ext, ' [', data.Timestamp, ']']},...
-               'Interpreter', 'none', 'FontSize', 10)
-    end
-    if length(dep_rels) > 2
-        disp(['Data variable ''', strrep(dep_name, '_', ' '),...
-              ''' depends on more than two sweep variables. ',...
-              'This data will not be plotted.'])
+               [strrep(filename, '_', '\_'), ext,...
+               ' [', data.Timestamp, ']']}, 'FontSize', 10)
     end
 end
 end

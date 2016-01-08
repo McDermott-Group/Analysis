@@ -1,10 +1,14 @@
 function plotQuantumEfficiencyNPhotons(number_of_photons)
-%plotQuantumEfficiencyNPhotons(NUMBER_OF_PHOTONS) Plot the quantum efficiency 
-% estimated from two text data sets based on specified number of photons
-% in the measuremnet interval (NUMBER_OF_PHOTONS).
+%plotQuantumEfficiencyNPhotons(NUMBER_OF_PHOTONS) Plot quantum
+% efficiency estimated from two data sets based on specified number of
+% photons in the measurement interval.
+%   plotQuantumEfficiencyNPhotons(NUMBER_OF_PHOTONS) plots the quantum
+%   efficiency using number of photons in the measurement interval that
+%   should be specified by NUMBER_OF_PHOTONS.
 
 if ~exist('number_of_photons', 'var')
-    error('Number of photons in the measurment interval should be specified as the function argument.')
+    error(['Number of photons in the measurment interval should be ',...
+        'specified as the function argument.'])
 end
 
 % Select files for quantum efficiency estimation.
@@ -17,8 +21,10 @@ end
 
 % Read probability data file, convert the variable names, and define
 % the units.
-data1 = processMeasurementData(importMeasurementData(fullfile(pathnames{1}, filenames{1})));
-data2 = processMeasurementData(importMeasurementData(fullfile(pathnames{2}, filenames{2})));
+file1 = fullfile(pathnames{1}, filenames{1});
+file2 = fullfile(pathnames{2}, filenames{2});
+data1 = processMeasurementData(importMeasurementData(file1));
+data2 = processMeasurementData(importMeasurementData(file2));
 
 % Create folder Plots if necessary.
 plts_path = makeDirPlots(pathnames{1});
@@ -79,8 +85,11 @@ for data_index = 1:length(data1.dep)
     data.dep{length(data.dep) + 1} = quant_eff_name;
     data.plotting.(quant_eff_name).plot_title =...
         {'Quantum Efficiency Estimated from Two Datasets:',...
-        [' P(bright): ', filenames{1}, ' [', data1.Timestamp, ']'],...
-        [' P(dark):   ', filenames{2}, ' [', data2.Timestamp, ']']};
+        [' P(bright): ', strrep(filenames{1}, '_', '\_'),...
+        ' [', data1.Timestamp, ']'],...
+        [' P(dark):   ', strrep(filenames{2}, '_', '\_'),...
+        ' [', data2.Timestamp, ']'],...
+        ['Assumed Number of Photons = ', num2str(number_of_photons)]};
     data.plotting.(quant_eff_name).plot_filename =...
             fullfile(plts_path, [base_filename1, '_',...
             base_filename2, '_', quant_eff_name]);
