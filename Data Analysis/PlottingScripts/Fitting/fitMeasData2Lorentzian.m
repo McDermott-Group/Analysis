@@ -88,7 +88,7 @@ if length(dep_rels) == 1
         hold off
         legend('data', 'fit')
         xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-        ylabel([strrep(data_variable, '_', ' ') yunits], 'FontSize', 14);
+        ylabel([strrep(data_variable, '_', ' '), yunits], 'FontSize', 14);
         title(full_title, 'FontSize', 10)
         savePlot(fullfile(plts_path, [filename, '_', data_variable,...
             '_lorentzianfit_errorbar']));
@@ -102,10 +102,10 @@ if length(dep_rels) == 1
     hold off
     legend('data', 'fit')
     xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-    ylabel(strrep(data_variable, '_', ' '), 'FontSize', 14);
+    ylabel([strrep(data_variable, '_', ' '), yunits], 'FontSize', 14);
     title(full_title, 'FontSize', 10)
     savePlot(fullfile(plts_path, [filename, '_', data_variable,...
-        '_lorentzianfit_errorbar']));
+        '_lorentzianfit_simple']));
 
 elseif length(dep_rels) == 2 % Plot 2D data.
     if ~isempty(strfind(dep_rels{1}, 'Frequency'))
