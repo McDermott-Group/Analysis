@@ -61,7 +61,8 @@ for data_index = 1:length(data{1}.dep)
                       strrep(Q_name, '_', ' '), ' Trajectories'];
     else
         [~, filename, ext] = fileparts(filenames{1});
-        plot_title = [filename, ext, ' [', data{1}.Timestamp, ']'];
+        plot_title = [strrep(filename, '_', '\_'), ext,...
+            ' [', data{1}.Timestamp, ']'];
     end
 
     xunits = getUnits(data{1}, I_name);

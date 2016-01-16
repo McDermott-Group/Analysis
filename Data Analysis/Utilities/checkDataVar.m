@@ -12,7 +12,7 @@ if ~ischar(data_variable)
 end
 data_variable = strrep(data_variable, ' ', '_');
 if ~isfield(data, data_variable)
-    if ~isempty(strfind(data_variable, 'Phase_Space'))
+    if ~isempty(strfind(data_variable, 'Phase_Space_Shift'))
         data = maximizeIQContrast(data);
     end
     if ~isfield(data, data_variable)

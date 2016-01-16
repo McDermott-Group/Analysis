@@ -137,6 +137,15 @@ function data = processMeasurementData(data)
             std_name = [dep_name, '_Std_Dev'];
             if isfield(data, std_name)
                 data.error.(dep_name) = data.(std_name) / sqrt(N);
+            else
+                pos = strfind(dep_name, '_');
+                if ~isempty(pos)
+                    ch = dep_name(pos(end):end);
+                    std_name = [dep_name(1:pos(end)), 'Std_Dev', ch];
+                    if isfield(data, std_name)
+                        data.error.(dep_name) = data.(std_name) / sqrt(N);
+                    end
+                end
             end
         elseif strcmp(data.distr.(dep_name), 'uknown')
             err_name = [dep_name, '_Error'];

@@ -23,12 +23,16 @@ for f = 1:length(fields)
     if isnumeric(data{1}.(fields{f})) && length(data{1}.(fields{f})) == 1
         values = NaN(cell_size, 1);
         for k = 1:cell_size
-            if ~isnumeric(data{k}.(fields{f})) ||...
-                    length(data{k}.(fields{f})) ~= 1
-                flag = false;
-                break   
+            if isfield(data{k}, fields{f})
+                if ~isnumeric(data{k}.(fields{f})) ||...
+                        length(data{k}.(fields{f})) ~= 1
+                    flag = false;
+                    break   
+                else
+                    values(k) = data{k}.(fields{f});
+                end
             else
-                values(k) = data{k}.(fields{f});
+                flag = false;
             end
         end
     elseif ischar(data{1}.(fields{f}))
