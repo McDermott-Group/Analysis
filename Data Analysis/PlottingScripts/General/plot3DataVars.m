@@ -45,6 +45,7 @@ surface([x_vals, x_vals], [y_vals, y_vals], [z_vals, z_vals], ...
     [c, c], 'EdgeColor','flat', 'FaceColor','none');
 colormap(jet(len))
 view(30, 45)
+grid on
 
 xlabel([strrep(x_data_variable, '_', ' '), xunits], 'FontSize', 14);
 ylabel([strrep(y_data_variable, '_', ' '), yunits], 'FontSize', 14);

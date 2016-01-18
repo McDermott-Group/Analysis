@@ -41,11 +41,13 @@ function data = importMat_v0p0(filename)
     
     if isfield(data, fn)
         data = data.(fn);
+    elseif isfield(data, fn(1:end-4))
+        data = data.(fn(1:end-4));
     elseif isfield(data, 'data')
         data = data.data;
         return
     end
-    
+
     data.Filename = filename;
     data.Timestamp = data.Time;
     data = rmfield(data, 'Time');

@@ -20,8 +20,13 @@ for k = 1:length(fields)
         params{k} = ['Time: ', data.(field)];
     elseif strcmp(field, 'Comments')
         params{k} = ['Comments: ', [value{:}]];
-    elseif strcmp(field, 'Filename') || strcmp(field, 'Name') 
+    elseif strcmp(field, 'Filename')
         continue
+    elseif strcmp(field, 'Experiment_Name') ||  strcmp(field, 'Name') 
+        params{k} = [strrep(field,  '_', ' '), ': ',...
+            strrep(value, '_', '\_')];
+   elseif strcmp(field, 'ExperimentName')
+        params{k} = ['Experiment Name', ': ', strrep(value, '_', '\_')];
     elseif ischar(value)
         params{k} = [strrep(field,  '_', ' '), ': ', value];
     end
