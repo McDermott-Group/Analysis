@@ -38,11 +38,15 @@ end
 function data = importMat_v0p0(filename)
     [~, fn, ~] = fileparts(filename);
     data = load(filename);
-    
+
     if isfield(data, fn)
         data = data.(fn);
     elseif isfield(data, fn(1:end-4))
         data = data.(fn(1:end-4));
+    elseif length(fields(data)) == 1
+        field = fields(data);
+        field = field{1};
+        data = data.(field);
     elseif isfield(data, 'data')
         data = data.data;
         return

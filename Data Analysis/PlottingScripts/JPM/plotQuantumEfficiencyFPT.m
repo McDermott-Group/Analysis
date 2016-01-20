@@ -1,4 +1,4 @@
-function plotQuantumEfficiencyFPT(calibration_coeff, kappa)
+function quant_eff = plotQuantumEfficiencyFPT(calibration_coeff, kappa)
 % plotQuantumEfficiencyFPT Qunatum efficiency estimation based on the two
 % data sets.
 %   plotQuantumEfficiencyFPT(CALIBRATION_COEFFICIENT, KAPPA) plots quantum
