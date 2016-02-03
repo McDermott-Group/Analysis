@@ -85,6 +85,10 @@ end
 createFigure;
 hold on
 for k = 1:length(data_variables)
+    if strcmp(data_variables{k},'Phase')
+        data.(data_variables{k}) = unwrap(data.(data_variables{k}));
+    end
+        
     indeps = data.rels.(data_variables{k});
     plot(data.(indeps{1}), data.(data_variables{k}),...
         '.-', 'LineWidth', 1, 'MarkerSize', 15)
