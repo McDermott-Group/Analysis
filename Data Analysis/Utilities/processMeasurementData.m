@@ -72,7 +72,7 @@ function data = processMeasurementData(data)
                     data.units.(fields{k}) = 'Preamp Time Counts';
             end
         end
-        
+
         switch fields{k}
             case 'RF_Frequency'
                 if isfield(data.units, fields{k}) &&...
@@ -107,7 +107,7 @@ function data = processMeasurementData(data)
                         strcmp(data.units.(fields{k}), 'Hz')
                     data.units.(fields{k}) = 'GHz';
                     data.(fields{k}) = data.(fields{k}) / 1e9;
-                end 
+                end
         end
     end
     
