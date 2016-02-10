@@ -53,11 +53,15 @@ function data = importMat_v0p0(filename)
     end
 
     data.Filename = filename;
-    data.Timestamp = data.Time;
-    data = rmfield(data, 'Time');
+    if ~isfield(data, 'Timestamp')
+        data.Timestamp = data.Time;
+        data = rmfield(data, 'Time');
+    end
     
-    data.units = data.Units;
-    data = rmfield(data, 'Units');
+    if ~isfield(data, 'units')
+        data.units = data.Units;
+        data = rmfield(data, 'Units');
+    end
     
     if isfield(data, 'Distr')
         data.distr = data.Distr;
@@ -66,64 +70,70 @@ function data = importMat_v0p0(filename)
         data.distr = struct();
     end
     
-    data.rels = data.Depend;
-    data = rmfield(data, 'Depend');
+    if isfield(data, 'Depend')
+        data.rels = data.Depend;
+        data = rmfield(data, 'Depend');
+        
+        rels = fieldnames(data.rels);
+        for q = 1:length(rels)
+            rels_str = data.rels.(rels{q});
+            % char(39) is a single quotation mark.
+            rels_pos = strfind(rels_str, char(39));
+            if mod(length(rels_pos), 2) ~= 0
+                error(['Data variable dependencies are not properly',...
+                    'specified in ', filename, '.']);
+            end
+            relationships = cell(1, length(rels_pos)/2);
+            for k = 1:2:length(rels_pos)
+                relationships{(k+1)/2} = ...
+                    strrep(rels_str(rels_pos(k)+1:rels_pos(k+1)-1), ' ', '_');
+            end
+            data.rels.(rels{q}) = relationships;
+        end
+    end
     
     comments = data.Comments;
     data.Comments = cell(1);
-    data.Comments{1} = comments; 
+    data.Comments{1} = comments;
     
-    rels = fieldnames(data.rels);
-    for q = 1:length(rels)
-        rels_str = data.rels.(rels{q});
-        % char(39) is a single quotation mark.
-        rels_pos = strfind(rels_str, char(39));
-        if mod(length(rels_pos), 2) ~= 0
-            error(['Data variable dependencies are not properly',...
-                'specified in ', filename, '.']);
+    if isfield(data, 'ExptVars')
+        expt_vars = fieldnames(data.ExptVars);
+        for k = 1:length(expt_vars)
+            data.(expt_vars{k}) = data.ExptVars.(expt_vars{k});
         end
-        relationships = cell(1, length(rels_pos)/2);
-        for k = 1:2:length(rels_pos)
-            relationships{(k+1)/2} = ...
-                strrep(rels_str(rels_pos(k)+1:rels_pos(k+1)-1), ' ', '_');
-        end
-        data.rels.(rels{q}) = relationships;
+        data = rmfield(data, 'ExptVars');
     end
-            
-    expt_vars = fieldnames(data.ExptVars);
-    for k = 1:length(expt_vars)
-        data.(expt_vars{k}) = data.ExptVars.(expt_vars{k});
-    end
-    data = rmfield(data, 'ExptVars');
     
-    dep_counter = 0;
-    indep_counter = 0;
-    rels = fieldnames(data.rels);
-    vars = fieldnames(data.Data);
-    for k = 1:length(vars)
-        is_dep = true;
-        for q = 1:length(rels)
-            for p = 1:length(data.rels.(rels{q}))
-                if strcmp(data.rels.(rels{q}){p}, vars{k})
-                    is_dep = false;
-                    break
+    if isfield(data, 'Data')
+        dep_counter = 0;
+        indep_counter = 0;
+        rels = fieldnames(data.rels);
+        vars = fieldnames(data.Data);
+        for k = 1:length(vars)
+            is_dep = true;
+            for q = 1:length(rels)
+                for p = 1:length(data.rels.(rels{q}))
+                    if strcmp(data.rels.(rels{q}){p}, vars{k})
+                        is_dep = false;
+                        break
+                    end
                 end
             end
+            if is_dep
+                dep_counter = dep_counter + 1;
+                data.dep{dep_counter} = vars{k};
+            else
+                indep_counter = indep_counter + 1;
+                data.indep{indep_counter} = vars{k};
+            end
+            data.(vars{k}) = data.Data.(vars{k});
         end
-        if is_dep
-            dep_counter = dep_counter + 1;
-            data.dep{dep_counter} = vars{k};
-        else
-            indep_counter = indep_counter + 1;
-            data.indep{indep_counter} = vars{k};
-        end
-        data.(vars{k}) = data.Data.(vars{k});
-    end
-    data = rmfield(data, 'Data');
+        data = rmfield(data, 'Data');
 
-    for k = 1:length(data.dep)
-        if ~isfield(data.distr, data.dep{k})
-            data.distr.(data.dep{k}) = '';
+        for k = 1:length(data.dep)
+            if ~isfield(data.distr, data.dep{k})
+                data.distr.(data.dep{k}) = '';
+            end
         end
     end
 end

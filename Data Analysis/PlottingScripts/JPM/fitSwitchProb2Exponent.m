@@ -1,5 +1,5 @@
-function data = fitMeasData2Exponent(data_variable, data)
-%fitMeasData2Exponent(DATA_VARIABLE, DATA) Fit data to an exponential
+function data = fitSwitchProb2Exponent(data_variable, data)
+%fitSwitchProb2Exponent(DATA_VARIABLE, DATA) Fit data to an exponential
 %function, plot the data and the fit. 
 %   data = fitMeasData2Exponent(DATA_VARIABLE, DATA) fits data for
 %   DATA_VARIABLE to an exponent, and returns the data structure DATA with
@@ -114,38 +114,21 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     dep_units = data.units.(data_variable);
     indep2_units = data.units.(indep_name2);
 
-    time_const = zeros(length(indep_vals1), 3);
-    amplitude = zeros(size(time_const));
-    offset = zeros(size(time_const));
+    rate = zeros(length(indep_vals1), 3);
     for k = 1:length(indep_vals1)
         f = ExpFit(indep_vals2, dep_vals(k, :));
         ci = confint(f);
-        amplitude(k, :) = [f.a, f.a - ci(2, 1), ci(1, 1) - f.a];
-        time_const(k, :) = [1/f.b, 1 / (ci(1, 2) - f.b),...
-                                   1 / (f.b - ci(2, 2))];
-        offset(k, :) = [f.c, f.c - ci(2, 3), ci(1, 3) - f.c];
+        rate(k, :) = [f.a, f.a - ci(2, 1), ci(1, 1) - f.a];
     end
     
-    name = 'Extracted_Amplitude';
-    data.(name) = amplitude(:, 1);
-    data.error.(name) = amplitude(:, 2:3);
-    data.units.(name) = dep_units;
-    data.rels.(name){1} = indep_name1;
-    data.dep{length(data.dep) + 1} = name;
-    plotDataVar(data, name, 'errorbar')
-    
-    name = 'Extracted_Time_Constant';
-    data.(name) = time_const(:, 1);
-    data.error.(name) = time_const(:, 2:3);
-    data.units.(name) = indep2_units;
-    data.rels.(name){1} = indep_name1;
-    data.dep{length(data.dep) + 1} = name;
-    plotDataVar(data, name, 'errorbar')
-
-    name = 'Extracted_Offset';
-    data.(name) = offset(:, 1);
-    data.error.(name) = offset(:, 2:3);
-    data.units.(name) = indep2_units;
+    name = 'Extracted_Rate';
+    data.(name) = rate(:, 1);
+    data.error.(name) = rate(:, 2:3);
+    if strcmp(dep_units, '')
+        data.units.(name) = ['1/', indep2_units];
+    else
+        data.units.(name) = [dep_units, '/', indep2_units];
+    end
     data.rels.(name){1} = indep_name1;
     data.dep{length(data.dep) + 1} = name;
     plotDataVar(data, name, 'errorbar')
@@ -154,6 +137,6 @@ end
 
 function f = ExpFit(x, y)
 f = fit(x(:), y(:),...
-        'a * exp(-b * x) + c', 'StartPoint',...
-        [y(1) - y(end), 1 / (max(x) - min(x) + 9 * eps), y(end)]);
+        '1 - exp(-a * x)', 'StartPoint',...
+        [1 / (max(x) - min(x) + 9 * eps)]);
 end
