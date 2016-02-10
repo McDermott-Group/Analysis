@@ -29,6 +29,11 @@ if isempty(dep_rels)
           strrep(data_variable, '_', ' '), ''' are not specified.'])
 end
 
+if strcmp(data.units.(data_variable), 'dB')
+    data.(data_variable) = 10.^(data.(data_variable) / 20);
+    data.units.(data_variable) = '';
+end
+
 % Plot 1D data.
 if length(dep_rels) == 1
     indep_name = dep_rels{1};
