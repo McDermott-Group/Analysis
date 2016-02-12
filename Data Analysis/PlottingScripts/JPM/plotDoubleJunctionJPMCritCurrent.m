@@ -3,11 +3,14 @@ function plotDoubleJunctionJPMCritCurrent(I_critical, R)
 %bias
 %   plotDoubleJunctionJPMCritCurrent(I_CRITICAL, R) plots critical current
 %   vs differential bias. I_critical is the critical current in Amps of
-%   a single junction. R is the current bias resistance in Ohms (1000 Ohm
-%   by default).
+%   a single junction. If no critical current is passed to the function
+%   the data will be plotted against measured values. R is the current 
+%   bias resistance in Ohms (1000 Ohm by default). 
+
+plot_meas = false;
 
 if ~exist('I_critical', 'var')
-    error('Critical current (in Amps) should be specified as the function argument.')
+    plot_meas = true;
 end
 
 if ~exist('R', 'var')
@@ -37,9 +40,18 @@ if ~isfield(data, 'Input_Bias_Voltage') && ~isempty(data.Input_Bias_Voltage)
     error('Input Bias Voltage data is missing.')
 end
 
+if isfield(data, 'Switching Probability')
+    data_name = 'Switching Probability';
+elseif isfield(data, 'P11')
+    data_name = 'P11';
+else
+    error(['Could not find "Switching Probability" or "P11" variables' ...
+        'in data file.'])
+end    
+
 for data_index = 1:length(data.dep)
     dep_name = data.dep{data_index};
-    if ~strcmp(dep_name, 'Switching_Probability')
+    if ~strcmp(dep_name, data_name)
         continue
     end
     dep_rels = data.rels.(dep_name);
@@ -52,13 +64,20 @@ for data_index = 1:length(data.dep)
         input_bias = data.Input_Bias_Voltage(rows) / R;
         output_bias = data.Bias_Voltage(cols) / R;
     end
-
+    
     createFigure;
-    plotDots((output_bias - input_bias) / (2 * I_critical),...
-        (input_bias + output_bias) / I_critical)
-    ylim([0 2.5])
-    xlabel('\Delta=(I_{output}-I_{input})/(2I_{critical})', 'FontSize', 14);
-    ylabel('(I_{output}+I_{input})/I_{critical}', 'FontSize', 14);
+    if plot_meas
+        plotDots(output_bias*R, input_bias*R);
+        xlabel('Voltage Bias (V)', 'FontSize', 14);
+        ylabel('Input Voltage Bias (V)', 'FontSize', 14);
+    else 
+        plotDots((output_bias - input_bias) / (2 * I_critical),...
+            (input_bias + output_bias) / I_critical)
+        ylim([0 2.5])
+        xlabel('\Delta=(I_{output}-I_{input})/(2I_{critical})', ...
+            'FontSize', 14);
+        ylabel('(I_{output}+I_{input})/I_{critical}', 'FontSize', 14);
+    end
     title([filename, ' [', data.Timestamp, ']'], 'Interpreter', 'none', 'FontSize', 10)
     savePlot(fullfile(plts_path, [base_filename, '_', dep_name, '_pixelated']));
 end
