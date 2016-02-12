@@ -132,11 +132,12 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     data.rels.(name){1} = indep_name1;
     data.dep{length(data.dep) + 1} = name;
     plotDataVar(data, name, 'errorbar')
+    
+    saveMeasData(data, [filename, '_', data_variable, '_expfit'])
 end
 end
 
 function f = ExpFit(x, y)
 f = fit(x(:), y(:),...
-        '1 - exp(-a * x)', 'StartPoint',...
-        [1 / (max(x) - min(x) + 9 * eps)]);
+        '1 - exp(-a * x)', 'StartPoint', 1 / (max(x) - min(x) + 9 * eps));
 end

@@ -62,7 +62,8 @@ for k = 1:number_of_files
     end
     window_filename = fullfile(pathname, ['MeasurementData_',...
         num2str(k, '%03d')]);
-    [filename, pathname] = uigetfile({'*.txt', 'Text Files';
+    [filename, pathname] = uigetfile({'*.txt;*.mat', 'Data Files';...
+              '*.txt', 'Text Files';
               '*.mat', 'MATLAB Files';...
               '*.*', 'All Files' }, window_title, window_filename);
 
