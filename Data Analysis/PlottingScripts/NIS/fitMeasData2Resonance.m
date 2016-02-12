@@ -21,17 +21,17 @@ plts_path = makeDirPlots(pathname);
 % Check that the data variable exists (compute it if necessary).
 [data, data_variable] = checkDataVar(data, data_variable);
 
+if strcmp(data.units.(data_variable), 'dB')
+    data.(data_variable) = 10.^(data.(data_variable) / 20);
+    data.units.(data_variable) = 'Arb. Units';
+end
+
 dep_vals = data.(data_variable);
 dep_rels = data.rels.(data_variable);
 
 if isempty(dep_rels)
     error(['Independent (sweep) variables for data variable ''',...
           strrep(data_variable, '_', ' '), ''' are not specified.'])
-end
-
-if strcmp(data.units.(data_variable), 'dB')
-    data.(data_variable) = 10.^(data.(data_variable) / 20);
-    data.units.(data_variable) = '';
 end
 
 % Plot 1D data.
@@ -52,7 +52,7 @@ if length(dep_rels) == 1
     dep_vals = dep_vals / params(5);
     
     [~, fit] = model(params);
-    if isfield(data, 'error') && isfield(data.error, data_variable) % Plot an errobar graph.
+    if isfield(data, 'error') && isfield(data.error, data_variable)
         createFigure('right');
         plotErrorbar(indep_vals, dep_vals, data.error.(data_variable))
         hold on
@@ -62,8 +62,9 @@ if length(dep_rels) == 1
         xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(data_variable, '_', ' ') yunits], 'FontSize', 14);
         title({[filename, ext, ' [', data.Timestamp, ']'],...
-               f0, Qs, mismatch_A0}, 'Interpreter', 'none', 'FontSize', 10)
-        savePlot(fullfile(plts_path, [filename, '_', data_variable, '_resfit_errorbar']));
+            f0, Qs, mismatch_A0}, 'Interpreter', 'none', 'FontSize', 10)
+        savePlot(fullfile(plts_path,...
+            [filename, '_', data_variable, '_resfit_errorbar']));
     end
 
     createFigure;
@@ -74,9 +75,10 @@ if length(dep_rels) == 1
     legend('data', 'fit')
     xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
     ylabel('|S_{21}|', 'FontSize', 14);
-        title({[filename, ext, ' [', data.Timestamp, ']'],...
-               f0, Qs, mismatch_A0}, 'Interpreter', 'none', 'FontSize', 10)
-    savePlot(fullfile(plts_path, [filename, '_', data_variable, '_resfit_simple']));
+    title({[filename, ext, ' [', data.Timestamp, ']'],...
+        f0, Qs, mismatch_A0}, 'Interpreter', 'none', 'FontSize', 10)
+    savePlot(fullfile(plts_path,...
+        [filename, '_', data_variable, '_resfit_simple']));
 elseif length(dep_rels) == 2 % Plot 2D data.
     if strcmp(dep_rels{1}, 'RF_Frequency')
         indep_name1 = dep_rels{2};
@@ -95,6 +97,7 @@ elseif length(dep_rels) == 2 % Plot 2D data.
 
     xunits = getUnits(data, indep_name1);
     yunits = getUnits(data, indep_name2);
+    zunits = getUnits(data, data_variable);
     f0 = zeros(size(indep_vals1));
     Qi = zeros(size(f0));
     Qc = zeros(size(f0));
@@ -116,8 +119,9 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
     ylabel(['Resonance Frequency ', yunits], 'FontSize', 14);
     title({[filename, ext, ' [', data.Timestamp, ']']},...
-            'Interpreter', 'none', 'FontSize', 10)
-    savePlot(fullfile(plts_path, [filename, '_', data_variable, '_resfreq_simple']));
+        'Interpreter', 'none', 'FontSize', 10)
+    savePlot(fullfile(plts_path,...
+        [filename, '_', data_variable, '_resfreq_simple']));
     
     createFigure('right');
     plotSimple(indep_vals1, Qi, '.-')
@@ -125,35 +129,41 @@ elseif length(dep_rels) == 2 % Plot 2D data.
         plotSimple(indep_vals1, Qc, '.-')
     hold off
     xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-    ylabel(['Quality Factor'], 'FontSize', 14);
+    ylabel('Quality Factor', 'FontSize', 14);
     legend('internal', 'coupling')
     title({[filename, ext, ' [', data.Timestamp, ']']},...
-            'Interpreter', 'none', 'FontSize', 10)
-    savePlot(fullfile(plts_path, [filename, '_', data_variable, '_qualfact_simple']));
+        'Interpreter', 'none', 'FontSize', 10)
+    savePlot(fullfile(plts_path,...
+        [filename, '_', data_variable, '_qualfact_simple']));
     
     createFigure;
     plotSimple(indep_vals1, L, '.-')
     xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
     ylabel('Mismatch', 'FontSize', 14);
     title({[filename, ext, ' [', data.Timestamp, ']']},...
-            'Interpreter', 'none', 'FontSize', 10)
-    savePlot(fullfile(plts_path, [filename, '_', data_variable, '_rmismatch_simple']));
+        'Interpreter', 'none', 'FontSize', 10)
+    savePlot(fullfile(plts_path,...
+        [filename, '_', data_variable, '_rmismatch_simple']));
    
     createFigure;
     plotPixelated(indep_vals1, indep_vals2, fit')
     xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
     ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-    title({'|S21| Fit', [filename, ext, ' [', data.Timestamp, ']']},...
-            'Interpreter', 'none', 'FontSize', 10)
-    savePlot(fullfile(plts_path, [filename, '_', data_variable, '_s21fit_pixelated']));
+    title({['|S21| Fit', zunits],...
+        [filename, ext, ' [', data.Timestamp, ']']},...
+        'Interpreter', 'none', 'FontSize', 10)
+    savePlot(fullfile(plts_path,...
+        [filename, '_', data_variable, '_s21fit_pixelated']));
     
     createFigure('right');
     plotPixelated(indep_vals1, indep_vals2, dep_vals')
     xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
     ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
-    title({'|S21| Data', [filename, ext, ' [', data.Timestamp, ']']},...
-            'Interpreter', 'none', 'FontSize', 10)
-    savePlot(fullfile(plts_path, [filename, '_', data_variable, '_s21data_pixelated']));
+    title({['|S21| Data', zunits],...
+        [filename, ext, ' [', data.Timestamp, ']']},...
+        'Interpreter', 'none', 'FontSize', 10)
+    savePlot(fullfile(plts_path,...
+        [filename, '_', data_variable, '_s21data_pixelated']));
 end
 end
 
@@ -172,10 +182,6 @@ model = @expfun;
 start_point = [start_f, start_Qint, .8 * start_Qint, -.1, 1.1 * max(y)];
 options = optimset('MaxFunEvals', 10000);
 [estimates] = fminsearch(model, start_point, options);
-% expfun accepts curve parameters as inputs, and outputs sse,
-% the sum of squares error for A * exp(-lambda * xdata) - ydata, 
-% and the FittedCurve. FMINSEARCH only needs sse, but we want to 
-% plot the FittedCurve at the end.
     function [sse, signal] = expfun(params)
         f0 = params(1);
         Qi = params(2);
@@ -188,6 +194,6 @@ options = optimset('MaxFunEvals', 10000);
         S21 = (Smin + 2 * 1i * Q * dx) ./ (1 + 2* 1i * Q * dx + 1i * L);
         signal = abs(S21);
         ErrorVector = signal - y / A0;
-        sse = sum(ErrorVector.^ 2);
+        sse = sum(ErrorVector.^2);
     end
 end
