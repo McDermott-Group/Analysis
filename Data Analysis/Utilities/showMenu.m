@@ -1,5 +1,5 @@
-function k = showLegendMenu(xHeader,varargin)
-%showLegendMenu   Generate a menu of choices for user input.
+function k = showMenu(xHeader,varargin)
+%showMenu   Generate a menu of choices for user input.
 %   CHOICE = MENU(HEADER, ITEM1, ITEM2, ... ) displays the HEADER
 %   string followed in sequence by the menu-item strings: ITEM1, ITEM2,
 %   ... ITEMn. Returns the number of the selected menu-item as CHOICE,

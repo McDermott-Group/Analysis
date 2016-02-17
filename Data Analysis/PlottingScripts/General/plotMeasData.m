@@ -11,8 +11,9 @@ if isempty(fields(data))
 end
 
 if ~exist('data_variable', 'var')
-    for data_index = 1:length(data.dep)
-        dep_name = data.dep{data_index};
+    dep_vars = selectDepDataVars(data);
+    for data_index = 1:length(dep_vars)
+        dep_name = dep_vars{data_index};
         if ~isempty(strfind(dep_name, '_Std_Dev')) ||...
                  ~isempty(strfind(dep_name, '_Error'))
             continue

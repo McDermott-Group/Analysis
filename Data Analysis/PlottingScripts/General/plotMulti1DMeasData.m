@@ -31,12 +31,18 @@ end
 % Create folder Plots if necessary.
 plts_path = makeDirPlots(pathnames{1});
 
-for data_index = 1:length(data{1}.dep)
-    dep_name = data{1}.dep{data_index};
+if ~exist('data_variable', 'var')
+    dep_vars = selectDepDataVars(data);
+elseif ~iscell(data_variable)
+    dep_vars = {data_variable};
+else
+    dep_vars = data_variable;
+end
+
+for data_index = 1:length(dep_vars)
+    dep_name = dep_vars{data_index};
     if ~isempty(strfind(dep_name, '_Std_Dev')) ||...
-            ~isempty(strfind(dep_name, '_Error')) ||...
-            (exist('data_variable', 'var') &&...
-            ~strcmp(dep_name, strrep(data_variable, ' ', '_')))
+            ~isempty(strfind(dep_name, '_Error'))
         continue
     end
     if isempty(data{1}.rels.(dep_name))
@@ -76,6 +82,12 @@ for data_index = 1:length(data{1}.dep)
                 break
             end
         end
+        
+        title_str_cell = {strrep(dep_name, '_', ' '),...
+            [strrep(filenames{1}, '_', '\_'), ' - ',...
+            strrep(filenames{end}, '_', '\_')],...
+            ['[', data{1}.Timestamp, ' - ',...
+             data{end}.Timestamp, ']']};
 
         if errorbar_flag % Plot an errobar graph.
             createFigure('right');
@@ -102,7 +114,7 @@ for data_index = 1:length(data{1}.dep)
 
             xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
             ylabel([strrep(dep_name, '_', ' '), yunits], 'FontSize', 14);
-            title(strrep(dep_name, '_', ' '), 'FontSize', 10)
+            title(title_str_cell, 'FontSize', 10)
             legend(legend_entries, 'Interpreter', 'none')
             savePlot(fullfile(plts_path, [dep_name, '_errorbar']));
         end
@@ -120,7 +132,7 @@ for data_index = 1:length(data{1}.dep)
 
         xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
         ylabel([strrep(dep_name, '_', ' '), yunits], 'FontSize', 14);
-        title(strrep(dep_name, '_', ' '), 'FontSize', 10)
+        title(title_str_cell, 'FontSize', 10)
         legend(legend_entries, 'Interpreter', 'none')
         
         savePlot(fullfile(plts_path, [dep_name, '_simple']));

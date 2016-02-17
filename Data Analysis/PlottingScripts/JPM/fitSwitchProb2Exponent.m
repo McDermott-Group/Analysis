@@ -1,14 +1,9 @@
 function data = fitSwitchProb2Exponent(data_variable, data)
-%fitSwitchProb2Exponent(DATA_VARIABLE, DATA) Fit data to an exponential
-%function, plot the data and the fit. 
+%fitSwitchProb2Exponent(DATA_VARIABLE, DATA) Fit switching probability data
+%to an exponential function, plot the data and the fit. 
 %   data = fitMeasData2Exponent(DATA_VARIABLE, DATA) fits data for
 %   DATA_VARIABLE to an exponent, and returns the data structure DATA with
 %   the fit appended to it.
-
-if ~exist('data_variable', 'var')
-    error(['No dependent data variable to fit the exponent to is ',...
-        'given as an input argument.'])
-end
 
 if ~exist('data', 'var')
     % Select a file.
@@ -16,6 +11,11 @@ if ~exist('data', 'var')
 end
 if isempty(fields(data))
     return
+end
+
+if ~exist('data_variable', 'var')
+    data_variable = selectDepDataVars(data, true);
+    data_variable = data_variable{1};
 end
 
 [pathname, filename, ext] = fileparts(data.Filename);
@@ -46,18 +46,13 @@ if length(dep_rels) == 1
     
     ci = confint(f);
     ae = max([abs(ci(1, 1) - f.a), abs(ci(2, 1) - f.a)]);
-    astr = ['a = ', num2str(f.a, 4), ' ± ', num2str(ae, 3), yunits];
-    be = max([abs(1 / ci(1, 2) - 1 / f.b), abs(1 / ci(2, 2) - 1 / f.b)]);
-    invbstr = ['1/b = ', num2str(1 / f.b, 4), ' ± ', num2str(be, 3),...
-        xunits];
-    ce = max([abs(ci(1, 3) - f.c), abs(ci(2, 3) - f.c)]);
-    cstr = ['c = ', num2str(f.c, 4), ' ± ', num2str(ce, 3), yunits];
+    astr = ['a = ', num2str(f.a, 4), ' ± ', num2str(ae, 3), ' 1/',...
+        data.units.(indep_name)];
     
     full_title = {[strrep(filename, '_', '\_'), ext,...
             ' [', data.Timestamp, ']'],...
-            [strrep(data_variable, '_', ' '),' = a * exp(-b * ',...
-            strrep(indep_name, '_', ' '), ') + c'],...
-            [astr, '; ', invbstr, '; ' cstr]};
+            [strrep(data_variable, '_', ' '),' = 1 - exp(-a * ',...
+            strrep(indep_name, '_', ' '), ')'], astr};
 
     name = ['Fitted_', data_variable];
     data.units.(name) = data.units.(data_variable);
