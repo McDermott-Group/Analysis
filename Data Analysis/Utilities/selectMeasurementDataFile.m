@@ -56,7 +56,7 @@ pathnames = cell(number_of_files, 1);
 for k = 1:number_of_files
     % Open the user interface to select a file.
     if ~exist('window_titles', 'var')
-        window_title = 'Select a text file containing the data...';
+        window_title = 'Select a data file...';
     else
         window_title = window_titles{k};
     end
