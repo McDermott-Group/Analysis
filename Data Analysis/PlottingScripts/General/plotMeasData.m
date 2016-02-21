@@ -12,6 +12,9 @@ end
 
 if ~exist('data_variable', 'var')
     dep_vars = selectDepDataVars(data);
+    if isempty(dep_vars)
+        return
+    end
     for data_index = 1:length(dep_vars)
         dep_name = dep_vars{data_index};
         if ~isempty(strfind(dep_name, '_Std_Dev')) ||...
