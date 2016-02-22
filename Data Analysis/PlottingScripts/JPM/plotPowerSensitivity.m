@@ -69,20 +69,22 @@ elseif length(dep_rels) == 2 % Plot 2D data.
         pos = strfind(dep_rels{1}, 'Attenuation');
         prefix = dep_rels{1}(1:pos(1)-2);
         indep_vals2 = data.(dep_rels{1});
+        dep_rels = {dep_rels{2}, dep_rels{1}};
         dep_vals = dep_vals';
     elseif ~isempty(strfind(dep_rels{2}, 'Attenuation'))
         pos = strfind(dep_rels{2}, 'Attenuation');
         prefix = dep_rels{2}(1:pos(1)-2);
         indep_vals2 = data.(dep_rels{2});
-    elseif ~isempty(strfind(dep_rels{1}, 'Amplitude'))
-        pos = strfind(dep_rels{1}, 'Amplitude');
-        prefix = dep_rels{1}(1:pos(1)-2);
-        indep_vals2 = data.(dep_rels{1});
-        dep_vals = dep_vals';
+    elseif ~isempty(strfind(dep_rels{1}, 'Amplitude')) &&...
+            isempty(strfind(dep_rels{1}, 'Fast'))
+        prefix = 'Readout';
         mode = false;
-    elseif ~isempty(strfind(dep_rels{2}, 'Amplitude'))
-        pos = strfind(dep_rels{2}, 'Amplitude');
-        prefix = dep_rels{2}(1:pos(1)-2);
+        indep_vals2 = data.(dep_rels{1});
+        dep_rels = {dep_rels{2}, dep_rels{1}};
+        dep_vals = dep_vals';
+    elseif ~isempty(strfind(dep_rels{2}, 'Amplitude')) &&...
+            isempty(strfind(dep_rels{2}, 'Fast'))
+        prefix = 'Readout';
         indep_vals2 = data.(dep_rels{2});
         mode = false;
     else
@@ -105,7 +107,7 @@ elseif length(dep_rels) == 2 % Plot 2D data.
         data.([prefix, '_Frequency']), data.Fast_Pulse_Time);
 
     dep_vals(dep_vals < 0) = 0;
-    threshold = 10 * median(dep_vals(:));
+    threshold = 20 * median(dep_vals(:));
     dep_vals(dep_vals > threshold) = threshold;
 end
 
