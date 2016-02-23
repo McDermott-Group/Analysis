@@ -47,9 +47,9 @@ colormap(jet(len))
 view(30, 45)
 grid on
 
-xlabel([strrep(x_data_variable, '_', ' '), xunits], 'FontSize', 14);
-ylabel([strrep(y_data_variable, '_', ' '), yunits], 'FontSize', 14);
-zlabel([strrep(z_data_variable, '_', ' '), zunits], 'FontSize', 14);
+xlabel([strrep(x_data_variable, '_', ' '), xunits], 'FontSize', 14)
+ylabel([strrep(y_data_variable, '_', ' '), yunits], 'FontSize', 14)
+zlabel([strrep(z_data_variable, '_', ' '), zunits], 'FontSize', 14)
 title(plot_title, 'Interpreter', 'none', 'FontSize', 10)
 
 savePlot(fullfile(plts_path, [filename, '_',...

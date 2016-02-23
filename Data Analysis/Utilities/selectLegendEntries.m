@@ -9,7 +9,6 @@ function [legend_entries, choice] = selectLegendEntries(data, dependent_variable
 %   is a selected legend option (CHOICE is equal to zero if nothing is
 %   selected).
 
-
 if ~exist('data', 'var') && ~iscell(data)
     error('A cell containing data structures is expected.') 
 end

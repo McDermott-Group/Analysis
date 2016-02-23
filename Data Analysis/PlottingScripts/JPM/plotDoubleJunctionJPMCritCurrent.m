@@ -19,13 +19,15 @@ end
 
 % Select files for the plot.
 [filename, pathname, status] = selectMeasurementDataFile(1,...
-    {'Select a data file with the Input and Output Bias Voltages as independent axes...'});
+    {['Select a data file with the Input and Output Bias Voltages as ',...
+    'independent axes...']});
 if ~status
     return
 end
 
 % Read the data file, convert the variable names, and specify the units.
-data = processMeasurementData(importMeasurementData(fullfile(pathname, filename)));
+file = importMeasurementData(fullfile(pathname, filename));
+data = processMeasurementData(file);
 
 % Create folder Plots if necessary.
 plts_path = makeDirPlots(pathname);
@@ -45,7 +47,7 @@ if isfield(data, 'Switching Probability')
 elseif isfield(data, 'P11')
     data_name = 'P11';
 else
-    error(['Could not find "Switching Probability" or "P11" variables' ...
+    error(['Could not find "Switching Probability" or "P11" variables',...
         'in data file.'])
 end    
 
@@ -75,9 +77,11 @@ for data_index = 1:length(data.dep)
             (input_bias + output_bias) / I_critical)
         ylim([0 2.5])
         xlabel('\Delta=(I_{output}-I_{input})/(2I_{critical})', ...
-            'FontSize', 14);
-        ylabel('(I_{output}+I_{input})/I_{critical}', 'FontSize', 14);
+            'FontSize', 14)
+        ylabel('(I_{output}+I_{input})/I_{critical}', 'FontSize', 14)
     end
-    title([filename, ' [', data.Timestamp, ']'], 'Interpreter', 'none', 'FontSize', 10)
-    savePlot(fullfile(plts_path, [base_filename, '_', dep_name, '_pixelated']));
+    title([filename, ' [', data.Timestamp, ']'],...
+        'Interpreter', 'none', 'FontSize', 10)
+    savePlot(fullfile(plts_path,...
+        [base_filename, '_', dep_name, '_pixelated']));
 end

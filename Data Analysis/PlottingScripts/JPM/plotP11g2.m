@@ -50,12 +50,6 @@ if length(dep_rels) == 1
     indep_name = dep_rels{1};
     indep_vals = data.(indep_name);
 
-    xmin = min(indep_vals);
-    xmax = max(indep_vals);
-    if xmax == xmin
-        xmax = xmax + eps;
-    end
-
     xunits = getUnits(data, indep_name);
     yunits = getUnits(data, 'P11');
 
@@ -74,26 +68,15 @@ if length(dep_rels) == 1
             else
                 plot(indep_vals, PA_PB_prod,...
                     '.', 'LineWidth', 1, 'MarkerSize', 15)
-                PA_PB_prod_error = zeros(size(PA_PB_prod));
             end
             hold off
             legend('P_{11}', 'P_A*P_B')
-            ymin = min([P11(:) - 1.96 * data.error.P11(:);...
-                PA_PB_prod(:) - 1.96 * PA_PB_prod_error(:)]);
-            ymax = max([P11(:) + 1.96 * data.error.P11(:);...
-                PA_PB_prod(:) + 1.96 * PA_PB_prod_error(:)]);
-        else
-            ymin = min(P11(:) - 1.96 * data.error.P11(:));
-            ymax = max(P11(:) + 1.96 * data.error.P11(:));
         end
-        if ymin == ymax
-            ymax = Inf;
-        end
-        axis([xmin xmax ymin ymax])
+        axis tight
         grid on
 
-        xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-        ylabel('P11', 'FontSize', 14);
+        xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14)
+        ylabel('P11', 'FontSize', 14)
         title({[strrep(filename, '_', '\_'),...
             ' [', data.Timestamp, ']']}, 'FontSize', 10)
         savePlot(fullfile(plts_path, [filename, '_', 'P11', '_errorbar']));
@@ -109,20 +92,12 @@ if length(dep_rels) == 1
             '.-', 'LineWidth', 1, 'MarkerSize', 15)
         hold off
         legend('P_{11}', 'P_A*P_B')
-        ymin = min([P11(:); PA_PB_prod(:)]);
-        ymax = max([P11(:); PA_PB_prod(:)]);
-    else
-        ymin = min(P11);
-        ymax = max(P11);
     end
-    if ymin == ymax
-        ymax = Inf;
-    end
-    axis([xmin xmax ymin ymax])
+    axis tight
     grid on
 
-    xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-    ylabel(['P_{11}', yunits], 'FontSize', 14);
+    xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14)
+    ylabel(['P_{11}', yunits], 'FontSize', 14)
     title({[filename, ' [', data.Timestamp, ']']},...
         'Interpreter', 'none', 'FontSize', 10)
     savePlot(fullfile(plts_path, [filename, '_P11_simple']));
@@ -140,16 +115,16 @@ if length(dep_rels) == 2
     plotSmooth(indep_vals1, indep_vals2, P11);
     xunits = getUnits(data, indep_name1);
     yunits = getUnits(data, indep_name2);
-    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-    ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
+    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14)
+    ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14)
     title({'P11:', [filename, ' [', data.Timestamp, ']']},...
         'Interpreter', 'none', 'FontSize', 10)
     savePlot(fullfile(plts_path, [filename, '_P11_smooth']));
     % Plot the data as a pixeleated image.
     createFigure('right');
     plotPixelated(indep_vals1, indep_vals2, P11');
-    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-    ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
+    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14)
+    ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14)
     title({'P11:', [strrep(filename, '_', '\_'), ext,...
         ' [', data.Timestamp, ']']}, 'FontSize', 10)
     savePlot(fullfile(plts_path, [filename, '_P11_pixelated']));
@@ -168,8 +143,8 @@ if length(dep_rels) == 1
     if exist('g2_var', 'var')
         createFigure('right');
         plotErrorbar(indep_vals, g2, 1.96 * sqrt(g2_var));
-        xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-        ylabel('g_2 = P_{11} / P_AP_B', 'FontSize', 14);
+        xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14)
+        ylabel('g_2 = P_{11} / P_AP_B', 'FontSize', 14)
         title({[strrep(filename, '_', '\_'), ext,...
             ' [', data.Timestamp, ']']}, 'FontSize', 10)
         savePlot(fullfile(plts_path, [filename, '_g2_errorbar']));
@@ -177,8 +152,8 @@ if length(dep_rels) == 1
 
     createFigure;
     plotSimple(indep_vals, g2);    % Plot a simple 1D graph.
-    xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-    ylabel('g_2 = P_{11} / P_AP_B', 'FontSize', 14);
+    xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14)
+    ylabel('g_2 = P_{11} / P_AP_B', 'FontSize', 14)
     title({[strrep(filename, '_', '\_'), ext,...
         ' [', data.Timestamp, ']']}, 'FontSize', 10)
     savePlot(fullfile(plts_path, [filename, '_g2_simple']));
@@ -196,8 +171,8 @@ if length(dep_rels) == 2
     plotSmooth(indep_vals1, indep_vals2, g2);
     xunits = getUnits(data, indep_name1);
     yunits = getUnits(data, indep_name2);
-    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-    ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
+    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14)
+    ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14)
     title({'g2:', [strrep(filename, '_', '\_'), ext,...
            ' [', data.Timestamp, ']']}, 'FontSize', 10)
     savePlot(fullfile(plts_path, [filename, '_g2_smooth']));
@@ -206,8 +181,8 @@ if length(dep_rels) == 2
     corrected_g2(corrected_g2 > 2) = NaN;
     createFigure('right');
     plotPixelated(indep_vals1, indep_vals2, corrected_g2');
-    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-    ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
+    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14)
+    ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14)
     title({'g2:', [strrep(filename, '_', '\_'), ext,...
         ' [', data.Timestamp, ']']}, 'FontSize', 10)
     savePlot(fullfile(plts_path, [filename, '_g2_pixelated']));

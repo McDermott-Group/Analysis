@@ -4,7 +4,6 @@ function savePlot(full_filename)
 %   savePlot(FULL_FILENAME) saves the plot in a current figure to a .png
 %   file. FULL_FILENAME specifies the name of the png file and its location.
 
-
 try
     saveas(gca, full_filename, 'png')
 catch
@@ -13,4 +12,3 @@ catch
 end
 
 end
-

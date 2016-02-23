@@ -9,12 +9,7 @@ function plotSmooth(indep1, indep2, dep)
 hndl = surf(Ind1, Ind2, dep);
 set(gca, 'View', [0 90])
 set(hndl, 'LineStyle', 'none', 'FaceColor', 'interp', 'FaceLighting', 'phong');
-zmin = min(dep(:));
-zmax = max(dep(:));
-if zmin == zmax
-    zmax = Inf;
-end
-axis([min(indep1), max(indep1), min(indep2), max(indep2), zmin, zmax, caxis])
+axis tight
 colormap(jet)
 colorbar
 

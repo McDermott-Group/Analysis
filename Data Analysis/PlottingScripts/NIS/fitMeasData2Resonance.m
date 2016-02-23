@@ -59,8 +59,8 @@ if length(dep_rels) == 1
             plot(indep_vals, fit, 'r', 'Linewidth', 2)
         hold off
         legend('data', 'fit')
-        xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-        ylabel([strrep(data_variable, '_', ' ') yunits], 'FontSize', 14);
+        xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14)
+        ylabel([strrep(data_variable, '_', ' ') yunits], 'FontSize', 14)
         title({[filename, ext, ' [', data.Timestamp, ']'],...
             f0, Qs, mismatch_A0}, 'Interpreter', 'none', 'FontSize', 10)
         savePlot(fullfile(plts_path,...
@@ -73,8 +73,8 @@ if length(dep_rels) == 1
         plot(indep_vals, fit, 'r', 'Linewidth', 2)
     hold off
     legend('data', 'fit')
-    xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-    ylabel('|S_{21}|', 'FontSize', 14);
+    xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14)
+    ylabel('|S_{21}|', 'FontSize', 14)
     title({[filename, ext, ' [', data.Timestamp, ']'],...
         f0, Qs, mismatch_A0}, 'Interpreter', 'none', 'FontSize', 10)
     savePlot(fullfile(plts_path,...
@@ -116,8 +116,8 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     
     createFigure;
     plotSimple(indep_vals1, f0, '.-')
-    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-    ylabel(['Resonance Frequency ', yunits], 'FontSize', 14);
+    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14)
+    ylabel(['Resonance Frequency ', yunits], 'FontSize', 14)
     title({[filename, ext, ' [', data.Timestamp, ']']},...
         'Interpreter', 'none', 'FontSize', 10)
     savePlot(fullfile(plts_path,...
@@ -128,8 +128,8 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     hold on
         plotSimple(indep_vals1, Qc, '.-')
     hold off
-    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-    ylabel('Quality Factor', 'FontSize', 14);
+    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14)
+    ylabel('Quality Factor', 'FontSize', 14)
     legend('internal', 'coupling')
     title({[filename, ext, ' [', data.Timestamp, ']']},...
         'Interpreter', 'none', 'FontSize', 10)
@@ -138,8 +138,8 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     
     createFigure;
     plotSimple(indep_vals1, L, '.-')
-    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-    ylabel('Mismatch', 'FontSize', 14);
+    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14)
+    ylabel('Mismatch', 'FontSize', 14)
     title({[filename, ext, ' [', data.Timestamp, ']']},...
         'Interpreter', 'none', 'FontSize', 10)
     savePlot(fullfile(plts_path,...
@@ -147,8 +147,8 @@ elseif length(dep_rels) == 2 % Plot 2D data.
    
     createFigure;
     plotPixelated(indep_vals1, indep_vals2, fit')
-    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-    ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
+    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14)
+    ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14)
     title({['|S21| Fit', zunits],...
         [filename, ext, ' [', data.Timestamp, ']']},...
         'Interpreter', 'none', 'FontSize', 10)
@@ -157,8 +157,8 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     
     createFigure('right');
     plotPixelated(indep_vals1, indep_vals2, dep_vals')
-    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-    ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
+    xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14)
+    ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14)
     title({['|S21| Data', zunits],...
         [filename, ext, ' [', data.Timestamp, ']']},...
         'Interpreter', 'none', 'FontSize', 10)

@@ -1,14 +1,17 @@
-function data = loadMeasurementData
-%loadMeasurementData    Load data from a data file into the MATLAB 
-%workspace. The function returns the loaded structure.
+function data = loadMeasurementData(file)
+%loadMeasurementData Load data from a data file.
+%  DATA = loadMeasurementData(FILE) loads data from a data file FILE.
+%  The function returns the loaded structure DATA.
 
-% Select a single file to load.
-[filename, pathname, status] = selectMeasurementDataFile(1);
-if ~status
-    data = struct();
-    return
+if ~exist('file', 'var')
+    % Select a single file to load.
+    [filename, pathname, status] = selectMeasurementDataFile(1);
+    if ~status
+        data = struct();
+        return
+    end
+    file = fullfile(pathname, filename);
 end
 
 % Read the data file, convert the variable names, and specify the units.
-file = fullfile(pathname, filename);
 data = processMeasurementData(importMeasurementData(file));

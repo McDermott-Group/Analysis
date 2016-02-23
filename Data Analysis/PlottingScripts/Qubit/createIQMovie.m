@@ -55,8 +55,8 @@ for data_index = 1:length(data.dep)
     xunits = getUnits(data, I_name);
     yunits = getUnits(data, Q_name);
     iunits = getUnits(data, indep);
-    xlabel([strrep(I_name, '_', ' '), xunits], 'FontSize', 14);
-    ylabel([strrep(Q_name, '_', ' '), yunits], 'FontSize', 14);
+    xlabel([strrep(I_name, '_', ' '), xunits], 'FontSize', 14)
+    ylabel([strrep(Q_name, '_', ' '), yunits], 'FontSize', 14)
 
     axis([min(I(:)) max(I(:)) min(Q(:)) max(Q(:))])
     axis equal

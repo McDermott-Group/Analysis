@@ -76,8 +76,8 @@ if length(dep_rels) == 1
         elseif size(err, 2) == 2 && size(err, 1) == length(indep_vals)
              plotAssymErrorbar(indep_vals, dep_vals, err(:, 1), err(:, 2))
         end
-        xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-        ylabel([full_dep_name, yunits], 'FontSize', 14);
+        xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14)
+        ylabel([full_dep_name, yunits], 'FontSize', 14)
         if exist('plot_title', 'var')
             title({strrep(plot_title{1}, yunits, ''),...
                 plot_title{2:end}}, 'FontSize', 10)
@@ -92,9 +92,8 @@ if length(dep_rels) == 1
     if strcmp(type, '') || strcmp(type, 'simple')
         createFigure;
         plotSimple(indep_vals, dep_vals)
-        xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-        ylabel([full_dep_name, yunits],...
-            'FontSize', 14);
+        xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14)
+        ylabel([full_dep_name, yunits], 'FontSize', 14)
         if exist('plot_title', 'var')
             title({strrep(plot_title{1}, yunits, ''),...
                 plot_title{2:end}}, 'FontSize', 10)
@@ -123,8 +122,8 @@ if length(dep_rels) == 2
         % Plot the data as a smooth surface.
         createFigure;
         plotSmooth(indep_vals1, indep_vals2, dep_vals);
-        xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-        ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
+        xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14)
+        ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14)
         if exist('plot_title', 'var')
             title(plot_title, 'FontSize', 10)
         else
@@ -163,8 +162,8 @@ if length(dep_rels) == 2
         % Plot the data as a pixelated image.
         createFigure('right');
         plotPixelated(indep_vals1, indep_vals2, dep_vals');
-        xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-        ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
+        xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14)
+        ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14)
         if exist('plot_title', 'var')
             title(plot_title, 'FontSize', 10)
         else

@@ -27,9 +27,11 @@ for data_index = 1:length(data.dep)
     % Plot 2D data.
     if length(dep_rels) == 2
         if strcmp(dep_rels{2}, 'Fast_Pulse_Amplitude')
-            dep_vals = dep_vals - mean(dep_vals(:, 1:5), 2) * ones(1, size(dep_vals, 2));
+            dep_vals = dep_vals - mean(dep_vals(:, 1:5), 2) *...
+                ones(1, size(dep_vals, 2));
         else
-            dep_vals = dep_vals - ones(size(dep_vals, 1), 1) * mean(dep_vals(1:5, :));
+            dep_vals = dep_vals - ones(size(dep_vals, 1), 1) *...
+                mean(dep_vals(1:5, :));
         end
 
         processed_data_var = ['RFInduced_', dep_name];

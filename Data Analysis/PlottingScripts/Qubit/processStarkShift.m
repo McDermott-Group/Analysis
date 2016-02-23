@@ -37,13 +37,13 @@ else
 end
 
 if exist('alpha', 'var')
-    alpha = alpha * 1e6;     % Hz, quibit anharmonicity
+    alpha = alpha * 1e6; % Hz, quibit anharmonicity
 else
     error('Qubit anharmonicity is not specified.')
 end
 
 if exist('chi_0', 'var')
-    chi_0 = chi_0 * 1e6;        % Hz, low power chi shift
+    chi_0 = chi_0 * 1e6; % Hz, low power chi shift
 else
     error('Chi shift is not specified.')
 end
@@ -103,26 +103,26 @@ SS_fit = (S_1 - S_0) * stark_factor * SSA.^2 +...
 n_fit = stark_factor * SSA.^2;
 
 createFigure([.2, .1, .75, .75]);
-subplot(2, 1, 1);
+subplot(2, 1, 1)
 [~, filename, ext] = fileparts(data.Filename);
 title({[strrep(filename, '_', '\_'), ext, ' [', data.Timestamp, ']'],...
     ['Fit to Stark Shift Data: number of photons = ',...
     num2str(stark_factor, 4), ' x (DAC Amplitude)^2'],...
     ['n_{crit} = ', num2str(n_crit, 4), ' photons; ',...
-    'Qubit Anharmonicity = ', num2str(alpha/1e6), ' MHz; ',...
+    'Qubit Anharmonicity = ', num2str(alpha / 1e6), ' MHz; ',...
     '\chi_0 = ', num2str(chi_0/1e6), ' MHz']}, 'FontSize', 10)
 hold on
-plot(stark_amplitude, shift/2/pi/1e6, 'r.', 'MarkerSize', 15);
-plot(SSA, SS_fit/2/pi/1e6, 'b-', 'LineWidth', 2);
+plot(stark_amplitude, shift / pi / 2e6, 'r.', 'MarkerSize', 15)
+plot(SSA, SS_fit / pi / 2e6, 'b-', 'LineWidth', 2)
 hold off
-ylabel('Stark Shift (MHz)', 'FontSize', 14);
+ylabel('Stark Shift (MHz)', 'FontSize', 14)
 grid on
 
-subplot(2, 1, 2);
-plot(SSA, n_fit, 'b-', 'LineWidth', 2);
-ylabel('Number of Photons', 'FontSize', 14);
+subplot(2, 1, 2)
+plot(SSA, n_fit, 'b-', 'LineWidth', 2)
+ylabel('Number of Photons', 'FontSize', 14)
 xlabel([strrep(stark_amplitude_name, '_', ' '),...
-    getUnits(data, stark_amplitude_name)], 'FontSize', 14);
+    getUnits(data, stark_amplitude_name)], 'FontSize', 14)
 grid on
 
 end

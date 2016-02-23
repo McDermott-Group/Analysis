@@ -56,8 +56,8 @@ for data_index = 1:length(data.dep)
                  plotErrorbar(indep_vals, dep_vals, dep_err)
             hold off
             legend(strrep(res_name, '_', ' '), strrep(dep_name, '_', ' '))
-            xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-            ylabel([strrep(dep_name, '_', ' '), yunits], 'FontSize', 14);
+            xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14)
+            ylabel([strrep(dep_name, '_', ' '), yunits], 'FontSize', 14)
             title({[strrep(filename, '_', '\_'), ext,...
                 ' [', data.Timestamp, ']']}, 'FontSize', 10)
             savePlot(fullfile(plts_path, [filename, '_', dep_name,...
@@ -70,8 +70,8 @@ for data_index = 1:length(data.dep)
             plotSimple(indep_vals, dep_vals)
         hold off
         legend(strrep(res_name, '_', ' '), strrep(dep_name, '_', ' '))
-        xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-        ylabel([strrep(dep_name, '_', ' '), yunits], 'FontSize', 14);
+        xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14)
+        ylabel([strrep(dep_name, '_', ' '), yunits], 'FontSize', 14)
         title({[filename, ext, ' [', data.Timestamp, ']']},...
                 'Interpreter', 'none', 'FontSize', 10)
         savePlot(fullfile(plts_path, [filename, '_', dep_name,...
@@ -94,8 +94,8 @@ for data_index = 1:length(data.dep)
             % Plot the data as a smooth surface.
             createFigure;
             plotSmooth(indep_vals1, indep_vals2, dep_vals);
-            xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-            ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
+            xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14)
+            ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14)
             title({[strrep(dep_name, '_', ' '), zunits, ':'],...
                    [strrep(filename, '_', '\_'), ext,...
                    ' [', data.Timestamp, ']']}, 'FontSize', 10)
@@ -144,8 +144,8 @@ for data_index = 1:length(data.dep)
         % Plot the data as a pixeleated image.
         createFigure('right');
         plotPixelated(indep_vals1, indep_vals2, dep_vals');
-        xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-        ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
+        xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14)
+        ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14)
         title({[strrep(dep_name, '_', ' '), zunits, ':'],...
                [strrep(filename, '_', '\_'), ext,...
                ' [', data.Timestamp, ']']}, 'FontSize', 10)
@@ -154,8 +154,8 @@ for data_index = 1:length(data.dep)
         
         createFigure('right');
         plotPixelated(indep_vals1, indep_vals2, res_vals');
-        xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14);
-        ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14);
+        xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14)
+        ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14)
         title({[strrep(res_name, '_', ' '), zunits, ':'],...
                [strrep(filename, '_', '\_'), ext,...
                ' [', data.Timestamp, ']']}, 'FontSize', 10)

@@ -72,8 +72,8 @@ if length(dep_rels) == 1
             plot(indep_vals, f(indep_vals), 'r', 'Linewidth', 2)
         hold off
         legend('data', 'fit')
-        xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-        ylabel([strrep(data_variable, '_', ' ') yunits], 'FontSize', 14);
+        xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14)
+        ylabel([strrep(data_variable, '_', ' ') yunits], 'FontSize', 14)
         title(full_title, 'FontSize', 10)
         savePlot(fullfile(plts_path, [filename, '_', data_variable,...
             '_expfit_errorbar']));
@@ -86,8 +86,8 @@ if length(dep_rels) == 1
         plot(indep_vals, f(indep_vals), 'r', 'Linewidth', 2)
     hold off
     legend('data', 'fit')
-    xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-    ylabel([strrep(data_variable, '_', ' '), yunits], 'FontSize', 14);
+    xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14)
+    ylabel([strrep(data_variable, '_', ' '), yunits], 'FontSize', 14)
     title(full_title, 'FontSize', 10)
     savePlot(fullfile(plts_path, [filename, '_', data_variable,...
         '_expfit_simple']));

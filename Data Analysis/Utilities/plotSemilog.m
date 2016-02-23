@@ -6,15 +6,7 @@ function plotSemilog(indep, dep)
 %   a dependent variable (y coordinate).
 
 semilogy(indep, dep, '.-', 'LineWidth', 1, 'MarkerSize', 15)
-
-xmin = min(indep);
-xmax = max(indep);
-if xmax == xmin
-    xmax = Inf;
-end
-
-xlim([xmin xmax])
+axis tight
 grid on
-set(gca, 'FontSize', 14);
 
 end

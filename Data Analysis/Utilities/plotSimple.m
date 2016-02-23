@@ -10,9 +10,7 @@ if ~exist('style', 'var')
 end
 
 plot(indep, dep, style, 'LineWidth', 1, 'MarkerSize', 15)
-
 axis tight
 grid on
-set(gca, 'FontSize', 14);
 
 end

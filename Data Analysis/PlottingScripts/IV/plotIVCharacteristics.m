@@ -2,7 +2,8 @@ function plotIVCharacteristics
 %plotIVCharacteristics plots a current-voltage characteristics.
 
 % Retrive the path that was used last time.
-fid = fopen(fullfile(tempdir, 'plotIVCharacteristics_last_pathname.txt'), 'r');
+fid = fopen(fullfile(tempdir,...
+    'plotIVCharacteristics_last_pathname.txt'), 'r');
 if fid ~= -1
     pathname = fgetl(fid);
     fclose(fid);
@@ -28,14 +29,16 @@ if isnumeric(filename)
 end
 
 % Save the current path.
-fid = fopen(fullfile(tempdir, 'plotIVCharacteristics_last_pathname.txt'), 'w');
+fid = fopen(fullfile(tempdir,...
+    'plotIVCharacteristics_last_pathname.txt'), 'w');
 if fid ~= -1
     fprintf(fid, '%s', pathname);
     fclose(fid);
 end
 
 if ~exist([pathname, filename], 'file')
-    disp(['Error in ', mfilename,': File ', pathname, filename, ' does not exist.']);
+    disp(['Error in ', mfilename, ': File ', pathname, filename,...
+        ' does not exist.']);
     return
 end
 
@@ -45,14 +48,15 @@ timestamp = file.date;
 
 if isempty(data) || ~isfield(data, 'Current') || isempty(data.Current) ||...
         ~isfield(data, 'Voltage') || isempty(data.Voltage)
-    error(['Error using ', mfilename('fullpath'), ': The selected file does not contain any meaningful data']);
+    error(['Error using ', mfilename('fullpath'),...
+        ': The selected file does not contain any meaningful data']);
 end
 
 % Plot raw data.
 createFigure;
 plotSimple(1e3 * data.Voltage, 1e3 * data.Current);
-xlabel('Voltage (mV)', 'FontSize', 14);
-ylabel('Current (mA)', 'FontSize', 14);
+xlabel('Voltage (mV)', 'FontSize', 14)
+ylabel('Current (mA)', 'FontSize', 14)
 title(['Raw IV Characteristic [', filename, ', ', timestamp, ']'],...
        'Interpreter', 'none', 'FontSize', 10)
 
@@ -91,8 +95,8 @@ try
 
     createFigure;
     plotSimple(1e3 * (data.Voltage - p(1) * data.Current), 1e3 * data.Current);
-    xlabel('Voltage (mV)', 'FontSize', 14);
-    ylabel('Current (mA)', 'FontSize', 14);
+    xlabel('Voltage (mV)', 'FontSize', 14)
+    ylabel('Current (mA)', 'FontSize', 14)
     title({['Corrected IV Characteristic [', filename, ', ', timestamp, ']'],...
            ['Ground Resistance = ', num2str(p(1)), ' Ohm'],...
            ['Apparent Resistance = ', num2str(R_app), ' Ohm']},...

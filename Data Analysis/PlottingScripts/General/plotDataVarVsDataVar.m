@@ -36,8 +36,8 @@ yunits = getUnits(data, y_data_variable);
 createFigure;
 plotDots(data.(x_data_variable), data.(y_data_variable))
 
-xlabel([strrep(x_data_variable, '_', ' '), xunits], 'FontSize', 14);
-ylabel([strrep(y_data_variable, '_', ' '), yunits], 'FontSize', 14);
+xlabel([strrep(x_data_variable, '_', ' '), xunits], 'FontSize', 14)
+ylabel([strrep(y_data_variable, '_', ' '), yunits], 'FontSize', 14)
 title(plot_title, 'Interpreter', 'none', 'FontSize', 10)
 
 savePlot(fullfile(plts_path, [filename, '_',...

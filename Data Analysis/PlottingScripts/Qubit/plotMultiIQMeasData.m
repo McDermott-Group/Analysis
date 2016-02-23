@@ -109,8 +109,8 @@ for data_index = 1:length(data{1}.dep)
         grid on
         axis equal
         
-        xlabel([strrep(I_name, '_', ' '), xunits], 'FontSize', 14);
-        ylabel([strrep(Q_name, '_', ' '), yunits], 'FontSize', 14);
+        xlabel([strrep(I_name, '_', ' '), xunits], 'FontSize', 14)
+        ylabel([strrep(Q_name, '_', ' '), yunits], 'FontSize', 14)
         title(plot_title, 'FontSize', 10)
         if length(data) > 1
             legend(legend_entries, 'Interpreter', 'none')
@@ -123,15 +123,14 @@ for data_index = 1:length(data{1}.dep)
     createFigure([.01, .1, .88, .8]);
     hold on
     for k = 1:length(data);
-        plot(data{k}.(I_name), data{k}.(Q_name),...
-            '.', 'MarkerSize', 15)
+        plot(data{k}.(I_name), data{k}.(Q_name), '.', 'MarkerSize', 15)
     end
     hold off
     grid on
     axis equal
 
-    xlabel([strrep(I_name, '_', ' '), xunits], 'FontSize', 14);
-    ylabel([strrep(Q_name, '_', ' '), yunits], 'FontSize', 14);
+    xlabel([strrep(I_name, '_', ' '), xunits], 'FontSize', 14)
+    ylabel([strrep(Q_name, '_', ' '), yunits], 'FontSize', 14)
     title(plot_title, 'FontSize', 10)
     if length(data) > 1
         legend(legend_entries, 'Interpreter', 'none')
