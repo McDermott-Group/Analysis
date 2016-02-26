@@ -1,6 +1,6 @@
-function data = plotMinNorm2DMeasData(data_variable,...
-    normalization_direction)
-%plotMinNorm2DMeasData(DATA_VARIABLE, NORMALIZATION_DIRECTION)  Plot
+function data = plotMinNorm2DMeasData(normalization_direction,...
+    data_variable)
+%plotMinNorm2DMeasData(NORMALIZATION_DIRECTION, DATA_VARIABLE) Plot
 %a line-by-line minimum normalized 2D data. 
 %   DATA = plotMinNorm2DMeasData(DATA_VARIABLE, NORMALIZATION_DIRECTION)
 %   plots line-by-line minimum normalized data for vairable DATA_VARIABLE
@@ -8,15 +8,25 @@ function data = plotMinNorm2DMeasData(data_variable,...
 %   'along_x' or 'along_y'. The function returns structure DATA containing
 %   the normalized data.
 
-if ~exist('data_variable', 'var')
-    error('Specify dependent variable name as the first input argument.')
-end
-
 if exist('normalization_direction', 'var') &&...
         ~isempty(strfind(normalization_direction, 'x'))
     normalization_direction = 'along_x';
 else
     normalization_direction = 'along_y';
+end
+
+% Select a file.
+data = loadMeasurementData;
+if isempty(fields(data))
+    return
+end
+
+if ~exist('data_variable', 'var')
+    data_variable = selectDepDataVars(data, true);
+    if isempty(data_variable)
+        return
+    end
+    data_variable = data_variable{1};
 end
 
 % Select a file.

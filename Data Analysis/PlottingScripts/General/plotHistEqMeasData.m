@@ -5,14 +5,18 @@ function data = plotHistEqMeasData(data_variable)
 %   plots a histogram-equalized data. The function returns structure DATA
 %   containing the histogram-equalized data.
 
-if ~exist('data_variable', 'var')
-    error('Specify dependent variable name as the first input argument.')
-end
-
 % Select a file.
 data = loadMeasurementData;
 if isempty(fields(data))
     return
+end
+
+if ~exist('data_variable', 'var')
+    data_variable = selectDepDataVars(data, true);
+    if isempty(data_variable)
+        return
+    end
+    data_variable = data_variable{1};
 end
 
 % Check that the data variable exists (compute it if necessary).

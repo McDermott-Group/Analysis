@@ -15,6 +15,9 @@ end
 
 if ~exist('data_variable', 'var')
     data_variable = selectDepDataVars(data, true);
+    if isempty(data_variable)
+        return
+    end
     data_variable = data_variable{1};
 end
 

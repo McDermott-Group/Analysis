@@ -6,15 +6,18 @@ function data = fitMeasData2Lorentzian(data_variable)
 %   backgrounds, plots the data and the fit, and returns the data structure
 %   DATA with the fit appended to it.
 
-if ~exist('data_variable', 'var')
-    error(['No dependent data variable to fit the Lorentzian to is ',...
-        'given as an input argument.'])
-end
-
 % Select a file.
 data = loadMeasurementData;
 if isempty(fields(data))
     return
+end
+
+if ~exist('data_variable', 'var')
+    data_variable = selectDepDataVars(data, true);
+    if isempty(data_variable)
+        return
+    end
+    data_variable = data_variable{1};
 end
 
 [pathname, filename, ext] = fileparts(data.Filename);
