@@ -1,9 +1,9 @@
-function data = fitMeasData2Lorentzian(data_variable)
+function fitMeasData2Lorentzian(data_variable)
 %fitMeasData2Lorentzian(DATA_VARIABLE) Fit data to Lorentzians
 % superimposed on linear backgrounds, plot the data and the fit.
-%   data = fitMeasData2Lorentzian(DATA_VARIABLE)
+%   fitMeasData2Lorentzian(DATA_VARIABLE)
 %   fits data for DATA_VARIABLE to Lorentzians superimposed on linear
-%   backgrounds, plots the data and the fit, and returns the data structure
+%   backgrounds, plots the data and the fit, and saves the data structure
 %   DATA with the fit appended to it.
 
 % Select a file.
@@ -27,6 +27,11 @@ plts_path = makeDirPlots(pathname);
 
 % Check that the data variable exists (compute it if necessary).
 [data, data_variable] = checkDataVar(data, data_variable);
+
+if strcmp(data.units.(data_variable), 'dB')
+    data.(data_variable) = 10.^(data.(data_variable) / 20);
+    data.units.(data_variable) = 'Arb. Units';
+end
 
 dep_vals = data.(data_variable);
 dep_rels = data.rels.(data_variable);
@@ -203,6 +208,8 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     data.rels.(name) = data.rels.(data_variable);
     data.dep{length(data.dep) + 1} = name;
     plotDataVar(data, name, 'pixelated');
+    
+    saveMeasData(data, [filename, '_', data_variable, '_lorentzfit'])
 end
 end
 
