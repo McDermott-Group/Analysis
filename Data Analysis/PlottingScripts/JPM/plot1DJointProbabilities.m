@@ -106,6 +106,3 @@ title({[filename, ext, ' [', data.Timestamp, ']']},...
     'Interpreter', 'none', 'FontSize', 10)
 
 savePlot(fullfile(plts_path, [filename, '_prob_errobar']));
-
-% Show a message box with the experiment parameters.
-showMessageBox(data);

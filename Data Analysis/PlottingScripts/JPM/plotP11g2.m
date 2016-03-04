@@ -188,9 +188,6 @@ if length(dep_rels) == 2
     savePlot(fullfile(plts_path, [filename, '_g2_pixelated']));
 end
 
-% Show a message box with the experiment parameters.
-showMessageBox(data);
-
 disp(['<g_2> = ', num2str(mean(g2(:))), ' ± ',...
     num2str(1.96 * std(g2(:)) / sqrt(length(g2(:)))),...
     ' (mean ± 1.96 * standard error of the mean)'])

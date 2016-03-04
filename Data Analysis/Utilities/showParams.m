@@ -1,11 +1,19 @@
-function showMessageBox(data)
-%showMessageBox Show meessage box with the experiment parameters.
+function showParams(data)
+%showParams Show message box with the experiment parameters.
 
-fields = fieldnames(data);
-params = cell(length(fields), 1);
-for k = 1:length(fields)
-    field = fields{k};
-    value = data.(fields{k});
+% Select a file.
+if ~exist('data', 'var')
+    data = loadMeasurementData;
+    if isempty(fields(data))
+        return
+    end
+end
+
+flds = fieldnames(data);
+params = cell(length(flds), 1);
+for k = 1:length(flds)
+    field = flds{k};
+    value = data.(flds{k});
     if isnumeric(value)
         if length(value) == 1
             if isfield(data.units, field) && ~isempty(data.units.(field))
@@ -19,7 +27,7 @@ for k = 1:length(fields)
     elseif strcmp(field, 'Timestamp')
         params{k} = ['Time: ', data.(field)];
     elseif strcmp(field, 'Comments')
-        params{k} = ['Comments: ', [value{:}]];
+        params{k} = ['Comments: ', char(value{:})];
     elseif strcmp(field, 'Filename')
         continue
     elseif strcmp(field, 'Experiment_Name') ||  strcmp(field, 'Name') 

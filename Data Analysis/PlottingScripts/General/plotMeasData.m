@@ -26,9 +26,6 @@ if ~exist('data_variable', 'var')
         end
         plotDataVar(data, dep_name);
     end
-    
-    % Show a message box with the experiment parameters.
-    showMessageBox(data);
 else
     plotDataVar(data, data_variable);
 end
