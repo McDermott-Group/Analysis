@@ -231,13 +231,14 @@ half_y = (median_y + y(idx)) / 2;
 idx1 = find(y < half_y, 1, 'first');
 idx2 = find(y < half_y, 1, 'last');
 if ~isempty(idx1) && ~isempty(idx2) && x(idx1) ~= x(idx2)
-    width = abs(x(idx2) - x(idx1));
+    width = .05 * abs(x(idx2) - x(idx1));
 else
     width = 0.01;
 end
 
-start_point = [.5 * (max_y - min_y) * width^2 / 4,...
+start_point = [.1 * (max_y - min_y) * width^2 / 4,...
     start, width, 0, background];
+
 f = fit(x(:), y(:), '(a / ((x - b)^2 + (c / 2)^2)) + d * (x - b) + e',...
         'StartPoint', start_point);
 end
