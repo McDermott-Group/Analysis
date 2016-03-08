@@ -13,6 +13,7 @@ end
 
 % Select a file.
 data = loadMeasurementData;
+
 if isempty(fields(data))
     return
 end

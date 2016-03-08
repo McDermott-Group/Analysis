@@ -4,7 +4,8 @@ function plotDataVar(data, dependent_variable, type)
 %   plotDataVar(DATA, DEPENDENT_VARIABLE) creates plots for
 %   DEPENDENT_VARIABLE in structure DATA. Specify plot TYPE if only
 %   a specific plot is desired. Supported plot types: 'simple' (1D),
-%   'errorbar' (1D), 'smooth' (2D), 'pixelated' (2D), and 'polar' (2D).
+%   'errorbar' (1D), 'smooth' (2D), 'pixelated' (2D), 'polar' (2D), and
+%   'scatter' (3D scatter plot of 2D).
 
 if isempty(fields(data))
     return
@@ -172,6 +173,20 @@ if length(dep_rels) == 2
                    ' [', data.Timestamp, ']']}, 'FontSize', 10)
         end
         savePlot([plot_filename, extra_filename, '_pixelated']);
+    end
+    if strcmp(type, 'scatter')
+        createFigure('left');
+        plot3DSimple(indep_vals1, indep_vals2, dep_vals');
+        xlabel([strrep(indep_name1, '_', ' '), xunits], 'FontSize', 14)
+        ylabel([strrep(indep_name2, '_', ' '), yunits], 'FontSize', 14)
+        if exist('plot_title', 'var')
+            title(plot_title, 'FontSize', 10)
+        else
+            title({[full_dep_name, zunits, ':'],...
+                   [strrep(filename, '_', '\_'), ext,...
+                   ' [', data.Timestamp, ']']}, 'FontSize', 10)
+        end
+        savePlot([plot_filename, extra_filename, '_3d_scatter']);
     end
 end
 if length(dep_rels) > 2 && strcmp(type, '')
