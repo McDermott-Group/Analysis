@@ -1,0 +1,7 @@
+Rothwarf Taylor Equations
+Discretize energy states, add coupling between different energy levels
+Use N as #particles/Volume/Energy (in this case, you would multiply by deltaE or the energy discretization and multiply by unit volume to get a real number of particles).
+
+Need timesscale: tau-qp relax (emit phonon)
+tau-B (pair breaking time)
+tau-esc (escape time for phonons into substrate) 
