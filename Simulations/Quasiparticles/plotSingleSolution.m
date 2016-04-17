@@ -1,12 +1,13 @@
 function plotSingleSolution
-%PLOTSINGLESOLUTION Plot the quasiparticle dynamics solution. 
-%   Detailed explanation goes here
+%PLOTSINGLESOLUTION Generate the quasiparticle dynamics plots.
 
-Tph = 0.050; % K
-V = 1.2; % in units of \Delta
-r = 0.1;
-tspan = [-10, -9]; % in units of tau0
-[t, e, ~, f, n_qp] = simplest0DModel(r, V, Tph, tspan);
+Tph = .1; % K
+V = [2.8, 3]; % in units of \Delta
+r = 2 * 1.7 * 1e-10 / (sqrt(8) - sqrt(2.8^2 - 1));
+
+tspan = [-30000, 0]; % in units of tau0
+
+[t, e, ~, f, n_qp] = noTrapping0DModel(r, V, Tph, tspan);
 
 figure
 plot(t, n_qp, 'LineWidth', 3)
