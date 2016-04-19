@@ -1,11 +1,11 @@
 function plotTimeConstantPowerDependence
 %plotTimeConstantPowerDependence Plot the time constant bias dependence.
 
-r = 2 * 1.7 * 1e-10 / (sqrt(8) - sqrt(2.8^2 - 1)); % in units of 1 / \tau_0
-                                      %(assuming n_{qp} in units of n_{cp})
+r = 1e-8; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+c = 1e-3; % trapping rate in units of 1 / \tau_0
 V = 1.5:.5:20; % in units of \Delta
 Tph = 0.050; % K
-tspan = [-40000, 40000]; % in units of \tau_0
+tspan = [-5000, 5000]; % in units of \tau_0
 
 tau_p = NaN(size(V));
 err_p = NaN(size(V));
@@ -13,7 +13,8 @@ tau_r = NaN(size(V));
 err_r = NaN(size(V));
 P = NaN(size(V));
 for k = 1:length(V)
-    [t, ~, ~, ~, n_qp, ~, ~, P(k)]  = noTrapping0DModel(r, V(k), Tph, tspan);
+    % [t, ~, ~, ~, n_qp, ~, ~, P(k)]  = noTrapping0DModel(r, V(k), Tph, tspan);
+    [t, ~, ~, ~, n_qp, ~, ~, P(k)]  = simpleTrapping0DModel(r, c, V(k), Tph, tspan);
     [tau_p(k), err_p(k), tau_r(k), err_r(k)] = extractTimeConstants(t, n_qp, false);
 end
 
@@ -25,8 +26,10 @@ errorbar(V, tau_r, err_r, '.', 'Color', [0    0.4470    0.7410],...
     'LineWidth', 3)
 xlabel('Bias Voltage (\Delta/e)', 'FontSize', 14)
 ylabel('Time Constant (\tau_0)', 'FontSize', 14)
-legend('poisonning', 'relaxation')
-title('Time Constants')
+legend('poisoning', 'recovery')
+title({'Time Constants',...
+      ['injection rate r = ', num2str(r), '/\tau_0, ',...
+       'trapping rate c = ', num2str(c), '/\tau_0']})
 set(gca, 'yscale', 'Log')
 grid on
 grid minor
@@ -40,8 +43,10 @@ errorbar(P, tau_r, err_r, '.', 'Color', [0    0.4470    0.7410],...
     'LineWidth', 3)
 xlabel('Injection Power (n_{\rm cp}\Delta/\tau_0)', 'FontSize', 14)
 ylabel('Time Constant (\tau_0)', 'FontSize', 14)
-legend('poisonning', 'relaxation')
-title('Time Constants')
+legend('poisoning', 'recovery')
+title({'Time Constants',...
+      ['injection rate r = ', num2str(r), '/\tau_0, ',...
+       'trapping rate c = ', num2str(c), '/\tau_0']})
 set(gca, 'yscale', 'Log')
 grid on
 grid minor

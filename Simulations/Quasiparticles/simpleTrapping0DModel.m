@@ -1,12 +1,15 @@
 function [t, e, n, f, n_qp, n_qp_T, r_qp, P] = ...
-    noTrapping0DModel(r, V, Tph, tspan)
-%noTrapping0DModel Simplest model without any quasiparticle traps.
+    simpleTrapping0DModel(r, c, V, Tph, tspan)
+%simpleTrapping0DModel Simplest model with quasiparticle traps.
 % [t, e, n, f, n_qp, n_qp_T, r_qp, P] = noTrapping0DModel(r, V, Tph, tspan)
 %   computes the quasiparticle dynamics in a simple model without any
 %   quasiparticle traps.
 %   The input parameters:
-%      r is injection rate in 1/\tau_0,
-%      V is voltage in \Delta,
+%      r is the injection rate in 1/\tau_0, assuming n and n_qp in units
+%      of n_{cp},
+%      c is the trapping (capture) rate in 1/\tau_0, assuming n and n_qp
+%      in units of n_{cp},
+%      V is the applied voltage in \Delta,
 %      Tph is phonon temperature in K,
 %      tspan should be in form of [ti, tf] in units of \tau_0 where ti is
 %      the inital time and tf is the final time of the integration (it is
@@ -22,10 +25,10 @@ function [t, e, n, f, n_qp, n_qp_T, r_qp, P] = ...
 %      length(n_qp) == length(t),
 %      n_qp_T is the thermal quasiparticle density
 %      length(n_qp_T) == lenght(t),
-%      r_qp is the total injection rate in 1 / \tau_0, assuming n in
-%      units n_{cp}, single number,
-%      P is the total injected power in \Delta / \tau_0, assuming n in
-%      units n_{cp}.
+%      r_qp is the total injection rate in 1 / \tau_0, assuming n and n_qp
+%      in units n_{cp}, single number,
+%      P is the total injected power in \Delta / \tau_0, assuming n and
+%      n_qp in units n_{cp}, single number.
 % Constants.
 kB = 1.38064852e-23; % J / K
 eV2J = 1.602176565e-19; % J / eV 
@@ -41,7 +44,7 @@ Tph = kB * Tph / delta; % in units of \Delta
 Tc = 1 / 1.764; % \delta/(K_B * T_c) = 1.764 at T = 0 K BCS result
 
 % Number of energy bins.
-N = 400;
+N = 500;
 % Maximum energy.
 max_e = max(V) + 2;
 
@@ -89,9 +92,11 @@ else
 end
 R = R .* rho_de;
 
+Gt = c * Gtrapping(e, Tph, Tc);
+
 % Solve the ODE.
 options = odeset('AbsTol', 1e-20);
-[t, n] = ode15s(@(t, n) quasiparticleODE(t, n, rho_de, Gs, Gr, R),...
+[t, n] = ode15s(@(t, n) quasiparticleODE(t, n, rho_de, Gs, Gr, R, Gt),...
     tspan, n0, options);
 
 % Occupational numbers.
@@ -122,7 +127,17 @@ function normalized_density = rho(e)
     normalized_density = e ./ sqrt(e.^2 - 1);
 end
 
-function ndot = quasiparticleODE(t, n, rho_de, Gs, Gr, R)
+function Gt = Gtrapping(e, Tph, Tc)
+    de = 1e-5; % in units of \Delta
+    e_subgap = de/2:de:1-de/2;
+    [e_subgap, ei] = meshgrid(e_subgap, e);
+
+    Gt = (ei - e_subgap).^2 ./ abs(exp(-(ei - e_subgap) / Tph) - 1) / Tc^3;
+    Gt(~isfinite(Gt)) = 0;
+    Gt = sum(Gt, 2) * de;
+end
+
+function ndot = quasiparticleODE(t, n, rho_de, Gs, Gr, R, Gt)
     Gs = Gs .* (1 - ones(length(n), 1) * (n ./ rho_de)');
     if t > 0
         R = 0;
@@ -130,5 +145,8 @@ function ndot = quasiparticleODE(t, n, rho_de, Gs, Gr, R)
     % Eq. (2) in J. Wenner and J. M. Martinis: Erratum to
     % M. Lenander et al., Phys. Rev. B 84, 024501 (2011).
     % http://web.physics.ucsb.edu/~martinisgroup/papers/Lenander2010erratum.pdf
-    ndot = Gs' * n - sum(Gs, 2) .* n - 2 * n .* (Gr * n) + R;
+    % The last term is due to quasiparticle trapping assuming a simple
+    % model such that a quasiparticle is trapped if it scatters below
+    % the gap.
+    ndot = Gs' * n - sum(Gs, 2) .* n - 2 * n .* (Gr * n) + R - Gt .* n;
 end
