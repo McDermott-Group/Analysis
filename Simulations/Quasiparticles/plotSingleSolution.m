@@ -2,12 +2,12 @@ function plotSingleSolution
 %PLOTSINGLESOLUTION Generate the quasiparticle dynamics plots.
 
 % r = 1e-8; % in units of 1 / \tau_0
-r = 0 * 2 * 1.7 * 1e-10 / (sqrt(8) - sqrt(2.8^2 - 1));
+r = 2 * 1.7 * 1e-10 / (sqrt(8) - sqrt(2.8^2 - 1));
                                       %(assuming n_{qp} in units of n_{cp})
-c = 0 * 1e-3; % trapping rate in units of 1 / \tau_0
+c = 1e-3; % trapping rate in units of 1 / \tau_0
 V = 2; %[2.8, 3]; % in units of \Delta
-Tph = .140; % K
-tspan = [-1e5, 10000]; % in units of \tau_0
+Tph = .050; % K
+tspan = [-10000, 10000]; % in units of \tau_0
 
 % [t, e, ~, f, n_qp] = noTrapping0DModel(r, V, Tph, tspan);
 % [t, e, ~, f, n_qp] = simpleTrapping0DModel(r, c, V, Tph, tspan);
@@ -31,6 +31,6 @@ ylabel('Energy (\epsilon/\Delta)', 'FontSize', 14)
 title({'Occupational Number f(\epsilon) Time Evolution',...
        '(injection at t < 0, recovery at t > 0)'})
 
-% extractTimeConstants(t, n_qp, true);
+extractTimeConstants(t, n_qp, true);
 
 end

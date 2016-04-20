@@ -48,7 +48,7 @@ Tc = 1 / 1.764; % \delta/(K_B * T_c) = 1.764 at T = 0 K BCS result
 % TD = kB * TD/ delta; % in units of \Delta
 
 % Number of energy bins.
-N = 1000;
+N = 1024;
 % Maximum energy.
 max_e = max(V) + 2;
 
@@ -170,8 +170,8 @@ function Gb = Gbreaking(e, Tph)
     
     Z1_0 = 1.43; % See Table I in S. B. Kaplan et al.,
     % Phys. Rev. B 14, 4854 (1976). 
-    % Gb = (2 / Z1_0) * sum(Gb, 2) * dOmega;
-    Gb = sum(Gb, 2) * dOmega;
+    Gb = (2 / Z1_0) * sum(Gb, 2) * dOmega;
+    % Gb = sum(Gb, 2) * dOmega;
 end
 
 
