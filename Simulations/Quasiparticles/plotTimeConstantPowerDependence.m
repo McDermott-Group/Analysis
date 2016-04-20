@@ -1,7 +1,7 @@
 function plotTimeConstantPowerDependence
 %plotTimeConstantPowerDependence Plot the time constant bias dependence.
 
-r = 1e-8; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+r = 1e-10; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
 c = 1e-3; % trapping rate in units of 1 / \tau_0
 V = 1.5:.5:20; % in units of \Delta
 Tph = 0.050; % K

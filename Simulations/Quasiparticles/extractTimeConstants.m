@@ -35,6 +35,7 @@ end
 
 % Extract recombination time constant.
 t_r = t(t > 0);
+t_r = t_r - min(t_r);
 n_r = n_qp(t > 0);
 
 f_r = fit(t_r(:), n_r(:), 'a * exp(-b * x)',...
