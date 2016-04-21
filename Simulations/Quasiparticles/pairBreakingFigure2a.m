@@ -5,7 +5,7 @@ function pairBreakingFigure2a
 
 r = 2 * 1.7 * 1e-10 / (sqrt(8) - sqrt(2.8^2 - 1)); % in units of 1 / \tau_0
                                       %(assuming n_{qp} in units of n_{cp})
-c = 1e-3; % trapping rate in units of 1 / \tau_0
+c = 0; % trapping rate in units of 1 / \tau_0
 V = [2.8, 3.0]; % in units of \Delta
 Tph = 0:.0025:.190; % K
 tspan = [-30000, 0]; % in units of \tau_0
