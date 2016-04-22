@@ -2,16 +2,21 @@ function plotSingleSolution
 %PLOTSINGLESOLUTION Generate the quasiparticle dynamics plots.
 
 % r = 1e-8; % in units of 1 / \tau_0
-r = 2 * 1.7 * 1e-10 / (sqrt(8) - sqrt(2.8^2 - 1));
-                                      %(assuming n_{qp} in units of n_{cp})
-c = 1e-3; % trapping rate in units of 1 / \tau_0
-V = 2; %[2.8, 3]; % in units of \Delta
-Tph = .050; % K
-tspan = [-10000, 10000]; % in units of \tau_0
+% r = 2 * 1.7 * 1e-10 / (sqrt(8) - sqrt(2.8^2 - 1));
+%                                       %(assuming n_{qp} in units of n_{cp})
+% c = 1; % trapping rate in units of 1 / \tau_0
+% V = 2; %[2.8, 3]; % in units of \Delta
+% Tph = .050; % K
+% tspan = [-10000, 10000]; % in units of \tau_0
+
+r = .5e-7; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+c = .05; % trapping rate in units of 1 / \tau_0
+V = 10; % in units of \Delta
+Tph = 0.051; % K
+tspan = [-500, 500]; % in units of \tau_0
 
 % [t, e, ~, f, n_qp] = noTrapping0DModel(r, V, Tph, tspan);
-% [t, e, ~, f, n_qp] = simpleTrapping0DModel(r, c, V, Tph, tspan);
-[t, e, ~, f, n_qp] = pairBreakingTrapping0DModel(r, c, V, Tph, tspan);
+[t, e, ~, f, n_qp] = simpleTrapping0DModel(Tph, tspan, V, r, c);
 
 figure
 plot(t, n_qp, 'LineWidth', 3)

@@ -14,7 +14,8 @@ n_qp_eq = nan(size(Tph));
 ax = gca;
 ax.ColorOrderIndex = 2; 
 for k = 1:length(Tph)
-    [~, e, ~, f, n_qp, ~, r_qp] = noTrapping0DModel(r, V, Tph(k), tspan);
+    % [~, e, ~, f, n_qp, ~, r_qp] = noTrapping0DModel(r, V, Tph(k), tspan);
+    [~, e, ~, f, n_qp, ~, r_qp] = simpleTrapping0DModel(Tph(k), tspan, V, r, 0);
     n_qp_eq(k) = n_qp(end);
     plot(e, f(end, :), 'LineWidth', 3)
 end
