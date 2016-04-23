@@ -1,6 +1,6 @@
 function [t, e, n, f, n_qp, n_qp_T, r_qp, P] = ...
-    simpleTrapping0DModel(Tph, tspan, V, r, c, plot_flag)
-%simpleTrapping0DModel Simple trapping 0D model.
+    simpleTrappingQuasi0DModel(Tph, tspan, V, r, c, plot_flag)
+%ssimpleTrappingQuasi0DModel Simple trapping, quasi-0D model.
 % [t, e, n, f, n_qp, n_qp_T, r_qp, P] = 
 %   full0DModel(Tph, tspan, V, r, c, plot_flag)
 %   computes the quasiparticle dynamics in a simple model without any
@@ -32,6 +32,10 @@ function [t, e, n, f, n_qp, n_qp_T, r_qp, P] = ...
 %      P is the total injected power in \Delta / \tau_0, assuming n and
 %      n_qp in units n_{cp}, single number.
 
+if ~exist('plot_flag', 'var')
+    plot_flag = false;
+end
+
 % Constants.
 kB = 1.38064852e-23; % J / K
 eV2J = 1.602176565e-19; % J / eV 
@@ -51,7 +55,7 @@ Tc = 1 / 1.764; % \delta/(K_B * T_c) = 1.764 at T = 0 K BCS result
 % TD = kB * TD/ delta; % in units of \Delta
 
 % Number of energy bins.
-N = 300;
+N = 500;
 % Maximum energy.
 max_e = max(V) + 1;
 
@@ -72,28 +76,41 @@ Gr = Grecombination(e, Tph, Tc);
 
 Gtr = Gtrapping(e, Tph, Tc, c);
 
-R = Injection(e, rho_de, V, r);
-
-% Initial condition n0.
-f0 = 1 ./ (exp(e / Tph) + 1);
-n0 = rho_de .* f0;
+R = Injection(e, de, V, r, Tc, plot_flag);
 
 % Generate a plot.
-if exist('plot_flag', 'var') && plot_flag
+if plot_flag
+    f0 = 1 ./ (exp(e / Tph) + 1);
+    n0 = rho_de .* f0;
     figure
-    plot(e,  Gs_in * n0, e,  Gs_out .* n0,...
-         e, n0 .* ( Gr * n0),...
-         e, Gtr .* n0, e, R, 'LineWidth', 2)
+    plot(e,  Gs_in * n0 ./ de, e,  Gs_out .* n0 ./ de,...
+         e, n0 .* ( Gr * n0) ./ de,...
+         e, Gtr .* n0 ./ de, e, R ./ de, 'LineWidth', 2)
     xlabel('Energy \epsilon (\Delta)', 'FontSize', 14)
-    ylabel('Rate (1/\tau_0)', 'FontSize', 14)
+    ylabel('Rate per Unit Energy (1/\tau_0\Delta)', 'FontSize', 14)
     legend({'G^{in}_{scattering}', 'G^{out}_{scattering}',...
             'G_{recombination}', 'G_{trapping}', 'R_{injection}'})
     title('Absolute Term Strengths at Thermal Equilibrium')
     set(gca, 'yscale', 'Log')
     axis tight
     grid on
+    
+    figure
+    plot(e, r * rho(e), e, R ./ de, 'LineWidth', 2)
+    xlabel('Energy \epsilon (\Delta)', 'FontSize', 14)
+    ylabel('Injection Rate per Unit Energy (1/\tau_0\Delta)', 'FontSize', 14)
+    legend({'R_{contact}', 'R_{phonon}'})
+    title('Absolute Term Strengths at Thermal Equilibrium')
+    set(gca, 'yscale', 'Log')
+    axis tight
+    grid on
     return
 end
+
+% Initial condition n0.
+% f0 = 1 ./ (exp(e / Tph) + 1);
+% n0 = rho_de .* f0;
+n0 = zeros(size(e));
 
 % Solve the ODE.
 options = odeset('AbsTol', 1e-20);
@@ -175,19 +192,44 @@ function Gtr = Gtrapping(e, Tph, Tc, c)
     Gtr = c * trapz(e_gap, Gtr, 2);
 end
 
-function R = Injection(e, rho_de, V, r)
-    % It is assmumed that the injection is happening at t < 0 and
-    % the relaxation at t > 0.
-    % Injection voltage.
-    R = zeros(size(e));
-    if length(V) == 2
-        % Injection into an energy band.
-        R(V(1) < e & e <= V(2)) = r;
-    else
-        % Realistic injection.
-        R(e <= V) = r;
+function R = Injection(e_inj, de_inj, V, r, Tc, plot_flag)
+    N = 1e4;
+    epsilon = 1e-5;
+    Omega = linspace((V - 1) / (10 * N), V - 1, N);
+    N_Omega = zeros(size(Omega));
+    for k = 1:length(Omega)
+        if 1 + Omega(k) < V
+            e = linspace(1 + epsilon + Omega(k), V, N);
+            dN_Omega = Omega(k)^2 * rho(e - Omega(k)) .* rho(e) .*...
+                (1 - 1 ./ (e .* (Omega(k) - e)));
+            N_Omega(k) = r * trapz(e, dN_Omega) / Tc^3;
+        end
     end
-    R = R .* e.^2 .* rho_de;
+    % Generate a plot.
+    if exist('plot_flag', 'var') && plot_flag
+        figure
+        plot(Omega, N_Omega / r, 'LineWidth', 2)
+        xlabel('Phonon Energy \Omega (\Delta)', 'FontSize', 14)
+        ylabel('dN/d\Omega (1/\Delta)', 'FontSize', 14)
+        title('Non-Equilibrium Phonon Spectrum')
+        axis tight
+        grid on
+    end
+    % N_Omega = N_Omega ./ median(diff(N_Omega));
+    R = zeros(size(e_inj));
+    for k = 1:length(e_inj)
+        if e_inj(k) <= V - 1
+           indices = Omega > e_inj(k) + 1 + epsilon;
+           if length(Omega(indices)) > 1
+                dR = Omega(indices).^2 .* N_Omega(indices) .*...
+                    (e_inj(k) * (Omega(indices) - e_inj(k)) + 1) ./...
+                    (sqrt(e_inj(k)^2 - 1) .*...
+                    sqrt((Omega(indices) - e_inj(k)).^2 - 1));
+                R(k) = trapz(Omega(indices), dR);
+            end
+        end
+    end
+    R = R .* de_inj / Tc^3;
 end
 
 function ndot = quasiparticleODE(t, n, Gs_in, Gs_out, Gr, Gtr, R)

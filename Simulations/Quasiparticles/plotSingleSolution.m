@@ -9,14 +9,15 @@ function plotSingleSolution
 % Tph = .050; % K
 % tspan = [-10000, 10000]; % in units of \tau_0
 
-r = .5e-7; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-c = .05; % trapping rate in units of 1 / \tau_0
-V = 10; % in units of \Delta
+r = 1.7e-7; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+c = .01; % trapping rate in units of 1 / \tau_0
+V = 8; % in units of \Delta
 Tph = 0.051; % K
-tspan = [-500, 500]; % in units of \tau_0
+tspan = [-50, 50]; % in units of \tau_0
 
 % [t, e, ~, f, n_qp] = noTrapping0DModel(r, V, Tph, tspan);
-[t, e, ~, f, n_qp] = simpleTrapping0DModel(Tph, tspan, V, r, c);
+% [t, e, ~, f, n_qp] = simpleTrapping0DModel(Tph, tspan, V, r, c);
+[t, e, ~, f, n_qp] = simpleTrappingQuasi0DModel(Tph, tspan, V, r, c);
 
 figure
 plot(t, n_qp, 'LineWidth', 3)

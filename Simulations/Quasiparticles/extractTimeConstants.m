@@ -13,7 +13,7 @@ pos = find(n_p == min(n_p(n_p > max(n_p) / exp(1))));
 t_start = t_p(pos(1));
 
 f_p = fit(t_p(:), n_p(:), 'a * (1 - exp(-b * x))',...
-    'StartPoint', [max(n_p) , 1 / t_start], 'TolFun', 1e-20);
+    'StartPoint', [max(n_p) , 1 / t_start], 'TolFun', 1e-25);
 
 tau_p = 1 / f_p.b;
 ci_p = confint(f_p);
@@ -39,8 +39,9 @@ t_r = t(t > 0);
 t_r = t_r - min(t_r);
 n_r = n_qp(t > 0);
 
-f_r = fit(t_r(:), n_r(:), 'a * exp(-b * x) + c',...
-    'StartPoint', [max(n_r), f_p.b, min(n_r)], 'TolFun', 1e-20);
+f_r = fit(t_r(:), n_r(:), 'a * exp(-b * x)',...
+    'StartPoint', [max(n_r), .9 * f_p.b],...
+    'TolFun', 1e-25);
     
 tau_r = 1 / f_r.b;
 ci_r = confint(f_r);
@@ -51,7 +52,7 @@ if plot_flag
     figure
     hold on
     plot(t_r, n_r, 'LineWidth', 2)
-    plot(t_r, f_r.a * exp(-t_r / tau_r) + f_r.c, 'LineWidth', 2)
+    plot(t_r, f_r.a * exp(-t_r / tau_r), 'LineWidth', 2)
     xlabel('Time (\tau_0)', 'FontSize', 14)
     ylabel('n_{\rm qp} / n_{\rm cp}', 'FontSize', 14)
     title('Recovery Fit')

@@ -1,6 +1,6 @@
 function [t, e, n, f, n_qp, n_qp_T, r_qp, P] = ...
     full0DModel(Tph, tspan, V, r, c, plot_flag)
-%full0DModel Full 0D mode.
+%full0DModel Full 0D model.
 % [t, e, n, f, n_qp, n_qp_T, r_qp, P] = full0DModel(Tph, tspan, V, r, c)
 %   computes the quasiparticle dynamics in a simple model without any
 %   quasiparticle traps.
