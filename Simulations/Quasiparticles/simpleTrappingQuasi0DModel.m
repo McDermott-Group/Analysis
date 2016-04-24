@@ -1,5 +1,5 @@
 function [t, e, n, f, n_qp, n_qp_T, r_qp, P] = ...
-    simpleTrappingQuasi0DModel(Tph, tspan, V, r, c, plot_flag)
+    simpleTrappingQuasi0DModel(Tph, tspan, V, r, c, d, plot_flag)
 %ssimpleTrappingQuasi0DModel Simple trapping, quasi-0D model.
 % [t, e, n, f, n_qp, n_qp_T, r_qp, P] = 
 %   full0DModel(Tph, tspan, V, r, c, plot_flag)
@@ -15,7 +15,8 @@ function [t, e, n, f, n_qp, n_qp_T, r_qp, P] = ...
 %      r is the injection rate in 1/\tau_0, assuming n and n_qp in units
 %      of n_{cp},
 %      c is the trapping (capture) rate in 1/\tau_0, assuming n and n_qp
-%      in units of n_{cp}.
+%      in units of n_{cp},
+%      d is the phonon emission coefficient tue to relaxation below the gap,
 %      plot_flag is an optional parameter that controls plot creation.
 %   The output parameters:
 %      t is time in \tau_0,
@@ -76,7 +77,7 @@ Gr = Grecombination(e, Tph, Tc);
 
 Gtr = Gtrapping(e, Tph, Tc, c);
 
-R = Injection(e, de, V, r, Tc, plot_flag);
+R = Injection(e, de, V, r, d, Tc, plot_flag);
 
 % Generate a plot.
 if plot_flag
@@ -100,7 +101,6 @@ if plot_flag
     xlabel('Energy \epsilon (\Delta)', 'FontSize', 14)
     ylabel('Injection Rate per Unit Energy (1/\tau_0\Delta)', 'FontSize', 14)
     legend({'R_{contact}', 'R_{phonon}'})
-    title('Absolute Term Strengths at Thermal Equilibrium')
     set(gca, 'yscale', 'Log')
     axis tight
     grid on
@@ -192,17 +192,24 @@ function Gtr = Gtrapping(e, Tph, Tc, c)
     Gtr = c * trapz(e_gap, Gtr, 2);
 end
 
-function R = Injection(e_inj, de_inj, V, r, Tc, plot_flag)
+function R = Injection(e_inj, de_inj, V, r, d, Tc, plot_flag)
     N = 1e4;
     epsilon = 1e-5;
-    Omega = linspace((V - 1) / (10 * N), V - 1, N);
+    Omega = linspace(epsilon, V, N);
     N_Omega = zeros(size(Omega));
     for k = 1:length(Omega)
-        if 1 + Omega(k) < V
+        if Omega(k) < V - 1
             e = linspace(1 + epsilon + Omega(k), V, N);
             dN_Omega = Omega(k)^2 * rho(e - Omega(k)) .* rho(e) .*...
                 (1 - 1 ./ (e .* (Omega(k) - e)));
             N_Omega(k) = r * trapz(e, dN_Omega) / Tc^3;
+        end
+        le = max(1, Omega(k));
+        he = min(V, Omega(k) + 1);
+        if le < he
+            e = linspace(le + epsilon, he, N);
+            dN_Omega = Omega(k)^2 * rho(e);
+            N_Omega(k) = N_Omega(k) + d * r * trapz(e, dN_Omega) / Tc^3;
         end
     end
     % Generate a plot.
@@ -215,7 +222,6 @@ function R = Injection(e_inj, de_inj, V, r, Tc, plot_flag)
         axis tight
         grid on
     end
-    % N_Omega = N_Omega ./ median(diff(N_Omega));
     R = zeros(size(e_inj));
     for k = 1:length(e_inj)
         if e_inj(k) <= V - 1

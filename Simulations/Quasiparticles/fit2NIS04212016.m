@@ -23,11 +23,13 @@ E_r_n = data.NearTrapRecovery(:, 2);
 tau_r_n = data.NearTrapRecovery(:, 3);
 nqp_r_n = data.NearTrapRecovery(:, 4);
 
-r = 1.67e-7; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-c = .0095; % trapping rate in units of 1 / \tau_0
+r = .5e-9; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+c = 0.01; % trapping rate in units of 1 / \tau_0
+d = 1;
 V = [E_p_n; E_r_n; 3.5; 4.2; 6.7]; % in units of \Delta
+% V = V(V > 3);
 Tph = 0.051; % K
-tspan = [-200, 200]; % in units of \tau_0
+tspan = [-100, 100]; % in units of \tau_0
 
 tau_p = NaN(size(V));
 err_p = NaN(size(V));
@@ -37,7 +39,7 @@ nqp = NaN(size(V));
 P = NaN(size(V));
 for k = 1:length(V)
     % [t, ~, ~, ~, n_qp, ~, ~, P(k)] = simpleTrapping0DModel(Tph, tspan, V(k), r, c);
-    [t, ~, ~, ~, n_qp, ~, ~, P(k)] = simpleTrapping0DModel(Tph, tspan, V(k), r, c);
+    [t, ~, ~, ~, n_qp, ~, ~, P(k)] = simpleTrappingQuasi0DModel(Tph, tspan, V(k), r, c, d);
     [tau_p(k), err_p(k), tau_r(k), err_r(k)] = extractTimeConstants(t, n_qp, false);
     nqp(k) = max(n_qp);
 end
@@ -67,7 +69,8 @@ legend({'poisoning, near trap', 'recovery, near trap',...
     'poisoning simulation', 'recovery simulation'},...
     'Location', 'SouthWest')
 title({'Time Constants', ['r = ', num2str(r, '%.2e'),...
-    ', c = ', num2str(c, '%.2e'), ', F = ', num2str(F, '%.2f')]})
+    ', c = ', num2str(c, '%.2e'), ', d = ', num2str(d, '%.2e'),...
+    ', F = ', num2str(F, '%.2f')]})
 axis tight
 grid on
  
