@@ -161,10 +161,6 @@ function Gr = Grecombination(e, Tph, Tc)
         Np(ei + ej, Tph) / Tc^3;
 end
 
-% function Gtr = Gtrapping(e, Tph, Tc, c)
-%     Gtr = c / Tc^3;
-% end
-
 function Gtr = Gtrapping(e, Tph, Tc, c)
     % Simple model for the trapping matix.
     de = .5e-4; % in units of \Delta

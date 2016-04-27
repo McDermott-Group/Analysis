@@ -9,9 +9,9 @@ function plotSingleSolution
 % Tph = .050; % K
 % tspan = [-10000, 10000]; % in units of \tau_0
 
-r = 5e-8; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-c = 0; % trapping rate in units of 1 / \tau_0
-d = 0.1;
+r = .2e-9; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+c = 0.005; % trapping rate in units of 1 / \tau_0
+d = 1;
 V = 2.2; % in units of \Delta
 Tph = 0.051; % K
 tspan = [-300, 300]; % in units of \tau_0
