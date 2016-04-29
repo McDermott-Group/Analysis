@@ -108,14 +108,14 @@ if plot_flag
 end
 
 % Initial condition n0.
-% f0 = 1 ./ (exp(e / Tph) + 1);
-% n0 = rho_de .* f0;
+f0 = 1 ./ (exp(e / Tph) + 1);
+n0_T = rho_de .* f0;
 n0 = zeros(size(e));
 
 % Solve the ODE.
 options = odeset('AbsTol', 1e-20);
 [t, n] = ode15s(@(t, n) quasiparticleODE(t, n,...
-    Gs_in, Gs_out, Gr, Gtr, R), tspan, n0, options);
+    Gs_in, Gs_out, Gr, Gtr, R, n0_T), tspan, n0, options);
 
 % Occupational numbers.
 f = n ./ (ones(length(t), 1) * rho_de');
@@ -188,59 +188,71 @@ function Gtr = Gtrapping(e, Tph, Tc, c)
 end
 
 function R = Injection(e_inj, de_inj, V, r, d, Tc, plot_flag)
-    N = 2e4;
-    
-    epsilon = 1e-4;
-    Omega = linspace(0, V, N);
-    N_Omega = zeros(size(Omega));
-    for k = 1:length(Omega)
+%     N = 2e4;
+%     
+%     epsilon = 1e-4;
+%     Omega = linspace(0, V, N);
+%     N_Omega = zeros(size(Omega));
+%     for k = 1:length(Omega)
+
 %         if Omega(k) < V - 1
 %             e = linspace(1 + epsilon + Omega(k), V, N);
 %             dN_Omega = Omega(k)^2 * rho(e - Omega(k)) .* rho(e) .*...
 %                 (1 - 1 ./ (e .* (Omega(k) - e)));
 %             N_Omega(k) = r * trapz(e, dN_Omega) / Tc^3;
 %         end
-        le = max(1 + epsilon, Omega(k));
-        he = min(V, Omega(k) + 1);
-        if le < he
-            e = linspace(le, he, N);
-            dN_Omega = Omega(k)^2 * rho(e);
-            N_Omega(k) = N_Omega(k) + d * r * trapz(e, dN_Omega) / Tc^3;
-        end
-    end
-    % Generate a plot.
-    if exist('plot_flag', 'var') && plot_flag
-        figure
-        plot(Omega, N_Omega / r, 'LineWidth', 2)
-        xlabel('Phonon Energy \Omega (\Delta)', 'FontSize', 14)
-        ylabel('dN/d\Omega (1/\Delta)', 'FontSize', 14)
-        title('Non-Equilibrium Phonon Spectrum')
-        axis tight
-        grid on
-    end
+
+%         le = max(1 + epsilon, Omega(k));
+%         he = min(V, Omega(k) + 1);
+%         if le < he
+%             e = linspace(le, he, N);
+%             dN_Omega = Omega(k)^2 * rho(e);
+%             N_Omega(k) = N_Omega(k) + d * r * trapz(e, dN_Omega) / Tc^3;
+%         end
+%     end
+%     % Generate a plot.
+%     if exist('plot_flag', 'var') && plot_flag
+%         figure
+%         plot(Omega, N_Omega / r, 'LineWidth', 2)
+%         xlabel('Phonon Energy \Omega (\Delta)', 'FontSize', 14)
+%         ylabel('dN/d\Omega (1/\Delta)', 'FontSize', 14)
+%         title('Non-Equilibrium Phonon Spectrum')
+%         axis tight
+%         grid on
+%     end
+%     R = zeros(size(e_inj));
+%     for k = 1:length(e_inj)
+%         if e_inj(k) <= V - 1
+%            indices = Omega > (e_inj(k) + 1 + epsilon);
+%            if length(Omega(indices)) > 1
+%                 dR = Omega(indices).^2 .* N_Omega(indices) .*...
+%                     (e_inj(k) * (Omega(indices) - e_inj(k)) + 1) ./...
+%                     (sqrt(e_inj(k)^2 - 1) .*...
+%                     sqrt((Omega(indices) - e_inj(k)).^2 - 1));
+%                 R(k) = trapz(Omega(indices), dR);
+%             end
+%         end
+%     end
+%     R = R .* de_inj / Tc^3;
+   
     R = zeros(size(e_inj));
-    for k = 1:length(e_inj)
-        if e_inj(k) <= V - 1
-           indices = Omega > (e_inj(k) + 1 + epsilon);
-           if length(Omega(indices)) > 1
-                dR = Omega(indices).^2 .* N_Omega(indices) .*...
-                    (e_inj(k) * (Omega(indices) - e_inj(k)) + 1) ./...
-                    (sqrt(e_inj(k)^2 - 1) .*...
-                    sqrt((Omega(indices) - e_inj(k)).^2 - 1));
-                R(k) = trapz(Omega(indices), dR);
-            end
-        end
+    if length(V) == 2
+        % Injection into an energy band.
+        R(V(1) < e_inj & e_inj <= V(2)) = r;
+    else
+        % Realistic injection.
+        R(e_inj <= V) = r;
     end
-    R = R .* de_inj / Tc^3;
-    
-    figure
-    plot(e_inj, R, 'Linewidth', 2)
-    axis tight
-    xlabel('Energy')
-    ylabel('Source Term R (1/\Delta)')
+    R = R .* e_inj.^3 .* rho(e_inj) .* de_inj;
+     
+%     figure
+%     plot(e_inj, R, 'Linewidth', 2)
+%     axis tight
+%     xlabel('Energy')
+%     ylabel('Source Term R (1/\Delta)')
 end
 
-function ndot = quasiparticleODE(t, n, Gs_in, Gs_out, Gr, Gtr, R)
+function ndot = quasiparticleODE(t, n, Gs_in, Gs_out, Gr, Gtr, R, n0_T)
     if t > 0
         R = 0;
     end
