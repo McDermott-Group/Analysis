@@ -13,7 +13,7 @@ pos = find(n_p == min(n_p(n_p > max(n_p) / exp(1))));
 t_start = t_p(pos(1));
 
 f_p = fit(t_p(:), n_p(:), 'a * (1 - exp(-b * x))',...
-    'StartPoint', [max(n_p) , 1 / t_start], 'TolFun', 1e-25);
+    'StartPoint', [max(n_p) , 1 / t_start], 'TolFun', 1e-35);
 
 tau_p = 1 / f_p.b;
 ci_p = confint(f_p);
@@ -40,8 +40,7 @@ t_r = t_r - min(t_r);
 n_r = n_qp(t > 0);
 
 f_r = fit(t_r(:), n_r(:), 'a * exp(-b * x)',...
-    'StartPoint', [max(n_r), f_p.b],...
-    'TolFun', 1e-25);
+    'StartPoint', [max(n_r), f_p.b], 'TolFun', 1e-35);
     
 tau_r = 1 / f_r.b;
 ci_r = confint(f_r);

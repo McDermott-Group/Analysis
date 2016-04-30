@@ -9,15 +9,17 @@ function plotSingleSolution
 % Tph = .050; % K
 % tspan = [-10000, 10000]; % in units of \tau_0
 
-r = 5e-10; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+rqp = 1e-5; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+rph = 1e-8;
 c = 0.00; % trapping rate in units of 1 / \tau_0
 V = 1.8; % in units of \Delta
 Tph = 0.051; % K
 tspan = [-200, 10]; % in units of \tau_0
 
-% [t, e, ~, f, n_qp] = noTrapping0DModel(r, V, Tph, tspan);
-% [t, e, ~, f, n_qp] = directInjection0DModel(Tph, tspan, V, r, c);
-[t, e, ~, f, n_qp] = phononMediatedQuasi0DModel(Tph, tspan, V, r, c);
+% [t, e, ~, f, n_qp] = noTrapping0DModel(rqp, V, Tph, tspan);
+% [t, e, ~, f, n_qp] = directInjection0DModel(Tph, tspan, V, rqp, c);
+% [t, e, ~, f, n_qp] = phononMediatedQuasi0DModel(Tph, tspan, V, rph, c);
+[t, e, ~, f, n_qp] = mixedInjectionQuasi0DModel(Tph, tspan, V, rqp, rph, c);
 
 figure
 plot(t, n_qp, 'LineWidth', 3)
