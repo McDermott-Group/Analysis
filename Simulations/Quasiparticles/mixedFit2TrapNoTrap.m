@@ -1,12 +1,12 @@
 function mixedFit2TrapNoTrap
 %mixedFit2TrapNoTrap Fitting to TrapNoTrap dataset.
 
-r_direct_no_tr = 1e-5; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-r_phonon_no_tr = 5e-10; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+r_direct_no_tr = 5e-6; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+r_phonon_no_tr = 1e-10; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
 c_no_tr = 0; % trapping rate in units of 1 / \tau_0
 
-r_direct_tr = 1e-5; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-r_phonon_tr = 5e-10; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+r_direct_tr = 5e-6; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+r_phonon_tr = 1e-10; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
 c_tr = .1; % trapping rate in units of 1 / \tau_0
 
 delta = 0.18e-3; % eV (aluminum superconducting gap)
