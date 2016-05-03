@@ -1,6 +1,6 @@
 function [t, e, n, f, n_qp, r_qp, P] = ...
-    mixedInjectionQuasi0DModel(Tph, tspan, V, rqp, rph, c, plot_flag)
-%mixedInjectionQuasi0DModel Simple trapping, quasi-0D model.
+    recombinationIncludedQuasi0DModel(Tph, tspan, V, rqp, rph, c, plot_flag)
+%recombinationIncludedQuasi0DModel Simple trapping, quasi-0D model.
 % [t, e, n, f, n_qp, r_qp, P] = 
 %   phononMediatedQuasi0DModel(Tph, tspan, V, r, c, plot_flag)
 %   computes the quasiparticle dynamics in a simple model without any
@@ -55,9 +55,9 @@ Tc = 1 / 1.764; % \delta/(K_B * T_c) = 1.764 at T = 0 K BCS result
 % TD = kB * TD/ delta; % in units of \Delta
 
 % Number of energy bins.
-N = 100;
+N = 200;
 % Maximum energy.
-max_e = max(V) + 1;
+max_e = 2 * max(V) + 1;
 
 % Assign the quasiparicle energies to the bins. Non-uniform energy
 % separation is implemented. For a close to uniform distribution set alpha
@@ -77,7 +77,7 @@ Gr = Grecombination(e, Tph, Tc);
 Gtr = Gtrapping(e, Tph, Tc, c);
 
 Rqp = DirectInjection(e, rho_de, V, rqp);
-Rph = PhononMediatedInjection(e, de, V, rph, Tc);
+Rph = RecombinationInjection(e, de, V, rph, Tc);
 
 % Generate a plot.
 if plot_flag
@@ -222,7 +222,38 @@ function R = PhononMediatedInjection(e_inj, de_inj, V, r, Tc)
     end
     R = zeros(size(e_inj));
     for k = 1:length(e_inj)
-        if e_inj(k) <= V - 1
+        if e_inj(k) <= 2 * V - 1
+           indices = Omega > (e_inj(k) + 1 + epsilon);
+           if length(Omega(indices)) > 1
+                dR = Omega(indices).^2 .* N_Omega(indices) .*...
+                    (e_inj(k) * (Omega(indices) - e_inj(k)) + 1) ./...
+                    (sqrt(e_inj(k)^2 - 1) .*...
+                    sqrt((Omega(indices) - e_inj(k)).^2 - 1));
+                R(k) = trapz(Omega(indices), dR);
+            end
+        end
+    end
+    R = R .* de_inj / Tc^3;
+end
+
+function R = RecombinationInjection(e_inj, de_inj, V, r, Tc)
+    N = 5e3;
+    epsilon = 1e-4;
+    Omega = linspace(2 + epsilon, 2 * V, N);
+    N_Omega = zeros(size(Omega));
+    for k = 1:length(Omega)
+        le = max(1 + epsilon, Omega(k) - V);
+        he = min(V, Omega(k) - 1 - epsilon);
+        if le < he
+            e = linspace(le, he, N);
+            dN_Omega = Omega(k)^2 * rho(Omega(k) - e) .* rho(e) .*...
+                (1 + 1 ./ (e .* (Omega(k) - e)));
+            N_Omega(k) = r * trapz(e, dN_Omega) / Tc^3;
+        end
+    end
+    R = zeros(size(e_inj));
+    for k = 1:length(e_inj)
+        if e_inj(k) <= 2 * V - 1
            indices = Omega > (e_inj(k) + 1 + epsilon);
            if length(Omega(indices)) > 1
                 dR = Omega(indices).^2 .* N_Omega(indices) .*...

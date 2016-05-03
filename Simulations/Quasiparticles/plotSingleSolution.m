@@ -19,7 +19,8 @@ tspan = [-200, 10]; % in units of \tau_0
 % [t, e, ~, f, n_qp] = noTrapping0DModel(rqp, V, Tph, tspan);
 % [t, e, ~, f, n_qp] = directInjection0DModel(Tph, tspan, V, rqp, c);
 % [t, e, ~, f, n_qp] = phononMediatedQuasi0DModel(Tph, tspan, V, rph, c);
-[t, e, ~, f, n_qp] = mixedInjectionQuasi0DModel(Tph, tspan, V, rqp, rph, c);
+% [t, e, ~, f, n_qp] = mixedInjectionQuasi0DModel(Tph, tspan, V, rqp, rph, c);
+[t, e, ~, f, n_qp] = recombinationIncludedQuasi0DModel(Tph, tspan, V, rqp, rph, c);
 
 figure
 plot(t, n_qp, 'LineWidth', 3)
