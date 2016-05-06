@@ -1,6 +1,6 @@
 function [t, e, n, f, n_qp, r_qp, P] = ...
-    recombinationIncludedQuasi0DModel(Tph, tspan, V, rqp, rph, c, plot_flag)
-%recombinationIncludedQuasi0DModel Simple trapping, quasi-0D model.
+    twoStageQuasi0DModel(Tph, tspan, V, rqp, rph, c, plot_flag)
+%twoStageQuasi0DModel(Simple trapping, quasi-0D model.
 % [t, e, n, f, n_qp, r_qp, P] = 
 %   phononMediatedQuasi0DModel(Tph, tspan, V, r, c, plot_flag)
 %   computes the quasiparticle dynamics in a simple model without any
@@ -77,10 +77,6 @@ Gr = Grecombination(e, Tph, Tc);
 Gtr = Gtrapping(e, Tph, Tc, c);
 
 Rqp = DirectInjection(e, rho_de, V, rqp);
-Rph = RecombinationInjection(e, de, V, rph, Tc);
-% Rph = E2Injection(e, de, V, rph, Tc);
-% Rph = BranchRecombinationInjection(e, de, V, rph, Tc);
-% Rph = ScatteredPhononInjection(e, de, V, rph, Tc);
 
 % Generate a plot.
 if plot_flag
@@ -118,7 +114,29 @@ n0 = zeros(size(e));
 % Solve the ODE.
 options = odeset('AbsTol', 1e-20);
 [t, n] = ode15s(@(t, n) quasiparticleODE(t, n,...
-    Gs_in, Gs_out, Gr, Gtr, Rqp + Rph), tspan, n0, options);
+    Gs_in, Gs_out, Gr, Gtr, Rqp), tspan, n0, options);
+
+n_inj = n(end, :);
+
+% Occupational numbers.
+f_inj = n_inj ./ rho_de';
+
+f_inj = @(e_inj) interp1(e, f_inj, e_inj, 'spline', 'extrap');
+
+Rph = RecombinationInjection(e, de, V, rph, Tc, f_inj);
+% Rph = E2Injection(e, de, V, rph, Tc);
+% Rph = BranchRecombinationInjection(e, de, V, rph, Tc);
+% Rph = ScatteredPhononInjection(e, de, V, rph, Tc);
+
+Gtr = Gtrapping(e, Tph, Tc, c);
+
+options = odeset('AbsTol', 1e-20);
+[t, n] = ode15s(@(t, n) quasiparticleODE(t, n,...
+    Gs_in, Gs_out, Gr, Gtr, Rph), tspan, n0, options);
+
+% figure
+% loglog(e, n_inj, e, n(end, :))
+% legend('Direct Injection', 'Solution')
 
 % Occupational numbers.
 f = n ./ (ones(length(t), 1) * rho_de');
@@ -258,7 +276,7 @@ function R = ScatteredPhononInjection(e_inj, de_inj, V, r, Tc)
     R = R .* de_inj / Tc^3;
 end
 
-function R = RecombinationInjection(e_inj, de_inj, V, r, Tc)
+function R = RecombinationInjection(e_inj, de_inj, V, r, Tc, f_inj)
     N = 5e3;
     epsilon = 1e-4;
     Omega = linspace(2 + epsilon, 2 * V, N);
@@ -269,6 +287,7 @@ function R = RecombinationInjection(e_inj, de_inj, V, r, Tc)
         if le < he
             e = linspace(le, he, N);
             dN_Omega = Omega(k)^2 * rho(Omega(k) - e) .* rho(e) .*...
+                f_inj(Omega(k) - e) .* f_inj(e) .*...
                 (1 + 1 ./ (e .* (Omega(k) - e)));
             N_Omega(k) = r * trapz(e, dN_Omega) / Tc^3;
         end

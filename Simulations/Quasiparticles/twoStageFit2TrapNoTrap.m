@@ -1,13 +1,13 @@
-function recombinationFit2TrapNoTrap
-%recombinationFit2TrapNoTrap Fitting to TrapNoTrap dataset.
+function twoStageFit2TrapNoTrap
+%twoStageFit2TrapNoTrap Fitting to TrapNoTrap dataset.
 
-r_direct_no_tr = 0 * 3e-5; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-r_phonon_no_tr = .09e-8; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+r_direct_no_tr = .09e-5; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+r_phonon_no_tr = 1; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
 c_no_tr = 0; % trapping rate in units of 1 / \tau_0
 
-r_direct_tr = 0 * 3e-5; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-r_phonon_tr = .09e-8; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-c_tr = .17; % trapping rate in units of 1 / \tau_0
+r_direct_tr = 1.61 * r_direct_no_tr; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+r_phonon_tr = 1; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+c_tr = .02; % trapping rate in units of 1 / \tau_0
 
 delta = 0.18e-3; % eV (aluminum superconducting gap)
 
@@ -31,7 +31,7 @@ nqp_sim_no_tr = NaN(size(V_no_tr));
 nqp_sim_tr = NaN(size(V_tr));
 for k = 1:length(V_no_tr)
     if V_no_tr(k) > 1
-        [~, ~, ~, ~, nqp] = recombinationIncludedQuasi0DModel(Tph, tspan,...
+        [~, ~, ~, ~, nqp] = twoStageQuasi0DModel(Tph, tspan,...
             V_no_tr(k), r_direct_no_tr, r_phonon_no_tr, c_no_tr);
         nqp_sim_no_tr(k) = max(nqp);
     else
@@ -41,7 +41,7 @@ for k = 1:length(V_no_tr)
 end
 for k = 1:length(V_tr)
     if V_tr(k) > 1
-        [~, ~, ~, ~, nqp] = recombinationIncludedQuasi0DModel(Tph, tspan,...
+        [~, ~, ~, ~, nqp] = twoStageQuasi0DModel(Tph, tspan,...
             V_tr(k), r_direct_tr, r_phonon_tr, c_tr);
         nqp_sim_tr(k) = max(nqp);
     else
@@ -61,7 +61,7 @@ loglog(V_no_tr, nqp_no_tr, 'bo', V_no_tr, nqp_sim_no_tr, 'm*',...
 xlabel('Injection Energy (\Delta)', 'FontSize', 14)
 ylabel('Quasiparticle Density (\mu m^{-3})', 'FontSize', 14)
 legend({'no trap, experiment', ['simulation: ',...
-    ...% 'r_{qp} = ', num2str(r_direct_no_tr, '%.2e'), ', ',...
+    'r_{qp} = ', num2str(r_direct_no_tr, '%.2e'), ', ',...
     'r_{ph} = ', num2str(r_phonon_no_tr, '%.2e'), ', ',...
     'c_{trap} = ', num2str(c_no_tr, '%.2e')]},...
     'Location', 'SouthEast')
@@ -75,7 +75,7 @@ loglog(V_tr, nqp_tr, 'ko', V_tr, nqp_sim_tr, 'm*',...
 xlabel('Injection Energy (\Delta)', 'FontSize', 14)
 ylabel('Quasiparticle Density (\mu m^{-3})', 'FontSize', 14)
 legend({'experiment', ['simulation: ',...
-    ...% 'r_{qp} = ', num2str(r_direct_tr, '%.2e'), ', ',...
+    'r_{qp} = ', num2str(r_direct_tr, '%.2e'), ', ',...
     'r_{ph} = ', num2str(r_phonon_tr, '%.2e'), ', ',...
     'c_{trap} = ', num2str(c_tr, '%.2e')]},...
     'Location', 'SouthEast')
