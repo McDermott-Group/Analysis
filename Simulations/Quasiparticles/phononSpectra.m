@@ -1,6 +1,6 @@
-function [t, e, n, f, n_qp, r_qp, P] = ...
-    twoStageQuasi0DModel(Tph, tspan, V, rqp, rph, c, plot_flag)
-%twoStageQuasi0DModel(Simple trapping, quasi-0D model.
+function [t, e, n, f, n_qp, r_qp, Ptot, Psct, Prec] = ...
+    phononSpectra(Tph, tspan, V, rqp, rph, c, plot_flag)
+%phononSpectra(Simple trapping, quasi-0D model.
 % [t, e, n, f, n_qp, r_qp, P] = 
 %   phononMediatedQuasi0DModel(Tph, tspan, V, r, c, plot_flag)
 %   computes the quasiparticle dynamics in a simple model without any
@@ -29,7 +29,8 @@ function [t, e, n, f, n_qp, r_qp, P] = ...
 %      length(n_qp) == length(t),
 %      r_qp is the total injection rate in 1 / \tau_0, assuming n and n_qp
 %      in units n_{cp}, single number,
-%      P is the total injected power in W, single number.
+%      P is the total injected power in \Delta / \tau_0, assuming n and
+%      n_qp in units n_{cp}, single number.
 
 if ~exist('plot_flag', 'var')
     plot_flag = false;
@@ -49,7 +50,7 @@ Tph = kB * Tph / delta; % in units of \Delta
 % Tc = kB * Tc / delta;
 Tc = 1 / 1.764; % \delta/(K_B * T_c) = 1.764 at T = 0 K BCS result
 
-Volume = 1; % um^3
+Volume = 250; % um^3
 tau_0 = 438e-9; % sec
 ncp = 4e6; % n_{cp} for aluminum is 4e6 \micro m^-3
                      % C. Wang et al. Nature Comm. 5, 5836 (2014)
@@ -82,34 +83,6 @@ Gtr = Gtrapping(e, Tph, Tc, c);
 
 Rqp = DirectInjection(e, rho_de, V, rqp);
 
-% Generate a plot.
-if plot_flag
-    f0 = 1 ./ (exp(e / Tph) + 1);
-    n0 = rho_de .* f0;
-    figure
-    plot(e, Gs_in * n0 ./ de, e,  Gs_out .* n0 ./ de,...
-         e, n0 .* ( Gr * n0) ./ de,...
-         e, Gtr .* n0 ./ de, e, Rqp ./ de, e, Rph ./ de, 'LineWidth', 2)
-    xlabel('Energy \epsilon (\Delta)', 'FontSize', 14)
-    ylabel('Rate per Unit Energy (1/\tau_0\Delta)', 'FontSize', 14)
-    legend({'G^{in}_{scattering}', 'G^{out}_{scattering}',...
-            'G_{recombination}', 'G_{trapping}', 'R_{direct}', 'R_{phonon}'})
-    title('Absolute Term Strengths at Thermal Equilibrium')
-    set(gca, 'yscale', 'Log')
-    axis tight
-    grid on
-    
-    figure
-    plot(e, Rqp, e, Rph, 'LineWidth', 2)
-    xlabel('Energy \epsilon (\Delta)', 'FontSize', 14)
-    ylabel('Injection Rate per Unit Energy (1/\tau_0\Delta)', 'FontSize', 14)
-    legend({'R_{direct}', 'R_{phonon}'})
-    set(gca, 'yscale', 'Log')
-    axis tight
-    grid on
-    return
-end
-
 % Initial condition n0.
 % f0 = 1 ./ (exp(e / Tph) + 1);
 % n0_T = rho_de .* f0;
@@ -117,7 +90,7 @@ n0 = zeros(size(e));
 
 % Solve the ODE. 
 options = odeset('AbsTol', 1e-20);
-[~, n] = ode15s(@(t, n) quasiparticleODE(t, n,...
+[t, n] = ode15s(@(t, n) quasiparticleODE(t, n,...
     Gs_in, Gs_out, Gr, Gtr, Rqp), tspan, n0, options);
 
 n_inj = n(end, :);
@@ -127,19 +100,33 @@ f_inj = n_inj ./ rho_de';
 
 f_inj = @(e_inj) interp1(e, f_inj, e_inj, 'spline', 'extrap');
 
-Rph_rec = RecombinationInjection(e, de, V, rph, Tc, f_inj);
-Rph_sct = ScatteringInjection(e, de, V, rph, Tc, f_inj);
+[~, Omega_rec, N_Omega_rec] = RecombinationInjection(e, de, V, rph, Tc, f_inj);
+[~, Omega_sct, N_Omega_sct] = ScatteringInjection(e, de, V, rph, Tc, f_inj);
 % Rph = E2Injection(e, de, V, rph, Tc);
 % Rph = BranchRecombinationInjection(e, de, V, rph, Tc);
 % Rph = ScatteredPhononInjection(e, de, V, rph, Tc);
 
-Gtr = Gtrapping(e, Tph, Tc, c);
+% Gtr = Gtrapping(e, Tph, Tc, c);
 
-scat = @(e) interp1(Omega_sct, N_Omega_sct, e, 'spline', 'extrap');
+% scat = @(e) interp1(Omega_sct, N_Omega_sct, e, 'spline', 'extrap');
 
-options = odeset('AbsTol', 1e-20);
-[t, n] = ode15s(@(t, n) quasiparticleODE(t, n,...
-    Gs_in, Gs_out, Gr, Gtr, Rph_sct + Rph_rec), tspan, n0, options);
+% Omega = [Omega_sct(Omega_sct < 2), Omega_rec];
+% N_Omega = [N_Omega_sct(Omega_sct < 2), N_Omega_rec + scat(Omega_rec)];
+% 
+% figure
+% plot(Omega_rec, N_Omega_rec, Omega_sct, N_Omega_sct,...
+%     Omega, N_Omega, 'LineWidth', 2)
+% xlabel('Phonon Energy \Omega (\Delta)', 'FontSize', 14)
+% ylabel('N_{gen}(\Omega) (n_{cp} / \Delta)', 'FontSize', 14)
+% title('Phonon Spectrum')
+% legend('recombination', 'scattering', 'recombination + scattering')
+% set(gca, 'yscale', 'Log')
+% axis tight
+% grid on
+
+% options = odeset('AbsTol', 1e-20);
+% [t, n] = ode15s(@(t, n) quasiparticleODE(t, n,...
+%     Gs_in, Gs_out, Gr, Gtr, Rph), tspan, n0, options);
 
 % figure
 % loglog(e, n_inj, e, n(end, :))
@@ -164,7 +151,12 @@ r_qp = rqp * sum(rho_de(indices));
 % Injection power.
 P = rqp * sum(e(indices) .* rho_de(indices));
 coeff = delta * ncp * Volume / tau_0;
-P = coeff * P; % in W
+Ptot = coeff * P; % in W
+N_Omega_sct = N_Omega_sct(Omega_sct > 2);
+Omega_sct = Omega_sct(Omega_sct > 2);
+Psct = coeff * trapz(Omega_sct, N_Omega_sct .* Omega_sct);
+Prec = coeff * trapz(Omega_rec, N_Omega_rec .* Omega_rec);
+
 end
 
 function normalized_density = rho(e)
@@ -259,12 +251,6 @@ function R = TrapPhononInjection(e_inj, de_inj, V, r, Tc)
 end
 
 function [R, Omega, N_Omega] = ScatteringInjection(e_inj, de_inj, V, r, Tc, f_inj)
-    if V <= 2
-        R = zeros(size(e_inj));
-        Omega = zeros(size(e_inj));
-        N_Omega = zeros(size(e_inj));
-        return
-    end
     N = 5e3;
     epsilon = 1e-4;
     Omega = linspace(0, V, N);
