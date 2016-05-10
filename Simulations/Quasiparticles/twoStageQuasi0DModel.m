@@ -50,6 +50,11 @@ Tph = kB * Tph / delta; % in units of \Delta
 % Tc = kB * Tc / delta;
 Tc = 1 / 1.764; % \delta/(K_B * T_c) = 1.764 at T = 0 K BCS result
 
+Volume = 1; % um^3
+tau_0 = 438e-9; % sec
+ncp = 4e6; % n_{cp} for aluminum is 4e6 \micro m^-3
+                     % C. Wang et al. Nature Comm. 5, 5836 (2014)
+
 % Debye temperature.
 % TD = 428; % K
 % TD = kB * TD/ delta; % in units of \Delta
@@ -111,9 +116,9 @@ end
 % n0_T = rho_de .* f0;
 n0 = zeros(size(e));
 
-% Solve the ODE.
+% Solve the ODE. 
 options = odeset('AbsTol', 1e-20);
-[t, n] = ode15s(@(t, n) quasiparticleODE(t, n,...
+[~, n] = ode15s(@(t, n) quasiparticleODE(t, n,...
     Gs_in, Gs_out, Gr, Gtr, Rqp), tspan, n0, options);
 
 n_inj = n(end, :);
@@ -123,12 +128,29 @@ f_inj = n_inj ./ rho_de';
 
 f_inj = @(e_inj) interp1(e, f_inj, e_inj, 'spline', 'extrap');
 
-Rph = RecombinationInjection(e, de, V, rph, Tc, f_inj);
+[Rph, Omega_rec, N_Omega_rec] = RecombinationInjection(e, de, V, rph, Tc, f_inj);
+[~, Omega_sct, N_Omega_sct] = ScatteringInjection(e, de, V, rph, Tc, f_inj);
 % Rph = E2Injection(e, de, V, rph, Tc);
 % Rph = BranchRecombinationInjection(e, de, V, rph, Tc);
 % Rph = ScatteredPhononInjection(e, de, V, rph, Tc);
 
 Gtr = Gtrapping(e, Tph, Tc, c);
+
+scat = @(e) interp1(Omega_sct, N_Omega_sct, e, 'spline', 'extrap');
+
+Omega = [Omega_sct(Omega_sct < 2), Omega_rec];
+N_Omega = [N_Omega_sct(Omega_sct < 2), N_Omega_rec + scat(Omega_rec)];
+
+figure
+plot(Omega_rec, N_Omega_rec, Omega_sct, N_Omega_sct,...
+    Omega, N_Omega, 'LineWidth', 2)
+xlabel('Phonon Energy \Omega (\Delta)', 'FontSize', 14)
+ylabel('N_{gen}(\Omega) (n_{cp} / \Delta)', 'FontSize', 14)
+title('Phonon Spectrum')
+legend('recombination', 'scattering', 'recombination + scattering')
+set(gca, 'yscale', 'Log')
+axis tight
+grid on
 
 options = odeset('AbsTol', 1e-20);
 [t, n] = ode15s(@(t, n) quasiparticleODE(t, n,...
@@ -156,6 +178,8 @@ r_qp = rqp * sum(rho_de(indices));
 
 % Injection power.
 P = rqp * sum(e(indices) .* rho_de(indices));
+coeff = delta * ncp * Volume / tau_0;
+P = coeff * P % in W
 end
 
 function normalized_density = rho(e)
@@ -249,7 +273,7 @@ function R = TrapPhononInjection(e_inj, de_inj, V, r, Tc)
     R = R .* de_inj / Tc^3;
 end
 
-function R = ScatteredPhononInjection(e_inj, de_inj, V, r, Tc)
+function [R, Omega, N_Omega] = ScatteringInjection(e_inj, de_inj, V, r, Tc, f_inj)
     N = 5e3;
     epsilon = 1e-4;
     Omega = linspace(0, V, N);
@@ -257,11 +281,21 @@ function R = ScatteredPhononInjection(e_inj, de_inj, V, r, Tc)
     for k = 1:length(Omega)
         if Omega(k) < V - 1 - epsilon
             e = linspace(1 + epsilon + Omega(k), V, N);
-            dN_Omega = Omega(k)^2 * rho(e - Omega(k)) .* rho(e) .*...
+            dN_Omega = Omega(k)^2 * rho(e - Omega(k)) .* rho(e) .* f_inj(e) .*...
                 (1 - 1 ./ (e .* (Omega(k) - e)));
             N_Omega(k) = r * trapz(e, dN_Omega) / Tc^3;
         end
     end
+    
+    figure
+    plot(Omega, N_Omega, 'LineWidth', 2)
+    xlabel('Phonon Energy \Omega (\Delta)', 'FontSize', 14)
+    ylabel('N_{gen}(\Omega) (n_{cp} / \Delta)', 'FontSize', 14)
+    title('Phonon Spectrum (Scattering)')
+    set(gca, 'yscale', 'Log')
+    axis tight
+    grid on
+    
     R = zeros(size(e_inj));
     for k = 1:length(e_inj)
        indices = Omega > (e_inj(k) + 1 + epsilon);
@@ -276,7 +310,7 @@ function R = ScatteredPhononInjection(e_inj, de_inj, V, r, Tc)
     R = R .* de_inj / Tc^3;
 end
 
-function R = RecombinationInjection(e_inj, de_inj, V, r, Tc, f_inj)
+function [R, Omega, N_Omega] = RecombinationInjection(e_inj, de_inj, V, r, Tc, f_inj)
     N = 5e3;
     epsilon = 1e-4;
     Omega = linspace(2 + epsilon, 2 * V, N);
@@ -292,6 +326,16 @@ function R = RecombinationInjection(e_inj, de_inj, V, r, Tc, f_inj)
             N_Omega(k) = r * trapz(e, dN_Omega) / Tc^3;
         end
     end
+
+    figure
+    plot(Omega, N_Omega, 'LineWidth', 2)
+    xlabel('Phonon Energy \Omega (\Delta)', 'FontSize', 14)
+    ylabel('N_{gen}(\Omega) (n_{cp} / \Delta)', 'FontSize', 14)
+    title('Phonon Spectrum (Recombination)')
+    set(gca, 'yscale', 'Log')
+    axis tight
+    grid on
+
     R = zeros(size(e_inj));
     for k = 1:length(e_inj)
         if e_inj(k) <= 2 * V - 1
