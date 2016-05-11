@@ -1,4 +1,5 @@
-function [t, e, n, f, n_qp, r_qp, Ptot, Psct, Prec, Ptotsct] = ...
+function [t, e, n, f, n_qp, r_qp, Ptot, Psct, Prec, Ptotsct,...
+    P_sct, P_rec, R] = ...
     phononSpectra(Tph, tspan, V, rqp, rph, c, plot_flag)
 %phononSpectra(Simple trapping, quasi-0D model.
 % [t, e, n, f, n_qp, r_qp, P] = 
@@ -62,12 +63,12 @@ ncp = 4e6; % n_{cp} for aluminum is 4e6 \micro m^-3
 % Number of energy bins.
 N = 500;
 % Maximum energy.
-max_e = max(V) + 2;
+max_e = max(V) + 1;
 
 % Assign the quasiparicle energies to the bins. Non-uniform energy
 % separation is implemented. For a close to uniform distribution set alpha
 % to a small positive value.
-alpha = 10;
+alpha = 3.5;
 e = (1 + (max_e - 1) * sinh(alpha * (0:N) / N) / sinh(alpha))';
 de = diff(e);
 e = e(2:end);
@@ -102,9 +103,6 @@ f_inj = @(e_inj) interp1(e, f_inj, e_inj, 'spline', 'extrap');
 
 [~, Omega_rec, N_Omega_rec] = RecombinationInjection(e, de, V, rph, Tc, f_inj, Tph);
 [~, Omega_sct, N_Omega_sct] = ScatteringInjection(e, de, V, rph, Tc, f_inj, Tph);
-% Rph = E2Injection(e, de, V, rph, Tc);
-% Rph = BranchRecombinationInjection(e, de, V, rph, Tc);
-% Rph = ScatteredPhononInjection(e, de, V, rph, Tc);
 
 % Gtr = Gtrapping(e, Tph, Tc, c);
 
@@ -158,10 +156,15 @@ Omega_sct = Omega_sct(Omega_sct > 2);
 Psct = coeff * trapz(Omega_sct, N_Omega_sct .* Omega_sct);
 Prec = coeff * trapz(Omega_rec, N_Omega_rec .* Omega_rec);
 
+P_sct_in = coeff * trapz(e, e .* (Gs_in * n_inj'));
+P_sct_out = coeff * trapz(e, Gs_out .* (e .* n_inj'));
+P_sct = P_sct_out - P_sct_in;
+P_rec = coeff * trapz(e, 2 * e .* n_inj' .* (Gr * n_inj'));
 end
 
 function normalized_density = rho(e)
     normalized_density = e ./ sqrt(e.^2 - 1);
+    normalized_density(e <= 1) = 0;
 end
 
 function abs_phonon_density = Np(e, Tph)
@@ -171,7 +174,7 @@ end
 function [Gs_in, Gs_out] = Gscattering(e, de, Tph, Tc)
 % Scattering matrix defined by Eq. (6) in J. M. Martinis et al.,
 % Phys. Rev. Lett. 103, 097002 (2009), as well as Eqs. (C3) and (C4) in 
-% M. Lenander et al., Phys. Rev. B 84, 024501 (2011).
+% M. Lenander et al., Phys. Rev. B 84, 024501 (2011).c
 % These equations come from Eq. (8) in S. B. Kaplan et al.,
 % Phys. Rev. B 14, 4854 (1976).
     [ej, ei] = meshgrid(e);
@@ -223,90 +226,42 @@ function R = DirectInjection(e, rho_de, V, r)
     R = R .* rho_de;
 end
 
-function R = TrapPhononInjection(e_inj, de_inj, V, r, Tc)
-    N = 5e3;
-    epsilon = 1e-4;
-    Omega = linspace(0, V, N);
-    N_Omega = zeros(size(Omega));
-    for k = 1:length(Omega)
-        le = max(1 + epsilon, Omega(k));
-        he = min(V, Omega(k) + 1);
-        if le < he
-            e = linspace(le, he, N);
-            dN_Omega = Omega(k)^2 * rho(e);
-            N_Omega(k) = r * trapz(e, dN_Omega) / Tc^3;
-        end
-    end
-    R = zeros(size(e_inj));
-    for k = 1:length(e_inj)
-       indices = Omega > (e_inj(k) + 1 + epsilon);
-       if length(Omega(indices)) > 1
-            dR = Omega(indices).^2 .* N_Omega(indices) .*...
-                (e_inj(k) * (Omega(indices) - e_inj(k)) + 1) ./...
-                (sqrt(e_inj(k)^2 - 1) .*...
-                sqrt((Omega(indices) - e_inj(k)).^2 - 1));
-            R(k) = trapz(Omega(indices), dR);
-       end
-    end
-    R = R .* de_inj / Tc^3;
-end
-
 function [R, Omega, N_Omega] = ScatteringInjection(e_inj, de_inj, V, r, Tc, f_inj, Tph)
-    N = 5e3;
-    epsilon = 1e-4;
-    Omega = linspace(0, V, N);
-    N_Omega = zeros(size(Omega));
-    for k = 1:length(Omega)
-        if Omega(k) < V - 1 - epsilon
-            e = linspace(1 + epsilon + Omega(k), V, N);
-            dN_Omega = Omega(k)^2 * rho(e - Omega(k)) .* rho(e) .* f_inj(e) .*...
-                (1 - 1 ./ (e .* (Omega(k) - e))) .* Np(Omega(k), Tph);
-            N_Omega(k) = r * trapz(e, dN_Omega) / Tc^3;
-        end
-    end
+    Omega = e_inj - 1;
+    [Omega, e] = meshgrid(Omega, e_inj);
+    dN_Omega = Omega.^2 .* rho(e - Omega) .* rho(e) .* f_inj(e) .*...
+        (1 - 1 ./ (e .* (e - Omega))) .* Np(Omega, Tph);
+    dN_Omega(dN_Omega < 0) = 0;
+    N_Omega = r * trapz(e_inj, dN_Omega) / Tc^3;
     
 %     figure
-%     plot(Omega, N_Omega, 'LineWidth', 2)
+%     plot(Omega(1, :), N_Omega, 'LineWidth', 2)
 %     xlabel('Phonon Energy \Omega (\Delta)', 'FontSize', 14)
 %     ylabel('N_{gen}(\Omega) (n_{cp} / \Delta)', 'FontSize', 14)
 %     title('Phonon Spectrum (Scattering)')
 %     set(gca, 'yscale', 'Log')
 %     axis tight
 %     grid on
-    
-    R = zeros(size(e_inj));
-    for k = 1:length(e_inj)
-       indices = Omega > (e_inj(k) + 1 + epsilon);
-       if length(Omega(indices)) > 1
-            dR = Omega(indices).^2 .* N_Omega(indices) .*...
-                (e_inj(k) * (Omega(indices) - e_inj(k)) + 1) ./...
-                (sqrt(e_inj(k)^2 - 1) .*...
-                sqrt((Omega(indices) - e_inj(k)).^2 - 1));
-            R(k) = trapz(Omega(indices), dR);
-       end
-    end
-    R = R .* de_inj / Tc^3;
+
+    dR = Omega.^2 .* (ones(size(e_inj)) * N_Omega) .*...
+                (e .* (Omega - e) + 1) ./...
+                (sqrt(e.^2 - 1) .* sqrt((Omega - e).^2 - 1));
+    dR(e <= 1 | Omega <= e + 1) = 0;
+    R = trapz(Omega(1, :), dR, 2) .* de_inj / Tc^3;
+    Omega = Omega(1, :);
 end
 
 function [R, Omega, N_Omega] = RecombinationInjection(e_inj, de_inj, V, r, Tc, f_inj, Tph)
-    N = 5e3;
-    epsilon = 1e-4;
-    Omega = linspace(2 + epsilon, 2 * V, N);
-    N_Omega = zeros(size(Omega));
-    for k = 1:length(Omega)
-        le = max(1 + epsilon, Omega(k) - V);
-        he = min(V, Omega(k) - 1 - epsilon);
-        if le < he
-            e = linspace(le, he, N);
-            dN_Omega = Omega(k)^2 * rho(Omega(k) - e) .* rho(e) .*...
-                f_inj(Omega(k) - e) .* f_inj(e) .*...
-                (1 + 1 ./ (e .* (Omega(k) - e))) .* Np(Omega(k), Tph);
-            N_Omega(k) = r * trapz(e, dN_Omega) / Tc^3;
-        end
-    end
+    Omega = 2 * e_inj;
+    [Omega, e] = meshgrid(Omega, e_inj);
+    dN_Omega = Omega.^2 .* rho(Omega - e) .* rho(e) .*...
+        f_inj(Omega - e) .* f_inj(e) .*...
+        (1 + 1 ./ (e .* (Omega - e))) .* Np(Omega, Tph);
+    dN_Omega(dN_Omega < 0) = 0;
+    N_Omega = r * trapz(e_inj, dN_Omega) / Tc^3;
 
 %     figure
-%     plot(Omega, N_Omega, 'LineWidth', 2)
+%     plot(Omega(1, :), N_Omega, 'LineWidth', 2)
 %     xlabel('Phonon Energy \Omega (\Delta)', 'FontSize', 14)
 %     ylabel('N_{gen}(\Omega) (n_{cp} / \Delta)', 'FontSize', 14)
 %     title('Phonon Spectrum (Recombination)')
@@ -314,58 +269,14 @@ function [R, Omega, N_Omega] = RecombinationInjection(e_inj, de_inj, V, r, Tc, f
 %     axis tight
 %     grid on
 
-    R = zeros(size(e_inj));
-    for k = 1:length(e_inj)
-        if e_inj(k) <= 2 * V - 1
-           indices = Omega > (e_inj(k) + 1 + epsilon);
-           if length(Omega(indices)) > 1
-                dR = Omega(indices).^2 .* N_Omega(indices) .*...
-                    (e_inj(k) * (Omega(indices) - e_inj(k)) + 1) ./...
-                    (sqrt(e_inj(k)^2 - 1) .*...
-                    sqrt((Omega(indices) - e_inj(k)).^2 - 1));
-                R(k) = trapz(Omega(indices), dR);
-            end
-        end
-    end
-    R = R .* de_inj / Tc^3;
+    dR = Omega.^2 .* (ones(size(e_inj)) * N_Omega) .*...
+                (e .* (Omega - e) + 1) ./...
+                (sqrt(e.^2 - 1) .* sqrt((Omega - e).^2 - 1));
+    dR(e <= 1 | Omega <= e + 1) = 0;
+    R = trapz(Omega(1, :), dR, 2) .* de_inj / Tc^3;
+    Omega = Omega(1, :);
 end
 
-function R = E2Injection(e_inj, de_inj, V, r, Tc)
-    R = r * (e_inj - 2).^2 .* de_inj / Tc^3;
-    R(e_inj < V) = 0;
-end
-
-function R = BranchRecombinationInjection(e_inj, de_inj, V, r, Tc)
-    N = 5e3;
-    epsilon = 1e-4;
-    Omega = linspace(2 + epsilon, 2 * V, N);
-    N_Omega = zeros(size(Omega));
-    for k = 1:length(Omega)
-        le = max(1 + epsilon, Omega(k) - V);
-        he = min(V, Omega(k) - 1 - epsilon);
-        if le < he
-            e = linspace(le, he, N);
-            dN_Omega = Omega(k)^2 * rho(Omega(k) - e) .* rho(e) .*...
-                (1 + ((1 + sqrt(e.^2 - 1) .* sqrt((Omega(k) - e).^2 - 1)) ./...
-                (e .* (Omega(k) - e))));
-            N_Omega(k) = r * trapz(e, dN_Omega) / Tc^3;
-        end
-    end
-    R = zeros(size(e_inj));
-    for k = 1:length(e_inj)
-        if e_inj(k) <= 2 * V - 1
-           indices = Omega > (e_inj(k) + 1 + epsilon);
-           if length(Omega(indices)) > 1
-                dR = Omega(indices).^2 .* N_Omega(indices) .*...
-                    (e_inj(k) * (Omega(indices) - e_inj(k)) + 1) ./...
-                    (sqrt(e_inj(k)^2 - 1) .*...
-                    sqrt((Omega(indices) - e_inj(k)).^2 - 1));
-                R(k) = trapz(Omega(indices), dR);
-            end
-        end
-    end
-    R = R .* de_inj / Tc^3;
-end
 
 function ndot = quasiparticleODE(t, n, Gs_in, Gs_out, Gr, Gtr, R)
     if t > 0
