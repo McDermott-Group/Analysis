@@ -1,16 +1,15 @@
 function twoStageFit2TrapNoTrap
 %twoStageFit2TrapNoTrap Fitting to TrapNoTrap dataset.
 
-r_direct_no_tr = .09e-5; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+r_direct_no_tr = .5e-7; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
 r_phonon_no_tr = 1; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
 c_no_tr = 0; % trapping rate in units of 1 / \tau_0
 
-r_direct_tr = .2 * 1.61 * r_direct_no_tr; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+r_direct_tr = 1.61 * r_direct_no_tr; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
 r_phonon_tr = 1; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-c_tr = .01; % trapping rate in units of 1 / \tau_0
+c_tr = .002; % trapping rate in units of 1 / \tau_0
 
 delta = 0.18e-3; % eV (aluminum superconducting gap)
-e = 1.60217662e-19; % C
 
 ncp = 4e6; % n_{cp} for aluminum is 4e-6 \micro m^-3
                      % C. Wang et al. Nature Comm. 5, 5836 (2014)
@@ -117,7 +116,7 @@ title('With Traps')
 axis tight
 grid on
 
-coeff = 4e5 * coeff;
+coeff = 1e7 * coeff;
 figure('Position', [.1 .1 1.5 .8] * scrsz(4));
 subplot(1, 2, 1)
 loglog(P_no_tr, nqp_no_tr, 'bo', coeff * P_sim_no_tr, nqp_sim_no_tr, 'm*',...

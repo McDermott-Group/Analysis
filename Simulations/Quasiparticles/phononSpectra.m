@@ -1,4 +1,4 @@
-function [t, e, n, f, n_qp, r_qp, Ptot, Psct, Prec] = ...
+function [t, e, n, f, n_qp, r_qp, Ptot, Psct, Prec, Ptotsct] = ...
     phononSpectra(Tph, tspan, V, rqp, rph, c, plot_flag)
 %phononSpectra(Simple trapping, quasi-0D model.
 % [t, e, n, f, n_qp, r_qp, P] = 
@@ -60,14 +60,14 @@ ncp = 4e6; % n_{cp} for aluminum is 4e6 \micro m^-3
 % TD = kB * TD/ delta; % in units of \Delta
 
 % Number of energy bins.
-N = 200;
+N = 500;
 % Maximum energy.
-max_e = 2 * max(V) + 1;
+max_e = max(V) + 2;
 
 % Assign the quasiparicle energies to the bins. Non-uniform energy
 % separation is implemented. For a close to uniform distribution set alpha
 % to a small positive value.
-alpha = 5;
+alpha = 10;
 e = (1 + (max_e - 1) * sinh(alpha * (0:N) / N) / sinh(alpha))';
 de = diff(e);
 e = e(2:end);
@@ -100,8 +100,8 @@ f_inj = n_inj ./ rho_de';
 
 f_inj = @(e_inj) interp1(e, f_inj, e_inj, 'spline', 'extrap');
 
-[~, Omega_rec, N_Omega_rec] = RecombinationInjection(e, de, V, rph, Tc, f_inj);
-[~, Omega_sct, N_Omega_sct] = ScatteringInjection(e, de, V, rph, Tc, f_inj);
+[~, Omega_rec, N_Omega_rec] = RecombinationInjection(e, de, V, rph, Tc, f_inj, Tph);
+[~, Omega_sct, N_Omega_sct] = ScatteringInjection(e, de, V, rph, Tc, f_inj, Tph);
 % Rph = E2Injection(e, de, V, rph, Tc);
 % Rph = BranchRecombinationInjection(e, de, V, rph, Tc);
 % Rph = ScatteredPhononInjection(e, de, V, rph, Tc);
@@ -152,6 +152,7 @@ r_qp = rqp * sum(rho_de(indices));
 P = rqp * sum(e(indices) .* rho_de(indices));
 coeff = delta * ncp * Volume / tau_0;
 Ptot = coeff * P; % in W
+Ptotsct = coeff * trapz(Omega_sct, N_Omega_sct .* Omega_sct);
 N_Omega_sct = N_Omega_sct(Omega_sct > 2);
 Omega_sct = Omega_sct(Omega_sct > 2);
 Psct = coeff * trapz(Omega_sct, N_Omega_sct .* Omega_sct);
@@ -219,7 +220,7 @@ function R = DirectInjection(e, rho_de, V, r)
         R(e <= V) = r;
     end
     
-    R = R .* rho_de ./ (rho(e)).^2; %sqrt(1 - 1 ./ e.^2);
+    R = R .* rho_de;
 end
 
 function R = TrapPhononInjection(e_inj, de_inj, V, r, Tc)
@@ -250,7 +251,7 @@ function R = TrapPhononInjection(e_inj, de_inj, V, r, Tc)
     R = R .* de_inj / Tc^3;
 end
 
-function [R, Omega, N_Omega] = ScatteringInjection(e_inj, de_inj, V, r, Tc, f_inj)
+function [R, Omega, N_Omega] = ScatteringInjection(e_inj, de_inj, V, r, Tc, f_inj, Tph)
     N = 5e3;
     epsilon = 1e-4;
     Omega = linspace(0, V, N);
@@ -259,7 +260,7 @@ function [R, Omega, N_Omega] = ScatteringInjection(e_inj, de_inj, V, r, Tc, f_in
         if Omega(k) < V - 1 - epsilon
             e = linspace(1 + epsilon + Omega(k), V, N);
             dN_Omega = Omega(k)^2 * rho(e - Omega(k)) .* rho(e) .* f_inj(e) .*...
-                (1 - 1 ./ (e .* (Omega(k) - e)));
+                (1 - 1 ./ (e .* (Omega(k) - e))) .* Np(Omega(k), Tph);
             N_Omega(k) = r * trapz(e, dN_Omega) / Tc^3;
         end
     end
@@ -287,7 +288,7 @@ function [R, Omega, N_Omega] = ScatteringInjection(e_inj, de_inj, V, r, Tc, f_in
     R = R .* de_inj / Tc^3;
 end
 
-function [R, Omega, N_Omega] = RecombinationInjection(e_inj, de_inj, V, r, Tc, f_inj)
+function [R, Omega, N_Omega] = RecombinationInjection(e_inj, de_inj, V, r, Tc, f_inj, Tph)
     N = 5e3;
     epsilon = 1e-4;
     Omega = linspace(2 + epsilon, 2 * V, N);
@@ -299,7 +300,7 @@ function [R, Omega, N_Omega] = RecombinationInjection(e_inj, de_inj, V, r, Tc, f
             e = linspace(le, he, N);
             dN_Omega = Omega(k)^2 * rho(Omega(k) - e) .* rho(e) .*...
                 f_inj(Omega(k) - e) .* f_inj(e) .*...
-                (1 + 1 ./ (e .* (Omega(k) - e)));
+                (1 + 1 ./ (e .* (Omega(k) - e))) .* Np(Omega(k), Tph);
             N_Omega(k) = r * trapz(e, dN_Omega) / Tc^3;
         end
     end

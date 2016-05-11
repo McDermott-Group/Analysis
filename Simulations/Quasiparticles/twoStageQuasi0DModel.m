@@ -135,8 +135,6 @@ Rph_sct = ScatteringInjection(e, de, V, rph, Tc, f_inj);
 
 Gtr = Gtrapping(e, Tph, Tc, c);
 
-scat = @(e) interp1(Omega_sct, N_Omega_sct, e, 'spline', 'extrap');
-
 options = odeset('AbsTol', 1e-20);
 [t, n] = ode15s(@(t, n) quasiparticleODE(t, n,...
     Gs_in, Gs_out, Gr, Gtr, Rph_sct + Rph_rec), tspan, n0, options);
@@ -227,7 +225,7 @@ function R = DirectInjection(e, rho_de, V, r)
         R(e <= V) = r;
     end
     
-    R = R .* rho_de ./ (rho(e)).^2; %sqrt(1 - 1 ./ e.^2);
+    R = R .* rho_de;
 end
 
 function R = TrapPhononInjection(e_inj, de_inj, V, r, Tc)
@@ -267,7 +265,7 @@ function [R, Omega, N_Omega] = ScatteringInjection(e_inj, de_inj, V, r, Tc, f_in
     end
     N = 5e3;
     epsilon = 1e-4;
-    Omega = linspace(0, V, N);
+    Omega = linspace(0, V - 1, N);
     N_Omega = zeros(size(Omega));
     for k = 1:length(Omega)
         if Omega(k) < V - 1 - epsilon
