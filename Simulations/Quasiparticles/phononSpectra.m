@@ -1,9 +1,9 @@
-function [t, e, n, f, n_qp, r_qp, Ptot, Psct, Prec, Ptotsct,...
-    P_sct, P_rec, R] = ...
-    phononSpectra(Tph, tspan, V, rqp, rph, c, plot_flag)
+function [t, e, n, f, n_qp, r_qp, Ptot, Psct, Prec, Psct2D,...
+    P_sct, P_rec] = ...
+    phononSpectra(Tph, tspan, V, rqp, rph, c)
 %phononSpectra(Simple trapping, quasi-0D model.
 % [t, e, n, f, n_qp, r_qp, P] = 
-%   phononMediatedQuasi0DModel(Tph, tspan, V, r, c, plot_flag)
+%   phononMediatedQuasi0DModel(Tph, tspan, V, r, c)
 %   computes the quasiparticle dynamics in a simple model without any
 %   quasiparticle traps.
 %   The input parameters:
@@ -33,10 +33,6 @@ function [t, e, n, f, n_qp, r_qp, Ptot, Psct, Prec, Ptotsct,...
 %      P is the total injected power in \Delta / \tau_0, assuming n and
 %      n_qp in units n_{cp}, single number.
 
-if ~exist('plot_flag', 'var')
-    plot_flag = false;
-end
-
 % Constants.
 kB = 1.38064852e-23; % J / K
 eV2J = 1.602176565e-19; % J / eV 
@@ -56,6 +52,8 @@ tau_0 = 438e-9; % sec
 ncp = 4e6; % n_{cp} for aluminum is 4e6 \micro m^-3
                      % C. Wang et al. Nature Comm. 5, 5836 (2014)
 
+power_calib = delta * ncp * Volume / tau_0;
+                     
 % Debye temperature.
 % TD = 428; % K
 % TD = kB * TD/ delta; % in units of \Delta
@@ -63,12 +61,12 @@ ncp = 4e6; % n_{cp} for aluminum is 4e6 \micro m^-3
 % Number of energy bins.
 N = 500;
 % Maximum energy.
-max_e = max(V) + 1;
+max_e = 2 * max(V) - 1;
 
 % Assign the quasiparicle energies to the bins. Non-uniform energy
 % separation is implemented. For a close to uniform distribution set alpha
 % to a small positive value.
-alpha = 3.5;
+alpha = 5;
 e = (1 + (max_e - 1) * sinh(alpha * (0:N) / N) / sinh(alpha))';
 de = diff(e);
 e = e(2:end);
@@ -98,37 +96,11 @@ n_inj = n(end, :);
 
 % Occupational numbers.
 f_inj = n_inj ./ rho_de';
+f_inj(f_inj < 0) = 0;
+f_inj = @(e_inj) interp1(e, f_inj, e_inj);
 
-f_inj = @(e_inj) interp1(e, f_inj, e_inj, 'spline', 'extrap');
-
-[~, Omega_rec, N_Omega_rec] = RecombinationInjection(e, de, V, rph, Tc, f_inj, Tph);
-[~, Omega_sct, N_Omega_sct] = ScatteringInjection(e, de, V, rph, Tc, f_inj, Tph);
-
-% Gtr = Gtrapping(e, Tph, Tc, c);
-
-% scat = @(e) interp1(Omega_sct, N_Omega_sct, e, 'spline', 'extrap');
-
-% Omega = [Omega_sct(Omega_sct < 2), Omega_rec];
-% N_Omega = [N_Omega_sct(Omega_sct < 2), N_Omega_rec + scat(Omega_rec)];
-% 
-% figure
-% plot(Omega_rec, N_Omega_rec, Omega_sct, N_Omega_sct,...
-%     Omega, N_Omega, 'LineWidth', 2)
-% xlabel('Phonon Energy \Omega (\Delta)', 'FontSize', 14)
-% ylabel('N_{gen}(\Omega) (n_{cp} / \Delta)', 'FontSize', 14)
-% title('Phonon Spectrum')
-% legend('recombination', 'scattering', 'recombination + scattering')
-% set(gca, 'yscale', 'Log')
-% axis tight
-% grid on
-
-% options = odeset('AbsTol', 1e-20);
-% [t, n] = ode15s(@(t, n) quasiparticleODE(t, n,...
-%     Gs_in, Gs_out, Gr, Gtr, Rph), tspan, n0, options);
-
-% figure
-% loglog(e, n_inj, e, n(end, :))
-% legend('Direct Injection', 'Solution')
+[~, Omega_rec, N_Omega_rec] = RecombinationInjection(e, de, f_inj, V, rph, Tc, Tph);
+[~, Omega_sct, N_Omega_sct] = ScatteringInjection(e, de, f_inj, V, rph, Tc, Tph);
 
 % Occupational numbers.
 f = n ./ (ones(length(t), 1) * rho_de');
@@ -148,18 +120,17 @@ r_qp = rqp * sum(rho_de(indices));
 
 % Injection power.
 P = rqp * sum(e(indices) .* rho_de(indices));
-coeff = delta * ncp * Volume / tau_0;
-Ptot = coeff * P; % in W
-Ptotsct = coeff * trapz(Omega_sct, N_Omega_sct .* Omega_sct);
+Ptot = power_calib * P; % in W
+Psct = power_calib * trapz(Omega_sct, N_Omega_sct .* Omega_sct);
 N_Omega_sct = N_Omega_sct(Omega_sct > 2);
 Omega_sct = Omega_sct(Omega_sct > 2);
-Psct = coeff * trapz(Omega_sct, N_Omega_sct .* Omega_sct);
-Prec = coeff * trapz(Omega_rec, N_Omega_rec .* Omega_rec);
+Psct2D = power_calib * trapz(Omega_sct, N_Omega_sct .* Omega_sct);
+Prec = power_calib * trapz(Omega_rec, N_Omega_rec .* Omega_rec);
 
-P_sct_in = coeff * trapz(e, e .* (Gs_in * n_inj'));
-P_sct_out = coeff * trapz(e, Gs_out .* (e .* n_inj'));
+P_sct_in = power_calib * sum(e .* (Gs_in * n_inj'));
+P_sct_out = power_calib * sum(e .* Gs_out .* n_inj');
 P_sct = P_sct_out - P_sct_in;
-P_rec = coeff * trapz(e, 2 * e .* n_inj' .* (Gr * n_inj'));
+P_rec = power_calib * sum(2 * e .* n_inj' .* (Gr * n_inj'));
 end
 
 function normalized_density = rho(e)
@@ -226,13 +197,15 @@ function R = DirectInjection(e, rho_de, V, r)
     R = R .* rho_de;
 end
 
-function [R, Omega, N_Omega] = ScatteringInjection(e_inj, de_inj, V, r, Tc, f_inj, Tph)
-    Omega = e_inj - 1;
-    [Omega, e] = meshgrid(Omega, e_inj);
+function [R, Omega, N_Omega] = ScatteringInjection(e_inj, de_inj, f_inj, V, r, Tc, Tph)
+    N = 5 * length(e_inj);
+    Omega = linspace(0, max(V) - 1, N);
+    e_final = linspace(min(e_inj), max(e_inj), N)';
+    [Omega, e] = meshgrid(Omega, e_final);
     dN_Omega = Omega.^2 .* rho(e - Omega) .* rho(e) .* f_inj(e) .*...
         (1 - 1 ./ (e .* (e - Omega))) .* Np(Omega, Tph);
-    dN_Omega(dN_Omega < 0) = 0;
-    N_Omega = r * trapz(e_inj, dN_Omega) / Tc^3;
+    dN_Omega(dN_Omega < 0 | ~isfinite(dN_Omega)) = 0;
+    N_Omega = r * trapz(e_final, dN_Omega) / Tc^3;
     
 %     figure
 %     plot(Omega(1, :), N_Omega, 'LineWidth', 2)
@@ -243,22 +216,25 @@ function [R, Omega, N_Omega] = ScatteringInjection(e_inj, de_inj, V, r, Tc, f_in
 %     axis tight
 %     grid on
 
-    dR = Omega.^2 .* (ones(size(e_inj)) * N_Omega) .*...
+    dR = Omega.^2 .* (ones(size(e_final)) * N_Omega) .*...
                 (e .* (Omega - e) + 1) ./...
                 (sqrt(e.^2 - 1) .* sqrt((Omega - e).^2 - 1));
-    dR(e <= 1 | Omega <= e + 1) = 0;
-    R = trapz(Omega(1, :), dR, 2) .* de_inj / Tc^3;
+    dR(Omega <= e + 1) = 0;
+    R = trapz(Omega(1, :), dR, 2) / Tc^3;
+    R = interp1(e_final, R, e_inj) .* de_inj;
     Omega = Omega(1, :);
 end
 
-function [R, Omega, N_Omega] = RecombinationInjection(e_inj, de_inj, V, r, Tc, f_inj, Tph)
-    Omega = 2 * e_inj;
-    [Omega, e] = meshgrid(Omega, e_inj);
+function [R, Omega, N_Omega] = RecombinationInjection(e_inj, de_inj, f_inj, V, r, Tc, Tph)
+    N = 5 * length(e_inj);
+    Omega = linspace(2, 2 * max(V), N);
+    e_final = linspace(min(e_inj), max(e_inj), N)';
+    [Omega, e] = meshgrid(Omega, e_final);
     dN_Omega = Omega.^2 .* rho(Omega - e) .* rho(e) .*...
         f_inj(Omega - e) .* f_inj(e) .*...
         (1 + 1 ./ (e .* (Omega - e))) .* Np(Omega, Tph);
-    dN_Omega(dN_Omega < 0) = 0;
-    N_Omega = r * trapz(e_inj, dN_Omega) / Tc^3;
+    dN_Omega(dN_Omega < 0 | ~isfinite(dN_Omega)) = 0;
+    N_Omega = r * trapz(e_final, dN_Omega) / Tc^3;
 
 %     figure
 %     plot(Omega(1, :), N_Omega, 'LineWidth', 2)
@@ -269,18 +245,19 @@ function [R, Omega, N_Omega] = RecombinationInjection(e_inj, de_inj, V, r, Tc, f
 %     axis tight
 %     grid on
 
-    dR = Omega.^2 .* (ones(size(e_inj)) * N_Omega) .*...
+    dR = Omega.^2 .* (ones(size(e_final)) * N_Omega) .*...
                 (e .* (Omega - e) + 1) ./...
                 (sqrt(e.^2 - 1) .* sqrt((Omega - e).^2 - 1));
-    dR(e <= 1 | Omega <= e + 1) = 0;
-    R = trapz(Omega(1, :), dR, 2) .* de_inj / Tc^3;
+    dR(Omega <= e + 1) = 0;
+    R = trapz(Omega(1, :), dR, 2) / Tc^3;
+    R = interp1(e_final, R, e_inj) .* de_inj;
     Omega = Omega(1, :);
 end
-
 
 function ndot = quasiparticleODE(t, n, Gs_in, Gs_out, Gr, Gtr, R)
     if t > 0
         R = 0;
     end
+    n(n < 0) = 0;
     ndot = Gs_in * n - Gs_out .* n - 2 * n .* (Gr * n) - Gtr .* n + R;
 end

@@ -31,10 +31,6 @@ function [t, e, n, f, n_qp, r_qp, P] = ...
 %      in units n_{cp}, single number,
 %      P is the total injected power in W, single number.
 
-if ~exist('plot_flag', 'var')
-    plot_flag = false;
-end
-
 % Constants.
 kB = 1.38064852e-23; % J / K
 eV2J = 1.602176565e-19; % J / eV 
@@ -49,11 +45,11 @@ Tph = kB * Tph / delta; % in units of \Delta
 % Tc = kB * Tc / delta;
 Tc = 1 / 1.764; % \delta/(K_B * T_c) = 1.764 at T = 0 K BCS result
 
-Volume = 1; % um^3
+Volume = 1e5; % um^3
 tau_0 = 438e-9; % sec
 ncp = 4e6; % n_{cp} for aluminum is 4e6 \micro m^-3
                      % C. Wang et al. Nature Comm. 5, 5836 (2014)
-
+                     
 % Debye temperature.
 % TD = 428; % K
 % TD = kB * TD/ delta; % in units of \Delta
@@ -61,12 +57,14 @@ ncp = 4e6; % n_{cp} for aluminum is 4e6 \micro m^-3
 % Number of energy bins.
 N = 500;
 % Maximum energy.
-max_e = max(V) + 1;
+max_e = 2 * max(V) - 1;
 
 % Assign the quasiparicle energies to the bins. Non-uniform energy
 % separation is implemented. For a close to uniform distribution set alpha
 % to a small positive value.
-alpha = 3.5;
+%e = linspace(1, max_e, N + 1)';
+
+alpha = 5;
 e = (1 + (max_e - 1) * sinh(alpha * (0:N) / N) / sinh(alpha))';
 de = diff(e);
 e = e(2:end);
@@ -96,11 +94,11 @@ n_inj = n(end, :);
 
 % Occupational numbers.
 f_inj = n_inj ./ rho_de';
-
+f_inj(f_inj < 0) = 0;
 f_inj = @(e_inj) interp1(e, f_inj, e_inj, 'spline', 'extrap');
 
-Rph_rec = RecombinationInjection(e, de, V, rph, Tc, f_inj, Tph);
-Rph_sct = ScatteringInjection(e, de, V, rph, Tc, f_inj, Tph);
+Rph_rec = RecombinationInjection(e, de, f_inj, V, rph, Tc, Tph);
+Rph_sct = ScatteringInjection(e, de, f_inj, V, rph, Tc, Tph);
 
 Gtr = Gtrapping(e, Tph, Tc, c);
 
@@ -225,39 +223,44 @@ function R = DirectInjection(e, rho_de, V, r)
     R = R .* rho_de;
 end
 
-function [R, Omega, N_Omega] = ScatteringInjection(e_inj, de_inj, V, r, Tc, f_inj, Tph)
-    Omega = e_inj - 1;
-    [Omega, e] = meshgrid(Omega, e_inj);
+function [R, Omega, N_Omega] = ScatteringInjection(e_inj, de_inj, f_inj, V, r, Tc, Tph)
+    N = 5 * length(e_inj);
+    Omega = linspace(0, max(V) - 1, N);
+    e_final = linspace(min(e_inj), max(e_inj), N)';
+    [Omega, e] = meshgrid(Omega, e_final);
     dN_Omega = Omega.^2 .* rho(e - Omega) .* rho(e) .* f_inj(e) .*...
         (1 - 1 ./ (e .* (e - Omega))) .* Np(Omega, Tph);
-    dN_Omega(dN_Omega < 0) = 0;
-    N_Omega = r * trapz(e_inj, dN_Omega) / Tc^3;
+    dN_Omega(dN_Omega < 0 | ~isfinite(dN_Omega)) = 0;
+    N_Omega = r * trapz(e_final, dN_Omega) / Tc^3;
     
-    figure
-    plot(Omega(1, :), N_Omega, 'LineWidth', 2)
-    xlabel('Phonon Energy \Omega (\Delta)', 'FontSize', 14)
-    ylabel('N_{gen}(\Omega) (n_{cp} / \Delta)', 'FontSize', 14)
-    title('Phonon Spectrum (Scattering)')
-    set(gca, 'yscale', 'Log')
-    axis tight
-    grid on
+%     figure
+%     plot(Omega(1, :), N_Omega, 'LineWidth', 2)
+%     xlabel('Phonon Energy \Omega (\Delta)', 'FontSize', 14)
+%     ylabel('N_{gen}(\Omega) (n_{cp} / \Delta)', 'FontSize', 14)
+%     title('Phonon Spectrum (Scattering)')
+%     set(gca, 'yscale', 'Log')
+%     axis tight
+%     grid on
 
-    dR = Omega.^2 .* (ones(size(e_inj)) * N_Omega) .*...
+    dR = Omega.^2 .* (ones(size(e_final)) * N_Omega) .*...
                 (e .* (Omega - e) + 1) ./...
                 (sqrt(e.^2 - 1) .* sqrt((Omega - e).^2 - 1));
-    dR(e <= 1 | Omega <= e + 1) = 0;
-    R = trapz(Omega(1, :), dR, 2) .* de_inj / Tc^3;
+    dR(Omega <= e + 1) = 0;
+    R = trapz(Omega(1, :), dR, 2) / Tc^3;
+    R = interp1(e_final, R, e_inj) .* de_inj;
     Omega = Omega(1, :);
 end
 
-function [R, Omega, N_Omega] = RecombinationInjection(e_inj, de_inj, V, r, Tc, f_inj, Tph)
-    Omega = 2 * e_inj;
-    [Omega, e] = meshgrid(Omega, e_inj);
+function [R, Omega, N_Omega] = RecombinationInjection(e_inj, de_inj, f_inj, V, r, Tc, Tph)
+    N = 5 * length(e_inj);
+    Omega = linspace(2, 2 * max(V), N);
+    e_final = linspace(min(e_inj), max(e_inj), N)';
+    [Omega, e] = meshgrid(Omega, e_final);
     dN_Omega = Omega.^2 .* rho(Omega - e) .* rho(e) .*...
         f_inj(Omega - e) .* f_inj(e) .*...
         (1 + 1 ./ (e .* (Omega - e))) .* Np(Omega, Tph);
-    dN_Omega(dN_Omega < 0) = 0;
-    N_Omega = r * trapz(e_inj, dN_Omega) / Tc^3;
+    dN_Omega(dN_Omega < 0 | ~isfinite(dN_Omega)) = 0;
+    N_Omega = r * trapz(e_final, dN_Omega) / Tc^3;
 
 %     figure
 %     plot(Omega(1, :), N_Omega, 'LineWidth', 2)
@@ -268,11 +271,12 @@ function [R, Omega, N_Omega] = RecombinationInjection(e_inj, de_inj, V, r, Tc, f
 %     axis tight
 %     grid on
 
-    dR = Omega.^2 .* (ones(size(e_inj)) * N_Omega) .*...
+    dR = Omega.^2 .* (ones(size(e_final)) * N_Omega) .*...
                 (e .* (Omega - e) + 1) ./...
                 (sqrt(e.^2 - 1) .* sqrt((Omega - e).^2 - 1));
-    dR(e <= 1 | Omega <= e + 1) = 0;
-    R = trapz(Omega(1, :), dR, 2) .* de_inj / Tc^3;
+    dR(Omega <= e + 1) = 0;
+    R = trapz(Omega(1, :), dR, 2) / Tc^3;
+    R = interp1(e_final, R, e_inj) .* de_inj;
     Omega = Omega(1, :);
 end
 
@@ -280,5 +284,6 @@ function ndot = quasiparticleODE(t, n, Gs_in, Gs_out, Gr, Gtr, R)
     if t > 0
         R = 0;
     end
+    n(n < 0) = 0;
     ndot = Gs_in * n - Gs_out .* n - 2 * n .* (Gr * n) - Gtr .* n + R;
 end

@@ -8,17 +8,17 @@ c = 0; % trapping rate in units of 1 / \tau_0
 Tph = 0.051; % K
 tspan = [-500, 0]; % in units of \tau_0
 
-V = 1.1:.5:10;
+V = 1.1:2:10;
 
 Ptot = NaN(size(V));
-Psct = NaN(size(V));
+Psct2D = NaN(size(V));
 Prec = NaN(size(V));
-Ptotsct = NaN(size(V));
+Psct = NaN(size(V));
 P_sct = NaN(size(V));
 P_rec = NaN(size(V));
 for k = 1:length(V)
     if V(k) > 1
-        [~, ~, ~, ~, ~, ~, Ptot(k), Psct(k), Prec(k), Ptotsct(k),...
+        [~, ~, ~, ~, ~, ~, Ptot(k), Psct(k), Prec(k), Psct2D(k),...
             P_sct(k), P_rec(k)] = phononSpectra(Tph, tspan,...
             V(k), r_direct, r_phonon, c);
     end
@@ -26,22 +26,13 @@ for k = 1:length(V)
 end
 
 figure
-plot(V, Ptotsct ./ Ptot, V, Psct ./ Ptot, V, Prec ./ Ptot, V, (Psct + Prec) ./ Ptot,...
-    V, (Ptotsct + Prec) ./ Ptot, 'LineWidth', 2)
+plot(V, Psct ./ Ptot, V, Prec ./ Ptot, V, (Psct + Prec) ./ Ptot,...
+     V, Psct2D ./ Ptot, V, (Psct2D + Prec) ./ Ptot, 'LineWidth', 2)
 xlabel('Voltage (\Delta)', 'FontSize', 14)
 ylabel('Normalized Power P / P_{total}', 'FontSize', 14)
-legend('scattering', 'scattering above 2\Delta', 'recombination',...
-    'scattering above 2\Delta + recombination', 'scattering + recombination')
-axis tight
-grid on
-
-figure
-semilogx(Ptot, Ptotsct ./ Ptot, Ptot, Psct ./ Ptot, Ptot, Prec ./ Ptot, Ptot,...
-    (Psct + Prec) ./ Ptot, Ptot, (Ptotsct + Prec) ./ Ptot, 'LineWidth', 2)
-xlabel('P_{total} (W)', 'FontSize', 14)
-ylabel('Normalized Power P / P_{total}', 'FontSize', 14)
-legend('scattering', 'scattering above 2\Delta', 'recombination',...
-    'scattering above 2\Delta + recombination', 'scattering + recombination')
+legend('scattering', 'recombination',...
+       'scattering + recombination', 'scattering above 2\Delta',...
+       'scattering above 2\Delta + recombination')
 axis tight
 grid on
 
@@ -52,6 +43,17 @@ xlabel('Voltage (\Delta)', 'FontSize', 14)
 ylabel('Normalized Power P / P_{total}', 'FontSize', 14)
 legend('scattering', 'recombination',...
     'scattering + recombination')
+axis tight
+grid on
+
+figure
+semilogx(Ptot, Psct ./ Ptot, Ptot, Prec ./ Ptot, Ptot, (Psct + Prec) ./ Ptot,...
+     Ptot, Psct2D ./ Ptot, Ptot, (Psct2D + Prec) ./ Ptot, 'LineWidth', 2)
+xlabel('P_{total} (W)', 'FontSize', 14)
+ylabel('Normalized Power P / P_{total}', 'FontSize', 14)
+legend('scattering', 'recombination',...
+       'scattering + recombination', 'scattering above 2\Delta',...
+       'scattering above 2\Delta + recombination')
 axis tight
 grid on
 
