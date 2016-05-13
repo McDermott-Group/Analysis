@@ -8,7 +8,7 @@ c = 0; % trapping rate in units of 1 / \tau_0
 Tph = 0.051; % K
 tspan = [-500, 0]; % in units of \tau_0
 
-V = 1.1:2:10;
+V = 1.1:.5:10;
 
 Ptot = NaN(size(V));
 Psct2D = NaN(size(V));

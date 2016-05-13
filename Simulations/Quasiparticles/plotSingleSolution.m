@@ -12,19 +12,20 @@ function plotSingleSolution
 r_direct = .09e-5; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
 r_phonon = 1; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
 c = 0; % trapping rate in units of 1 / \tau_0
+vol = 1e5; % um^- 3
 
 Tph = 0.051; % K
 tspan = [-500, -1]; % in units of \tau_0
 
-V = 3.5;
+V = 4;
 
-[t, e, n, f, n_qp] = twoStageQuasi0DModel(Tph, tspan, V, r_direct, r_phonon, c, true);
+[t, e, n, f, n_qp] = twoStageQuasi0DModel(Tph, tspan, V, r_direct, r_phonon, c, vol, true);
 
 figure
 plot(t, n_qp, 'LineWidth', 3)
 hold on
 xlabel('Time (\tau_0)', 'FontSize', 14)
-ylabel('n_{\rm qp} / n_{\rm cp}', 'FontSize', 14)
+ylabel('n_{\rm qp} (\mu m^{-3})', 'FontSize', 14)
 title({'Quasipaticle Dynamics',...
        '(injection at t < 0, recovery at t > 0)'})
 grid on

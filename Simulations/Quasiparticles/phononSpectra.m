@@ -258,6 +258,8 @@ function ndot = quasiparticleODE(t, n, Gs_in, Gs_out, Gr, Gtr, R)
     if t > 0
         R = 0;
     end
-    n(n < 0) = 0;
+    non_positive_n = n <= 0;
+    n(non_positive_n) = 0;
     ndot = Gs_in * n - Gs_out .* n - 2 * n .* (Gr * n) - Gtr .* n + R;
+    ndot(ndot < 0 & non_positive_n) = 0;
 end
