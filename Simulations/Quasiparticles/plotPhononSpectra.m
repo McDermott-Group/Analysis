@@ -1,14 +1,19 @@
 function plotPhononSpectra
 %plotPhononSpectra Plot phonon spectra.
 
-r_direct = .09e-5; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+r_direct = 1.5e-05; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
 r_phonon = 1; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
 c = 0; % trapping rate in units of 1 / \tau_0
+vol = 3.044e+04; % um^3
 
 Tph = 0.051; % K
-tspan = [-500, 0]; % in units of \tau_0
+tspan = [-250, 0]; % in units of \tau_0
 
-V = 1.1:.5:10;
+% V = 1.1:2:5;
+V = [1.25, 2, 3, 4];
+
+% Number of energy bins.
+N = 500;
 
 Ptot = NaN(size(V));
 Psct2D = NaN(size(V));
@@ -20,7 +25,7 @@ for k = 1:length(V)
     if V(k) > 1
         [~, ~, ~, ~, ~, ~, Ptot(k), Psct(k), Prec(k), Psct2D(k),...
             P_sct(k), P_rec(k)] = phononSpectra(Tph, tspan,...
-            V(k), r_direct, r_phonon, c);
+            V(k), r_direct, r_phonon, c, vol, N);
     end
     k
 end
@@ -33,6 +38,7 @@ ylabel('Normalized Power P / P_{total}', 'FontSize', 14)
 legend('scattering', 'recombination',...
        'scattering + recombination', 'scattering above 2\Delta',...
        'scattering above 2\Delta + recombination')
+title('Integrated Phonon Channel Power')
 axis tight
 grid on
 
@@ -41,6 +47,7 @@ plot(V, P_sct ./ Ptot, V, P_rec ./ Ptot,...
     V, (P_sct + P_rec) ./ Ptot, 'LineWidth', 2)
 xlabel('Voltage (\Delta)', 'FontSize', 14)
 ylabel('Normalized Power P / P_{total}', 'FontSize', 14)
+title('Integrated Power in ODE RHS')
 legend('scattering', 'recombination',...
     'scattering + recombination')
 axis tight
@@ -54,6 +61,7 @@ ylabel('Normalized Power P / P_{total}', 'FontSize', 14)
 legend('scattering', 'recombination',...
        'scattering + recombination', 'scattering above 2\Delta',...
        'scattering above 2\Delta + recombination')
+title('Integrated Phonon Channel Power')
 axis tight
 grid on
 
@@ -62,6 +70,7 @@ semilogx(Ptot, P_sct ./ Ptot, Ptot, P_rec ./ Ptot, Ptot,...
     (P_sct + P_rec) ./ Ptot, 'LineWidth', 2)
 xlabel('P_{total} (W)', 'FontSize', 14)
 ylabel('Normalized Power P / P_{total}', 'FontSize', 14)
+title('Integrated Power in ODE RHS')
 legend('scattering', 'recombination',...
     'scattering + recombination')
 axis tight

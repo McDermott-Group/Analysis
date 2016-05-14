@@ -18,18 +18,18 @@ function [t, e, n, f, n_qp, r_qp, P] = ...
 %      of n_{cp},
 %      c is the trapping (capture) rate in 1/\tau_0, assuming n and n_qp
 %      in units of n_{cp},
+%      vol is the volume in um^3,
 %      N is the umber of energy bins (50-1000 or so),
 %      plot_flag is an optional parameter that controls plot creation.
 %   The output parameters:
 %      t is time in \tau_0,
 %      e are energies of the bins in \Delta,
-%      n are the quasiparticle densities in n_{cp}, size(n) == [length(t),
+%      n are the quasiparticle densities in um^-3, size(n) == [length(t),
 %      length(e)],
 %      f are the occupational numbers, size(f) == size(n),
 %      n_qp is the non-equilibrium quasiparticle density,
 %      length(n_qp) == length(t),
-%      r_qp is the total injection rate in 1 / \tau_0, assuming n and n_qp
-%      in units n_{cp}, single number,
+%      r_qp is the total injection rate in 1 / \tau_0, single number,
 %      P is the total injected power in W, single number.
 
 % Constants.
@@ -85,7 +85,7 @@ n_inj = n(end, :);
 % Occupational numbers.
 f_inj = n_inj ./ rho_de';
 f_inj(f_inj < 0) = 0;
-f_inj = @(e_inj) interp1(e, f_inj, e_inj, 'spline', 'extrap');
+f_inj = @(e_inj) interp1(e, f_inj, e_inj);
 
 [Rph_rec, Omega_rec, N_Omega_rec] = RecombinationInjection(e, de, f_inj, V, rph, Tc, Tph);
 [Rph_sct, Omega_sct, N_Omega_sct] = ScatteringInjection(e, de, f_inj, V, rph, Tc, Tph);
@@ -112,10 +112,13 @@ end
 
 Gtr = Gtrapping(e, Tph, Tc, c);
 
+options = odeset('AbsTol', 1e-20);
+[t, n] = ode15s(@(t, n) quasiparticleODE(t, n,...
+    Gs_in, Gs_out, Gr, Gtr, Rph_sct + Rph_rec), tspan, n0, options);
+
 % Generate a plot.
 if plot_flag
-    f0 = 1 ./ (exp(e / Tph) + 1);
-    n0 = rho_de .* f0;
+    n0 = n_inj';
     figure
     plot(e, Gs_in * n0 ./ de, e,  Gs_out .* n0 ./ de,...
          e, n0 .* ( Gr * n0) ./ de,...
@@ -138,10 +141,6 @@ if plot_flag
     axis tight
     grid on
 end
-
-options = odeset('AbsTol', 1e-20);
-[t, n] = ode15s(@(t, n) quasiparticleODE(t, n,...
-    Gs_in, Gs_out, Gr, Gtr, Rph_sct + Rph_rec), tspan, n0, options);
 
 % Occupational numbers.
 f = n ./ (ones(length(t), 1) * rho_de');
@@ -230,7 +229,7 @@ function R = DirectInjection(e, rho_de, V, r)
 end
 
 function [R, Omega, N_Omega] = ScatteringInjection(e_inj, de_inj, f_inj, V, r, Tc, Tph)
-    N = 5 * length(e_inj);
+    N = 3 * length(e_inj);
     Omega = linspace(0, max(V) - 1, N);
     e_final = linspace(min(e_inj), max(e_inj), N)';
     [Omega, e] = meshgrid(Omega, e_final);
@@ -249,7 +248,7 @@ function [R, Omega, N_Omega] = ScatteringInjection(e_inj, de_inj, f_inj, V, r, T
 end
 
 function [R, Omega, N_Omega] = RecombinationInjection(e_inj, de_inj, f_inj, V, r, Tc, Tph)
-    N = 5 * length(e_inj);
+    N = 3 * length(e_inj);
     Omega = linspace(2, 2 * max(V), N);
     e_final = linspace(min(e_inj), max(e_inj), N)';
     [Omega, e] = meshgrid(Omega, e_final);

@@ -1,6 +1,6 @@
 function [t, e, n, f, n_qp, r_qp, Ptot, Psct, Prec, Psct2D,...
     P_sct, P_rec] = ...
-    phononSpectra(Tph, tspan, V, rqp, rph, c)
+    phononSpectra(Tph, tspan, V, rqp, rph, c, vol, N)
 %phononSpectra(Simple trapping, quasi-0D model.
 % [t, e, n, f, n_qp, r_qp, P] = 
 %   phononMediatedQuasi0DModel(Tph, tspan, V, r, c)
@@ -19,19 +19,19 @@ function [t, e, n, f, n_qp, r_qp, Ptot, Psct, Prec, Psct2D,...
 %      of n_{cp},
 %      c is the trapping (capture) rate in 1/\tau_0, assuming n and n_qp
 %      in units of n_{cp},
+%      vol is the volume in um^3,
+%      N is the umber of energy bins (50-1000 or so),
 %      plot_flag is an optional parameter that controls plot creation.
 %   The output parameters:
 %      t is time in \tau_0,
 %      e are energies of the bins in \Delta,
-%      n are the quasiparticle densities in n_{cp}, size(n) == [length(t),
+%      n are the quasiparticle densities in  in um^-3,, size(n) == [length(t),
 %      length(e)],
 %      f are the occupational numbers, size(f) == size(n),
 %      n_qp is the non-equilibrium quasiparticle density,
 %      length(n_qp) == length(t),
-%      r_qp is the total injection rate in 1 / \tau_0, assuming n and n_qp
-%      in units n_{cp}, single number,
-%      P is the total injected power in \Delta / \tau_0, assuming n and
-%      n_qp in units n_{cp}, single number.
+%      r_qp is the total injection rate in 1 / \tau_0, single number,
+%      P is the total injected power in \Delta / \tau_0, single number.
 
 % Constants.
 kB = 1.38064852e-23; % J / K
@@ -47,19 +47,16 @@ Tph = kB * Tph / delta; % in units of \Delta
 % Tc = kB * Tc / delta;
 Tc = 1 / 1.764; % \delta/(K_B * T_c) = 1.764 at T = 0 K BCS result
 
-Volume = 250; % um^3
 tau_0 = 438e-9; % sec
 ncp = 4e6; % n_{cp} for aluminum is 4e6 \micro m^-3
                      % C. Wang et al. Nature Comm. 5, 5836 (2014)
 
-power_calib = delta * ncp * Volume / tau_0;
+power_calib = delta * ncp * vol / tau_0;
                      
 % Debye temperature.
 % TD = 428; % K
 % TD = kB * TD/ delta; % in units of \Delta
 
-% Number of energy bins.
-N = 500;
 % Maximum energy.
 max_e = 2 * max(V) - 1;
 
@@ -106,7 +103,7 @@ f_inj = @(e_inj) interp1(e, f_inj, e_inj);
 f = n ./ (ones(length(t), 1) * rho_de');
 
 % Non-equlibrium quasipatical density.
-n_qp = 2 * sum(n, 2);
+n_qp = 2 * ncp * sum(n, 2);
 
 % Bins indices the quasiparticles are injected to.
 if length(V) == 2
@@ -131,6 +128,36 @@ P_sct_in = power_calib * sum(e .* (Gs_in * n_inj'));
 P_sct_out = power_calib * sum(e .* Gs_out .* n_inj');
 P_sct = P_sct_out - P_sct_in;
 P_rec = power_calib * sum(2 * e .* n_inj' .* (Gr * n_inj'));
+
+Pt_sct = NaN(size(n, 1), 1);
+Pt_sct2D = NaN(size(n, 1), 1);
+Pt_rec = NaN(size(n, 1), 1);
+f(f < 0) = 0;
+for k = 1:size(n, 1)
+    f_inj = f(k, :);
+    f_inj = @(e_inj) interp1(e, f_inj, e_inj);
+    [~, Omega_rec, N_Omega_rec] = RecombinationInjection(e, de, f_inj, V, rph, Tc, Tph);
+    [~, Omega_sct, N_Omega_sct] = ScatteringInjection(e, de, f_inj, V, rph, Tc, Tph);
+    Pt_sct(k) = power_calib * trapz(Omega_sct, N_Omega_sct .* Omega_sct);
+    N_Omega_sct = N_Omega_sct(Omega_sct > 2);
+    Omega_sct = Omega_sct(Omega_sct > 2);
+    Pt_sct2D(k) = power_calib * trapz(Omega_sct, N_Omega_sct .* Omega_sct);
+    Pt_rec(k) = power_calib * trapz(Omega_rec, N_Omega_rec .* Omega_rec);
+end
+
+figure
+t = t - min(t);
+plot(t, Pt_sct ./ Ptot, t, Pt_rec ./ Ptot, t, (Pt_sct + Pt_rec) ./ Ptot,...
+     t, Pt_sct2D ./ Ptot, t, (Pt_sct2D + Pt_rec) ./ Ptot, 'LineWidth', 2)
+xlabel('Time (\tau_0)', 'FontSize', 14)
+ylabel('Normalized Power P / P_{total}', 'FontSize', 14)
+legend('scattering', 'recombination',...
+       'scattering + recombination', 'scattering above 2\Delta',...
+       'scattering above 2\Delta + recombination')
+title(['V = ',  num2str(V), ' \Delta/e']) 
+axis tight
+grid on
+
 end
 
 function normalized_density = rho(e)

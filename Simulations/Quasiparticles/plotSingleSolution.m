@@ -14,12 +14,14 @@ r_phonon = 1; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
 c = 0; % trapping rate in units of 1 / \tau_0
 vol = 1e5; % um^- 3
 
+N = 1000;
+
 Tph = 0.051; % K
 tspan = [-500, -1]; % in units of \tau_0
 
 V = 4;
 
-[t, e, n, f, n_qp] = twoStageQuasi0DModel(Tph, tspan, V, r_direct, r_phonon, c, vol, true);
+[t, e, n, f, n_qp] = twoStageQuasi0DModel(Tph, tspan, V, r_direct, r_phonon, c, vol, N, true);
 
 figure
 plot(t, n_qp, 'LineWidth', 3)
