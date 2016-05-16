@@ -2,10 +2,10 @@ function autoFit2TwoStageTrapNoTrap
 %autoFit2TwoStageTrapNoTrap Fitting to TrapNoTrap dataset.
 
 % No traps.
-% r_direct = 1.676e-05; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-% r_phonon = 4.876e-02; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-% c = 1.603e-02; % trapping rate in units of 1 / \tau_0
-% vol = 3.044e+04; % um^3
+r_direct = 1.676e-05; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+r_phonon = 4.876e-02; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+c = 1.603e-02; % trapping rate in units of 1 / \tau_0
+vol = 3.044e+04; % um^3
 
 % With traps.
 % r_direct = 4.875e-06; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
@@ -17,12 +17,12 @@ Tph = 0.051; % K
 tspan = [-310, -10]; % in units of \tau_0
 
 % Number of the energy bins.
-N = 20;
+N = 50;
 
 delta = 0.18e-3; % eV (aluminum superconducting gap)
 data = load('TrapNoTrap.mat');
 
-% No traps.
+No traps.
 V = data.NoTrap(:, 5) / delta;
 P = data.NoTrap(:, 6);
 nqp = data.NoTrap(:, 8) - min(data.NoTrap(:, 8));

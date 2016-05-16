@@ -1,4 +1,4 @@
-function fit2NIS04212016
+function twoStageTimeDomainFit2NIS04212016
 %FIT2NIS04212016 Fitting to FinalNIS04212016forSimulations data set.
 
 data = load('NIS04212016.mat');
@@ -23,13 +23,18 @@ E_r_n = data.NearTrapRecovery(:, 2);
 tau_r_n = data.NearTrapRecovery(:, 3);
 nqp_r_n = data.NearTrapRecovery(:, 4);
 
-r = 1.67e-7; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-c = 0.0095; % trapping rate in units of 1 / \tau_0
-d = 1;
+r_direct = 8.323e-06; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+r_phonon = 5.018e-03; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+c = 1.639e-02; % trapping rate in units of 1 / \tau_0
+vol = 5e+04; % um^3
+
 V = [E_p_n; E_r_n; 3.5; 4.2; 6.7]; % in units of \Delta
 % V = V(V > 3);
 Tph = 0.051; % K
-tspan = [-100, 100]; % in units of \tau_0
+tspan = [-200, 200]; % in units of \tau_0
+
+% Number of energy bins.
+N = 125;
 
 tau_p = NaN(size(V));
 err_p = NaN(size(V));
@@ -37,17 +42,15 @@ tau_r = NaN(size(V));
 err_r = NaN(size(V));
 nqp = NaN(size(V));
 P = NaN(size(V));
-for k = 1:length(V)
-    % [t, ~, ~, ~, n_qp, ~, ~, P(k)] = simpleTrapping0DModel(Tph, tspan, V(k), r, c);
-    [t, ~, ~, ~, n_qp, ~, ~, P(k)] = simpleTrappingQuasi0DModel(Tph, tspan, V(k), r, c, d);
+for k = 1:length(V) 
+    clear twoStageTimeDomainQuasi0DModel
+    [t, ~, ~, ~, n_qp, ~, P(k)] = twoStageTimeDomainQuasi0DModel(Tph, tspan, V(k), r_direct, r_phonon, c, vol, N);
     [tau_p(k), err_p(k), tau_r(k), err_r(k)] = extractTimeConstants(t, n_qp, false);
     nqp(k) = max(n_qp);
+    k
 end
 
-nqp = 4e6 * nqp; % n_{cp} for aluminum is (4e-6 \micro m^-3
-                     % C. Wang et al. Nature Comm. 5, 5836 (2014)
-
-F = 5;
+F = 6;
 tau0 = F * .438; % us, \tau_0 for aluminum from S. B. Kaplan et al.,
               % Phys. Rev. B 14, 4854 (1976)
 tau_p = tau0 * tau_p;
@@ -68,9 +71,10 @@ ylabel('Time Constant (\mu s)', 'FontSize', 14)
 legend({'poisoning, near trap', 'recovery, near trap',...
     'poisoning simulation', 'recovery simulation'},...
     'Location', 'SouthWest')
-title({'Time Constants', ['r = ', num2str(r, '%.2e'),...
-    ', c = ', num2str(c, '%.2e'), ', d = ', num2str(d, '%.2e'),...
-    ', F = ', num2str(F, '%.2f')]})
+title({'Time Constants', ['r_{direct} = ', num2str(r_direct, '%.3e'),...
+    ', r_{ph} = ', num2str(r_direct, '%.3e'),...
+    ', c_{tr} = ', num2str(c, '%.3e'),...
+    ', F = ', num2str(F, '%.3f')]})
 axis tight
 grid on
  

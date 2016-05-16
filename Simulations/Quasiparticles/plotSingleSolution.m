@@ -9,19 +9,21 @@ function plotSingleSolution
 % Tph = .050; % K
 % tspan = [-10000, 10000]; % in units of \tau_0
 
-r_direct = .09e-5; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-r_phonon = 1; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-c = 0; % trapping rate in units of 1 / \tau_0
-vol = 1e5; % um^- 3
+r_direct = 8.323e-06; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+r_phonon = 5.018e-03; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+c = 1.639e-02; % trapping rate in units of 1 / \tau_0
+vol = 5e+04; % um^3
 
-N = 1000;
+N = 125;
 
 Tph = 0.051; % K
-tspan = [-500, -1]; % in units of \tau_0
+tspan = [-200, 200]; % in units of \tau_0
 
-V = 4;
+V = 2.5;
 
-[t, e, n, f, n_qp] = twoStageQuasi0DModel(Tph, tspan, V, r_direct, r_phonon, c, vol, N, true);
+% [t, e, n, f, n_qp] = twoStageQuasi0DModel(Tph, tspan, V, r_direct, r_phonon, c, vol, N, true);
+clear twoStageTimeDomainQuasi0DModel
+[t, e, ~, f, n_qp] = twoStageTimeDomainQuasi0DModel(Tph, tspan, V, r_direct, r_phonon, c, vol, N);
 
 figure
 plot(t, n_qp, 'LineWidth', 3)
@@ -41,14 +43,14 @@ ylabel('Energy (\epsilon/\Delta)', 'FontSize', 14)
 title({'Occupational Number f(\epsilon) Time Evolution',...
        '(injection at t < 0, recovery at t > 0)'})
 
-figure
-semilogy(e, n(end, :), e, f(end, :), 'LineWidth', 3)
-xlabel('Energy (\Delta)', 'FontSize', 14)
-ylabel('n(\epsilon), f(\epsilon)', 'FontSize', 14)
-legend('n(\epsilon)', 'f(\epsilon)')
-axis tight
-grid on
+% figure
+% semilogy(e, n(end, :), e, f(end, :), 'LineWidth', 3)
+% xlabel('Energy (\Delta)', 'FontSize', 14)
+% ylabel('n(\epsilon), f(\epsilon)', 'FontSize', 14)
+% legend('n(\epsilon)', 'f(\epsilon)')
+% axis tight
+% grid on
 
-% extractTimeConstants(t, n_qp, true);
+extractTimeConstants(t, n_qp, true);
 
 end
