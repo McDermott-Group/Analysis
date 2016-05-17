@@ -1,15 +1,17 @@
 function twoStageFit2TrapNoTrap
 %twoStageFit2TrapNoTrap Fitting to TrapNoTrap dataset.
 
-r_direct_no_tr = 1.471e-05; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-r_phonon_no_tr = 4.876e-02; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-c_no_tr = 1.603e-02; % trapping rate in units of 1 / \tau_0
-vol_no_tr = 3.044e+04; % um^3
+% r_direct_no_tr = 1.471e-05; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+% r_phonon_no_tr = 4.876e-02; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+% c_no_tr = 1.603e-02; % trapping rate in units of 1 / \tau_0
+% vol_no_tr = 3.044e+04; % um^3
+r_direct_no_tr = 7.917e-05; r_phonon_no_tr = 6.061e-03; c_no_tr = 1.848e-02; vol_no_tr = 5.000e+03; 
 
-r_direct_tr = 4.875e-06; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-r_phonon_tr = 1.138e-02; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-c_tr = 1.591e-02; % trapping rate in units of 1 / \tau_0
-vol_tr = 2.585e+05; % um^3
+% r_direct_tr = 4.875e-06; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+% r_phonon_tr = 1.138e-02; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
+% c_tr = 1.591e-02; % trapping rate in units of 1 / \tau_0
+% vol_tr = 2.585e+05; % um^3
+r_direct_tr = 1.649e-04; r_phonon_tr = 8.646e-05; c_tr = 1.021e-02; vol_tr = 5.000e+03; 
 
 delta = 0.18e-3; % eV (aluminum superconducting gap)
 Tph = 0.051; % K
