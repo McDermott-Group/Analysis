@@ -1,5 +1,0 @@
-Rothwarf Taylor Equations
-
-Need timesscale: tau-qp relax (emit phonon)
-tau-B (pair breaking time)
-tau-esc (escape time for phonons into substrate) 
