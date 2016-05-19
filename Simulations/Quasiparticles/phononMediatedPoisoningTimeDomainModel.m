@@ -6,11 +6,11 @@ function [t, e, n, f, n_qp, r_qp, P] = ...
 % 
 % [t, e, n, f, n_qp, r_qp, P] = 
 %   phononMediatedPoisoningTimeDomainModel(Tph, tspan, V, rqp, rph, c, vol, N)
-%   computes the quasiparticle dynamics in a two-point quasi-0D model.
-%   The quasiparticles are directly injected at the contact. At every point
-%   of time the phonon density is computed. This density is used to
-%   calculate the quasi-particle injection rate due to the pair-breaking
-%   mechanism.
+%   computes the quasiparticle dynamics using a two-point quasi-0D model.
+%   The quasiparticles are directly injected into the NIS junction.
+%   At every point in time the phonon density is computed. This phonon
+%   density is used to calculate the quasiparticle injection rate assuming
+%   the pair-breaking mechanism.
 %
 %   The input parameters:
 %      Tph is phonon temperature in K,
@@ -102,12 +102,12 @@ else
 end
 
 % Total injection rate.
-r_qp = rqp * sum(rho_de(indices));
+r_qp = rqp * sum(rho_de(indices)); % n_{cp}/\tau_0
 
 % Injection power.
 P = rqp * sum(e(indices) .* rho_de(indices));
 coeff = delta * ncp * vol / tau_0;
-P = coeff * P; % in W
+P = coeff * P; % W
 end
 
 function normalized_density = rho(e)
@@ -201,6 +201,7 @@ function [R, Omega1D, N_Omega] = ScatteringInjection(e_inj, de_inj,...
         % The following expression, multiplied by the phonon density per 
         % unit volume and integrated over the phonon energies, gives
         % quasiparticle injection rates per unit energy per unit volume.
+        % See Eq. (27) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
         dR_Omega_no_N_Omega = Omega.^2 .* (e .* (Omega - e) + 1) ./...
                 (sqrt(e.^2 - 1) .* sqrt((Omega - e).^2 - 1)) / Tc^3;
         dR_Omega_no_N_Omega(dR_Omega_no_N_Omega < 0 |...
@@ -239,6 +240,7 @@ function [R, Omega1D, N_Omega] = RecombinationInjection(e_inj, de_inj,...
         % The following expression, multiplied by the phonon density per 
         % unit volume and integrated over the phonon energies, gives
         % quasiparticle injection rates per unit energy per unit volume.
+        % See Eq. (27) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
         dR_Omega_no_N_Omega = Omega.^2 .*...
                 (e .* (Omega - e) + 1) ./...
                 (sqrt(e.^2 - 1) .* sqrt((Omega - e).^2 - 1)) / Tc^3;
@@ -260,7 +262,6 @@ end
 function ndot = quasiparticleODE(t, n, Gs_in, Gs_out, Gr, Gtr, R_direct,...
         e, de, rho_de, V, rph, Tc, Tph)
     % n is in units n_{cp}, rates are in units n_{cp}/\tau_0.
-    
     % It is assmumed that the injection is happening at t < 0 and
     % the relaxation - at t > 0.
     if t > 0

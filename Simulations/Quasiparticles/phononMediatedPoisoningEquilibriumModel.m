@@ -1,61 +1,67 @@
 function [t, e, n, f, n_qp, r_qp, P] = ...
-    twoStageQuasi0DModel(Tph, tspan, V, rqp, rph, c, vol, N, plot_flag)
-%twoStageQuasi0DModel(Simple trapping, quasi-0D model.
-% [t, e, n, f, n_qp, r_qp, P] = 
-%   phononMediatedQuasi0DModel(Tph, tspan, V, r, c, plot_flag)
-%   computes the quasiparticle dynamics in a simple model without any
-%   quasiparticle traps.
+    phononMediatedPoisoningEquilibriumModel(Tph, tspan, V, rqp, rph, c,...
+    vol, N, plot_flag)
+% phononMediatedPoisoningEquilibriumModel Two-point, i.e. a normal metal-
+% isolator-superconductor junction (NIS) and a resonator,
+% quasi-0D model for computing the equlibrium quasiparticle density.
+%
+% [t, e, n, f, n_qp, r_qp, P] = ...
+%   phononMediatedPoisoningEquilibriumModel(Tph, tspan, V, rqp, rph, c,...
+%   vol, N, plot_flag) computes the quasiparticle dynamics using
+%   a two-point quasi-0D model. The quasiparticles are directly injected
+%   into NIS junction. The equlibrium quasiparticle distribution and
+%   phonon densities are computed. The phonon density is then used to
+%   calculate the quasi-particle injection rate assuming the pair-breaking
+%   mechanism.
+%
 %   The input parameters:
 %      Tph is phonon temperature in K,
 %      tspan should be in form of [ti, tf] in units of \tau_0 where ti is
-%      the inital time and tf is the final time of the integration (it is
-%      assumed quasiparticles are injected at t < 0 and relaxation happens
-%      at t > 0),
+%      the inital time and tf is the final time of the integration range
+%     (it is assumed quasiparticles are injected at t < 0 and relaxation
+%      happens at t > 0),
 %      V is the applied voltage in \Delta,
-%      r_inj is the quasiparticle injection rate in 1/\tau_0,
-%      assuming n and n_qp in units of n_{cp},
-%      r_ph is the injection rate in 1/\tau_0, assuming n and n_qp in units
-%      of n_{cp},
-%      c is the trapping (capture) rate in 1/\tau_0, assuming n and n_qp
-%      in units of n_{cp},
-%      vol is the volume in um^3,
-%      N is the umber of energy bins (50-1000 or so),
-%      plot_flag is an optional parameter that controls plot creation.
+%      rqp is the quasiparticle injection rate in n_{cp}/\tau_0,
+%      rph is the fraction of the phonons that go to the resonator,
+%      dimensionless,
+%      c is the trapping (capture) rate in n_{cp}/\tau_0,
+%      vol is the injection volume in um^3,
+%      N is the number of the energy bins (50-1000 or so).
+%
 %   The output parameters:
 %      t is time in \tau_0,
 %      e are energies of the bins in \Delta,
-%      n are the quasiparticle densities in um^-3, size(n) == [length(t),
-%      length(e)],
+%      n are the quasiparticle densities in n_{cp}/\tau_0,
+%      size(n) == [length(t), length(e)],
 %      f are the occupational numbers, size(f) == size(n),
-%      n_qp is the non-equilibrium quasiparticle density,
+%      n_qp is the non-equilibrium quasiparticle density in quasiparticles
+%      per um^3,
 %      length(n_qp) == length(t),
-%      r_qp is the total injection rate in 1 / \tau_0, single number,
+%      r_qp is the total injection rate in n_{cp}/\tau_0, single number,
 %      P is the total injected power in W, single number.
 
 % Constants.
 kB = 1.38064852e-23; % J / K
 eV2J = 1.602176565e-19; % J / eV 
 
-% Tc = 1.2; % K (aluminum critical temperature)
 delta = 0.18e-3; % eV (aluminum superconducting gap)
 
 % Convert all energy-related values to \Delta units.
 delta = eV2J * delta; % J
 Tph = kB * Tph / delta; % in units of \Delta
 
-% Tc = kB * Tc / delta;
 Tc = 1 / 1.764; % \delta/(K_B * T_c) = 1.764 at T = 0 K BCS result
 
 tau_0 = 438e-9; % sec
 ncp = 4e6; % n_{cp} for aluminum is 4e6 \micro m^-3
-                     % C. Wang et al. Nature Comm. 5, 5836 (2014)
+           % C. Wang et al. Nature Comm. 5, 5836 (2014)
 
 % Maximum energy.
 max_e = 2 * max(V) - 1;
 
 % Assign the quasiparicle energies to the bins. Non-uniform energy
-% separation is implemented. For a close to uniform distribution set alpha
-% to a small positive value.
+% spacing is implemented. To get a spacing that is close to a uniform
+% set alpha to a very small positive value.
 alpha = 5;
 e = (1 + (max_e - 1) * sinh(alpha * (0:N) / N) / sinh(alpha))';
 de = diff(e);
@@ -72,23 +78,27 @@ Gtr = Gtrapping(e, Tph, Tc, c);
 
 Rqp = DirectInjection(e, rho_de, V, rqp);
 
-% Initial condition n0.
+% Initial condition for the quasiparticle distribution.
 n0 = zeros(size(e));
 
-% Solve the ODE. 
+% Solve the ODE at the NIS junction.
 options = odeset('AbsTol', 1e-20);
 [~, n] = ode15s(@(t, n) quasiparticleODE(t, n,...
     Gs_in, Gs_out, Gr, Gtr, Rqp), tspan, n0, options);
 
 n_inj = n(end, :);
 
-% Occupational numbers.
+% Occupation numbers.
 f_inj = n_inj ./ rho_de';
 f_inj(f_inj < 0) = 0;
 f_inj = @(e_inj) interp1(e, f_inj, e_inj);
 
-[Rph_rec, Omega_rec, N_Omega_rec] = RecombinationInjection(e, de, f_inj, V, rph, Tc, Tph);
-[Rph_sct, Omega_sct, N_Omega_sct] = ScatteringInjection(e, de, f_inj, V, rph, Tc, Tph);
+[Rph_rec, Omega_rec, N_Omega_rec] = RecombinationInjection(e, de, f_inj,...
+    V, rph, Tc, Tph);
+[Rph_sct, Omega_sct, N_Omega_sct] = ScatteringInjection(e, de, f_inj,...
+    V, rph, Tc, Tph);
+
+Gtr = Gtrapping(e, Tph, Tc, c);
 
 if plot_flag
     figure
@@ -110,23 +120,23 @@ if plot_flag
     grid on
 end
 
-Gtr = Gtrapping(e, Tph, Tc, c);
-
+% Solve the ODE at the resonator.
 options = odeset('AbsTol', 1e-20);
 [t, n] = ode15s(@(t, n) quasiparticleODE(t, n,...
     Gs_in, Gs_out, Gr, Gtr, Rph_sct + Rph_rec), tspan, n0, options);
 
-% Generate a plot.
 if plot_flag
     n0 = n_inj';
     figure
     plot(e, Gs_in * n0 ./ de, e,  Gs_out .* n0 ./ de,...
          e, n0 .* ( Gr * n0) ./ de,...
-         e, Gtr .* n0 ./ de, e, Rph_sct ./ de, e, Rph_rec ./ de, 'LineWidth', 2)
+         e, Gtr .* n0 ./ de, e, Rph_sct ./ de, e, Rph_rec ./ de,...
+         'LineWidth', 2)
     xlabel('Energy \epsilon (\Delta)', 'FontSize', 14)
     ylabel('Rate per Unit Energy (1/\tau_0\Delta)', 'FontSize', 14)
     legend({'G^{in}_{scattering}', 'G^{out}_{scattering}',...
-            'G_{recombination}', 'G_{trapping}', 'R_{ph. sct.}', 'R_{ph. rec.}'})
+            'G_{recombination}', 'G_{trapping}', 'R_{ph. sct.}',...
+            'R_{ph. rec.}'})
     title('Absolute Term Strengths at Thermal Equilibrium')
     set(gca, 'yscale', 'Log')
     axis tight
@@ -135,7 +145,8 @@ if plot_flag
     figure
     plot(e, Rph_sct, e, Rph_rec, 'LineWidth', 2)
     xlabel('Energy \epsilon (\Delta)', 'FontSize', 14)
-    ylabel('Injection Rate per Unit Energy (1/\tau_0\Delta)', 'FontSize', 14)
+    ylabel('Injection Rate per Unit Energy (1/\tau_0\Delta)',...
+        'FontSize', 14)
     legend({'R_{ph. sct.}', 'R_{ph. rec.}'})
     set(gca, 'yscale', 'Log')
     axis tight
@@ -145,7 +156,7 @@ end
 % Occupational numbers.
 f = n ./ (ones(length(t), 1) * rho_de');
 
-% Non-equlibrium quasipatical density.
+% Non-equlibrium quasipartical density.
 n_qp = 2 * ncp * sum(n, 2);
 
 % Bins indices the quasiparticles are injected to.
@@ -156,12 +167,12 @@ else
 end
 
 % Total injection rate.
-r_qp = rqp * sum(rho_de(indices));
+r_qp = rqp * sum(rho_de(indices)); % n_{cp}/\tau_0
 
 % Injection power.
 P = rqp * sum(e(indices) .* rho_de(indices));
 coeff = delta * ncp * vol / tau_0;
-P = coeff * P; % in W
+P = coeff * P; % W
 end
 
 function normalized_density = rho(e)
@@ -224,20 +235,23 @@ function R = DirectInjection(e, rho_de, V, r)
         % Realistic injection.
         R(e <= V) = r;
     end
-    
     R = R .* rho_de;
 end
 
-function [R, Omega, N_Omega] = ScatteringInjection(e_inj, de_inj, f_inj, V, r, Tc, Tph)
+function [R, Omega, N_Omega] = ScatteringInjection(e_inj, de_inj,...
+        f_inj, V, r, Tc, Tph)
     N = 3 * length(e_inj);
     Omega = linspace(0, max(V) - 1, N);
     e_final = linspace(min(e_inj), max(e_inj), N)';
     [Omega, e] = meshgrid(Omega, e_final);
+    
+    % See Eq. (8) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
     dN_Omega = Omega.^2 .* rho(e - Omega) .* rho(e) .* f_inj(e) .*...
         (1 - 1 ./ (e .* (e - Omega))) .* Np(Omega, Tph);
     dN_Omega(dN_Omega < 0 | ~isfinite(dN_Omega)) = 0;
     N_Omega = r * trapz(e_final, dN_Omega) / Tc^3;
-
+    
+    % See Eq. (27) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
     dR = Omega.^2 .* (ones(size(e_final)) * N_Omega) .*...
                 (e .* (Omega - e) + 1) ./...
                 (sqrt(e.^2 - 1) .* sqrt((Omega - e).^2 - 1));
@@ -247,17 +261,21 @@ function [R, Omega, N_Omega] = ScatteringInjection(e_inj, de_inj, f_inj, V, r, T
     Omega = Omega(1, :);
 end
 
-function [R, Omega, N_Omega] = RecombinationInjection(e_inj, de_inj, f_inj, V, r, Tc, Tph)
+function [R, Omega, N_Omega] = RecombinationInjection(e_inj, de_inj,...
+        f_inj, V, r, Tc, Tph)
     N = 3 * length(e_inj);
     Omega = linspace(2, 2 * max(V), N);
     e_final = linspace(min(e_inj), max(e_inj), N)';
     [Omega, e] = meshgrid(Omega, e_final);
+    
+    % See Eq. (8) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
     dN_Omega = Omega.^2 .* rho(Omega - e) .* rho(e) .*...
         f_inj(Omega - e) .* f_inj(e) .*...
         (1 + 1 ./ (e .* (Omega - e))) .* Np(Omega, Tph);
     dN_Omega(dN_Omega < 0 | ~isfinite(dN_Omega)) = 0;
     N_Omega = r * trapz(e_final, dN_Omega) / Tc^3;
 
+    % See Eq. (27) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
     dR = Omega.^2 .* (ones(size(e_final)) * N_Omega) .*...
                 (e .* (Omega - e) + 1) ./...
                 (sqrt(e.^2 - 1) .* sqrt((Omega - e).^2 - 1));
@@ -268,6 +286,9 @@ function [R, Omega, N_Omega] = RecombinationInjection(e_inj, de_inj, f_inj, V, r
 end
 
 function ndot = quasiparticleODE(t, n, Gs_in, Gs_out, Gr, Gtr, R)
+    % n is in units n_{cp}, rates are in units n_{cp}/\tau_0.
+    % It is assmumed that the injection is happening at t < 0 and
+    % the relaxation - at t > 0.
     if t > 0
         R = 0;
     end

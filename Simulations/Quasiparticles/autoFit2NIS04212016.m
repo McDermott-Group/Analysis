@@ -1,10 +1,9 @@
-function autoFit2TwoStageNIS04212016
-%autoFit2TwoStageTrapNoTrap Fitting to TrapNoTrap dataset.
+function autoFit2NIS04212016
+%autoFit2NIS04212016 Fitting to the TrapNoTrap dataset.
 
-% r_direct = 1.676e-05; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-% r_phonon = 4.876e-02; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-% c = 1.603e-02; % trapping rate in units of 1 / \tau_0
-r_direct = 8.323e-06; r_phonon = 5.018e-03; c = 1.639e-02;
+r_direct = 8.323e-06; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
+r_phonon = 5.018e-03; % dimensionless
+c = 1.639e-02; % dimensionless
 
 Tph = 0.051; % K
 tspan = [-310, -10]; % in units of \tau_0
@@ -23,7 +22,8 @@ nqp_r_n = data.NearTrapRecovery(:, 4);
 V = [E_p_n; E_r_n];
 nqp = [nqp_p_n; nqp_r_n];
 
-options = optimset('Display', 'iter', 'MaxIter', floor(2000 / N), 'TolFun', 1e-2);
+options = optimset('Display', 'iter', 'MaxIter', floor(2000 / N),...
+    'TolFun', 1e-2);
 x = fminsearch(@(x) simulations(x, Tph, tspan, V, nqp, N),...
     [r_direct, r_phonon, c], options);
 

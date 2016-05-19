@@ -1,5 +1,6 @@
-function twoStageTimeDomainFit2NIS04212016
-%FIT2NIS04212016 Fitting to FinalNIS04212016forSimulations data set.
+function timeDomainModelFit2NIS04212016
+%timeDomainModelFit2NIS04212016 Fitting to the FinalNIS04212016forSimulations
+% dataset using the two-point time domain quasi-0D model.
 
 data = load('NIS04212016.mat');
 
@@ -23,13 +24,12 @@ E_r_n = data.NearTrapRecovery(:, 2);
 tau_r_n = data.NearTrapRecovery(:, 3);
 nqp_r_n = data.NearTrapRecovery(:, 4);
 
-r_direct = 8.323e-06; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-r_phonon = 5.018e-03; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-c = 1.639e-02; % trapping rate in units of 1 / \tau_0
+r_direct = 8.323e-06; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
+r_phonon = 5.018e-03; % dimensionless
+c = 1.639e-02; % dimensionless
 vol = 5e+04; % um^3
 
 V = [E_p_n; E_r_n; 3.5; 4.2; 6.7]; % in units of \Delta
-% V = V(V > 3);
 Tph = 0.051; % K
 tspan = [-200, 200]; % in units of \tau_0
 
@@ -43,12 +43,16 @@ err_r = NaN(size(V));
 nqp = NaN(size(V));
 P = NaN(size(V));
 for k = 1:length(V) 
-    clear twoStageTimeDomainQuasi0DModel
-    [t, ~, ~, ~, n_qp, ~, P(k)] = twoStageTimeDomainQuasi0DModel(Tph, tspan, V(k), r_direct, r_phonon, c, vol, N);
-    [tau_p(k), err_p(k), tau_r(k), err_r(k)] = extractTimeConstants(t, n_qp, false);
+    clear phononMediatedPoisoningTimeDomainModel
+    [t, ~, ~, ~, n_qp, ~, P(k)] = ...
+        phononMediatedPoisoningTimeDomainModel(Tph, tspan, V(k),...
+        r_direct, r_phonon, c, vol, N);
+    [tau_p(k), err_p(k), tau_r(k), err_r(k)] = ...
+        extractTimeConstants(t, n_qp, false);
     nqp(k) = max(n_qp);
-    k
+    fprintf('*')
 end
+fprintf('\n')
 
 F = 6;
 tau0 = F * .438; % us, \tau_0 for aluminum from S. B. Kaplan et al.,

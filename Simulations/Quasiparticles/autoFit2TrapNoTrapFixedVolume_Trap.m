@@ -1,19 +1,11 @@
-function autoFit2TwoStageTrapNoTrapFixedVolume
-%autoFit2TwoStageTrapNoTrapFixedVolume Fitting to TrapNoTrap dataset.
+function autoFit2TrapNoTrapFixedVolume_Trap
+%autoFit2TrapNoTrapFixedVolume_Trap Fitting to the TrapNoTrap dataset.
 
-% No traps.
-% r_direct = 1.676e-05; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-% r_phonon = 4.876e-02; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-% c = 1.603e-02; % trapping rate in units of 1 / \tau_0
-% vol = 5e3; %3.044e+04; % um^3
-r_direct = 7.917e-05; r_phonon = 6.061e-03; c = 1.848e-02; vol = 5.000e+03; 
-
-% With traps.
-% r_direct = 4.875e-06; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-% r_phonon = 1.138e-02; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-% c = 1.591e-02; % trapping rate in units of 1 / \tau_0
-% vol = 2.585e+05; % um^3
-r_direct = 1.649e-04; r_phonon = 8.646e-05; c = 1.021e-02; vol = 5.000e+03; 
+With traps.
+r_direct = 1.649e-04; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
+r_phonon = 8.646e-05; % dimensionless
+c = 1.021e-02; % dimensionless
+vol = 5e3; % um^3
 
 Tph = 0.051; % K
 tspan = [-310, -10]; % in units of \tau_0
@@ -23,11 +15,6 @@ N = 150;
 
 delta = 0.18e-3; % eV (aluminum superconducting gap)
 data = load('TrapNoTrap.mat');
-
-% No traps.
-% V = data.NoTrap(:, 5) / delta;
-% P = data.NoTrap(:, 6);
-% nqp = data.NoTrap(:, 8) - min(data.NoTrap(:, 8));
 
 % With traps.
 V = data.Trap(:, 5) / delta;
@@ -52,7 +39,8 @@ function error = simulations(x, Tph, tspan, V, P, nqp, vol, N)
     nqp_sim = NaN(size(V));
     P_sim = NaN(size(V));
     for k = 1:length(V)
-        [~, ~, ~, ~, n_qp, ~, P_sim(k)] = twoStageQuasi0DModel(Tph, tspan,...
+        [~, ~, ~, ~, n_qp, ~, P_sim(k)] = ...
+            phononMediatedPoisoningEquilibriumModel(Tph, tspan,...
             V(k), x(1), x(2), x(3), vol, N, false);
         nqp_sim(k) = n_qp(end);
     end

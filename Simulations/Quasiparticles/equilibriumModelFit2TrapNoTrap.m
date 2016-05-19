@@ -1,17 +1,16 @@
-function twoStageFit2TrapNoTrap
-%twoStageFit2TrapNoTrap Fitting to TrapNoTrap dataset.
+function equilibriumModelFit2TrapNoTrap
+%equilibriumModelFit2TrapNoTrap Fitting to the TrapNoTrap dataset using
+% the two-point equilibrium quasi-0D model
 
-% r_direct_no_tr = 1.471e-05; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-% r_phonon_no_tr = 4.876e-02; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-% c_no_tr = 1.603e-02; % trapping rate in units of 1 / \tau_0
-% vol_no_tr = 3.044e+04; % um^3
-r_direct_no_tr = 7.917e-05; r_phonon_no_tr = 6.061e-03; c_no_tr = 1.848e-02; vol_no_tr = 5.000e+03; 
+r_direct_no_tr = 7.917e-05; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
+r_phonon_no_tr = 6.061e-03; % dimensionless
+c_no_tr = 1.848e-02; % dimensionless
+vol_no_tr = 5.000e+03; % um^3
 
-% r_direct_tr = 4.875e-06; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-% r_phonon_tr = 1.138e-02; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-% c_tr = 1.591e-02; % trapping rate in units of 1 / \tau_0
-% vol_tr = 2.585e+05; % um^3
-r_direct_tr = 1.649e-04; r_phonon_tr = 8.646e-05; c_tr = 1.021e-02; vol_tr = 5.000e+03; 
+r_direct_tr = 1.649e-04; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
+r_phonon_tr = 8.646e-05; % dimensionless
+c_tr = 1.021e-02; % dimensionless
+vol_tr = 5.000e+03; % um^3
 
 delta = 0.18e-3; % eV (aluminum superconducting gap)
 Tph = 0.051; % K
@@ -56,24 +55,29 @@ P_sim_no_tr = NaN(size(V_no_tr));
 P_sim_tr = NaN(size(V_tr));
 for k = 1:length(V_no_tr)
     if V_no_tr(k) > 1
-        [~, ~, ~, ~, nqp, ~, P_sim_no_tr(k)] = twoStageQuasi0DModel(Tph, tspan,...
-            V_no_tr(k), r_direct_no_tr, r_phonon_no_tr, c_no_tr, vol_no_tr, N, false);
+        [~, ~, ~, ~, nqp, ~, P_sim_no_tr(k)] =...
+            phononMediatedPoisoningEquilibriumModel(Tph, tspan,...
+            V_no_tr(k), r_direct_no_tr, r_phonon_no_tr, c_no_tr,...
+            vol_no_tr, N, false);
         nqp_sim_no_tr(k) = max(nqp);
     else
         nqp_sim_no_tr(k) = 0;
     end
-    k
+    fprintf('*')
 end
+fprintf('\n')
 for k = 1:length(V_tr)
     if V_tr(k) > 1
-        [~, ~, ~, ~, nqp, ~, P_sim_tr(k)] = twoStageQuasi0DModel(Tph, tspan,...
+        [~, ~, ~, ~, nqp, ~, P_sim_tr(k)] = ...
+            phononMediatedPoisoningEquilibriumModel(Tph, tspan,...
             V_tr(k), r_direct_tr, r_phonon_tr, c_tr, vol_tr, N, false);
         nqp_sim_tr(k) = max(nqp);
     else
         nqp_sim_tr(k) = 0;
     end
-    k
+    fprintf('*')
 end
+fprintf('\n')
 
 scrsz = get(0, 'ScreenSize');
 figure('Position', [.1 .1 1.5 .8] * scrsz(4));
