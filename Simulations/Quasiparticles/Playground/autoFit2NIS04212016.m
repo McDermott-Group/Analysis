@@ -1,5 +1,5 @@
 function autoFit2NIS04212016
-%autoFit2NIS04212016 Fitting to the NIS04212016 dataset.
+%autoFit2NIS04212016 Fitting to the TrapNoTrap dataset.
 
 r_direct = 8.323e-06; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
 r_phonon = 5.018e-03; % dimensionless
