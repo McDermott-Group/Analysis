@@ -174,7 +174,7 @@ end
 
 function [R, Omega1D, N_Omega] = ScatteringInjection(e_inj, de_inj,...
         f_inj, V, r, Tc, Tph)
-    persistent N Omega e_final e dN_Omega_no_f_inj dR_Omega_no_N_Omega
+    persistent N Omega e_init e dN_Omega_no_f_inj dR_Omega_no_N_Omega
     % If the bias is too small there is no point in computing
     % the contribution due to the phonon scattering.
     if max(V) <= 3
@@ -189,12 +189,12 @@ function [R, Omega1D, N_Omega] = ScatteringInjection(e_inj, de_inj,...
     if isempty(N)
         N = 3 * length(e_inj);
         Omega = linspace(2, max(V) - 1, N);
-        e_final = linspace(min(e_inj), max(e_inj), N)';
-        [Omega, e] = meshgrid(Omega, e_final);
+        e_init = linspace(min(e_inj), max(e_inj), N)';
+        [Omega, e] = meshgrid(Omega, e_init);
         % The following expression, multiplied by the quasiparticle
         % occupation numbers f_inj and integrated over the quasiparticle
-        % final energies e_final, gives phonon density per unit volume at
-        % energies Omega.
+        % "initial" energies e_init, gives phonon density per unit volume
+        % at energy Omega.
         % See Eq. (8) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
         dN_Omega_no_f_inj = r * Omega.^2 .* rho(e - Omega) .* rho(e) .*...
                 (1 - 1 ./ (e .* (e - Omega))) .* Np(Omega, Tph) / Tc^3;
@@ -209,13 +209,13 @@ function [R, Omega1D, N_Omega] = ScatteringInjection(e_inj, de_inj,...
     end
     dN_Omega = dN_Omega_no_f_inj .* f_inj(e);
     dN_Omega(dN_Omega < 0 | ~isfinite(dN_Omega)) = 0;
-    N_Omega = trapz(e_final, dN_Omega);
+    N_Omega = trapz(e_init, dN_Omega);
 
-    dR = dR_Omega_no_N_Omega .* (ones(size(e_final)) * N_Omega);
+    dR = dR_Omega_no_N_Omega .* (ones(size(e_init)) * N_Omega);
     dR(Omega <= e + 1) = 0;
     R = trapz(Omega(1, :), dR, 2);
     % Compute the quasipartcle injection per energy bin.
-    R = interp1(e_final, R, e_inj) .* de_inj;
+    R = interp1(e_init, R, e_inj) .* de_inj;
     Omega1D = Omega(1, :);
 end
 
@@ -228,12 +228,12 @@ function [R, Omega1D, N_Omega] = RecombinationInjection(e_inj, de_inj,...
     if isempty(N)
         N = 3 * length(e_inj);
         Omega = linspace(2, 2 * max(V), N);
-        e_final = linspace(min(e_inj), max(e_inj), N)';
+        e_final = linspace(1, max(e_inj), N)';
         [Omega, e] = meshgrid(Omega, e_final);
         % The following expression, multiplied by the quasiparticle
         % occupation numbers f_inj at the recombininng energies and
-        % integrated over the quasiparticle "final" energies e_final, gives
-        % phonon density per unit volume at energies Omega.
+        % integrated over the quasiparticle "final" energies e_final,
+        % gives phonon density per unit volume at energy Omega.
         % See Eq. (8) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
         dN_Omega_no_f_inj = r * Omega.^2 .* rho(Omega - e) .* rho(e) .*...
                 (1 + 1 ./ (e .* (Omega - e))) .* Np(Omega, Tph) / Tc^3;
