@@ -10,7 +10,7 @@ Tph = 0.051; % K
 tspan = [-250, 0]; % in units of \tau_0
 
 % V = 1.1:2:5;
-V = [1.25, 2, 3, 4];
+V = 4.5;
 
 % Number of energy bins.
 N = 500;

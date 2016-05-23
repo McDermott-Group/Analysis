@@ -32,7 +32,7 @@ disp(['r_direct = ', num2str(x(1), '%.3e'), '; ',...
 end
 
 function error = simulations(x, Tph, tspan, V, P, nqp, vol, N)
-    indices = (V > 1) & (nqp > 0);
+    indices = (V > 1) & (nqp > 0) & (V < 5);
     P = P(indices);
     nqp = nqp(indices);
     V = V(indices);
@@ -40,7 +40,7 @@ function error = simulations(x, Tph, tspan, V, P, nqp, vol, N)
     P_sim = NaN(size(V));
     for k = 1:length(V)
         [~, ~, ~, ~, n_qp, ~, P_sim(k)] = ...
-            phononMediatedPoisoningEquilibriumModel(Tph, tspan,...
+            twoRegionSteadyStateModel(Tph, tspan,...
             V(k), x(1), x(2), x(3), vol, N, false);
         nqp_sim(k) = n_qp(end);
     end

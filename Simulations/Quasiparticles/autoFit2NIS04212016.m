@@ -38,7 +38,7 @@ function error = simulations(x, Tph, tspan, V, nqp, N)
     V = V(indices);
     nqp_sim = NaN(size(V));
     for k = 1:length(V)
-        [~, ~, ~, ~, n_qp] = twoStageQuasi0DModel(Tph, tspan,...
+        [~, ~, ~, ~, n_qp] = twoRegionSteadyStateModel(Tph, tspan,...
             V(k), x(1), x(2), x(3), 1e5, N, false);
         nqp_sim(k) = n_qp(end);
     end

@@ -1,12 +1,13 @@
 function [t, e, n, f, n_qp, r_qp, P] = ...
-    phononMediatedPoisoningEquilibriumModel(Tph, tspan, V, rqp, rph, c,...
+    twoRegionSteadyStateModel(Tph, tspan, V, rqp, rph, c,...
     vol, N, plot_flag)
-% phononMediatedPoisoningEquilibriumModel Two-point, i.e. a normal metal-
-% isolator-superconductor junction (NIS) and a resonator,
-% quasi-0D model for computing the equlibrium quasiparticle density.
+% twoRegionSteadyStateModelTwo-region, one corresponds to
+% a normal metal-isolator-superconductor junction (NIS) and the other one -
+% to a resonator, quasi-0D model for computing the steady-state
+% quasiparticle densities.
 %
 % [t, e, n, f, n_qp, r_qp, P] = ...
-%   phononMediatedPoisoningEquilibriumModel(Tph, tspan, V, rqp, rph, c,...
+%   twoRegionSteadyStateModel(Tph, tspan, V, rqp, rph, c,...
 %   vol, N, plot_flag) computes the quasiparticle dynamics using
 %   a two-point quasi-0D model. The quasiparticles are directly injected
 %   into NIS junction. The equlibrium quasiparticle distribution and
@@ -30,15 +31,15 @@ function [t, e, n, f, n_qp, r_qp, P] = ...
 %
 %   The output parameters:
 %      t is time in \tau_0,
-%      e are energies of the bins in \Delta,
+%      e are energies of the bins in \Delta, a vector,
 %      n are the quasiparticle densities in n_{cp}/\tau_0,
 %      size(n) == [length(t), length(e)],
 %      f are the occupational numbers, size(f) == size(n),
 %      n_qp is the non-equilibrium quasiparticle density in quasiparticles
 %      per um^3,
 %      length(n_qp) == length(t),
-%      r_qp is the total injection rate in n_{cp}/\tau_0, single number,
-%      P is the total injected power in W, single number.
+%      r_qp is the total injection rate in n_{cp}/\tau_0, a single number,
+%      P is the total injected power in W, a single number.
 
 % Constants.
 kB = 1.38064852e-23; % J / K
@@ -57,18 +58,33 @@ ncp = 4e6; % n_{cp} for aluminum is 4e6 \micro m^-3
            % C. Wang et al. Nature Comm. 5, 5836 (2014)
 
 % Maximum energy.
-max_e = 2 * max(V) - 1;
+max_e = max(4, max(V));
 
 % Assign the quasiparicle energies to the bins. Non-uniform energy
 % spacing is implemented. To get a spacing that is close to a uniform
 % set alpha to a very small positive value.
-alpha = 5;
+alpha = 6;
 e = (1 + (max_e - 1) * sinh(alpha * (0:N) / N) / sinh(alpha))';
 de = diff(e);
 e = e(2:end);
 
 % Short-hand notation.
 rho_de = rho(e) .* de;
+
+% Bins indices the quasiparticles are injected to.
+if length(V) == 2
+    indices = V(1) < e & e < V(2);
+else
+    indices = e < V;
+end
+
+% Total injection rate.
+r_qp = rqp * sum(rho_de(indices)); % n_{cp}/\tau_0
+
+% Injection power.
+P = rqp * sum(e(indices) .* rho_de(indices));
+power_calib = delta * ncp * vol / tau_0;
+P = power_calib * P; % W
 
 [Gs_in, Gs_out] = Gscattering(e, de, Tph, Tc);
 
@@ -83,7 +99,7 @@ n0 = zeros(size(e));
 
 % Solve the ODE at the NIS junction.
 options = odeset('AbsTol', 1e-20);
-[~, n] = ode15s(@(t, n) quasiparticleODE(t, n,...
+[t, n] = ode15s(@(t, n) quasiparticleODE(t, n,...
     Gs_in, Gs_out, Gr, Gtr, Rqp), tspan, n0, options);
 
 n_inj = n(end, :);
@@ -97,15 +113,15 @@ f_inj = @(e_inj) interp1(e, f_inj, e_inj);
     V, rph, Tc, Tph);
 [Rph_sct, Omega_sct, N_Omega_sct] = ScatteringInjection(e, de, f_inj,...
     V, rph, Tc, Tph);
-
-Gtr = Gtrapping(e, Tph, Tc, c);
+[Rph_trp, Omega_trp, N_Omega_trp] = TrapInjection(e, de, f_inj,...
+    V, c * rph, Tc, Tph);
 
 if plot_flag
     figure
     plot(Omega_rec, N_Omega_rec, 'LineWidth', 2)
     xlabel('Phonon Energy \Omega (\Delta)', 'FontSize', 14)
     ylabel('N_{gen}(\Omega) (n_{cp} / \Delta)', 'FontSize', 14)
-    title('Phonon Spectrum (Recombination)')
+    title('Phonon Occupation Numbers (Recombination)')
     set(gca, 'yscale', 'Log')
     axis tight
     grid on
@@ -114,8 +130,64 @@ if plot_flag
     plot(Omega_sct, N_Omega_sct, 'LineWidth', 2)
     xlabel('Phonon Energy \Omega (\Delta)', 'FontSize', 14)
     ylabel('N_{gen}(\Omega) (n_{cp} / \Delta)', 'FontSize', 14)
-    title('Phonon Spectrum (Scattering)')
+    title('Phonon Occupation Numbers (Scattering)')
     set(gca, 'yscale', 'Log')
+    axis tight
+    grid on
+    
+    figure
+    plot(Omega_trp, N_Omega_trp, 'LineWidth', 2)
+    xlabel('Phonon Energy \Omega (\Delta)', 'FontSize', 14)
+    ylabel('N_{gen}(\Omega) (n_{cp} / \Delta)', 'FontSize', 14)
+    title('Phonon Occupation Numbers (Trapping)')
+    set(gca, 'yscale', 'Log')
+    axis tight
+    grid on
+
+    % Quaiparticle occupation numbers.
+    f = n ./ (ones(length(t), 1) * rho_de');
+
+    Pt_sct = NaN(size(n, 1), 1);
+    Pt_sct2D = NaN(size(n, 1), 1);
+    Pt_rec = NaN(size(n, 1), 1);
+    Pt_trp = NaN(size(n, 1), 1);
+    Pt_trp2D = NaN(size(n, 1), 1);
+    power_calib = delta * ncp * vol / tau_0;
+    for k = 1:size(n, 1)
+        f_inj = f(k, :);
+        f_inj = @(e_inj) interp1(e, f_inj, e_inj);
+        [~, Omega_rec, N_Omega_rec] = RecombinationInjection(e, de,...
+            f_inj, V, rph, Tc, Tph);
+        [~, Omega_sct, N_Omega_sct] = ScatteringInjection(e, de,...
+            f_inj, V, rph, Tc, Tph);
+        [~, Omega_trp, N_Omega_trp] = ScatteringInjection(e, de,...
+            f_inj, V, c * rph, Tc, Tph);
+        Pt_sct(k) = power_calib * trapz(Omega_sct, N_Omega_sct .* Omega_sct);
+        N_Omega_sct = N_Omega_sct(Omega_sct > 2);
+        Omega_sct = Omega_sct(Omega_sct > 2);
+        Pt_sct2D(k) = power_calib * trapz(Omega_sct, N_Omega_sct .* Omega_sct);
+
+        Pt_rec(k) = power_calib * trapz(Omega_rec, N_Omega_rec .* Omega_rec);
+
+        Pt_trp(k) = power_calib * trapz(Omega_trp, N_Omega_trp .* Omega_trp);
+        N_Omega_trp = N_Omega_trp(Omega_trp > 2);
+        Omega_trp = Omega_trp(Omega_trp > 2);
+        Pt_trp2D(k) = power_calib * trapz(Omega_sct, N_Omega_trp .* Omega_trp);
+    end
+
+    figure
+    Pres = rph * P;
+    plot(t, Pt_sct ./ Pres, t, Pt_rec ./ Pres, t, Pt_trp ./Pres,...
+         t, (Pt_sct + Pt_rec + Pt_trp) ./ Pres,...
+         t, Pt_sct2D./ Pres, t, Pt_trp2D ./ Pres, t,...
+         (Pt_sct2D + Pt_rec + Pt_trp2D) ./ Pres, 'LineWidth', 2)
+    xlabel('Time (\tau_0)', 'FontSize', 14)
+    ylabel('Normalized Power P / P_{total}', 'FontSize', 14)
+    legend('scattering', 'recombination', 'trapping',...
+           'scattering + recombination + trapping',...
+           'scattering above 2\Delta', 'trapping above 2\Delta',...
+           '(scattering + recombination + trapping) above 2\Delta')
+    title(['V = ',  num2str(V), ' \Delta/e']) 
     axis tight
     grid on
 end
@@ -123,33 +195,37 @@ end
 % Solve the ODE at the resonator.
 options = odeset('AbsTol', 1e-20);
 [t, n] = ode15s(@(t, n) quasiparticleODE(t, n,...
-    Gs_in, Gs_out, Gr, Gtr, Rph_sct + Rph_rec), tspan, n0, options);
+    Gs_in, Gs_out, Gr, Gtr, Rph_sct + Rph_rec + Rph_trp),...
+    tspan, n0, options);
 
 if plot_flag
     n0 = n_inj';
-    figure
-    plot(e, Gs_in * n0 ./ de, e,  Gs_out .* n0 ./ de,...
-         e, n0 .* ( Gr * n0) ./ de,...
-         e, Gtr .* n0 ./ de, e, Rph_sct ./ de, e, Rph_rec ./ de,...
-         'LineWidth', 2)
-    xlabel('Energy \epsilon (\Delta)', 'FontSize', 14)
-    ylabel('Rate per Unit Energy (1/\tau_0\Delta)', 'FontSize', 14)
-    legend({'G^{in}_{scattering}', 'G^{out}_{scattering}',...
-            'G_{recombination}', 'G_{trapping}', 'R_{ph. sct.}',...
-            'R_{ph. rec.}'})
-    title('Absolute Term Strengths at Thermal Equilibrium')
-    set(gca, 'yscale', 'Log')
-    axis tight
-    grid on
+%     figure
+%     plot(e, Gs_in * n0 ./ de, e, Gs_out .* n0 ./ de,...
+%          e, n0 .* (Gr * n0) ./ de,...
+%          e, Gtr .* n0 ./ de, e, Rph_sct ./ de, e, Rph_rec ./ de,...
+%          e, Rph_trp ./ de,...
+%          'LineWidth', 2)
+%     xlabel('Energy \epsilon (\Delta)', 'FontSize', 14)
+%     ylabel('Rate per Unit Energy (1/\tau_0\Delta)', 'FontSize', 14)
+%     legend({'G^{in}_{scattering}', 'G^{out}_{scattering}',...
+%             'G_{recombination}', 'G_{trapping}', 'R_{ph. sct.}',...
+%             'R_{ph. rec.}', 'R_{ph. trp.}'})
+%     title('Rate Equation Term Strengths')
+%     set(gca, 'yscale', 'Log')
+%     axis tight
+%     xlim([1, max(V)])
+%     grid on
     
     figure
-    plot(e, Rph_sct, e, Rph_rec, 'LineWidth', 2)
+    plot(e, Rph_sct, e, Rph_rec, e, Rph_trp, 'LineWidth', 2)
     xlabel('Energy \epsilon (\Delta)', 'FontSize', 14)
     ylabel('Injection Rate per Unit Energy (1/\tau_0\Delta)',...
         'FontSize', 14)
-    legend({'R_{ph. sct.}', 'R_{ph. rec.}'})
+    legend({'R_{ph. sct.}', 'R_{ph. rec.}', 'R_{ph. trp.}'})
     set(gca, 'yscale', 'Log')
     axis tight
+    xlim([1, max(V)])
     grid on
 end
 
@@ -158,21 +234,6 @@ f = n ./ (ones(length(t), 1) * rho_de');
 
 % Non-equlibrium quasipartical density.
 n_qp = 2 * ncp * sum(n, 2);
-
-% Bins indices the quasiparticles are injected to.
-if length(V) == 2
-    indices = V(1) < e & e < V(2);
-else
-    indices = e < V;
-end
-
-% Total injection rate.
-r_qp = rqp * sum(rho_de(indices)); % n_{cp}/\tau_0
-
-% Injection power.
-P = rqp * sum(e(indices) .* rho_de(indices));
-coeff = delta * ncp * vol / tau_0;
-P = coeff * P; % W
 end
 
 function normalized_density = rho(e)
@@ -238,32 +299,37 @@ function R = DirectInjection(e, rho_de, V, r)
     R = R .* rho_de;
 end
 
-function [R, Omega, N_Omega] = ScatteringInjection(e_inj, de_inj,...
+function [R, Omega1D, N_Omega] = ScatteringInjection(e_inj, de_inj,...
         f_inj, V, r, Tc, Tph)
-    N = 3 * length(e_inj);
+    if max(V) <= 3
+        R = zeros(size(e_inj));
+        Omega1D = [0, 10];
+        N_Omega = [0, 0];
+        return
+    end
+    N = 5 * length(e_inj);
     Omega = linspace(0, max(V) - 1, N);
-    e_final = linspace(min(e_inj), max(e_inj), N)';
-    [Omega, e] = meshgrid(Omega, e_final);
-    
+    e_initial = linspace(min(e_inj), max(e_inj), N)';
+    [Omega, e] = meshgrid(Omega, e_initial);
     % See Eq. (8) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
     dN_Omega = Omega.^2 .* rho(e - Omega) .* rho(e) .* f_inj(e) .*...
         (1 - 1 ./ (e .* (e - Omega))) .* Np(Omega, Tph);
     dN_Omega(dN_Omega < 0 | ~isfinite(dN_Omega)) = 0;
-    N_Omega = r * trapz(e_final, dN_Omega) / Tc^3;
-    
+    N_Omega = r * trapz(e_initial, dN_Omega) / Tc^3;
+
     % See Eq. (27) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
-    dR = Omega.^2 .* (ones(size(e_final)) * N_Omega) .*...
+    dR = Omega.^2 .* (ones(size(e_initial)) * N_Omega) .*...
                 (e .* (Omega - e) + 1) ./...
                 (sqrt(e.^2 - 1) .* sqrt((Omega - e).^2 - 1));
     dR(Omega <= e + 1) = 0;
     R = trapz(Omega(1, :), dR, 2) / Tc^3;
-    R = interp1(e_final, R, e_inj) .* de_inj;
-    Omega = Omega(1, :);
+    R = interp1(e_initial, R, e_inj) .* de_inj;
+    Omega1D = Omega(1, :);
 end
 
-function [R, Omega, N_Omega] = RecombinationInjection(e_inj, de_inj,...
+function [R, Omega1D, N_Omega] = RecombinationInjection(e_inj, de_inj,...
         f_inj, V, r, Tc, Tph)
-    N = 3 * length(e_inj);
+    N = 5 * length(e_inj);
     Omega = linspace(2, 2 * max(V), N);
     e_final = linspace(min(e_inj), max(e_inj), N)';
     [Omega, e] = meshgrid(Omega, e_final);
@@ -282,7 +348,37 @@ function [R, Omega, N_Omega] = RecombinationInjection(e_inj, de_inj,...
     dR(Omega <= e + 1) = 0;
     R = trapz(Omega(1, :), dR, 2) / Tc^3;
     R = interp1(e_final, R, e_inj) .* de_inj;
-    Omega = Omega(1, :);
+    Omega1D = Omega(1, :);
+end
+
+function [R, Omega1D, N_Omega] = TrapInjection(e_inj, de_inj,...
+        f_inj, V, r, Tc, Tph)
+    if max(V) <= 2
+        R = zeros(size(e_inj));
+        Omega1D = [0, 10];
+        N_Omega = [0, 0];
+        return
+    end
+    N = 5 * length(e_inj);
+    Omega = linspace(2, max(V), N);
+    e_inital = linspace(min(e_inj), max(e_inj), N)';
+    [Omega, e] = meshgrid(Omega, e_inital);
+    
+    % See Eq. (8) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976),
+    % assuming \Delta=0.
+    dN_Omega = Omega.^2 .* rho(e) .* f_inj(e) .* Np(Omega, Tph);
+    dN_Omega(dN_Omega < 0 | ~isfinite(dN_Omega) |...
+        e - Omega >= 1 | e - Omega < 0) = 0;
+    N_Omega = r * trapz(e_inital, dN_Omega) / Tc^3;
+    
+    % See Eq. (27) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
+    dR = Omega.^2 .* (ones(size(e_inital)) * N_Omega) .*...
+                (e .* (Omega - e) + 1) ./...
+                (sqrt(e.^2 - 1) .* sqrt((Omega - e).^2 - 1));
+    dR(Omega <= e + 1) = 0;
+    R = trapz(Omega(1, :), dR, 2) / Tc^3;
+    R = interp1(e_inital, R, e_inj) .* de_inj;
+    Omega1D = Omega(1, :);
 end
 
 function ndot = quasiparticleODE(t, n, Gs_in, Gs_out, Gr, Gtr, R)
@@ -293,7 +389,6 @@ function ndot = quasiparticleODE(t, n, Gs_in, Gs_out, Gr, Gtr, R)
         R = 0;
     end
     non_positive_n = n <= 0;
-    n(non_positive_n) = 0;
     ndot = Gs_in * n - Gs_out .* n - 2 * n .* (Gr * n) - Gtr .* n + R;
     ndot(ndot < 0 & non_positive_n) = 0;
 end

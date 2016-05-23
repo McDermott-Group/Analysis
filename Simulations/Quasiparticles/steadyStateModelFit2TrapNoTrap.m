@@ -1,5 +1,5 @@
-function equilibriumModelFit2TrapNoTrap
-%equilibriumModelFit2TrapNoTrap Fitting to the TrapNoTrap dataset using
+function steadyStateModelFit2TrapNoTrap
+%steadyStateModelFit2TrapNoTrap Fitting to the TrapNoTrap dataset using
 % the two-point equilibrium quasi-0D model
 
 r_direct_no_tr = 7.917e-05; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
@@ -56,7 +56,7 @@ P_sim_tr = NaN(size(V_tr));
 for k = 1:length(V_no_tr)
     if V_no_tr(k) > 1
         [~, ~, ~, ~, nqp, ~, P_sim_no_tr(k)] =...
-            phononMediatedPoisoningEquilibriumModel(Tph, tspan,...
+            twoRegionSteadyStateModel(Tph, tspan,...
             V_no_tr(k), r_direct_no_tr, r_phonon_no_tr, c_no_tr,...
             vol_no_tr, N, false);
         nqp_sim_no_tr(k) = max(nqp);
@@ -69,7 +69,7 @@ fprintf('\n')
 for k = 1:length(V_tr)
     if V_tr(k) > 1
         [~, ~, ~, ~, nqp, ~, P_sim_tr(k)] = ...
-            phononMediatedPoisoningEquilibriumModel(Tph, tspan,...
+            twoRegionSteadyStateModel(Tph, tspan,...
             V_tr(k), r_direct_tr, r_phonon_tr, c_tr, vol_tr, N, false);
         nqp_sim_tr(k) = max(nqp);
     else

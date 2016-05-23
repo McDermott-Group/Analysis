@@ -1,24 +1,24 @@
 function plotSingleSolution
 %plotSingleSolution Quasiparticle dynamics plots.
 
-r_direct = 8.323e-06; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
-r_phonon = 5.018e-03; % dimensionless
-c = 1.639e-02; % dimensionless
+r_direct = 1.5e-05; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
+r_phonon = 5e-03; % dimensionless
+c = 0.015; % dimensionless
 vol = 5e+04; % um^3
 
-N = 125;
+N = 200;
 
 Tph = 0.051; % K
-tspan = [-200, 200]; % in units of \tau_0
+tspan = [-200, 50]; % in units of \tau_0
 
-V = 2.5;
+V = 4.5;
 
 % [t, e, n, f, n_qp] = ...
-    % phononMediatedPoisoningEquilibriumModel(Tph, tspan, V,...
-    % r_direct, r_phonon, c, vol, N, true);
-clear phononMediatedPoisoningTimeDomainModel
+%     twoRegionSteadyStateModel(Tph, tspan, V,...
+%     r_direct, r_phonon, c, vol, N, true);
+clear twoRegionTimeDomainModel
 [t, e, n, f, n_qp] = ...
-    phononMediatedPoisoningTimeDomainModel(Tph, tspan, V,...
+    twoRegionTimeDomainModel(Tph, tspan, V,...
     r_direct, r_phonon, c, vol, N);
 
 figure
@@ -54,6 +54,7 @@ xlabel('Energy (\Delta)', 'FontSize', 14)
 ylabel('n(\epsilon), f(\epsilon)', 'FontSize', 14)
 legend('n(\epsilon)', 'f(\epsilon)')
 axis tight
+xlim([1, max(V)])
 grid on
 
 extractTimeConstants(t, n_qp, true);
