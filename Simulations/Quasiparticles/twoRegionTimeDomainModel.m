@@ -226,7 +226,7 @@ function [R, Omega1D, N_Omega] = RecombinationInjection(e_inj, de_inj,...
     % will stay in the memory between the function calls since they are
     % intialized as "persistent".
     if isempty(N)
-        N = 3 * length(e_inj);
+        N = 5 * length(e_inj);
         Omega = linspace(2, 2 * max(V), N);
         e_final = linspace(1, max(e_inj), N)';
         [Omega, e] = meshgrid(Omega, e_final);
@@ -248,11 +248,11 @@ function [R, Omega1D, N_Omega] = RecombinationInjection(e_inj, de_inj,...
                   ~isfinite(dR_Omega_no_N_Omega)) = 0;
     end
     dN_Omega = dN_Omega_no_f_inj .* f_inj(Omega - e) .* f_inj(e);
-    dN_Omega(dN_Omega < 0 | ~isfinite(dN_Omega)) = 0;
+    dN_Omega(dN_Omega < 0 | ~isfinite(dN_Omega) | Omega - e <= 1) = 0;
     N_Omega = trapz(e_final, dN_Omega);
 
     dR = dR_Omega_no_N_Omega .* (ones(size(e_final)) * N_Omega);
-    dR(Omega <= e + 1) = 0;
+    % dR(Omega <= e + 1) = 0;
     R = trapz(Omega(1, :), dR, 2);
     % Compute the quasipartcle injection per energy bin.
     R = interp1(e_final, R, e_inj) .* de_inj;
@@ -274,7 +274,7 @@ function [R, Omega1D, N_Omega] = TrapInjection(e_inj, de_inj,...
     % will stay in the memory between the function calls since they are
     % intialized as "persistent".
     if isempty(N)
-        N = 3 * length(e_inj);
+        N = 5 * length(e_inj);
         Omega = linspace(2, max(V), N);
         e_init = linspace(min(e_inj), max(e_inj), N)';
         [Omega, e] = meshgrid(Omega, e_init);

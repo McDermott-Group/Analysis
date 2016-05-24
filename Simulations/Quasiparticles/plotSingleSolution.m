@@ -6,7 +6,7 @@ r_phonon = 5e-03; % dimensionless
 c = 0.015; % dimensionless
 vol = 5e+04; % um^3
 
-N = 200;
+N = 100;
 
 Tph = 0.051; % K
 tspan = [-200, 50]; % in units of \tau_0
@@ -33,7 +33,6 @@ grid minor
 axis tight
 
 figure
-plotSmooth(t, e, f)
 [Ind1, Ind2] = ndgrid(t, e);
 hndl = surf(Ind1, Ind2, f);
 set(gca, 'View', [0 90])

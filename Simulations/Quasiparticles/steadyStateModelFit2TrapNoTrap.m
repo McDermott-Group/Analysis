@@ -2,14 +2,14 @@ function steadyStateModelFit2TrapNoTrap
 %steadyStateModelFit2TrapNoTrap Fitting to the TrapNoTrap dataset using
 % the two-point equilibrium quasi-0D model
 
-r_direct_no_tr = 7.917e-05; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
-r_phonon_no_tr = 6.061e-03; % dimensionless
-c_no_tr = 1.848e-02; % dimensionless
+r_direct_no_tr = 7.551e-05; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
+r_phonon_no_tr = 7.891e-03; % dimensionless
+c_no_tr = 2.379e-02; % dimensionless
 vol_no_tr = 5.000e+03; % um^3
 
-r_direct_tr = 1.649e-04; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
-r_phonon_tr = 8.646e-05; % dimensionless
-c_tr = 1.021e-02; % dimensionless
+r_direct_tr = 2.654e-04; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
+r_phonon_tr = 1.073e-04; % dimensionless
+c_tr = 2.366e-02; % dimensionless
 vol_tr = 5.000e+03; % um^3
 
 delta = 0.18e-3; % eV (aluminum superconducting gap)
@@ -53,7 +53,7 @@ nqp_sim_no_tr = NaN(size(V_no_tr));
 nqp_sim_tr = NaN(size(V_tr));
 P_sim_no_tr = NaN(size(V_no_tr));
 P_sim_tr = NaN(size(V_tr));
-for k = 1:length(V_no_tr)
+parfor k = 1:length(V_no_tr)
     if V_no_tr(k) > 1
         [~, ~, ~, ~, nqp, ~, P_sim_no_tr(k)] =...
             twoRegionSteadyStateModel(Tph, tspan,...
@@ -66,7 +66,7 @@ for k = 1:length(V_no_tr)
     fprintf('*')
 end
 fprintf('\n')
-for k = 1:length(V_tr)
+parfor k = 1:length(V_tr)
     if V_tr(k) > 1
         [~, ~, ~, ~, nqp, ~, P_sim_tr(k)] = ...
             twoRegionSteadyStateModel(Tph, tspan,...
