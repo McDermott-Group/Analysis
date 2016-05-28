@@ -17,7 +17,7 @@ Tph = 0.051; % K
 tspan = [-300, 0]; % in units of \tau_0
 
 % Number of the energy bins.
-N = 500;
+N = 100;
 
 data = load('TrapNoTrap.mat');
 

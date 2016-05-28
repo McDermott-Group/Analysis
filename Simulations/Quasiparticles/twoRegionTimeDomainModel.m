@@ -215,7 +215,7 @@ function [R, Omega1D, N_Omega] = ScatteringInjection(e_inj, de_inj,...
     dR(Omega <= e + 1) = 0;
     R = trapz(Omega(1, :), dR, 2);
     % Compute the quasipartcle injection per energy bin.
-    R = interp1(e_init, R, e_inj) .* de_inj;
+    R = interp1(e_init, R, e_inj, 'nearest') .* de_inj;
     Omega1D = Omega(1, :);
 end
 
@@ -250,12 +250,12 @@ function [R, Omega1D, N_Omega] = RecombinationInjection(e_inj, de_inj,...
     dN_Omega = dN_Omega_no_f_inj .* f_inj(Omega - e) .* f_inj(e);
     dN_Omega(dN_Omega < 0 | ~isfinite(dN_Omega) | Omega - e <= 1) = 0;
     N_Omega = trapz(e_final, dN_Omega);
-
+    
     dR = dR_Omega_no_N_Omega .* (ones(size(e_final)) * N_Omega);
     % dR(Omega <= e + 1) = 0;
     R = trapz(Omega(1, :), dR, 2);
     % Compute the quasipartcle injection per energy bin.
-    R = interp1(e_final, R, e_inj) .* de_inj;
+    R = interp1(e_final, R, e_inj, 'nearest') .* de_inj;
     Omega1D = Omega(1, :);
 end
 
@@ -303,7 +303,7 @@ function [R, Omega1D, N_Omega] = TrapInjection(e_inj, de_inj,...
     dR(Omega <= e + 1) = 0;
     R = trapz(Omega(1, :), dR, 2);
     % Compute the quasipartcle injection per energy bin.
-    R = interp1(e_init, R, e_inj) .* de_inj;
+    R = interp1(e_init, R, e_inj, 'nearest') .* de_inj;
     Omega1D = Omega(1, :);
 end
 
@@ -326,7 +326,7 @@ function ndot = quasiparticleODE(t, n, Gs_in, Gs_out, Gr, Gtr, R_direct,...
 
     f_inj = n_cnt ./ rho_de;
     f_inj(f_inj < 0) = 0;
-    f_inj = @(e_inj) interp1(e, f_inj, e_inj);
+    f_inj = @(e_inj) interp1(e, f_inj, e_inj, 'nearest');
 
     Rph_rec = RecombinationInjection(e, de, f_inj, V, rph, Tc, Tph);
     Rph_sct = ScatteringInjection(e, de, f_inj, V, rph, Tc, Tph);

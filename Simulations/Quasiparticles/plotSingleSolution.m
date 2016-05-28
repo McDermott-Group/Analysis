@@ -6,20 +6,20 @@ r_phonon = 5e-03; % dimensionless
 c = 0.015; % dimensionless
 vol = 5e+04; % um^3
 
-N = 100;
+N = 500;
 
 Tph = 0.051; % K
-tspan = [-200, 50]; % in units of \tau_0
+tspan = [-300, 50]; % in units of \tau_0
 
 V = 4.5;
 
-% [t, e, n, f, n_qp] = ...
-%     twoRegionSteadyStateModel(Tph, tspan, V,...
-%     r_direct, r_phonon, c, vol, N, true);
-clear twoRegionTimeDomainModel
 [t, e, n, f, n_qp] = ...
-    twoRegionTimeDomainModel(Tph, tspan, V,...
-    r_direct, r_phonon, c, vol, N);
+    twoRegionSteadyStateModel(Tph, tspan, V,...
+    r_direct, r_phonon, c, vol, N, true);
+% clear twoRegionTimeDomainModel
+% [t, e, n, f, n_qp] = ...
+%     twoRegionTimeDomainModel(Tph, tspan, V,...
+%     r_direct, r_phonon, c, vol, N);
 
 figure
 plot(t, n_qp, 'LineWidth', 3)

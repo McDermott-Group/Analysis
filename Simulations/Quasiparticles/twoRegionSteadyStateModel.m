@@ -199,7 +199,7 @@ options = odeset('AbsTol', 1e-20);
     tspan, n0, options);
 
 if plot_flag
-    n0 = n_inj';
+%     n0 = n_inj';
 %     figure
 %     plot(e, Gs_in * n0 ./ de, e, Gs_out .* n0 ./ de,...
 %          e, n0 .* (Gr * n0) ./ de,...
