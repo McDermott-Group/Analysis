@@ -49,14 +49,14 @@ Tc = 1 / 1.764; % \delta/(K_B * T_c) = 1.764 at T = 0 K BCS result
 % TD = kB * TD/ delta; % in units of \Delta
 
 % Number of energy bins.
-N = 100;
+N = 200;
 % Maximum energy.
 max_e = max(V) + 1;
 
 % Assign the quasiparicle energies to the bins. Non-uniform energy
 % separation is implemented. For a close to uniform distribution set alpha
 % to a small positive value.
-alpha = 5;
+alpha = 20;
 e = (1 + (max_e - 1) * sinh(alpha * (0:N) / N) / sinh(alpha))';
 de = diff(e);
 e = e(2:end);

@@ -3,7 +3,7 @@ function steadyStateModelPowerDependence
 %biases.
 
 r_direct = [.01, .1, 1, 10, 100] * 1e-07; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
-r_phonon = [1, .1, .01, .001, .0001]; % dimensionless
+r_phonon = ones(size(r_direct)) * 1e-2; %[1, .1, .01, .001, .0001]; % dimensionless
 c = 0*2.5e-02; % dimensionless
 vol = 5.000e+03; % um^3
 V = 1.1:1:30; % in units of \delta
@@ -41,8 +41,8 @@ for k = 1:length(r_direct)
     legends{k} = ['r_{qp} = ', num2str(r_direct(k), '%.2e'), '\Delta/e'];
 end
 legend(legends, 'Location', 'SouthEast')
-title({'Power Dependence at Different Bias Voltages',...
-    ['r_{ph} = ', num2str(r_phonon, '%.2e'), ', ',...
+title({'Power Dependence at Different Injection Rates',...
+    ['r_{ph} = ', num2str(r_phonon(1), '%.2e'), ', ',...
      'c_{trap} = ', num2str(c, '%.2e'), ', '...
      'volume = ', num2str(vol, '%.2e'), '\mu{m}^3']})
 axis tight

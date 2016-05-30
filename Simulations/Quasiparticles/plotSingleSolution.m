@@ -3,13 +3,13 @@ function plotSingleSolution
 
 r_direct = 1.5e-05; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
 r_phonon = 5e-03; % dimensionless
-c = 0.015; % dimensionless
-vol = 5e+04; % um^3
+c = 0; % dimensionless
+vol = 5e+03; % um^3
 
-N = 500;
+N = 200;
 
 Tph = 0.051; % K
-tspan = [-300, 50]; % in units of \tau_0
+tspan = [-300, -10]; % in units of \tau_0
 
 V = 4.5;
 
@@ -56,6 +56,6 @@ axis tight
 xlim([1, max(V)])
 grid on
 
-extractTimeConstants(t, n_qp, true);
+%extractTimeConstants(t, n_qp, true);
 
 end
