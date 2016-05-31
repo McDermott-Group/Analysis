@@ -58,12 +58,12 @@ ncp = 4e6; % n_{cp} for aluminum is 4e6 \micro m^-3
            % C. Wang et al. Nature Comm. 5, 5836 (2014)
 
 % Maximum energy.
-max_e = max(4, max(V));
+max_e = max(4, 2 * max(V));
 
 % Assign the quasiparicle energies to the bins. Non-uniform energy
 % spacing is implemented. To get a spacing that is close to a uniform
 % set alpha to a very small positive value.
-alpha = 5;
+alpha = 4;
 e1 = (1 + (max_e - 1) * sinh(alpha * (0:N) / N) / sinh(alpha))';
 e2 = (1 + (max_e - 1) * sinh(alpha * (1:N+1) / N) / sinh(alpha))';
 de = e2 - e1;
@@ -103,23 +103,23 @@ options = odeset('AbsTol', 1e-10);
 [t, n] = ode15s(@(t, n) quasiparticleODE(t, n,...
     Gs_in, Gs_out, Gr, Gtr, Rqp), tspan, n0, options);
 
-n_inj = n(end, :);
+n_inj = n(end, :)';
 
 % Occupation numbers.
-f_inj = n_inj ./ rho_de';
+f_inj = n_inj ./ rho_de;
 f_inj(f_inj < 0) = 0;
 f_inj = @(e_inj) interp1(e, f_inj, e_inj);
 
-[Rph_rec1, Omega_rec, N_Omega_rec] = RecombinationInjection(e, de, f_inj,...
+[Rph_rec_brute, Omega_rec, N_Omega_rec] = RecombinationInjection(e, de, f_inj,...
     V, rph, Tc, Tph);
-[Rph_sct1, Omega_sct, N_Omega_sct] = ScatteringInjection(e, de, f_inj,...
+[Rph_sct_brute, Omega_sct, N_Omega_sct] = ScatteringInjection(e, de, f_inj,...
     V, rph, Tc, Tph);
-[Rph_trp, Omega_trp, N_Omega_trp] = TrapInjection(e, de, f_inj,...
+[Rph_trp_brute, Omega_trp, N_Omega_trp] = TrapInjection(e, de, f_inj,...
     V, c * rph, Tc, Tph);
 
 Rph_rec = FastRecombinationInjection(e, de, n_inj, rph, Tc, Tph);
-Rph_sct = FastScatteringInjection(e, de, n_inj, V, rph, Tc, Tph);
-
+Rph_sct = FastScatteringInjection(e, de, n_inj, rph, Tc, Tph, V);
+Rph_trp = FastTrapInjection(e, de, n_inj, rph, Tc, Tph, V, c);
 
 if plot_flag
     figure
@@ -157,6 +157,11 @@ if plot_flag
     Pt_rec = NaN(size(n, 1), 1);
     Pt_trp = NaN(size(n, 1), 1);
     Pt_trp2D = NaN(size(n, 1), 1);
+    Pt_rec_fast = NaN(size(n, 1), 1);
+    Pt_sct_fast = NaN(size(n, 1), 1);
+    Pt_sct2D_fast = NaN(size(n, 1), 1);
+    Pt_trp_fast = NaN(size(n, 1), 1);
+    Pt_trp2D_fast = NaN(size(n, 1), 1);
     power_calib = delta * ncp * vol / tau_0;
     for k = 1:size(n, 1)
         f_inj = f(k, :);
@@ -182,7 +187,7 @@ if plot_flag
 
     figure
     Pres = rph * P;
-    plot(t, Pt_sct ./ Pres, t, Pt_rec ./ Pres, t, Pt_trp ./Pres,...
+    plot(t, Pt_sct ./ Pres, t, Pt_rec ./ Pres, t, Pt_trp ./ Pres,...
          t, (Pt_sct + Pt_rec + Pt_trp) ./ Pres,...
          t, Pt_sct2D ./ Pres, t, Pt_trp2D ./ Pres, t,...
          (Pt_sct2D + Pt_rec + Pt_trp2D) ./ Pres, 'LineWidth', 2)
@@ -192,11 +197,10 @@ if plot_flag
            'scattering + recombination + trapping',...
            'scattering above 2\Delta', 'trapping above 2\Delta',...
            '(scattering + recombination + trapping) above 2\Delta')
-    title(['V = ',  num2str(V), ' \Delta/e (using phonon occupation numbers)']) 
+    title(['V = ',  num2str(V), ' \Delta/e (brute-force integration)']) 
     axis tight
     grid on
-    Pt_sct_ph = Pt_sct;
-    Pt_rec_ph = Pt_rec;
+
     for k = 1:size(n, 1);
         nt = n(k, :);
         P_sct_in = power_calib * sum(e .* (Gs_in * nt'));
@@ -217,50 +221,68 @@ if plot_flag
     axis tight
     grid on
     
+    for k = 1:size(n, 1)     
+        nt = n(k, :)';
+        [~, Pt_rec_fast(k)] = FastRecombinationInjection(e, de, nt, rph, Tc, Tph);
+        [~, Pt_sct_fast(k), Pt_sct2D_fast(k)] = FastScatteringInjection(e, de, nt, rph, Tc, Tph, V);
+        [~, Pt_trp_fast(k), Pt_trp2D_fast(k)] = FastTrapInjection(e, de, nt, rph, Tc, Tph, V, c);
+    end
+    
     figure
-    plot(t, Pt_sct_ph, t, Pt_sct, t, Pt_rec_ph,...
-         t, Pt_rec, 'LineWidth', 2)
-    set(gca, 'yscale', 'Log')
+    Pt_rec_fast = power_calib * Pt_rec_fast;
+    Pt_sct_fast = power_calib * Pt_sct_fast;
+    Pt_trp_fast = power_calib * Pt_trp_fast;
+    Pt_sct2D_fast = power_calib * Pt_sct2D_fast;
+    Pt_trp2D_fast = power_calib * Pt_trp2D_fast;
+    plot(t, Pt_sct_fast ./ P, t, Pt_rec_fast ./ P, t, Pt_trp_fast ./ P,...
+         t, (Pt_sct_fast + Pt_rec_fast + Pt_trp_fast) ./ P,...
+         t, Pt_sct2D_fast ./ P, t, Pt_trp2D_fast ./ P, t,...
+         (Pt_sct2D_fast + Pt_rec_fast + Pt_trp2D_fast) ./ P, 'LineWidth', 2)
+    xlabel('Time (\tau_0)', 'FontSize', 14)
+    ylabel('Normalized Power (P / P_{total})', 'FontSize', 14)
+    legend('scattering', 'recombination', 'trapping',...
+           'scattering + recombination + trapping',...
+           'scattering above 2\Delta', 'trapping above 2\Delta',...
+           '(scattering + recombination + trapping) above 2\Delta')
+    title(['V = ',  num2str(V), ' \Delta/e (improved calculation)']) 
     axis tight
     grid on
 end
 
 % Solve the ODE at the resonator.
-options = odeset('AbsTol', 1e-10, 'RelTol', 1e-5);
+options = odeset('AbsTol', 1e-10, 'RelTol', 1e-6);
 [t, n] = ode15s(@(t, n) quasiparticleODE(t, n,...
     Gs_in, Gs_out, Gr, Gtr, Rph_sct + Rph_rec + Rph_trp),...
     tspan, n0, options);
 
 if plot_flag
-%     n0 = n_inj';
-%     figure
-%     plot(e, Gs_in * n0 ./ de, e, Gs_out .* n0 ./ de,...
-%          e, n0 .* (Gr * n0) ./ de,...
-%          e, Gtr .* n0 ./ de, e, Rph_sct ./ de, e, Rph_rec ./ de,...
-%          e, Rph_trp ./ de,...
-%          'LineWidth', 2)
-%     xlabel('Energy \epsilon (\Delta)', 'FontSize', 14)
-%     ylabel('Rate per Unit Energy (1/\tau_0\Delta)', 'FontSize', 14)
-%     legend({'G^{in}_{scattering}', 'G^{out}_{scattering}',...
-%             'G_{recombination}', 'G_{trapping}', 'R_{ph. sct.}',...
-%             'R_{ph. rec.}', 'R_{ph. trp.}'})
-%     title('Rate Equation Term Strengths')
-%     set(gca, 'yscale', 'Log')
-%     axis tight
-%     xlim([1, max(V)])
-%     grid on
-    
     figure
     plot(e, Rph_sct, e, Rph_rec, e, Rph_trp,...
-        e, Rph_sct1, e, Rph_rec1, 'LineWidth', 2)
+        e, Rph_sct_brute, e, Rph_rec_brute, e, Rph_trp_brute, 'LineWidth', 2)
     xlabel('Energy \epsilon (\Delta)', 'FontSize', 14)
     ylabel('Injection Rate per Unit Energy (1/\tau_0\Delta)',...
         'FontSize', 14)
-    legend({'R_{ph. sct.}', 'R_{ph. rec.}', 'R_{ph. trp.}'})
+    legend({'R_{ph. sct.}', 'R_{ph. rec.}', 'R_{ph. trp.}',...
+        'R_{ph. sct.} (brute-force)', 'R_{ph. rec.} (brute-force)',...
+        'R_{ph. trp.} (brute-force)'})
     set(gca, 'yscale', 'Log')
     axis tight
     xlim([1, max(V)])
     grid on
+end
+
+if plot_flag
+    power_calib * sum(e .* Rph_sct) / P
+    power_calib * sum(e .* Rph_sct_brute) / P
+    power_calib * sum(e .* Rph_rec) / P
+    power_calib * sum(e .* Rph_rec_brute) / P
+    power_calib * sum(e .* Rph_trp) / P
+    power_calib * sum(e .* Rph_trp_brute) / P
+    
+    power_calib * sum(e .* Rph_trp)
+    power_calib * sum(e .* Rph_trp_brute)
+    Pt_trp_fast(end)
+    Pt_trp2D_fast(end)
 end
 
 % Occupational numbers.
@@ -309,11 +331,11 @@ function Gr = Grecombination(e, Tph, Tc)
         Np(ei + ej, Tph) / Tc^3;
 end
 
-function Gtr = Gtrapping(e, Tph, Tc, c)
+function Gtr = Gtrapping(e_inj, Tph, Tc, c)
     % Simple model for the trapping matix.
-    de = .5e-4; % in units of \Delta
-    e_gap = de/2:de:1-de/2;
-    [eg, ei] = meshgrid(e_gap, e);
+    N = 5 * length(e_inj);
+    e_gap = linspace(0, 1, N + 1);
+    [eg, ei] = meshgrid(e_gap, e_inj);
     Gtr = (ei - eg).^2 .* Np(ei - eg, Tph) / Tc^3;
     Gtr = c * trapz(e_gap, Gtr, 2);
 end
@@ -384,49 +406,98 @@ function [R, Omega1D, N_Omega] = RecombinationInjection(e_inj, de_inj,...
     Omega1D = Omega(1, :);
 end
 
-function R = FastScatteringInjection(e_inj, de_inj, n_inj, V, r, Tc, Tph)
-    if max(V) <= 3
-        R = zeros(size(e_inj));
-        return
-    end
-    
+function [R, P, P2D] = FastScatteringInjection(e_inj, de_inj,...
+        n_inj, r, Tc, Tph, V)    
     [ej, ei] = meshgrid(e_inj);
     n_inj(n_inj < 0) = 0;
-    N_Omega = (ei - ej).^2 .* rho(ej) .* (n_inj' * de_inj') .*...
+    N_Omega1D = (ei - ej).^2 .* rho(ej) .* (n_inj * de_inj') .*...
         (1 - 1 ./ (ei .* ej)) .* Np(ei - ej, Tph) / Tc^3;
 
     Omega = ei - ej;
-    Omega = Omega(:);
-    N_Omega = N_Omega(:);
-    indices = Omega <= 2;
-    N_Omega(indices) = [];
-    Omega(indices) = [];
+    Omega1D = Omega(:);
+    N_Omega1D = N_Omega1D(:);
+    indices = Omega1D > 0;
+    P = sum(N_Omega1D(indices) .* Omega1D(indices));
+    indices = Omega1D <= 2;
+    N_Omega1D(indices) = [];
+    Omega1D(indices) = [];
+    P2D = sum(N_Omega1D .* Omega1D);
+    
+    if max(V) <= 3 || r == 0
+        R = zeros(size(e_inj));
+        return
+    end
 
-    [e, Omega2D] = meshgrid(e_inj, Omega);
+    [e, Omega2D] = meshgrid(e_inj, Omega1D);
 
     % See Eq. (27) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
-    dR = Omega2D.^2 .* (N_Omega * ones(size(e_inj'))) .*...
+    dR = Omega2D.^2 .* (N_Omega1D * de_inj') .*...
                 (e .* (Omega2D - e) + 1) ./...
                 (sqrt(e.^2 - 1) .* sqrt((Omega2D - e).^2 - 1));
     dR(Omega2D <= e + 1) = 0;
-    R = r * sum(dR)' .* de_inj / Tc^3;
+    R = sum(dR)' / Tc^3;
+    R = r * R * P2D ./ sum(e_inj .* R);
 end
 
-function R = FastRecombinationInjection(e_inj, de_inj, n_inj, r, Tc, Tph)
+function [R, P] = FastRecombinationInjection(e_inj, de_inj,...
+        n_inj, r, Tc, Tph)
     [ej, ei] = meshgrid(e_inj);
     
-    Gr = (ei + ej).^2 .*...
-        (1 + 1 ./ (ei .* ej)) .*...
+    Gr = (ei + ej).^2 .* (1 + 1 ./ (ei .* ej)) .*...
         Np(ei + ej, Tph) / Tc^3;
     n_inj(n_inj < 0) = 0;
     [n_j, n_i] = meshgrid(n_inj);
-    N_Omega = 2 * n_i .* Gr .* n_j;
+    N_Omega = n_i .* Gr .* n_j;
     
+    Omega = ei + ej;
+    Omega1D = Omega(:);
+    P = sum(N_Omega(:) .* Omega1D);
+
+    [e, Omega2D] = meshgrid(e_inj, Omega1D);
+
     % See Eq. (27) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
-    dR = (ei + ej).^2 .* N_Omega .*...
-                (ei .* ej + 1) ./...
-                (sqrt(ei.^2 - 1) .* sqrt(ej.^2 - 1));
-    R = r * sum(dR)' .* de_inj / Tc^3;
+    dR = Omega2D.^2 .* (N_Omega(:) * de_inj') .*...
+                (e .* (Omega2D - e) + 1) ./...
+                (sqrt(e.^2 - 1) .* sqrt((Omega2D - e).^2 - 1));
+    dR(Omega2D <= e + 1) = 0;
+    R = sum(dR)' / Tc^3;
+    R = r * R * P ./ sum(e_inj .* R);
+end
+
+function [R, P, P2D] = FastTrapInjection(e_inj, de_inj,...
+        n_inj, r, Tc, Tph, V, c)
+    N = 5 * length(e_inj);
+    e_gap = linspace(0, 1, N + 1);
+    
+    [ej, ei] = meshgrid(e_gap, e_inj);
+    n_inj(n_inj < 0) = 0;
+    N_Omega = c * (ei - ej).^2 .* (n_inj * ones(size(e_gap)) / N) .*...
+                Np(ei - ej, Tph) / Tc^3;
+            
+    Omega = ei - ej;
+ 
+    Omega1D = Omega(:);
+    N_Omega1D = N_Omega(:);
+    P = sum(N_Omega1D .* Omega1D);
+    indices = Omega1D <= 2;
+    N_Omega1D(indices) = [];
+    Omega1D(indices) = [];
+    P2D = sum(N_Omega1D .* Omega1D);
+    
+    if max(V) <= 2 || r == 0 || c == 0
+        R = zeros(size(e_inj));
+        return
+    end
+
+    [e, Omega2D] = meshgrid(e_inj, Omega1D);
+
+    % See Eq. (27) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
+    dR = Omega2D.^2 .* (N_Omega1D * de_inj') .*...
+                (e .* (Omega2D - e) + 1) ./...
+                (sqrt(e.^2 - 1) .* sqrt((Omega2D - e).^2 - 1));
+    dR(Omega2D <= e + 1) = 0;
+    R = sum(dR)' / Tc^3;
+    R = r * R * P2D ./ sum(e_inj .* R);
 end
 
 function [R, Omega1D, N_Omega] = TrapInjection(e_inj, de_inj,...
@@ -438,7 +509,7 @@ function [R, Omega1D, N_Omega] = TrapInjection(e_inj, de_inj,...
         return
     end
     N = 5 * length(e_inj);
-    Omega = linspace(0, max(V), N);
+    Omega = linspace(0, 2 * max(V), N);
     e_inital = linspace(min(e_inj), max(e_inj), N)';
     [Omega, e] = meshgrid(Omega, e_inital);
     

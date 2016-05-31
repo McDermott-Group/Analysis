@@ -2,11 +2,11 @@ function plotSingleSolution
 %plotSingleSolution Quasiparticle dynamics plots.
 
 r_direct = 1.5e-05; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
-r_phonon = 5e-03; % dimensionless
-c = 0; % dimensionless
+r_phonon = .005; % dimensionless
+c = 0.02; % dimensionless
 vol = 5e+03; % um^3
 
-N = 200;
+N = 100;
 
 Tph = 0.051; % K
 tspan = [-300, -10]; % in units of \tau_0
