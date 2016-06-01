@@ -478,7 +478,7 @@ function [R, P, P2D] = FastTrapInjection(e_inj, de_inj,...
  
     Omega1D = Omega(:);
     N_Omega1D = N_Omega(:);
-    P = sum(N_Omega1D .* Omega1D);
+    P = sum(N_Omega1D .* ei(:));
     indices = Omega1D <= 2;
     N_Omega1D(indices) = [];
     Omega1D(indices) = [];
