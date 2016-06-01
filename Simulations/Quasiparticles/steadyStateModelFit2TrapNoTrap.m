@@ -2,13 +2,13 @@ function steadyStateModelFit2TrapNoTrap
 %steadyStateModelFit2TrapNoTrap Fitting to the TrapNoTrap dataset using
 % the two-point equilibrium quasi-0D model
 
-r_direct_no_tr = 7.551e-05; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
-r_phonon_no_tr = 7.891e-03; % dimensionless
+r_direct_no_tr = 2e-04; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
+r_phonon_no_tr = .01; % dimensionless
 c_no_tr = 2.379e-02; % dimensionless
 vol_no_tr = 5.000e+03; % um^3
 
-r_direct_tr = 2.654e-04; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
-r_phonon_tr = 1.073e-04; % dimensionless
+r_direct_tr = 2e-03; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
+r_phonon_tr = .01; % dimensionless
 c_tr = 2.366e-02; % dimensionless
 vol_tr = 5.000e+03; % um^3
 
@@ -56,9 +56,9 @@ P_sim_tr = NaN(size(V_tr));
 parfor k = 1:length(V_no_tr)
     if V_no_tr(k) > 1
         [~, ~, ~, ~, nqp, ~, P_sim_no_tr(k)] =...
-            twoRegionSteadyStateModel(Tph, tspan,...
+            twoRegionSteadyStateModelOptimized(Tph, tspan,...
             V_no_tr(k), r_direct_no_tr, r_phonon_no_tr, c_no_tr,...
-            vol_no_tr, N, false);
+            vol_no_tr, N);
         nqp_sim_no_tr(k) = max(nqp);
     else
         nqp_sim_no_tr(k) = 0;

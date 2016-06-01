@@ -1,7 +1,7 @@
 function [t, e, n, f, n_qp, r_qp, P] = ...
     twoRegionSteadyStateModel(Tph, tspan, V, rqp, rph, c,...
     vol, N, plot_flag)
-% twoRegionSteadyStateModelTwo-region, one corresponds to
+% twoRegionSteadyStateModel Two-region, one corresponds to
 % a normal metal-isolator-superconductor junction (NIS) and the other one -
 % to a resonator, quasi-0D model for computing the steady-state
 % quasiparticle densities.
@@ -271,19 +271,19 @@ if plot_flag
     grid on
 end
 
-if plot_flag
-    power_calib * sum(e .* Rph_sct) / P
-    power_calib * sum(e .* Rph_sct_brute) / P
-    power_calib * sum(e .* Rph_rec) / P
-    power_calib * sum(e .* Rph_rec_brute) / P
-    power_calib * sum(e .* Rph_trp) / P
-    power_calib * sum(e .* Rph_trp_brute) / P
-    
-    power_calib * sum(e .* Rph_trp)
-    power_calib * sum(e .* Rph_trp_brute)
-    Pt_trp_fast(end)
-    Pt_trp2D_fast(end)
-end
+% if plot_flag
+%     power_calib * sum(e .* Rph_sct) / P
+%     power_calib * sum(e .* Rph_sct_brute) / P
+%     power_calib * sum(e .* Rph_rec) / P
+%     power_calib * sum(e .* Rph_rec_brute) / P
+%     power_calib * sum(e .* Rph_trp) / P
+%     power_calib * sum(e .* Rph_trp_brute) / P
+%     
+%     power_calib * sum(e .* Rph_trp)
+%     power_calib * sum(e .* Rph_trp_brute)
+%     Pt_trp_fast(end)
+%     Pt_trp2D_fast(end)
+% end
 
 % Occupational numbers.
 f = n ./ (ones(length(t), 1) * rho_de');
@@ -435,8 +435,8 @@ function [R, P, P2D] = FastScatteringInjection(e_inj, de_inj,...
                 (e .* (Omega2D - e) + 1) ./...
                 (sqrt(e.^2 - 1) .* sqrt((Omega2D - e).^2 - 1));
     dR(Omega2D <= e + 1) = 0;
-    R = sum(dR)' / Tc^3;
-    R = r * R * P2D ./ sum(e_inj .* R);
+    R = sum(dR)';
+    R = r * R * P2D / sum(e_inj .* R);
 end
 
 function [R, P] = FastRecombinationInjection(e_inj, de_inj,...
@@ -451,22 +451,23 @@ function [R, P] = FastRecombinationInjection(e_inj, de_inj,...
     
     Omega = ei + ej;
     Omega1D = Omega(:);
+    N_Omega1D = N_Omega(:);
     P = sum(N_Omega(:) .* Omega1D);
 
     [e, Omega2D] = meshgrid(e_inj, Omega1D);
 
     % See Eq. (27) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
-    dR = Omega2D.^2 .* (N_Omega(:) * de_inj') .*...
+    dR = Omega2D.^2 .* (N_Omega1D * de_inj') .*...
                 (e .* (Omega2D - e) + 1) ./...
                 (sqrt(e.^2 - 1) .* sqrt((Omega2D - e).^2 - 1));
     dR(Omega2D <= e + 1) = 0;
-    R = sum(dR)' / Tc^3;
-    R = r * R * P ./ sum(e_inj .* R);
+    R = sum(dR)';
+    R = r * R * P / sum(e_inj .* R);
 end
 
 function [R, P, P2D] = FastTrapInjection(e_inj, de_inj,...
         n_inj, r, Tc, Tph, V, c)
-    N = 5 * length(e_inj);
+    N = length(e_inj);
     e_gap = linspace(0, 1, N + 1);
     
     [ej, ei] = meshgrid(e_gap, e_inj);
@@ -496,8 +497,8 @@ function [R, P, P2D] = FastTrapInjection(e_inj, de_inj,...
                 (e .* (Omega2D - e) + 1) ./...
                 (sqrt(e.^2 - 1) .* sqrt((Omega2D - e).^2 - 1));
     dR(Omega2D <= e + 1) = 0;
-    R = sum(dR)' / Tc^3;
-    R = r * R * P2D ./ sum(e_inj .* R);
+    R = sum(dR)';
+    R = r * R * P2D / sum(e_inj .* R);
 end
 
 function [R, Omega1D, N_Omega] = TrapInjection(e_inj, de_inj,...
