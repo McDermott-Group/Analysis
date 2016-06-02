@@ -6,12 +6,13 @@ r_direct = 2.654e-04; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
 r_phonon = 1.073e-04; % dimensionless
 c = 2.366e-02; % dimensionless
 vol = 5e3; % um^3
+r_direct = 2.516e-04; r_phonon = 6.311e-02; c = 8.629e-02; vol = 4.958e+03;
 
 Tph = 0.051; % K
 tspan = [-310, -10]; % in units of \tau_0
 
 % Number of the energy bins.
-N = 500;
+N = 200;
 
 delta = 0.18e-3; % eV (aluminum superconducting gap)
 data = load('TrapNoTrap.mat');
@@ -21,7 +22,7 @@ V = data.Trap(:, 5) / delta;
 P = data.Trap(:, 6);
 nqp = data.Trap(:, 8) - min(data.Trap(:, 8));
 
-options = optimset('Display', 'iter', 'MaxIter', floor(5000 / N), 'TolFun', 1e-2);
+options = optimset('Display', 'iter', 'MaxIter', 50, 'TolFun', 1e-2);
 x = fminsearch(@(x) simulations(x, Tph, tspan, V, P, nqp, N),...
     [r_direct, r_phonon, c, vol], options);
 
@@ -32,7 +33,7 @@ disp(['r_direct = ', num2str(x(1), '%.3e'), '; ',...
 end
 
 function error = simulations(x, Tph, tspan, V, P, nqp, N)
-    indices = (V > 1) & (nqp > 0) & (V < 4);
+    indices = (V > 1.1) & (nqp > 0) & (V < 5);
     P = P(indices);
     nqp = nqp(indices);
     V = V(indices);
@@ -42,7 +43,7 @@ function error = simulations(x, Tph, tspan, V, P, nqp, N)
     r_ph = x(2);
     c = x(3);
     vol = x(4);
-    parfor k = 1:length(V)
+    for k = 1:length(V)
         [~, ~, ~, ~, n_qp, ~, P_sim(k)] = ...
             twoRegionSteadyStateModelOptimized(Tph, tspan,...
             V(k), r_qp, r_ph, c, vol, N);

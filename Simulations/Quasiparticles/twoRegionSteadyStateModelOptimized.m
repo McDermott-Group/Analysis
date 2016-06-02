@@ -8,7 +8,7 @@ function [t, e, n, f, n_qp, r_qp, P] = ...
 %
 % [t, e, n, f, n_qp, r_qp, P] = ...
 %   twoRegionSteadyStateModelOptimized(Tph, tspan, V, rqp, rph, c,...
-%   vol, N, plot_flag) computes the quasiparticle dynamics using
+%   vol, N) computes the quasiparticle dynamics using
 %   a two-point quasi-0D model. The quasiparticles are directly injected
 %   into NIS junction. The equlibrium quasiparticle distribution and
 %   phonon densities are computed. The phonon density is then used to
@@ -193,17 +193,21 @@ function R = ScatteringInjection(e_inj, de_inj, n_inj, r, Tc, Tph, V)
     end
 
     [ej, ei] = meshgrid(e_inj);
-    n_inj(n_inj < 0) = 0;
     N_Omega1D = (ei - ej).^2 .* rho(ej) .* (n_inj * de_inj') .*...
         (1 - 1 ./ (ei .* ej)) .* Np(ei - ej, Tph) / Tc^3;
 
     Omega = ei - ej;
     Omega1D = Omega(:);
     N_Omega1D = N_Omega1D(:);
-    indices = Omega1D <= 2;
+    indices = Omega1D <= 2 | N_Omega1D <= 0;
     N_Omega1D(indices) = [];
     Omega1D(indices) = [];
     P2D = sum(N_Omega1D .* Omega1D);
+    
+    if isempty(Omega1D)
+        R = zeros(size(e_inj));
+        return
+    end
 
     [e, Omega2D] = meshgrid(e_inj, Omega1D);
 
@@ -219,8 +223,7 @@ end
 function R = RecombinationInjection(e_inj, de_inj, n_inj, r, Tc, Tph)
     [ej, ei] = meshgrid(e_inj);
     
-    Gr = (ei + ej).^2 .* (1 + 1 ./ (ei .* ej)) .*...
-        Np(ei + ej, Tph) / Tc^3;
+    Gr = (ei + ej).^2 .* (1 + 1 ./ (ei .* ej)) .* Np(ei + ej, Tph) / Tc^3;
     n_inj(n_inj < 0) = 0;
     [n_j, n_i] = meshgrid(n_inj);
     N_Omega = n_i .* Gr .* n_j;
@@ -248,10 +251,9 @@ function R = TrapInjection(e_inj, de_inj, n_inj, r, Tc, Tph, V, c)
     end
 
     N = length(e_inj);
-    e_gap = linspace(0, 1, N + 1);
+    e_gap = linspace(1/(2 * N), 1 - 1 / (2 * N), N);
     
     [ej, ei] = meshgrid(e_gap, e_inj);
-    n_inj(n_inj < 0) = 0;
     N_Omega = c * (ei - ej).^2 .* (n_inj * ones(size(e_gap)) / N) .*...
                 Np(ei - ej, Tph) / Tc^3;
             
@@ -259,10 +261,15 @@ function R = TrapInjection(e_inj, de_inj, n_inj, r, Tc, Tph, V, c)
  
     Omega1D = Omega(:);
     N_Omega1D = N_Omega(:);
-    indices = Omega1D <= 2;
+    indices = Omega1D <= 2 | N_Omega1D <= 0;
     N_Omega1D(indices) = [];
     Omega1D(indices) = [];
     P2D = sum(N_Omega1D .* Omega1D);
+    
+    if isempty(Omega1D)
+        R = zeros(size(e_inj));
+        return
+    end
 
     [e, Omega2D] = meshgrid(e_inj, Omega1D);
 

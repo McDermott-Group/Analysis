@@ -24,17 +24,17 @@ E_r_n = data.NearTrapRecovery(:, 2);
 tau_r_n = data.NearTrapRecovery(:, 3);
 nqp_r_n = data.NearTrapRecovery(:, 4);
 
-r_direct = 8.323e-06; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
-r_phonon = 5.018e-03; % dimensionless
-c = 1.639e-02; % dimensionless
-vol = 5e+04; % um^3
+r_direct = 8.263e-05; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
+r_phonon = 2.223e-01; % dimensionless
+c = 9.414e-02; % dimensionless
+vol = 5e3; % um^3
 
 V = [E_p_n; E_r_n; 3.5; 4.2; 6.7]; % in units of \Delta
 Tph = 0.051; % K
 tspan = [-200, 200]; % in units of \tau_0
 
 % Number of energy bins.
-N = 125;
+N = 100;
 
 tau_p = NaN(size(V));
 err_p = NaN(size(V));
@@ -43,9 +43,9 @@ err_r = NaN(size(V));
 nqp = NaN(size(V));
 P = NaN(size(V));
 for k = 1:length(V) 
-    clear phononMediatedPoisoningTimeDomainModel
+    clear twoRegionTimeDomainModel
     [t, ~, ~, ~, n_qp, ~, P(k)] = ...
-        phononMediatedPoisoningTimeDomainModel(Tph, tspan, V(k),...
+        twoRegionTimeDomainModel(Tph, tspan, V(k),...
         r_direct, r_phonon, c, vol, N);
     [tau_p(k), err_p(k), tau_r(k), err_r(k)] = ...
         extractTimeConstants(t, n_qp, false);
@@ -75,7 +75,7 @@ ylabel('Time Constant (\mu s)', 'FontSize', 14)
 legend({'poisoning, near trap', 'recovery, near trap',...
     'poisoning simulation', 'recovery simulation'},...
     'Location', 'SouthWest')
-title({'Time Constants', ['r_{direct} = ', num2str(r_direct, '%.3e'),...
+title({'Time Constants', ['r_{qp} = ', num2str(r_direct, '%.3e'),...
     ', r_{ph} = ', num2str(r_phonon, '%.3e'),...
     ', c_{tr} = ', num2str(c, '%.3e'),...
     ', F = ', num2str(F, '%.3f')]})

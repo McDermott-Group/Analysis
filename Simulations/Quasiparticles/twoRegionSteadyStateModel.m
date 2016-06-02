@@ -409,7 +409,6 @@ end
 function [R, P, P2D] = FastScatteringInjection(e_inj, de_inj,...
         n_inj, r, Tc, Tph, V)    
     [ej, ei] = meshgrid(e_inj);
-    n_inj(n_inj < 0) = 0;
     N_Omega1D = (ei - ej).^2 .* rho(ej) .* (n_inj * de_inj') .*...
         (1 - 1 ./ (ei .* ej)) .* Np(ei - ej, Tph) / Tc^3;
 
@@ -418,12 +417,12 @@ function [R, P, P2D] = FastScatteringInjection(e_inj, de_inj,...
     N_Omega1D = N_Omega1D(:);
     indices = Omega1D > 0;
     P = sum(N_Omega1D(indices) .* Omega1D(indices));
-    indices = Omega1D <= 2;
+    indices = Omega1D <= 2 | N_Omega1D <= 0;
     N_Omega1D(indices) = [];
     Omega1D(indices) = [];
     P2D = sum(N_Omega1D .* Omega1D);
     
-    if max(V) <= 3 || r == 0
+    if max(V) <= 3 || r == 0 || isempty(Omega1D)
         R = zeros(size(e_inj));
         return
     end
@@ -468,10 +467,9 @@ end
 function [R, P, P2D] = FastTrapInjection(e_inj, de_inj,...
         n_inj, r, Tc, Tph, V, c)
     N = length(e_inj);
-    e_gap = linspace(0, 1, N + 1);
+    e_gap = linspace(1/(2 * N), 1 - 1 / (2 * N), N);
     
     [ej, ei] = meshgrid(e_gap, e_inj);
-    n_inj(n_inj < 0) = 0;
     N_Omega = c * (ei - ej).^2 .* (n_inj * ones(size(e_gap)) / N) .*...
                 Np(ei - ej, Tph) / Tc^3;
             
@@ -480,12 +478,12 @@ function [R, P, P2D] = FastTrapInjection(e_inj, de_inj,...
     Omega1D = Omega(:);
     N_Omega1D = N_Omega(:);
     P = sum(N_Omega1D .* ei(:));
-    indices = Omega1D <= 2;
+    indices = Omega1D <= 2 | N_Omega1D <= 0;
     N_Omega1D(indices) = [];
     Omega1D(indices) = [];
     P2D = sum(N_Omega1D .* Omega1D);
     
-    if max(V) <= 2 || r == 0 || c == 0
+    if max(V) <= 2 || r == 0 || c == 0 || isempty(Omega1D)
         R = zeros(size(e_inj));
         return
     end

@@ -1,28 +1,28 @@
 function plotSingleSolution
 %plotSingleSolution Quasiparticle dynamics plots.
 
-r_direct = 1.5e-05; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
-r_phonon = .005; % dimensionless
+r_direct = 2e-04; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
+r_phonon = .01; % dimensionless
 c = 0.02; % dimensionless
-vol = 5e+03; % um^3
+vol = 3e+03; % um^3
 
-N = 100;
+N = 200;
 
 Tph = 0.051; % K
-tspan = [-300, -10]; % in units of \tau_0
+tspan = [-310, -10]; % in units of \tau_0
 
 V = 4.5;
 
-[t, e, n, f, n_qp] = ...
-    twoRegionSteadyStateModel(Tph, tspan, V,...
-    r_direct, r_phonon, c, vol, N, true);
+% [t, e, n, f, n_qp] = ...
+%     twoRegionSteadyStateModel(Tph, tspan, V,...
+%     r_direct, r_phonon, c, vol, N, true);
 % [t, e, n, f, n_qp] = ...
 %     twoRegionSteadyStateModelOptimized(Tph, tspan, V,...
 %     r_direct, r_phonon, c, vol, N);
-% clear twoRegionTimeDomainModel
-% [t, e, n, f, n_qp] = ...
-%     twoRegionTimeDomainModel(Tph, tspan, V,...
-%     r_direct, r_phonon, c, vol, N);
+clear twoRegionTimeDomainModel
+[t, e, n, f, n_qp] = ...
+    twoRegionTimeDomainModel(Tph, tspan, V,...
+    r_direct, r_phonon, c, vol, N);
 
 figure
 plot(t, n_qp, 'LineWidth', 3)

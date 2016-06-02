@@ -6,12 +6,10 @@ r_direct = 7.551e-05; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
 r_phonon = 9.180e-03; % dimensionless
 c = 2.379e-02; % dimensionless
 vol = 5e3; % um^3
-r_direct = 1.330e-04; r_phonon = 1.866e-02; c = 4.839e-04; vol = 2.875e+03;
+r_direct = 2.184e-04; r_phonon = 2.764e-01; c = 3.670e-02; vol = 2.590e+03;
 
 Tph = 0.051; % K
 tspan = [-310, -10]; % in units of \tau_0
-
-% Number of the energy bins.
 N = 200;
 
 delta = 0.18e-3; % eV (aluminum superconducting gap)
@@ -22,7 +20,7 @@ V = data.NoTrap(:, 5) / delta;
 P = data.NoTrap(:, 6);
 nqp = data.NoTrap(:, 8) - min(data.NoTrap(:, 8));
 
-options = optimset('Display', 'iter', 'MaxIter', 25,...
+options = optimset('Display', 'iter', 'MaxIter', 50,...
     'TolFun', 1e-2);
 x = fminsearch(@(x) simulations(x, Tph, tspan, V, P, nqp, N),...
     [r_direct, r_phonon, c, vol], options);
@@ -34,7 +32,7 @@ disp(['r_direct = ', num2str(x(1), '%.3e'), '; ',...
 end
 
 function error = simulations(x, Tph, tspan, V, P, nqp, N)
-    indices = (V > 1) & (nqp > 0) & (V < 4);
+    indices = (V > 1.1) & (nqp > 0) & (V < 5);
     P = P(indices);
     nqp = nqp(indices);
     V = V(indices);

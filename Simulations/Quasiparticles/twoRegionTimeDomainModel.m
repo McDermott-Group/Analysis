@@ -85,7 +85,7 @@ n0 = [n0; n0];
 % Solve the ODE. 
 options = odeset('AbsTol', 1e-20);
 [t, n] = ode15s(@(t, n) quasiparticleODE(t, n, Gs_in, Gs_out, Gr, Gtr,...
-    Rdirect, e, de, rho_de, V, rph, Tc, Tph, c), tspan, n0, options);
+    Rdirect, e, de, rph, Tc, Tph, V, c), tspan, n0, options);
 
 n = n(:, size(n, 2)/2+1:end);
 % Occupational numbers.
@@ -172,143 +172,128 @@ function R = DirectInjection(e, rho_de, V, r)
     R = R .* rho_de;
 end
 
-function [R, Omega1D, N_Omega] = ScatteringInjection(e_inj, de_inj,...
-        f_inj, V, r, Tc, Tph)
-    persistent N Omega e_init e dN_Omega_no_f_inj dR_Omega_no_N_Omega
+function R = ScatteringInjection(e_inj, de_inj, n_inj, r, Tc, Tph, V)
     % If the bias is too small there is no point in computing
     % the contribution due to the phonon scattering.
-    if max(V) <= 3
+    if max(V) <= 3 || r == 0
         R = zeros(size(e_inj));
-        Omega1D = [0, 10];
-        N_Omega = [0, 0];
         return
     end
     % A few matrices are needed to be computed only once. Their value
     % will stay in the memory between the function calls since they are
     % intialized as "persistent".
-    if isempty(N)
-        N = 5 * length(e_inj);
-        Omega = linspace(2, max(V) - 1, N);
-        e_init = linspace(min(e_inj), max(e_inj), N)';
-        [Omega, e] = meshgrid(Omega, e_init);
-        % The following expression, multiplied by the quasiparticle
-        % occupation numbers f_inj and integrated over the quasiparticle
-        % "initial" energies e_init, gives phonon density per unit volume
-        % at energy Omega.
-        % See Eq. (8) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
-        dN_Omega_no_f_inj = r * Omega.^2 .* rho(e - Omega) .* rho(e) .*...
-                (1 - 1 ./ (e .* (e - Omega))) .* Np(Omega, Tph) / Tc^3;
-        % The following expression, multiplied by the phonon density per 
-        % unit volume and integrated over the phonon energies, gives
-        % quasiparticle injection rates per unit energy per unit volume.
-        % See Eq. (27) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
-        dR_Omega_no_N_Omega = Omega.^2 .* (e .* (Omega - e) + 1) ./...
-                (sqrt(e.^2 - 1) .* sqrt((Omega - e).^2 - 1)) / Tc^3;
-        dR_Omega_no_N_Omega(dR_Omega_no_N_Omega < 0 |...
-                  ~isfinite(dR_Omega_no_N_Omega)) = 0;
-    end
-    dN_Omega = dN_Omega_no_f_inj .* f_inj(e);
-    dN_Omega(dN_Omega < 0 | ~isfinite(dN_Omega)) = 0;
-    N_Omega = trapz(e_init, dN_Omega);
+    persistent Omega1D indices N_Omega1D_no_n_de dR_no_N_Omega_de
+    if isempty(Omega1D)
+        [ej, ei] = meshgrid(e_inj);
+        N_Omega1D_no_n_de = (ei - ej).^2 .* rho(ej) .*...
+            (1 - 1 ./ (ei .* ej)) .* Np(ei - ej, Tph) / Tc^3;
 
-    dR = dR_Omega_no_N_Omega .* (ones(size(e_init)) * N_Omega);
-    dR(Omega <= e + 1) = 0;
-    R = trapz(Omega(1, :), dR, 2);
-    % Compute the quasipartcle injection per energy bin.
-    R = interp1(e_init, R, e_inj, 'nearest') .* de_inj;
-    Omega1D = Omega(1, :);
+        Omega = ei - ej;
+        Omega1D = Omega(:);
+        indices = Omega1D <= 2 | N_Omega1D_no_n_de(:) <= 0;
+        Omega1D(indices) = [];
+        [e, Omega2D] = meshgrid(e_inj, Omega1D);
+        % See Eq. (27) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
+        dR_no_N_Omega_de = Omega2D.^2 .*...
+                    (e .* (Omega2D - e) + 1) ./...
+                    (sqrt(e.^2 - 1) .* sqrt((Omega2D - e).^2 - 1));
+        dR_no_N_Omega_de(Omega2D <= e + 1) = 0;
+    end
+    N_Omega = N_Omega1D_no_n_de .* (n_inj * de_inj');
+    N_Omega1D = N_Omega(:);
+    N_Omega1D(indices) = [];
+    P2D = sum(N_Omega1D .* Omega1D);
+    if P2D <= 0
+        R = zeros(size(e_inj));
+        return
+    end
+
+    dR = dR_no_N_Omega_de .* (N_Omega1D * de_inj');
+    R = sum(dR)';
+    R = r * R * P2D / sum(e_inj .* R);
 end
 
-function [R, Omega1D, N_Omega] = RecombinationInjection(e_inj, de_inj,...
-        f_inj, V, r, Tc, Tph)
-    persistent N Omega e_final e dN_Omega_no_f_inj dR_Omega_no_N_Omega
+function R = RecombinationInjection(e_inj, de_inj, n_inj, r, Tc, Tph)
     % A few matrices are needed to be computed only once. Their value
     % will stay in the memory between the function calls since they are
     % intialized as "persistent".
-    if isempty(N)
-        N = 5 * length(e_inj);
-        Omega = linspace(2, 2 * max(V), N);
-        e_final = linspace(1, max(e_inj), N)';
-        [Omega, e] = meshgrid(Omega, e_final);
-        % The following expression, multiplied by the quasiparticle
-        % occupation numbers f_inj at the recombininng energies and
-        % integrated over the quasiparticle "final" energies e_final,
-        % gives phonon density per unit volume at energy Omega.
-        % See Eq. (8) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
-        dN_Omega_no_f_inj = r * Omega.^2 .* rho(Omega - e) .* rho(e) .*...
-                (1 + 1 ./ (e .* (Omega - e))) .* Np(Omega, Tph) / Tc^3;
-        % The following expression, multiplied by the phonon density per 
-        % unit volume and integrated over the phonon energies, gives
-        % quasiparticle injection rates per unit energy per unit volume.
+    persistent Omega1D Gr dR_no_N_Omega_de 
+    if isempty(Omega1D)
+        [ej, ei] = meshgrid(e_inj);
+        Gr = (ei + ej).^2 .* (1 + 1 ./ (ei .* ej)) .*...
+             Np(ei + ej, Tph) / Tc^3;
+        Omega = ei + ej;
+        Omega1D = Omega(:);
+        
+        [e, Omega2D] = meshgrid(e_inj, Omega1D);
+
         % See Eq. (27) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
-        dR_Omega_no_N_Omega = Omega.^2 .*...
-                (e .* (Omega - e) + 1) ./...
-                (sqrt(e.^2 - 1) .* sqrt((Omega - e).^2 - 1)) / Tc^3;
-        dR_Omega_no_N_Omega(dR_Omega_no_N_Omega < 0 |...
-                  ~isfinite(dR_Omega_no_N_Omega)) = 0;
+        dR_no_N_Omega_de = Omega2D.^2 .*...
+                    (e .* (Omega2D - e) + 1) ./...
+                    (sqrt(e.^2 - 1) .* sqrt((Omega2D - e).^2 - 1));
+        dR_no_N_Omega_de(Omega2D <= e + 1) = 0;
     end
-    dN_Omega = dN_Omega_no_f_inj .* f_inj(Omega - e) .* f_inj(e);
-    dN_Omega(dN_Omega < 0 | ~isfinite(dN_Omega) | Omega - e <= 1) = 0;
-    N_Omega = trapz(e_final, dN_Omega);
-    
-    dR = dR_Omega_no_N_Omega .* (ones(size(e_final)) * N_Omega);
-    % dR(Omega <= e + 1) = 0;
-    R = trapz(Omega(1, :), dR, 2);
-    % Compute the quasipartcle injection per energy bin.
-    R = interp1(e_final, R, e_inj, 'nearest') .* de_inj;
-    Omega1D = Omega(1, :);
+    if sum(n_inj) <= 0
+        R = zeros(size(e_inj));
+        return
+    end
+    [n_j, n_i] = meshgrid(n_inj);
+    N_Omega = n_i .* Gr .* n_j;
+
+    N_Omega1D = N_Omega(:);
+    P = sum(N_Omega1D .* Omega1D);
+
+    dR = dR_no_N_Omega_de .* (N_Omega1D * de_inj');
+    R = sum(dR)';
+    R = r * R * P / sum(e_inj .* R);
 end
 
-function [R, Omega1D, N_Omega] = TrapInjection(e_inj, de_inj,...
-        f_inj, V, r, Tc, Tph)
-    persistent N Omega e_init e dN_Omega_no_f_inj dR_Omega_no_N_Omega
+function R = TrapInjection(e_inj, de_inj, n_inj, r, Tc, Tph, V, c)
     % If the bias is too small there is no point in computing
     % the contribution due to the phonon generation via trapping.
     if max(V) <= 2
         R = zeros(size(e_inj));
-        Omega1D = [0, 10];
-        N_Omega = [0, 0];
         return
     end
     % A few matrices are needed to be computed only once. Their value
     % will stay in the memory between the function calls since they are
     % intialized as "persistent".
-    if isempty(N)
-        N = 5 * length(e_inj);
-        Omega = linspace(2, max(V), N);
-        e_init = linspace(min(e_inj), max(e_inj), N)';
-        [Omega, e] = meshgrid(Omega, e_init);
-        % The following expression, multiplied by the quasiparticle
-        % occupation numbers f_inj and integrated over the quasiparticle
-        % "initial" energies e_init, gives phonon density per unit volume
-        % at energy Omega.
-        % See Eq. (8) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976),
-        % assuming \Delta = 0.
-        dN_Omega_no_f_inj = r * Omega.^2 .* rho(e) .* Np(Omega, Tph) / Tc^3;
-        dN_Omega_no_f_inj(e - Omega >= 1 | e - Omega < 0) = 0;
-        % The following expression, multiplied by the phonon density per 
-        % unit volume and integrated over the phonon energies, gives
-        % quasiparticle injection rates per unit energy per unit volume.
-        % See Eq. (27) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
-        dR_Omega_no_N_Omega = Omega.^2 .* (e .* (Omega - e) + 1) ./...
-                (sqrt(e.^2 - 1) .* sqrt((Omega - e).^2 - 1)) / Tc^3;
-        dR_Omega_no_N_Omega(dR_Omega_no_N_Omega < 0 |...
-                  ~isfinite(dR_Omega_no_N_Omega)) = 0;
-    end
-    dN_Omega = dN_Omega_no_f_inj .* f_inj(e);
-    dN_Omega(dN_Omega < 0 | ~isfinite(dN_Omega)) = 0;
-    N_Omega = trapz(e_init, dN_Omega);
+    persistent Omega1D indices N_Omega1D_no_n_de dR_no_N_Omega_de de
+    if isempty(Omega1D)
+        N = length(e_inj);
+        e_gap = linspace(1/(2 * N), 1 - 1 / (2 * N), N);
+        [ej, ei] = meshgrid(e_gap, e_inj);
 
-    dR = dR_Omega_no_N_Omega .* (ones(size(e_init)) * N_Omega);
-    dR(Omega <= e + 1) = 0;
-    R = trapz(Omega(1, :), dR, 2);
-    % Compute the quasipartcle injection per energy bin.
-    R = interp1(e_init, R, e_inj, 'nearest') .* de_inj;
-    Omega1D = Omega(1, :);
+        N_Omega1D_no_n_de = c * (ei - ej).^2 .* Np(ei - ej, Tph) / Tc^3;
+
+        Omega = ei - ej;
+        Omega1D = Omega(:);
+        indices = Omega1D <= 2 | N_Omega1D_no_n_de(:) <= 0;
+        Omega1D(indices) = [];
+        [e, Omega2D] = meshgrid(e_inj, Omega1D);
+        % See Eq. (27) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
+        dR_no_N_Omega_de = Omega2D.^2 .*...
+                    (e .* (Omega2D - e) + 1) ./...
+                    (sqrt(e.^2 - 1) .* sqrt((Omega2D - e).^2 - 1));
+        dR_no_N_Omega_de(Omega2D <= e + 1) = 0;
+        de = ones(size(de_inj')) / N;
+    end
+    N_Omega = N_Omega1D_no_n_de .* (n_inj * de);
+    N_Omega1D = N_Omega(:);
+    N_Omega1D(indices) = [];
+    P2D = sum(N_Omega1D .* Omega1D);
+    if P2D <= 0
+        R = zeros(size(e_inj));
+        return
+    end
+
+    dR = dR_no_N_Omega_de .* (N_Omega1D * de_inj');
+    R = sum(dR)';
+    R = r * R * P2D / sum(e_inj .* R);
 end
 
 function ndot = quasiparticleODE(t, n, Gs_in, Gs_out, Gr, Gtr, R_direct,...
-        e, de, rho_de, V, rph, Tc, Tph, c)
+        e, de, rph, Tc, Tph, V, c)
     % n is in units n_{cp}, rates are in units n_{cp}/\tau_0.
     % It is assmumed that the injection is happening at t < 0 and
     % the relaxation - at t > 0.
@@ -321,21 +306,35 @@ function ndot = quasiparticleODE(t, n, Gs_in, Gs_out, Gr, Gtr, R_direct,...
     % The first half of vector n0 describes the NIS junction and
     % the second - the resonator.
     half = length(n) / 2;
-    n_cnt = n(1:half);
+    n_nis = n(1:half);
     n_res = n(half+1:end);
 
-    f_inj = n_cnt ./ rho_de;
-    f_inj(f_inj < 0) = 0;
-    f_inj = @(e_inj) interp1(e, f_inj, e_inj, 'nearest');
+    Rph_rec = RecombinationInjection(e, de, n_nis, rph, Tc, Tph);
+    Rph_sct = ScatteringInjection(e, de, n_nis, rph, Tc, Tph, V);
+    Rph_trp = TrapInjection(e, de, n_nis, rph, Tc, Tph, V, c);
+    
+    if ~all(isfinite(Rph_rec))
+        disp('rec')
+        sum(isfinite(Rph_rec))
+    end
+    if ~all(isfinite(Rph_sct))
+        disp('sct')
+        sum(isfinite(Rph_sct))
+    end
+    if ~all(isfinite(Rph_trp))
+        disp('trp')
+        sum(isfinite(Rph_trp))
+    end
+    
+%     figure(10)
+%     plot(e, Rph_rec, 'r', e, Rph_sct, 'g', e, Rph_trp)
+%     set(gca, 'yscale', 'Log')
+%     pause(.5)
 
-    Rph_rec = RecombinationInjection(e, de, f_inj, V, rph, Tc, Tph);
-    Rph_sct = ScatteringInjection(e, de, f_inj, V, rph, Tc, Tph);
-    Rph_trp = TrapInjection(e, de, f_inj, V, c * rph, Tc, Tph);
-
-    ndot_cnt = Gs_in * n_cnt - Gs_out .* n_cnt - 2 * n_cnt .* (Gr * n_cnt) -...
-        Gtr .* n_cnt + R_direct;
+    ndot_nis = Gs_in * n_nis - Gs_out .* n_nis - 2 * n_nis .* (Gr * n_nis) -...
+        Gtr .* n_nis + R_direct;
     ndot_res = Gs_in * n_res - Gs_out .* n_res - 2 * n_res .* (Gr * n_res) -...
         Gtr .* n_res + Rph_rec + Rph_trp + Rph_sct;
-    ndot = [ndot_cnt; ndot_res];
+    ndot = [ndot_nis; ndot_res];
     ndot(ndot < 0 & non_positive_n) = 0;
 end

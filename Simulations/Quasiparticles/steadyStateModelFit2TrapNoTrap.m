@@ -2,22 +2,22 @@ function steadyStateModelFit2TrapNoTrap
 %steadyStateModelFit2TrapNoTrap Fitting to the TrapNoTrap dataset using
 % the two-point equilibrium quasi-0D model
 
-r_direct_no_tr = 2e-04; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
-r_phonon_no_tr = .01; % dimensionless
-c_no_tr = 2.379e-02; % dimensionless
-vol_no_tr = 5.000e+03; % um^3
+r_direct_no_tr = 2.184e-04; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
+r_phonon_no_tr = 2.764e-01; % dimensionless
+c_no_tr =  3.670e-02; % dimensionless
+vol_no_tr = 2.590e+03; % um^3
 
-r_direct_tr = 2e-03; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
-r_phonon_tr = .01; % dimensionless
-c_tr = 2.366e-02; % dimensionless
-vol_tr = 5.000e+03; % um^3
+r_direct_tr = 1.839e-04; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
+r_phonon_tr = 1.574e-01; % dimensionless
+c_tr = 1.299e-01; % dimensionless
+vol_tr = 5.852e+03; % um^3
 
 delta = 0.18e-3; % eV (aluminum superconducting gap)
 Tph = 0.051; % K
-tspan = [-300, 0]; % in units of \tau_0
+tspan = [-310, -10]; % in units of \tau_0
 
 % Number of the energy bins.
-N = 100;
+N = 200;
 
 data = load('TrapNoTrap.mat');
 
