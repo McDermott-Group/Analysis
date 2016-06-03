@@ -2,10 +2,10 @@ function autoFit2TrapNoTrap_Trap
 %autoFit2TrapNoTrap_Trap Fitting to the TrapNoTrap dataset.
 
 % With traps.
-r_direct = 2.654e-04; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
-r_phonon = 1.073e-04; % dimensionless
-c = 2.366e-02; % dimensionless
-vol = 5e3; % um^3
+% r_direct in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
+% r_phonon dimensionless
+% c dimensionless
+% vol in units of um^3
 r_direct = 2.516e-04; r_phonon = 6.311e-02; c = 8.629e-02; vol = 4.958e+03;
 
 Tph = 0.051; % K

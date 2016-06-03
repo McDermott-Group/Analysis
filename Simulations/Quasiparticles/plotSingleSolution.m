@@ -1,15 +1,15 @@
 function plotSingleSolution
 %plotSingleSolution Quasiparticle dynamics plots.
 
-r_direct = 2e-04; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
-r_phonon = .01; % dimensionless
-c = 0.02; % dimensionless
-vol = 3e+03; % um^3
+r_direct = 8e-05; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
+r_phonon = 2e-01; % dimensionless
+c = 0.1; % dimensionless
+vol = 5e+03; % um^3
 
 N = 200;
 
 Tph = 0.051; % K
-tspan = [-310, -10]; % in units of \tau_0
+tspan = [-310, 100]; % in units of \tau_0
 
 V = 4.5;
 
@@ -59,6 +59,6 @@ axis tight
 xlim([1, max(V)])
 grid on
 
-%extractTimeConstants(t, n_qp, true);
+extractTimeConstants(t, n_qp, true);
 
 end
