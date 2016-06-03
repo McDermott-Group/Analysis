@@ -34,17 +34,16 @@ Tph = 0.051; % K
 tspan = [-200, 200]; % in units of \tau_0
 
 % Number of energy bins.
-N = 100;
+N = 150;
 
 tau_p = NaN(size(V));
 err_p = NaN(size(V));
 tau_r = NaN(size(V));
 err_r = NaN(size(V));
 nqp = NaN(size(V));
-P = NaN(size(V));
-for k = 1:length(V) 
+for k = 1:length(V)
     clear twoRegionTimeDomainModel
-    [t, ~, ~, ~, n_qp, ~, P(k)] = ...
+    [t, ~, ~, ~, n_qp] = ...
         twoRegionTimeDomainModel(Tph, tspan, V(k),...
         r_direct, r_phonon, c, vol, N);
     [tau_p(k), err_p(k), tau_r(k), err_r(k)] = ...
@@ -54,11 +53,15 @@ for k = 1:length(V)
 end
 fprintf('\n')
 
-F = 6;
-tau0 = F * .438; % us, \tau_0 for aluminum from S. B. Kaplan et al.,
+tau0 = .438; % us, \tau_0 for aluminum from S. B. Kaplan et al.,
               % Phys. Rev. B 14, 4854 (1976)
 tau_p = tau0 * tau_p;
 tau_r = tau0 * tau_r;
+
+F = median(tau_p_n ./ tau_p(1:length(tau_p_n)));
+
+tau_p = F * tau_p;
+tau_r = F * tau_r;
 
 scrsz = get(0, 'ScreenSize');
 figure('Position', [.1 .1 1.5 .8] * scrsz(4));
@@ -99,5 +102,7 @@ set(gca, 'yscale', 'Log')
 xlim([1 100])
 axis tight
 grid on
+
+saveas(gca, 'NIS24062016.pdf', 'pdf')
 
 end
