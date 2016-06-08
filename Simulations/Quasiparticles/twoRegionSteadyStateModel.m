@@ -1,4 +1,5 @@
-function [t, e, n, f, n_qp, r_qp, P] = ...
+function [t, e, n, f, n_qp, r_qp, P,...
+    Prec, Psct, Psct2D, Ptrp, Ptrp2D] = ...
     twoRegionSteadyStateModel(Tph, tspan, V, rqp, rph, c,...
     vol, N, plot_flag)
 % twoRegionSteadyStateModel Two-region, one corresponds to
@@ -120,6 +121,17 @@ f_inj = @(e_inj) interp1(e, f_inj, e_inj);
 Rph_rec = FastRecombinationInjection(e, de, n_inj, rph, Tc, Tph);
 Rph_sct = FastScatteringInjection(e, de, n_inj, rph, Tc, Tph, V);
 Rph_trp = FastTrapInjection(e, de, n_inj, rph, Tc, Tph, V, c);
+
+n_eq  = n(end, :)';
+[~, P_rec] = FastRecombinationInjection(e, de, n_eq, rph, Tc, Tph);
+[~, P_sct, P_sct2D] = FastScatteringInjection(e, de, n_eq, rph, Tc, Tph, V);
+[~, P_trp, P_trp2D] = FastTrapInjection(e, de, n_eq, rph, Tc, Tph, V, c);
+
+Prec = power_calib * P_rec / P;
+Psct = power_calib * P_sct / P;
+Psct2D = power_calib * P_sct2D / P;
+Ptrp = power_calib * P_trp / P;
+Ptrp2D = power_calib * P_trp2D / P;
 
 if plot_flag
     figure
@@ -270,20 +282,6 @@ if plot_flag
     xlim([1, max(V)])
     grid on
 end
-
-% if plot_flag
-%     power_calib * sum(e .* Rph_sct) / P
-%     power_calib * sum(e .* Rph_sct_brute) / P
-%     power_calib * sum(e .* Rph_rec) / P
-%     power_calib * sum(e .* Rph_rec_brute) / P
-%     power_calib * sum(e .* Rph_trp) / P
-%     power_calib * sum(e .* Rph_trp_brute) / P
-%     
-%     power_calib * sum(e .* Rph_trp)
-%     power_calib * sum(e .* Rph_trp_brute)
-%     Pt_trp_fast(end)
-%     Pt_trp2D_fast(end)
-% end
 
 % Occupational numbers.
 f = n ./ (ones(length(t), 1) * rho_de');

@@ -10,7 +10,7 @@ n_p = n_qp(t < 0);
 n_p = n_p - n_p(1);
 
 % Cut off the intial part of the curve to improve the fit.
-cut_off = 0.2 * max(n_p);
+cut_off = 0 * max(n_p);
 t_p(n_p < cut_off) = [];
 n_p(n_p < cut_off) = [];
 t_p = t_p - min(t_p);
@@ -47,7 +47,7 @@ t_r = t_r - min(t_r);
 n_r = n_qp(t > 0);
 
 % Cut off the intial part of the curve to improve the fit.
-cut_off = 0.9 * max(n_r);
+cut_off = 1 * max(n_r);
 t_r(n_r > cut_off) = [];
 n_r(n_r > cut_off) = [];
 t_r = t_r - min(t_r);

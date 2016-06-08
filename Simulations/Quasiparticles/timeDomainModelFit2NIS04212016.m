@@ -24,17 +24,18 @@ E_r_n = data.NearTrapRecovery(:, 2);
 tau_r_n = data.NearTrapRecovery(:, 3);
 nqp_r_n = data.NearTrapRecovery(:, 4);
 
-r_direct = 8.263e-05; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
-r_phonon = 2.223e-01; % dimensionless
-c = 9.414e-02; % dimensionless
-vol = 5e3; % um^3
+% r_direct in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
+% r_phonon dimensionless
+% c dimensionless
+% vol in units of um^3
+r_direct = 2.232e-05; r_phonon = 5.003e-01; c = 5.405e-02; vol = 5.000e+03;
 
 V = [E_p_n; E_r_n; 3.5; 4.2; 6.7]; % in units of \Delta
 Tph = 0.051; % K
 tspan = [-200, 200]; % in units of \tau_0
 
 % Number of energy bins.
-N = 150;
+N = 250;
 
 tau_p = NaN(size(V));
 err_p = NaN(size(V));
@@ -63,9 +64,6 @@ F = median(tau_p_n ./ tau_p(1:length(tau_p_n)));
 tau_p = F * tau_p;
 tau_r = F * tau_r;
 
-scrsz = get(0, 'ScreenSize');
-figure('Position', [.1 .1 1.5 .8] * scrsz(4));
-subplot(1, 2, 1)
 hold on
 plot(E_p_n, tau_p_n, '^',...
      E_r_n, tau_r_n, 'v', 'MarkerSize', 10, 'LineWidth', 2)
@@ -84,8 +82,9 @@ title({'Time Constants', ['r_{qp} = ', num2str(r_direct, '%.3e'),...
     ', F = ', num2str(F, '%.3f')]})
 axis tight
 grid on
+saveas(gca, 'NIS24062016_tau.pdf', 'pdf')
  
-subplot(1, 2, 2)
+figure
 hold on
 loglog(E_p_n, nqp_p_n, '^',...
        E_r_n, nqp_r_n, 'v',...
@@ -102,7 +101,6 @@ set(gca, 'yscale', 'Log')
 xlim([1 100])
 axis tight
 grid on
-
-saveas(gca, 'NIS24062016.pdf', 'pdf')
+saveas(gca, 'NIS24062016_nqp.pdf', 'pdf')
 
 end

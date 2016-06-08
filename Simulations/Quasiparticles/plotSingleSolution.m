@@ -1,28 +1,29 @@
 function plotSingleSolution
 %plotSingleSolution Quasiparticle dynamics plots.
 
-r_direct = 8e-05; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
-r_phonon = 2e-01; % dimensionless
-c = 0.1; % dimensionless
-vol = 5e+03; % um^3
+% r_direct in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
+% r_phonon dimensionless
+% c dimensionless
+% vol in units of um^3
+r_direct = 1e-05; r_phonon = 5e-02; c = 0; vol = 5.000e+03; 
 
-N = 200;
+N = 100;
 
 Tph = 0.051; % K
-tspan = [-310, 100]; % in units of \tau_0
+tspan = [-310, -10]; % in units of \tau_0
 
 V = 4.5;
 
-% [t, e, n, f, n_qp] = ...
-%     twoRegionSteadyStateModel(Tph, tspan, V,...
-%     r_direct, r_phonon, c, vol, N, true);
+[t, e, n, f, n_qp] = ...
+    twoRegionSteadyStateModel(Tph, tspan, V,...
+    r_direct, r_phonon, c, vol, N, true);
 % [t, e, n, f, n_qp] = ...
 %     twoRegionSteadyStateModelOptimized(Tph, tspan, V,...
 %     r_direct, r_phonon, c, vol, N);
-clear twoRegionTimeDomainModel
-[t, e, n, f, n_qp] = ...
-    twoRegionTimeDomainModel(Tph, tspan, V,...
-    r_direct, r_phonon, c, vol, N);
+% clear twoRegionTimeDomainModel
+% [t, e, n, f, n_qp] = ...
+%     twoRegionTimeDomainModel(Tph, tspan, V,...
+%     r_direct, r_phonon, c, vol, N);
 
 figure
 plot(t, n_qp, 'LineWidth', 3)

@@ -2,13 +2,14 @@ function autoFit2TrapNoTrapFixedVolume_NoTrap
 %autoFit2TrapNoTrapFixedVolume_NoTrap Fitting to the TrapNoTrap dataset.
 
 % No traps.
-r_direct = 7.551e-05; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
-r_phonon = 9.180e-03; % dimensionless
-c = 2.379e-02; % dimensionless
-vol = 5e3; % um^3
+% r_direct in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
+% r_phonon dimensionless
+% c dimensionless
+% vol in units of um^3
+r_direct = 9.063e-05; r_phonon = 7.346e-01; c = 3.955e-02; vol = 5.000e+03; 
 
 Tph = 0.051; % K
-tspan = [-310, -10]; % in units of \tau_0
+tspan = [-210, -10]; % in units of \tau_0
 
 % Number of the energy bins.
 N = 100;
@@ -21,7 +22,7 @@ V = data.NoTrap(:, 5) / delta;
 P = data.NoTrap(:, 6);
 nqp = data.NoTrap(:, 8) - min(data.NoTrap(:, 8));
 
-options = optimset('Display', 'iter', 'MaxIter', 25,...
+options = optimset('Display', 'iter', 'MaxIter', 100,...
     'TolFun', 1e-2);
 x = fminsearch(@(x) simulations(x, Tph, tspan, V, P, nqp, vol, N),...
     [r_direct, r_phonon, c], options);
@@ -33,7 +34,7 @@ disp(['r_direct = ', num2str(x(1), '%.3e'), '; ',...
 end
 
 function error = simulations(x, Tph, tspan, V, P, nqp, vol, N)
-    indices = (V > 1) & (nqp > 0) & (V < 4);
+    indices = (V > 1) & (nqp > 0);
     P = P(indices);
     nqp = nqp(indices);
     V = V(indices);

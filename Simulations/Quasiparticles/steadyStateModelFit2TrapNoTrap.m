@@ -2,16 +2,17 @@ function steadyStateModelFit2TrapNoTrap
 %steadyStateModelFit2TrapNoTrap Fitting to the TrapNoTrap dataset using
 % the two-point equilibrium quasi-0D model
 
-r_direct = 1.973e-04; r_phonon = 3.494e-01; c = 4.054e-02; vol = 2.950e+03;
+r_direct = 9.063e-05; r_phonon = 7.346e-01; c = 3.955e-02; vol = 5.000e+03;
 r_direct_no_tr = r_direct; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
 r_phonon_no_tr = r_phonon; % dimensionless
 c_no_tr = c; % dimensionless
 vol_no_tr = vol; % um^3
 
-r_direct_tr = 2.734e-05; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
-r_phonon_tr = 6.470e-01; % dimensionless
-c_tr = 6.357e-02; % dimensionless
-vol_tr = 3.683e+04; % um^3
+r_direct = 2.077e-04; r_phonon = 2.707e-01; c = 1.772e-01; vol = 5.000e+03;
+r_direct_tr = r_direct; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
+r_phonon_tr = r_phonon; % dimensionless
+c_tr = c; % dimensionless
+vol_tr = vol; % um^3
 
 delta = 0.18e-3; % eV (aluminum superconducting gap)
 Tph = 0.051; % K
@@ -80,10 +81,8 @@ parfor k = 1:length(V_tr)
 end
 fprintf('\n')
 
-scrsz = get(0, 'ScreenSize');
-figure('Position', [.1 .1 1.5 .8] * scrsz(4));
-subplot(1, 2, 1)
-loglog(V_no_tr, nqp_no_tr, 'bo', V_no_tr, nqp_sim_no_tr, 'm*',...
+figure
+semilogy(V_no_tr, nqp_no_tr, 'bo', V_no_tr, nqp_sim_no_tr, 'm*',...
     'MarkerSize', 10, 'LineWidth', 2)
 xlabel('Injection Energy (\Delta)', 'FontSize', 14)
 ylabel('Quasiparticle Density (\mu m^{-3})', 'FontSize', 14)
@@ -97,8 +96,8 @@ title('No Traps')
 axis tight
 grid on
  
-subplot(1, 2, 2)
-loglog(V_tr, nqp_tr, 'ko', V_tr, nqp_sim_tr, 'm*',...
+figure
+semilogy(V_tr, nqp_tr, 'ko', V_tr, nqp_sim_tr, 'm*',...
     'MarkerSize', 10, 'LineWidth', 2)
 xlabel('Injection Energy (\Delta)', 'FontSize', 14)
 ylabel('Quasiparticle Density (\mu m^{-3})', 'FontSize', 14)
@@ -112,9 +111,7 @@ title('With Traps')
 axis tight
 grid on
 
-scrsz = get(0, 'ScreenSize');
-figure('Position', [.1 .1 1.5 .8] * scrsz(4));
-subplot(1, 2, 1)
+figure
 loglog(P_no_tr, nqp_no_tr, 'bo', P_sim_no_tr, nqp_sim_no_tr, 'm*',...
     'MarkerSize', 10, 'LineWidth', 2)
 xlabel('Injection Power (W)', 'FontSize', 14)
@@ -128,8 +125,9 @@ legend({'no trap, experiment',...
 title('No Traps')
 axis tight
 grid on
- 
-subplot(1, 2, 2)
+saveas(gca, 'NoTrap.pdf', 'pdf')
+
+figure
 loglog(P_tr, nqp_tr, 'ko', P_sim_tr, nqp_sim_tr, 'm*',...
     'MarkerSize', 10, 'LineWidth', 2)
 xlabel('Injection Power (W)', 'FontSize', 14)
@@ -144,6 +142,6 @@ title('With Traps')
 axis tight
 grid on
 
-saveas(gca, 'TrapNoTrap.pdf', 'pdf')
+saveas(gca, 'Trap.pdf', 'pdf')
 
 end

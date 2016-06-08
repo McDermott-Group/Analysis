@@ -2,16 +2,17 @@ function autoFit2TrapNoTrapFixedVolume_Trap
 %autoFit2TrapNoTrapFixedVolume_Trap Fitting to the TrapNoTrap dataset.
 
 % With traps.
-r_direct = 2.654e-04; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
-r_phonon = 1.073e-04; % dimensionless
-c = 2.366e-02; % dimensionless
-vol = 5e3; % um^3
+% r_direct in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
+% r_phonon dimensionless
+% c dimensionless
+% vol in units of um^3
+r_direct = 2.077e-04; r_phonon = 2.707e-01; c = 1.772e-01; vol = 5.000e+03;
 
 Tph = 0.051; % K
-tspan = [-310, -10]; % in units of \tau_0
+tspan = [-210, -10]; % in units of \tau_0
 
 % Number of the energy bins.
-N = 500;
+N = 100;
 
 delta = 0.18e-3; % eV (aluminum superconducting gap)
 data = load('TrapNoTrap.mat');
@@ -21,7 +22,7 @@ V = data.Trap(:, 5) / delta;
 P = data.Trap(:, 6);
 nqp = data.Trap(:, 8) - min(data.Trap(:, 8));
 
-options = optimset('Display', 'iter', 'MaxIter', floor(5000 / N), 'TolFun', 1e-2);
+options = optimset('Display', 'iter', 'MaxIter', 100, 'TolFun', 1e-2);
 x = fminsearch(@(x) simulations(x, Tph, tspan, V, P, nqp, vol, N),...
     [r_direct, r_phonon, c], options);
 
