@@ -1,8 +1,9 @@
 function [t, e, n, f, n_qp, r_qp, P] = ...
-    twoRegionTimeDomainModel(Tph, tspan, V, rqp, rph, c, vol, N)
-%twoRegionTimeDomainModel Two-region, one that describes a normal metal-
-% isolator-superconductor junction (NIS) and the other one - a resonator,
-% quasi-0D model for computing the quasiparticle density evolution.  
+    twoRegionTimeDomainModelOptimized(Tph, tspan, V, rqp, rph, c, vol, N)
+%twoRegionTimeDomainModelOptimized Two-region, one that describes a normal
+% metal isolator-superconductor junction (NIS) and the other one -
+% a resonator, quasi-0D model for computing the quasiparticle density
+% evolution.  
 % 
 % [t, e, n, f, n_qp, r_qp, P] = 
 %   twoRegionTimeDomainModel(Tph, tspan, V, rqp, rph, c, vol, N)
@@ -67,6 +68,7 @@ e = e(2:end);
 
 % Short-hand notation.
 rho_de = rho(e) .* de;
+de = de';
 
 [Gs_in, Gs_out] = Gscattering(e, de, Tph, Tc);
 
@@ -75,6 +77,15 @@ Gr = Grecombination(e, Tph, Tc);
 Gtr = Gtrapping(e, Tph, Tc, c);
 
 Rdirect = DirectInjection(e, rho_de, V, rqp);
+
+[Omega1D_sct, indices_sct, N_Omega1D_no_n_de_sct, dR_no_N_Omega_de_sct] =...
+    ScatteringInjection(e, Tc, Tph);
+
+[Omega1D_rec, Gr_rec, dR_no_N_Omega_de_rec] =...
+    RecombinationInjection(e, Tc, Tph);
+
+[Omega1D_trp, indices_trp, N_Omega1D_no_n_de_trp, dR_no_N_Omega_de_trp,...
+    de_trp] = TrapInjection(e, de, Tc, Tph, c);
 
 % Initial condition for the quasiparticle distribution.
 % The first half of vector n0 describes the NIS junction and the second -
@@ -85,7 +96,12 @@ n0 = [n0; n0];
 % Solve the ODE. 
 options = odeset('AbsTol', 1e-20);
 [t, n] = ode15s(@(t, n) quasiparticleODE(t, n, Gs_in, Gs_out, Gr, Gtr,...
-    Rdirect, e, de, rph, Tc, Tph, V, c), tspan, n0, options);
+    Rdirect, e, de, rph, V,...
+    Omega1D_sct, indices_sct, N_Omega1D_no_n_de_sct, dR_no_N_Omega_de_sct,...
+    Omega1D_rec, Gr_rec, dR_no_N_Omega_de_rec,...
+    Omega1D_trp, indices_trp, N_Omega1D_no_n_de_trp, dR_no_N_Omega_de_trp,...
+    de_trp),...
+    tspan, n0, options);
 
 n = n(:, size(n, 2)/2+1:end);
 % Occupational numbers.
@@ -129,7 +145,7 @@ function [Gs_in, Gs_out] = Gscattering(e, de, Tph, Tc)
 
     Gs = (ei - ej).^2 .*...
         (1 - 1 ./ (ei .* ej)) .*...
-        rho(ej) .* Np(ei - ej, Tph) .* (ones(length(e), 1) * de') / Tc^3;
+        rho(ej) .* Np(ei - ej, Tph) .* (ones(length(e), 1) * de) / Tc^3;
     Gs(~isfinite(Gs)) = 0;
 
     Gs_in = Gs';
@@ -172,128 +188,67 @@ function R = DirectInjection(e, rho_de, V, r)
     R = R .* rho_de;
 end
 
-function R = ScatteringInjection(e_inj, de_inj, n_inj, r, Tc, Tph, V)
-    % If the bias is too small there is no point in computing
-    % the contribution due to the phonon scattering.
-    if max(V) <= 3 || r == 0
-        R = zeros(size(e_inj));
-        return
-    end
-    % A few matrices are needed to be computed only once. Their value
-    % will stay in the memory between the function calls since they are
-    % intialized as "persistent".
-    persistent Omega1D indices N_Omega1D_no_n_de dR_no_N_Omega_de
-    if isempty(Omega1D)
-        [ej, ei] = meshgrid(e_inj);
-        N_Omega1D_no_n_de = (ei - ej).^2 .* rho(ej) .*...
-            (1 - 1 ./ (ei .* ej)) .* Np(ei - ej, Tph) / Tc^3;
-
-        Omega = ei - ej;
-        Omega1D = Omega(:);
-        indices = Omega1D <= 2 | N_Omega1D_no_n_de(:) <= 0;
-        Omega1D(indices) = [];
-        [e, Omega2D] = meshgrid(e_inj, Omega1D);
-        % See Eq. (27) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
-        dR_no_N_Omega_de = Omega2D.^2 .*...
-                    (e .* (Omega2D - e) + 1) ./...
-                    (sqrt(e.^2 - 1) .* sqrt((Omega2D - e).^2 - 1));
-        dR_no_N_Omega_de(Omega2D <= e + 1) = 0;
-    end
-    N_Omega = N_Omega1D_no_n_de .* (n_inj * de_inj');
-    N_Omega1D = N_Omega(:);
-    N_Omega1D(indices) = [];
-    P2D = sum(N_Omega1D .* Omega1D);
-    if P2D <= 0
-        R = zeros(size(e_inj));
-        return
-    end
-
-    dR = dR_no_N_Omega_de .* (N_Omega1D * de_inj');
-    R = sum(dR)';
-    R = r * R * P2D / sum(e_inj .* R);
+function [Omega1D, indices, N_Omega1D_no_n_de, dR_no_N_Omega_de] =...
+    ScatteringInjection(e_inj, Tc, Tph)
+    [ej, ei] = meshgrid(e_inj);
+    N_Omega1D_no_n_de = (ei - ej).^2 .* rho(ej) .*...
+        (1 - 1 ./ (ei .* ej)) .* Np(ei - ej, Tph) / Tc^3;
+    Omega = ei - ej;
+    Omega1D = Omega(:);
+    indices = Omega1D <= 2 | N_Omega1D_no_n_de(:) <= 0;
+    Omega1D(indices) = [];
+    [e, Omega2D] = meshgrid(e_inj, Omega1D);
+    % See Eq. (27) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
+    dR_no_N_Omega_de = Omega2D.^2 .*...
+                (e .* (Omega2D - e) + 1) ./...
+                (sqrt(e.^2 - 1) .* sqrt((Omega2D - e).^2 - 1));
+    dR_no_N_Omega_de(Omega2D <= e + 1) = 0;
 end
 
-function R = RecombinationInjection(e_inj, de_inj, n_inj, r, Tc, Tph)
-    % A few matrices are needed to be computed only once. Their value
-    % will stay in the memory between the function calls since they are
-    % intialized as "persistent".
-    persistent Omega1D Gr dR_no_N_Omega_de 
-    if isempty(Omega1D)
-        [ej, ei] = meshgrid(e_inj);
-        Gr = (ei + ej).^2 .* (1 + 1 ./ (ei .* ej)) .*...
-             Np(ei + ej, Tph) / Tc^3;
-        Omega = ei + ej;
-        Omega1D = Omega(:);
-        
-        [e, Omega2D] = meshgrid(e_inj, Omega1D);
+function [Omega1D, Gr, dR_no_N_Omega_de] =...
+    RecombinationInjection(e_inj, Tc, Tph)
+    [ej, ei] = meshgrid(e_inj);
+    Gr = (ei + ej).^2 .* (1 + 1 ./ (ei .* ej)) .*...
+         Np(ei + ej, Tph) / Tc^3;
+    Omega = ei + ej;
+    Omega1D = Omega(:);
 
-        % See Eq. (27) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
-        dR_no_N_Omega_de = Omega2D.^2 .*...
-                    (e .* (Omega2D - e) + 1) ./...
-                    (sqrt(e.^2 - 1) .* sqrt((Omega2D - e).^2 - 1));
-        dR_no_N_Omega_de(Omega2D <= e + 1) = 0;
-    end
-    if sum(n_inj) <= 0
-        R = zeros(size(e_inj));
-        return
-    end
-    [n_j, n_i] = meshgrid(n_inj);
-    N_Omega = n_i .* Gr .* n_j;
+    [e, Omega2D] = meshgrid(e_inj, Omega1D);
 
-    N_Omega1D = N_Omega(:);
-    P = sum(N_Omega1D .* Omega1D);
-
-    dR = dR_no_N_Omega_de .* (N_Omega1D * de_inj');
-    R = sum(dR)';
-    R = r * R * P / sum(e_inj .* R);
+    % See Eq. (27) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
+    dR_no_N_Omega_de = Omega2D.^2 .*...
+                (e .* (Omega2D - e) + 1) ./...
+                (sqrt(e.^2 - 1) .* sqrt((Omega2D - e).^2 - 1));
+    dR_no_N_Omega_de(Omega2D <= e + 1) = 0;
 end
 
-function R = TrapInjection(e_inj, de_inj, n_inj, r, Tc, Tph, V, c)
-    % If the bias is too small there is no point in computing
-    % the contribution due to the phonon generation via trapping.
-    if max(V) <= 2
-        R = zeros(size(e_inj));
-        return
-    end
-    % A few matrices are needed to be computed only once. Their value
-    % will stay in the memory between the function calls since they are
-    % intialized as "persistent".
-    persistent Omega1D indices N_Omega1D_no_n_de dR_no_N_Omega_de de
-    if isempty(Omega1D)
-        N = length(e_inj);
-        e_gap = linspace(1/(2 * N), 1 - 1 / (2 * N), N);
-        [ej, ei] = meshgrid(e_gap, e_inj);
+function [Omega1D, indices, N_Omega1D_no_n_de, dR_no_N_Omega_de, de] =...
+    TrapInjection(e_inj, de_inj, Tc, Tph, c)
+    N = length(e_inj);
+    e_gap = linspace(1/(2 * N), 1 - 1 / (2 * N), N);
+    [ej, ei] = meshgrid(e_gap, e_inj);
 
-        N_Omega1D_no_n_de = c * (ei - ej).^2 .* Np(ei - ej, Tph) / Tc^3;
+    N_Omega1D_no_n_de = c * (ei - ej).^2 .* Np(ei - ej, Tph) / Tc^3;
 
-        Omega = ei - ej;
-        Omega1D = Omega(:);
-        indices = Omega1D <= 2 | N_Omega1D_no_n_de(:) <= 0;
-        Omega1D(indices) = [];
-        [e, Omega2D] = meshgrid(e_inj, Omega1D);
-        % See Eq. (27) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
-        dR_no_N_Omega_de = Omega2D.^2 .*...
-                    (e .* (Omega2D - e) + 1) ./...
-                    (sqrt(e.^2 - 1) .* sqrt((Omega2D - e).^2 - 1));
-        dR_no_N_Omega_de(Omega2D <= e + 1) = 0;
-        de = ones(size(de_inj')) / N;
-    end
-    N_Omega = N_Omega1D_no_n_de .* (n_inj * de);
-    N_Omega1D = N_Omega(:);
-    N_Omega1D(indices) = [];
-    P2D = sum(N_Omega1D .* Omega1D);
-    if P2D <= 0
-        R = zeros(size(e_inj));
-        return
-    end
-
-    dR = dR_no_N_Omega_de .* (N_Omega1D * de_inj');
-    R = sum(dR)';
-    R = r * R * P2D / sum(e_inj .* R);
+    Omega = ei - ej;
+    Omega1D = Omega(:);
+    indices = Omega1D <= 2 | N_Omega1D_no_n_de(:) <= 0;
+    Omega1D(indices) = [];
+    [e, Omega2D] = meshgrid(e_inj, Omega1D);
+    % See Eq. (27) in S. B. Kaplan et al., Phys. Rev. B 14, 4854 (1976).
+    dR_no_N_Omega_de = Omega2D.^2 .*...
+                (e .* (Omega2D - e) + 1) ./...
+                (sqrt(e.^2 - 1) .* sqrt((Omega2D - e).^2 - 1));
+    dR_no_N_Omega_de(Omega2D <= e + 1) = 0;
+    de = ones(size(de_inj)) / N;
 end
 
 function ndot = quasiparticleODE(t, n, Gs_in, Gs_out, Gr, Gtr, R_direct,...
-        e, de, rph, Tc, Tph, V, c)
+        e, de, rph, V,...
+    Omega1D_sct, indices_sct, N_Omega1D_no_n_de_sct, dR_no_N_Omega_de_sct,...
+    Omega1D_rec, Gr_rec, dR_no_N_Omega_de_rec,...
+    Omega1D_trp, indices_trp, N_Omega1D_no_n_de_trp, dR_no_N_Omega_de_trp,...
+    de_trp)
     % n is in units n_{cp}, rates are in units n_{cp}/\tau_0.
     % It is assmumed that the injection is happening at t < 0 and
     % the relaxation - at t > 0.
@@ -309,9 +264,54 @@ function ndot = quasiparticleODE(t, n, Gs_in, Gs_out, Gr, Gtr, R_direct,...
     n_nis = n(1:half);
     n_res = n(half+1:end);
 
-    Rph_rec = RecombinationInjection(e, de, n_nis, rph, Tc, Tph);
-    Rph_sct = ScatteringInjection(e, de, n_nis, rph, Tc, Tph, V);
-    Rph_trp = TrapInjection(e, de, n_nis, rph, Tc, Tph, V, c);
+    % Injection due to scattering.
+    if max(V) <= 3 || rph == 0
+        Rph_sct = zeros(size(e));
+    else
+        N_Omega_sct = N_Omega1D_no_n_de_sct .* (n_nis * de);
+        N_Omega1D = N_Omega_sct(:);
+        N_Omega1D(indices_sct) = [];
+        P2D = sum(N_Omega1D .* Omega1D_sct);
+        if P2D <= 0
+            Rph_sct = zeros(size(e));
+        else
+            dR = dR_no_N_Omega_de_sct .* (N_Omega1D * de);
+            R = sum(dR)';
+            Rph_sct = rph * R * P2D / sum(e .* R);
+        end
+    end
+
+    % Injection due to recombination.
+    if sum(n_nis) <= 0 || rph == 0
+        Rph_rec = zeros(size(e));
+    else
+        [n_j, n_i] = meshgrid(n_nis);
+        N_Omega = n_i .* Gr_rec .* n_j;
+
+        N_Omega1D = N_Omega(:);
+        P = sum(N_Omega1D .* Omega1D_rec);
+
+        dR = dR_no_N_Omega_de_rec .* (N_Omega1D * de);
+        R = sum(dR)';
+        Rph_rec = rph * R * P / sum(e .* R);
+    end
+
+    % Injection due to trapping.
+    if max(V) <= 2 || rph == 0
+        Rph_trp = zeros(size(e));
+    else
+        N_Omega = N_Omega1D_no_n_de_trp .* (n_nis * de_trp);
+        N_Omega1D = N_Omega(:);
+        N_Omega1D(indices_trp) = [];
+        P2D = sum(N_Omega1D .* Omega1D_trp);
+        if P2D <= 0
+            Rph_trp = zeros(size(e));
+        else
+            dR = dR_no_N_Omega_de_trp .* (N_Omega1D * de);
+            R = sum(dR)';
+            Rph_trp = rph * R * P2D / sum(e .* R);
+        end
+    end
 
     ndot_nis = Gs_in * n_nis - Gs_out .* n_nis - 2 * n_nis .* (Gr * n_nis) -...
         Gtr .* n_nis + R_direct;

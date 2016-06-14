@@ -42,10 +42,9 @@ err_p = NaN(size(V));
 tau_r = NaN(size(V));
 err_r = NaN(size(V));
 nqp = NaN(size(V));
-for k = 1:length(V)
-    clear twoRegionTimeDomainModel
+parfor k = 1:length(V)
     [t, ~, ~, ~, n_qp] = ...
-        twoRegionTimeDomainModel(Tph, tspan, V(k),...
+        twoRegionTimeDomainModelOptimized(Tph, tspan, V(k),...
         r_direct, r_phonon, c, vol, N);
     [tau_p(k), err_p(k), tau_r(k), err_r(k)] = ...
         extractTimeConstants(t, n_qp, false);
@@ -64,6 +63,7 @@ F = median(tau_p_n ./ tau_p(1:length(tau_p_n)));
 tau_p = F * tau_p;
 tau_r = F * tau_r;
 
+figure
 hold on
 plot(E_p_n, tau_p_n, '^',...
      E_r_n, tau_r_n, 'v', 'MarkerSize', 10, 'LineWidth', 2)
