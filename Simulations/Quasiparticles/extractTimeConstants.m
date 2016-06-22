@@ -10,7 +10,7 @@ n_p = n_qp(t < 0);
 n_p = n_p - n_p(1);
 
 % Cut off the intial part of the curve to improve the fit.
-cut_off = 0.1 * max(n_p);
+cut_off = 0 * max(n_p);
 t_p(n_p < cut_off) = [];
 n_p(n_p < cut_off) = [];
 t_p = t_p - min(t_p);
@@ -47,13 +47,18 @@ t_r = t_r - min(t_r);
 n_r = n_qp(t > 0);
 
 % Cut off the intial part of the curve to improve the fit.
-cut_off = 1 * max(n_r);
-t_r(n_r > cut_off) = [];
-n_r(n_r > cut_off) = [];
+% cut_off = .8 * max(n_r);
+% t_r(n_r > cut_off) = [];
+% n_r(n_r > cut_off) = [];
+% t_r = t_r - min(t_r);
+
+cut_off = 0;
+n_r(t_r < cut_off) = [];
+t_r(t_r < cut_off) = [];
 t_r = t_r - min(t_r);
 
-f_r = fit(t_r(:), n_r(:), 'a * exp(-b * x) + c',...
-    'StartPoint', [max(n_r), f_p.b, 0], 'TolFun', 1e-35);
+f_r = fit(t_r(:), n_r(:), 'a * exp(-b * x)',...
+    'StartPoint', [max(n_r), f_p.b], 'TolFun', 1e-35);
     
 tau_r = 1 / f_r.b;
 ci_r = confint(f_r);
@@ -64,7 +69,7 @@ if plot_flag
     figure
     hold on
     plot(t_r, n_r, 'LineWidth', 2)
-    plot(t_r, f_r.a * exp(-t_r / tau_r) + f_r.c, 'LineWidth', 2)
+    plot(t_r, f_r.a * exp(-t_r / tau_r), 'LineWidth', 2)
     xlabel('Time (\tau_0)', 'FontSize', 14)
     ylabel('n_{\rm qp} / n_{\rm cp}', 'FontSize', 14)
     title('Recovery Fit')

@@ -213,7 +213,7 @@ if plot_flag
     axis tight
     grid on
 
-    for k = 1:size(n, 1);
+    for k = 1:size(n, 1)
         nt = n(k, :);
         P_sct_in = power_calib * sum(e .* (Gs_in * nt'));
         P_sct_out = power_calib * sum(e .* Gs_out .* nt');

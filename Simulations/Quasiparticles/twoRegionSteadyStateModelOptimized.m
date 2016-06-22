@@ -36,8 +36,7 @@ function [t, e, n, f, n_qp, r_qp, P] = ...
 %      size(n) == [length(t), length(e)],
 %      f are the occupational numbers, size(f) == size(n),
 %      n_qp is the non-equilibrium quasiparticle density in quasiparticles
-%      per um^3,
-%      length(n_qp) == length(t),
+%      per um^3, length(n_qp) == length(t),
 %      r_qp is the total injection rate in n_{cp}/\tau_0, a single number,
 %      P is the total injected power in W, a single number.
 
@@ -54,7 +53,7 @@ Tph = kB * Tph / delta; % in units of \Delta
 Tc = 1 / 1.764; % \delta/(K_B * T_c) = 1.764 at T = 0 K BCS result
 
 tau_0 = 438e-9; % sec
-ncp = 4e6; % n_{cp} for aluminum is 4e6 \micro m^-3
+ncp = 4e6; % n_{cp} for aluminum is 4e6 um^-3
            % C. Wang et al. Nature Comm. 5, 5836 (2014)
 
 % Maximum energy.

@@ -28,14 +28,14 @@ nqp_r_n = data.NearTrapRecovery(:, 4);
 % r_phonon dimensionless
 % c dimensionless
 % vol in units of um^3
-r_direct = 2.232e-05; r_phonon = 5.003e-01; c = 5.405e-02; vol = 5.000e+03;
+r_direct = 2.2e-05; r_phonon = 5e-01; c = 5.4e-02; vol = 5.000e+03;
 
 V = [E_p_n; E_r_n; 3.5; 4.2; 6.7]; % in units of \Delta
 Tph = 0.051; % K
-tspan = [-200, 200]; % in units of \tau_0
+tspan = [-500, 2000]; % in units of \tau_0
 
 % Number of energy bins.
-N = 250;
+N = 200;
 
 tau_p = NaN(size(V));
 err_p = NaN(size(V));
@@ -47,7 +47,7 @@ parfor k = 1:length(V)
         twoRegionTimeDomainModelOptimized(Tph, tspan, V(k),...
         r_direct, r_phonon, c, vol, N);
     [tau_p(k), err_p(k), tau_r(k), err_r(k)] = ...
-        extractTimeConstants(t, n_qp, false);
+        estimateTimeConstants(t, n_qp, false);
     nqp(k) = max(n_qp);
     fprintf('*')
 end
@@ -63,16 +63,17 @@ F = median(tau_p_n ./ tau_p(1:length(tau_p_n)));
 tau_p = F * tau_p;
 tau_r = F * tau_r;
 
-figure
+h = figure;
 hold on
-plot(E_p_n, tau_p_n, '^',...
-     E_r_n, tau_r_n, 'v', 'MarkerSize', 10, 'LineWidth', 2)
-errorbar(V, tau_p, err_p, '*', 'MarkerSize', 10, 'LineWidth', 2)
-errorbar(V, tau_r, err_r, '*', 'MarkerSize', 10, 'LineWidth', 2)
+plot(E_p_n, tau_p_n, 'rh', 'MarkerSize', 9, 'LineWidth', 1.5,...
+    'MarkerFaceColor', 'r')
+plot(E_r_n, tau_r_n, 'rh', 'MarkerSize', 9, 'LineWidth', 1.5)
+errorbar(V, tau_p, err_p, '*', 'MarkerSize', 10, 'LineWidth', 1.5)
+errorbar(V, tau_r, err_r, '*', 'MarkerSize', 10, 'LineWidth', 1.5)
 set(gca, 'xscale', 'Log')
 hold off
-xlabel('Injection Energy (\Delta)', 'FontSize', 14)
-ylabel('Time Constant (\mu s)', 'FontSize', 14)
+xlabel('Normalized Injection Bias eV/\Delta', 'FontSize', 14)
+ylabel('Time Constant (\mu{s})', 'FontSize', 14)
 legend({'poisoning, near trap', 'recovery, near trap',...
     'poisoning simulation', 'recovery simulation'},...
     'Location', 'SouthWest')
@@ -82,25 +83,33 @@ title({'Time Constants', ['r_{qp} = ', num2str(r_direct, '%.3e'),...
     ', F = ', num2str(F, '%.3f')]})
 axis tight
 grid on
-saveas(gca, 'NIS24062016_tau.pdf', 'pdf')
+set(gca, 'box', 'on')
+savePDF(h, 'SimNIS24062016_tau.pdf')
  
-figure
+h = figure;
 hold on
-loglog(E_p_n, nqp_p_n, '^',...
-       E_r_n, nqp_r_n, 'v',...
-       V, nqp, '*',...
-       'MarkerSize', 10, 'LineWidth', 2)
+plot(E_p_n, nqp_p_n, 'rh', 'MarkerSize', 9, 'LineWidth', 1.5,...
+    'MarkerFaceColor', 'r')
+plot(E_r_n, nqp_r_n, 'rh', 'MarkerSize', 9, 'LineWidth', 1.5)
+plot(V, nqp, '*', 'MarkerSize', 10, 'LineWidth', 1.5)
 hold off
-xlabel('Injection Energy (\Delta)', 'FontSize', 14)
-ylabel('Quasiparticle Density (\mu m^{-3})', 'FontSize', 14)
+set(gca, 'xscale', 'Log', 'yscale', 'Log')
+xlabel('Normalized Injection Bias eV/\Delta', 'FontSize', 14)
+ylabel('Quasiparticle Density (\mu{m}^{-3})', 'FontSize', 14)
 legend({'poisoning, near trap', 'recovery, near trap', 'simulation'},...
     'Location', 'NorthWest')
-title('Quasiparticle Steady-State Density')
-set(gca, 'xscale', 'Log')
-set(gca, 'yscale', 'Log')
+title({'Quasiparticle Steady-State Density',...
+    ['r_{qp} = ', num2str(r_direct, '%.3e'),...
+    ', r_{ph} = ', num2str(r_phonon, '%.3e'),...
+    ', c_{tr} = ', num2str(c, '%.3e'),...
+    ', F = ', num2str(F, '%.3f')]})
 xlim([1 100])
 axis tight
 grid on
-saveas(gca, 'NIS24062016_nqp.pdf', 'pdf')
+set(gca, 'box', 'on')
+savePDF(h, 'SimNIS24062016_nqp.pdf')
+
+save('SimNIS24062016.mat', 'E_p_n', 'tau_p_n', 'nqp_p_n',...
+    'E_r_n', 'tau_r_n', 'nqp_r_n', 'V', 'nqp', 'tau_p', 'tau_r')
 
 end

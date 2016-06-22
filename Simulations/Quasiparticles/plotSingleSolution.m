@@ -5,14 +5,14 @@ function plotSingleSolution
 % r_phonon dimensionless
 % c dimensionless
 % vol in units of um^3
-r_direct = 1e-05; r_phonon = 5e-02; c = 0; vol = 5.000e+03; 
+r_direct = 2e-05; r_phonon = 5e-01; c = 5e-02; vol = 5.000e+03; 
 
-N = 100;
+N = 50;
 
 Tph = 0.051; % K
-tspan = [-300, 300]; % in units of \tau_0
+tspan = [-500, 2000]; % in units of \tau_0
 
-V = 4.5;
+V = 2;
 
 % [t, e, n, f, n_qp] = ...
 %     twoRegionSteadyStateModel(Tph, tspan, V,...
@@ -63,6 +63,6 @@ axis tight
 xlim([1, max(V)])
 grid on
 
-extractTimeConstants(t, n_qp, true);
+[tau_p, err_p, tau_r, err_r] = estimateTimeConstants(t, n_qp, true)
 
 end

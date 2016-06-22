@@ -34,8 +34,7 @@ function [t, e, n, f, n_qp, r_qp, P] = ...
 %      size(n) == [length(t), length(e)],
 %      f are the occupational numbers, size(f) == size(n),
 %      n_qp is the non-equilibrium quasiparticle density in quasiparticles
-%      per um^3,
-%      length(n_qp) == length(t),
+%      per um^3, length(n_qp) == length(t),
 %      r_qp is the total injection rate in n_{cp}/\tau_0, a single number,
 %      P is the total injected power in W, a single number.
 

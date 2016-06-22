@@ -1,5 +1,5 @@
 function steadyStateModelFit2TrapNoTrap
-%steadyStateModelFit2TrapNoTrap Fitting to the TrapNoTrap dataset using
+%steadyStateModelFit2TrapNoTrap Fitting to the `TrapNoTrap` dataset using
 % the two-point equilibrium quasi-0D model
 
 r_direct = 9.063e-05; r_phonon = 7.346e-01; c = 3.955e-02; vol = 5.000e+03;
@@ -19,7 +19,7 @@ Tph = 0.051; % K
 tspan = [-310, -10]; % in units of \tau_0
 
 % Number of the energy bins.
-N = 200;
+N = 100;
 
 data = load('TrapNoTrap.mat');
 
@@ -32,34 +32,48 @@ P_no_tr = data.NoTrap(:, 6);
 nqp_no_tr = data.NoTrap(:, 8) - min(data.NoTrap(:, 8));
 
 figure
-loglog(V_no_tr, nqp_no_tr, 'bo', V_tr, nqp_tr, 'ko', ...
-    'MarkerSize', 10, 'LineWidth', 2)
-xlabel('Injection Energy (\Delta)', 'FontSize', 14)
-ylabel('Quasiparticle Density (\mu m^{-3})', 'FontSize', 14)
+hold on
+plot(V_no_tr, nqp_no_tr, 'k^',...
+    'MarkerSize', 9, 'LineWidth', 2, 'MarkerFaceColor', 'k')
+plot(V_tr, nqp_tr, 'r^',...
+    'MarkerSize', 9, 'LineWidth', 2, 'MarkerFaceColor', 'r')
+hold off
+set(gca, 'xscale', 'Log', 'yscale', 'Log')
+xlabel('Normalized Injection Bias eV/\Delta', 'FontSize', 14)
+ylabel('Quasiparticle Density (\mu{m}^{-3})', 'FontSize', 14)
 legend('no traps', 'with traps', 'Location', 'SouthEast')
 title('Experiment')
 axis tight
 grid on
+set(gca, 'box', 'on')
 
 figure
-loglog(P_no_tr, nqp_no_tr, 'bo', P_tr, nqp_tr, 'ko', ...
-    'MarkerSize', 10, 'LineWidth', 2)
-xlabel('Injection Power (W)', 'FontSize', 14)
-ylabel('Quasiparticle Density (\mu m^{-3})', 'FontSize', 14)
+hold on
+plot(P_no_tr, nqp_no_tr, 'k^',...
+    'MarkerSize', 9, 'LineWidth', 2, 'MarkerFaceColor', 'k')
+plot(P_tr, nqp_tr, 'r^',...
+    'MarkerSize', 9, 'LineWidth', 2, 'MarkerFaceColor', 'r')
+hold off
+set(gca, 'xscale', 'Log', 'yscale', 'Log')
+xlabel('Power (W)', 'FontSize', 14)
+ylabel('Quasiparticle Density (\mu{m}^{-3})', 'FontSize', 14)
 legend('no traps', 'with traps', 'Location', 'SouthEast')
 title('Experiment')
 axis tight
 grid on
+set(gca, 'box', 'on')
 
-nqp_sim_no_tr = NaN(size(V_no_tr));
-nqp_sim_tr = NaN(size(V_tr));
-P_sim_no_tr = NaN(size(V_no_tr));
-P_sim_tr = NaN(size(V_tr));
-parfor k = 1:length(V_no_tr)
-    if V_no_tr(k) > 1
+V_sim_no_tr = [1.005; V_no_tr; 30.5];
+V_sim_tr = [1.005; V_tr; 30.5];
+nqp_sim_no_tr = NaN(size(V_sim_no_tr));
+nqp_sim_tr = NaN(size(V_sim_tr));
+P_sim_no_tr = NaN(size(V_sim_no_tr));
+P_sim_tr = NaN(size(V_sim_tr));
+parfor k = 1:length(V_sim_no_tr)
+    if V_sim_no_tr(k) > 1
         [~, ~, ~, ~, nqp, ~, P_sim_no_tr(k)] =...
             twoRegionSteadyStateModelOptimized(Tph, tspan,...
-            V_no_tr(k), r_direct_no_tr, r_phonon_no_tr, c_no_tr,...
+            V_sim_no_tr(k), r_direct_no_tr, r_phonon_no_tr, c_no_tr,...
             vol_no_tr, N);
         nqp_sim_no_tr(k) = max(nqp);
     else
@@ -68,11 +82,11 @@ parfor k = 1:length(V_no_tr)
     fprintf('*')
 end
 fprintf('\n')
-parfor k = 1:length(V_tr)
-    if V_tr(k) > 1
+parfor k = 1:length(V_sim_tr)
+    if V_sim_tr(k) > 1
         [~, ~, ~, ~, nqp, ~, P_sim_tr(k)] = ...
             twoRegionSteadyStateModel(Tph, tspan,...
-            V_tr(k), r_direct_tr, r_phonon_tr, c_tr, vol_tr, N, false);
+            V_sim_tr(k), r_direct_tr, r_phonon_tr, c_tr, vol_tr, N, false);
         nqp_sim_tr(k) = max(nqp);
     else
         nqp_sim_tr(k) = 0;
@@ -82,10 +96,10 @@ end
 fprintf('\n')
 
 figure
-semilogy(V_no_tr, nqp_no_tr, 'bo', V_no_tr, nqp_sim_no_tr, 'm*',...
-    'MarkerSize', 10, 'LineWidth', 2)
-xlabel('Injection Energy (\Delta)', 'FontSize', 14)
-ylabel('Quasiparticle Density (\mu m^{-3})', 'FontSize', 14)
+semilogy(V_no_tr, nqp_no_tr, 'k^', V_sim_no_tr, nqp_sim_no_tr, 'm*',...
+    'MarkerSize', 9, 'LineWidth', 2, 'MarkerFaceColor', 'k')
+xlabel('Normalized Injection Bias eV/\Delta', 'FontSize', 14)
+ylabel('Quasiparticle Density (\mu{m}^{-3})', 'FontSize', 14)
 legend({'no traps, experiment',...
     ['r_{qp} = ', num2str(r_direct_no_tr, '%.2e'), '/\tau_0, ',...
     'r_{ph} = ', num2str(r_phonon_no_tr, '%.3f'), ', ',...
@@ -97,10 +111,10 @@ axis tight
 grid on
  
 figure
-semilogy(V_tr, nqp_tr, 'ko', V_tr, nqp_sim_tr, 'm*',...
-    'MarkerSize', 10, 'LineWidth', 2)
-xlabel('Injection Energy (\Delta)', 'FontSize', 14)
-ylabel('Quasiparticle Density (\mu m^{-3})', 'FontSize', 14)
+semilogy(V_tr, nqp_tr, 'r^', V_sim_tr, nqp_sim_tr, 'm*',...
+    'MarkerSize', 9, 'LineWidth', 2, 'MarkerFaceColor', 'r')
+xlabel('Normalized Injection Bias eV/\Delta', 'FontSize', 14)
+ylabel('Quasiparticle Density (\mu{m}^{-3})', 'FontSize', 14)
 legend({'no trap, experiment',...
     ['r_{qp} = ', num2str(r_direct_tr, '%.2e'), '/\tau_0, ',...
     'r_{ph} = ', num2str(r_phonon_tr, '%.3f'), ', ',...
@@ -111,11 +125,11 @@ title('With Traps')
 axis tight
 grid on
 
-figure
-loglog(P_no_tr, nqp_no_tr, 'bo', P_sim_no_tr, nqp_sim_no_tr, 'm*',...
-    'MarkerSize', 10, 'LineWidth', 2)
-xlabel('Injection Power (W)', 'FontSize', 14)
-ylabel('Quasiparticle Density (\mu m^{-3})', 'FontSize', 14)
+h = figure;
+loglog(P_no_tr, nqp_no_tr, 'k^', P_sim_no_tr, nqp_sim_no_tr, 'm*',...
+    'MarkerSize', 9, 'LineWidth', 2, 'MarkerFaceColor', 'k')
+xlabel('Power (W)', 'FontSize', 14)
+ylabel('Quasiparticle Density (\mu{m}^{-3})', 'FontSize', 14)
 legend({'no trap, experiment',...
     ['r_{qp} = ', num2str(r_direct_no_tr, '%.1e'), '/\tau_0, ',...
     'r_{ph} = ', num2str(r_phonon_no_tr, '%.2f'), ', ',...
@@ -125,13 +139,16 @@ legend({'no trap, experiment',...
 title('No Traps')
 axis tight
 grid on
-saveas(gca, 'NoTrap.pdf', 'pdf')
+set(gca, 'box', 'on')
+savePDF(h, 'SimNoTrap.pdf')
+save('SimNoTrap.mat', 'V_no_tr', 'P_no_tr', 'nqp_no_tr',...
+    'V_sim_no_tr', 'P_sim_no_tr', 'nqp_sim_no_tr')
 
-figure
-loglog(P_tr, nqp_tr, 'ko', P_sim_tr, nqp_sim_tr, 'm*',...
-    'MarkerSize', 10, 'LineWidth', 2)
-xlabel('Injection Power (W)', 'FontSize', 14)
-ylabel('Quasiparticle Density (\mu m^{-3})', 'FontSize', 14)
+h = figure;
+loglog(P_tr, nqp_tr, 'r^', P_sim_tr, nqp_sim_tr, 'm*',...
+    'MarkerSize', 9, 'LineWidth', 2, 'MarkerFaceColor', 'r')
+xlabel('Power (W)', 'FontSize', 14)
+ylabel('Quasiparticle Density (\mu{m}^{-3})', 'FontSize', 14)
 legend({'trap, experiment',...
     ['r_{qp} = ', num2str(r_direct_tr, '%.1e'), '/\tau_0, ',...
     'r_{ph} = ', num2str(r_phonon_tr, '%.2f'), ', ',...
@@ -141,7 +158,9 @@ legend({'trap, experiment',...
 title('With Traps')
 axis tight
 grid on
-
-saveas(gca, 'Trap.pdf', 'pdf')
+set(gca, 'box', 'on')
+savePDF(h, 'SimTrap.pdf')
+save('SimTrap.mat', 'V_tr', 'P_tr', 'nqp_tr',...
+    'V_sim_tr', 'P_sim_tr', 'nqp_sim_tr')
 
 end
