@@ -28,14 +28,14 @@ nqp_r_n = data.NearTrapRecovery(:, 4);
 % r_phonon dimensionless
 % c dimensionless
 % vol in units of um^3
-r_direct = 2.2e-05; r_phonon = 5e-01; c = 5.4e-02; vol = 5.000e+03;
+r_direct = 1.481e-05; r_phonon = 6.618e-01; c = 4.608e-02; vol = 2.600e+04;
 
 V = [E_p_n; E_r_n; 3.5; 4.2; 6.7]; % in units of \Delta
 Tph = 0.051; % K
 tspan = [-500, 2000]; % in units of \tau_0
 
 % Number of energy bins.
-N = 200;
+N = 100;
 
 tau_p = NaN(size(V));
 err_p = NaN(size(V));
@@ -110,6 +110,6 @@ set(gca, 'box', 'on')
 savePDF(h, 'SimNIS24062016_nqp.pdf')
 
 save('SimNIS24062016.mat', 'E_p_n', 'tau_p_n', 'nqp_p_n',...
-    'E_r_n', 'tau_r_n', 'nqp_r_n', 'V', 'nqp', 'tau_p', 'tau_r')
+    'E_r_n', 'tau_r_n', 'nqp_r_n', 'V', 'nqp', 'tau_p', 'tau_r', 'F')
 
 end

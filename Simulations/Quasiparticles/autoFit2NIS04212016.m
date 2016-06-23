@@ -5,13 +5,13 @@ function autoFit2NIS04212016
 % r_phonon dimensionless
 % c dimensionless
 % vol in units of um^3
-r_direct = 2.232e-05; r_phonon = 5.003e-01; c = 5.405e-02; vol = 5.000e+03;
+r_direct = 2.232e-05; r_phonon = 5.003e-01; c = 5.405e-02; vol = 2.600e+04;
 
 Tph = 0.051; % K
-tspan = [-210, -10]; % in units of \tau_0
+tspan = [-510, -10]; % in units of \tau_0
 
 % Number of the energy bins.
-N = 100;
+N = 250;
 
 % Time domain data fit.
 data = load('NIS04212016.mat');

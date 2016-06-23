@@ -6,13 +6,13 @@ function autoFit2TrapNoTrapFixedVolume_Trap
 % r_phonon dimensionless
 % c dimensionless
 % vol in units of um^3
-r_direct = 2.077e-04; r_phonon = 2.707e-01; c = 1.772e-01; vol = 5.000e+03;
+r_direct = 3.963e-05; r_phonon = 8.102e-01; c = 8.885e-02; vol = 2.600e+04;
 
 Tph = 0.051; % K
-tspan = [-210, -10]; % in units of \tau_0
+tspan = [-510, -10]; % in units of \tau_0
 
 % Number of the energy bins.
-N = 100;
+N = 250;
 
 delta = 0.18e-3; % eV (aluminum superconducting gap)
 data = load('TrapNoTrap.mat');

@@ -1,4 +1,5 @@
-function [t, e, n, f, n_qp, r_qp, P] = ...
+function [t, e, n, f, n_qp, r_qp, P,...
+    Gamma_tr_inj, Gamma_tr_ph, Gamma_r_inj, Gamma_r_ph] = ...
     twoRegionSteadyStateModelOptimized(Tph, tspan, V, rqp, rph, c,...
     vol, N)
 % twoRegionSteadyStateModelOptimized Two-region, one corresponds to
@@ -105,6 +106,9 @@ options = odeset('AbsTol', 1e-10);
 % Equilibrium distribution.
 n_inj = n(end, :)';
 
+Gamma_tr_inj = trapz(e, Gtr .* n_inj) / trapz(e, n_inj) / tau_0;
+Gamma_r_inj = trapz(e, 2 * n_inj .* (Gr * n_inj)) / trapz(e, n_inj) / tau_0; 
+
 Rph_rec = RecombinationInjection(e, de, n_inj, rph, Tc, Tph);
 Rph_sct = ScatteringInjection(e, de, n_inj, rph, Tc, Tph, V);
 Rph_trp = TrapInjection(e, de, n_inj, rph, Tc, Tph, V, c);
@@ -120,6 +124,12 @@ f = n ./ (ones(length(t), 1) * rho_de');
 
 % Non-equlibrium quasipartical density.
 n_qp = 2 * ncp * sum(n, 2);
+
+n_ph = n(end, :)';
+
+Gamma_tr_ph = trapz(e, Gtr .* n_ph) / trapz(e, n_ph) / tau_0;
+Gamma_r_ph = trapz(e, 2 * n_ph .* (Gr * n_ph)) / trapz(e, n_ph) / tau_0;
+
 end
 
 function normalized_density = rho(e)

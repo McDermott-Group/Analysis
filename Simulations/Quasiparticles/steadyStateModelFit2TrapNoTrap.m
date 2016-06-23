@@ -2,13 +2,13 @@ function steadyStateModelFit2TrapNoTrap
 %steadyStateModelFit2TrapNoTrap Fitting to the `TrapNoTrap` dataset using
 % the two-point equilibrium quasi-0D model
 
-r_direct = 9.063e-05; r_phonon = 7.346e-01; c = 3.955e-02; vol = 5.000e+03;
+r_direct = 1.501e-05; r_phonon = 1.076e+00; c = 1.159e-02; vol = 2.600e+04;
 r_direct_no_tr = r_direct; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
 r_phonon_no_tr = r_phonon; % dimensionless
 c_no_tr = c; % dimensionless
 vol_no_tr = vol; % um^3
 
-r_direct = 2.077e-04; r_phonon = 2.707e-01; c = 1.772e-01; vol = 5.000e+03;
+r_direct = 3.963e-05; r_phonon = 8.102e-01; c = 8.885e-02; vol = 2.600e+04;
 r_direct_tr = r_direct; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
 r_phonon_tr = r_phonon; % dimensionless
 c_tr = c; % dimensionless
@@ -16,10 +16,10 @@ vol_tr = vol; % um^3
 
 delta = 0.18e-3; % eV (aluminum superconducting gap)
 Tph = 0.051; % K
-tspan = [-310, -10]; % in units of \tau_0
+tspan = [-510, -10]; % in units of \tau_0
 
 % Number of the energy bins.
-N = 100;
+N = 250;
 
 data = load('TrapNoTrap.mat');
 
@@ -69,9 +69,19 @@ nqp_sim_no_tr = NaN(size(V_sim_no_tr));
 nqp_sim_tr = NaN(size(V_sim_tr));
 P_sim_no_tr = NaN(size(V_sim_no_tr));
 P_sim_tr = NaN(size(V_sim_tr));
+Gamma_tr_nis_no_tr = NaN(size(V_sim_no_tr));
+Gamma_tr_res_no_tr = NaN(size(V_sim_no_tr));
+Gamma_tr_nis_tr = NaN(size(V_sim_tr));
+Gamma_tr_res_tr = NaN(size(V_sim_tr));
+Gamma_r_nis_no_tr = NaN(size(V_sim_no_tr));
+Gamma_r_res_no_tr = NaN(size(V_sim_no_tr));
+Gamma_r_nis_tr = NaN(size(V_sim_tr));
+Gamma_r_res_tr = NaN(size(V_sim_tr));
 parfor k = 1:length(V_sim_no_tr)
     if V_sim_no_tr(k) > 1
-        [~, ~, ~, ~, nqp, ~, P_sim_no_tr(k)] =...
+        [~, ~, ~, ~, nqp, ~, P_sim_no_tr(k),...
+            Gamma_tr_nis_no_tr(k), Gamma_tr_res_no_tr(k),...
+            Gamma_r_nis_no_tr(k), Gamma_r_res_no_tr(k)] =...
             twoRegionSteadyStateModelOptimized(Tph, tspan,...
             V_sim_no_tr(k), r_direct_no_tr, r_phonon_no_tr, c_no_tr,...
             vol_no_tr, N);
@@ -84,9 +94,11 @@ end
 fprintf('\n')
 parfor k = 1:length(V_sim_tr)
     if V_sim_tr(k) > 1
-        [~, ~, ~, ~, nqp, ~, P_sim_tr(k)] = ...
-            twoRegionSteadyStateModel(Tph, tspan,...
-            V_sim_tr(k), r_direct_tr, r_phonon_tr, c_tr, vol_tr, N, false);
+        [~, ~, ~, ~, nqp, ~, P_sim_tr(k),...
+            Gamma_tr_nis_tr(k), Gamma_tr_res_tr(k),...
+            Gamma_r_nis_tr(k), Gamma_r_res_tr(k)] = ...
+            twoRegionSteadyStateModelOptimized(Tph, tspan,...
+            V_sim_tr(k), r_direct_tr, r_phonon_tr, c_tr, vol_tr, N);
         nqp_sim_tr(k) = max(nqp);
     else
         nqp_sim_tr(k) = 0;
@@ -162,5 +174,39 @@ set(gca, 'box', 'on')
 savePDF(h, 'SimTrap.pdf')
 save('SimTrap.mat', 'V_tr', 'P_tr', 'nqp_tr',...
     'V_sim_tr', 'P_sim_tr', 'nqp_sim_tr')
+
+h = figure;
+loglog(P_sim_no_tr, Gamma_tr_nis_no_tr, 'k^',...
+       P_sim_no_tr, Gamma_tr_res_no_tr, 'b^',...
+       P_sim_tr, Gamma_tr_nis_tr, 'r^',...
+       P_sim_tr, Gamma_tr_res_tr, 'm^',...
+    'MarkerSize', 9, 'LineWidth', 2)
+xlabel('Power (W)', 'FontSize', 14)
+ylabel('Trapping Rate \Gamma_{tr} (s^{-1})', 'FontSize', 14)
+legend({'no traps, NIS', 'no traps, resonator',...
+        'with traps, NIS', 'with traps, resonator'},...
+        'Location', 'NorthWest')
+title('Trapping Rate')
+axis tight
+grid on
+set(gca, 'box', 'on')
+savePDF(h, 'SimGammaTrapping.pdf')
+
+h = figure;
+loglog(P_sim_no_tr, Gamma_r_nis_no_tr, 'k^',...
+       P_sim_no_tr, Gamma_r_res_no_tr, 'b^',...
+       P_sim_tr, Gamma_r_nis_tr, 'r^',...
+       P_sim_tr, Gamma_r_res_tr, 'm^',...
+    'MarkerSize', 9, 'LineWidth', 2)
+xlabel('Power (W)', 'FontSize', 14)
+ylabel('Recombination Rate \Gamma_{rec} (s^{-1})', 'FontSize', 14)
+legend({'no traps, NIS', 'no traps, resonator',...
+        'with traps, NIS', 'with traps, resonator'},...
+        'Location', 'SouthEast')
+title('Recombination Rate')
+axis tight
+grid on
+set(gca, 'box', 'on')
+savePDF(h, 'SimGammaRecombination.pdf')
 
 end
