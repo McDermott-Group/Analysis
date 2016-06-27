@@ -2,11 +2,11 @@ function steadyStateModelDifferentRqp
 %steadyStateModelDifferentRqp Explore the quasiparticle steady-state
 % density at different injection rates (resistances).
 
-r_direct = [.1, 1, 10, 100] * 1e-05; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
-r_phonon = 5e-2; % dimensionless
+r_direct = [1, 2, 4] * 1e-05; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
+r_phonon = .5; % dimensionless
 c = 0; % dimensionless
-vol = 5.000e+03; % um^3
-V = 1.1:1:30; % in units of \delta
+vol = 2.6e+03; % um^3
+V = linspace(1.001, 1.2, 20); % in units of \delta
 
 Tph = 0.051; % K
 tspan = [-510, -10]; % in units of \tau_0
@@ -27,11 +27,14 @@ for krqp = 1:length(r_direct)
         fprintf('*')
     end
 end
-fprintf('\n')
-figure
+
+h = figure;
 hold on
 for k = 1:length(r_direct)
     plot(P(:, k), nqp(:, k), 'MarkerSize', 10, 'LineWidth', 2)
+    p = polyfit(log(P(:, k)), log(nqp(:, k)), 1);
+    disp(['rqp = ', num2str(r_direct(k), '%.2e'), '/tau0: ',...
+        num2str(p(1)), '-power law'])
 end
 xlabel('Injection Power (W)', 'FontSize', 14)
 ylabel('Quasiparticle Density (\mu m^{-3})', 'FontSize', 14)
@@ -47,6 +50,6 @@ axis tight
 set(gca, 'xscale', 'Log')
 set(gca, 'yscale', 'Log')
 grid on
-
-saveas(gca, 'rqp.pdf', 'pdf')
+set(gca, 'box', 'on')
+savePDF(h, 'rqp.pdf')
 end

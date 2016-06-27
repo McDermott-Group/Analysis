@@ -27,8 +27,8 @@ for krqp = 1:length(r_phonon)
         fprintf('*')
     end
 end
-fprintf('\n')
-figure
+
+h = figure;
 hold on
 for k = 1:length(r_phonon)
     plot(P(:, k), nqp(:, k), 'MarkerSize', 10, 'LineWidth', 2)
@@ -47,6 +47,6 @@ axis tight
 set(gca, 'xscale', 'Log')
 set(gca, 'yscale', 'Log')
 grid on
-
-saveas(gca, 'rph.pdf', 'pdf')
+set(gca, 'box', 'on')
+savePDF(h, 'rph.pdf')
 end

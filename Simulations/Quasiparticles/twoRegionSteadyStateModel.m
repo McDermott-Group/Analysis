@@ -59,7 +59,7 @@ ncp = 4e6; % n_{cp} for aluminum is 4e6 \micro m^-3
            % C. Wang et al. Nature Comm. 5, 5836 (2014)
 
 % Maximum energy.
-max_e = max(4, 2 * max(V));
+max_e = 2 * max(V);
 
 % Assign the quasiparicle energies to the bins. Non-uniform energy
 % spacing is implemented. To get a spacing that is close to a uniform

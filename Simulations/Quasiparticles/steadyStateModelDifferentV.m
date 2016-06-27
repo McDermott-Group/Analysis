@@ -28,8 +28,7 @@ parfor kV = 1:length(V)
     fprintf('*')
 end
 
-fprintf('\n')
-figure
+h = figure;
 hold on
 plot(V, Prec, V, Psct, V, Psct2D, V, Ptrp, V, Ptrp2D,...
     V, Prec + Psct + Ptrp, V, Prec + Psct2D + Ptrp2D,...
@@ -45,6 +44,6 @@ title(['r_{qp} = ', num2str(r_direct, '%.2e'), '/\tau_0', ', ',...
      'v = ', num2str(vol, '%.2e'), ' \mu{m}^3'])
 axis tight
 grid on
-
-saveas(gca, 'PowerBudget_c0p01.pdf', 'pdf')
+set(gca, 'box', 'on')
+savePDF(h, 'PowerBudget_c0p01.pdf', 'pdf')
 end

@@ -55,7 +55,7 @@ ncp = 4e6; % n_{cp} for aluminum is 4e6 um^-3
            % C. Wang et al. Nature Comm. 5, 5836 (2014)
 
 % Maximum energy.
-max_e = max(4, max(V));
+max_e = 2 * max(V);
 
 % Assign the quasiparicle energies to the bins. Non-uniform energy
 % spacing is implemented. To get a spacing that is close to a uniform
@@ -103,7 +103,7 @@ options = odeset('AbsTol', 1e-20);
     tspan, n0, options);
 
 n = n(:, size(n, 2)/2+1:end);
-% Occupational numbers.
+% Occupation numbers.
 f = n ./ (ones(length(t), 1) * rho_de');
 
 % Non-equlibrium quasipartical density.

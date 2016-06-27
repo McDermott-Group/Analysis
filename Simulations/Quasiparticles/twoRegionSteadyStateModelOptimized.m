@@ -1,5 +1,5 @@
 function [t, e, n, f, n_qp, r_qp, P,...
-    Gamma_tr_inj, Gamma_tr_ph, Gamma_r_inj, Gamma_r_ph] = ...
+    Gamma_tr_inj, Gamma_tr_ph, Gamma_r_inj, Gamma_r_ph, f_nis, n_nis] = ...
     twoRegionSteadyStateModelOptimized(Tph, tspan, V, rqp, rph, c,...
     vol, N)
 % twoRegionSteadyStateModelOptimized Two-region, one corresponds to
@@ -58,7 +58,7 @@ ncp = 4e6; % n_{cp} for aluminum is 4e6 um^-3
            % C. Wang et al. Nature Comm. 5, 5836 (2014)
 
 % Maximum energy.
-max_e = max(4, 2 * max(V));
+max_e = 2 * max(V);
 
 % Assign the quasiparicle energies to the bins. Non-uniform energy
 % spacing is implemented. To get a spacing that is close to a uniform
@@ -100,8 +100,12 @@ n0 = zeros(size(e));
 
 % Solve the ODE at the NIS junction.
 options = odeset('AbsTol', 1e-10);
-[~, n] = ode15s(@(t, n) quasiparticleODE(t, n,...
+[t, n] = ode15s(@(t, n) quasiparticleODE(t, n,...
     Gs_in, Gs_out, Gr, Gtr, Rqp), tspan, n0, options);
+
+% Occupation numbers.
+f_nis = n ./ (ones(length(t), 1) * rho_de');
+n_nis = n;
 
 % Equilibrium distribution.
 n_inj = n(end, :)';
@@ -119,7 +123,7 @@ options = odeset('AbsTol', 1e-10, 'RelTol', 1e-6);
     Gs_in, Gs_out, Gr, Gtr, Rph_sct + Rph_rec + Rph_trp),...
     tspan, n0, options);
 
-% Occupational numbers.
+% Occupation numbers.
 f = n ./ (ones(length(t), 1) * rho_de');
 
 % Non-equlibrium quasipartical density.
