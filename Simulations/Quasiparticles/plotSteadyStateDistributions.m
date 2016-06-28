@@ -14,17 +14,17 @@ tspan = [-510, -10]; % in units of \tau_0
 
 V = 1.5;
 
-[~, e, n, f, ~, ~, ~, ~, ~, ~, ~, f_nis, n_nis] = ...
+[~, e, n_res, f_res, ~, ~, ~, ~, ~, ~, ~, n_nis, f_nis] = ...
     twoRegionSteadyStateModelOptimized(Tph, tspan, V,...
-    r_direct, r_phonon, c, vol, N);
+    r_direct, r_phonon, c, c, vol, N);
 
-h = figure;
-n(n < 0) = NaN;
-f(f < 0) = NaN;
+figure
+n_res(n_res < 0) = NaN;
+f_res(f_res < 0) = NaN;
 n_nis(n_nis < 0) = NaN;
 f_nis(n_nis < 0) = NaN;
 semilogy(e, n_nis(end, :), e, f_nis(end, :),...
-         e, n(end, :), e, f(end, :), 'LineWidth', 3)
+         e, n_res(end, :), e, f_res(end, :), 'LineWidth', 3)
 xlabel('Energy (\epsilon=E/\Delta)', 'FontSize', 14)
 ylabel('n/n_{cp}, f', 'FontSize', 14)
 legend('n_{NIS}(\epsilon)', 'f_{NIS}(\epsilon)',...
@@ -34,17 +34,15 @@ xlim([1, max(V)])
 grid on
 
 c = 0.02;
-[~, e, n_tr, f_tr, ~, ~, ~, ~, ~, ~, ~, f_nis_tr, n_nis_tr] = ...
+[~, e, ~, f_res_tr, ~, ~, ~, ~, ~, ~, ~, ~, f_nis_tr] = ...
     twoRegionSteadyStateModelOptimized(Tph, tspan, V,...
-    r_direct, r_phonon, c, vol, N);
+    r_direct, r_phonon, c, c, vol, N);
 
 h = figure;
-n_tr(n_tr < 0) = NaN;
-f_tr(f_tr < 0) = NaN;
-n_nis_tr(n_nis_tr < 0) = NaN;
-f_nis_tr(n_nis_tr < 0) = NaN;
+f_res_tr(f_res_tr < 0) = NaN;
+f_nis_tr(f_nis_tr < 0) = NaN;
 semilogy(e, f_nis(end, :), e, f_nis_tr(end, :),...
-         e, f(end, :), e, f_tr(end, :), 'LineWidth', 3)
+         e, f_res(end, :), e, f_res_tr(end, :), 'LineWidth', 3)
 xlabel('Energy (\epsilon=E/\Delta)', 'FontSize', 14)
 ylabel('Occupation Numbers f', 'FontSize', 14)
 legend('f_{NIS}(\epsilon) (c=0)', ['f_{NIS}(\epsilon) (c=', num2str(c),')'],...

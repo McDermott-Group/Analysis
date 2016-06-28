@@ -3,10 +3,10 @@ function steadyStateModelDifferentRph
 % density at different phonon fractions.
 
 r_direct = 1e-05; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
-r_phonon = [10, 1, .1, .01] * 5e-2; % dimensionless
+r_phonon = [.001, .01, 0.1, 1]; % dimensionless
 c = 0; % dimensionless
-vol = 5.000e+03; % um^3
-V = 1.1:1:30; % in units of \delta
+vol = 2.6e+04; % um^3
+V = linspace(1.001, 30, 30); % in units of \delta
 
 Tph = 0.051; % K
 tspan = [-510, -10]; % in units of \tau_0
@@ -22,7 +22,7 @@ for krqp = 1:length(r_phonon)
         Vsim = V(kV);
         [~, ~, ~, ~, n_qp, ~, P(kV, krqp)] =...
             twoRegionSteadyStateModelOptimized(Tph, tspan,...
-            Vsim, r_direct, rphsim, c, vol, N);
+            Vsim, r_direct, rphsim, c, c, vol, N);
         nqp(kV, krqp) = max(n_qp);
         fprintf('*')
     end
@@ -33,8 +33,8 @@ hold on
 for k = 1:length(r_phonon)
     plot(P(:, k), nqp(:, k), 'MarkerSize', 10, 'LineWidth', 2)
 end
-xlabel('Injection Power (W)', 'FontSize', 14)
-ylabel('Quasiparticle Density (\mu m^{-3})', 'FontSize', 14)
+xlabel('Power (W)', 'FontSize', 14)
+ylabel('Quasiparticle Density (\mu{m}^{-3})', 'FontSize', 14)
 legends = cell(0);
 for k = 1:length(r_phonon)
     legends{k} = ['r_{ph} = ', num2str(r_phonon(k), '%.2e')];

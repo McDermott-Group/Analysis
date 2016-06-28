@@ -2,17 +2,17 @@ function steadyStateModelDifferentRqp
 %steadyStateModelDifferentRqp Explore the quasiparticle steady-state
 % density at different injection rates (resistances).
 
-r_direct = [1, 2, 4] * 1e-05; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
-r_phonon = .5; % dimensionless
-c = 0; % dimensionless
-vol = 2.6e+03; % um^3
-V = linspace(1.001, 1.2, 20); % in units of \delta
+r_direct = [.01, .1, 1, 10] * 1e-05; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
+r_phonon = 1; % dimensionless
+c = 0.01; % dimensionless
+vol = 2.6e+04; % um^3
+V = linspace(1.001, 30, 30); % in units of \delta
 
 Tph = 0.051; % K
 tspan = [-510, -10]; % in units of \tau_0
 
 % Number of the energy bins.
-N = 200;
+N = 250;
 
 nqp = NaN(length(V), length(r_direct));
 P = NaN(size(nqp));
@@ -22,7 +22,7 @@ for krqp = 1:length(r_direct)
         Vsim = V(kV);
         [~, ~, ~, ~, n_qp, ~, P(kV, krqp)] =...
             twoRegionSteadyStateModelOptimized(Tph, tspan,...
-            Vsim, rqpsim, r_phonon, c, vol, N);
+            Vsim, rqpsim, r_phonon, c, c, vol, N);
         nqp(kV, krqp) = max(n_qp);
         fprintf('*')
     end
@@ -36,8 +36,8 @@ for k = 1:length(r_direct)
     disp(['rqp = ', num2str(r_direct(k), '%.2e'), '/tau0: ',...
         num2str(p(1)), '-power law'])
 end
-xlabel('Injection Power (W)', 'FontSize', 14)
-ylabel('Quasiparticle Density (\mu m^{-3})', 'FontSize', 14)
+xlabel('Power (W)', 'FontSize', 14)
+ylabel('Quasiparticle Density (\mu{m}^{-3})', 'FontSize', 14)
 legends = cell(0);
 for k = 1:length(r_direct)
     legends{k} = ['r_{qp} = ', num2str(r_direct(k), '%.2e'), '/\tau_0'];

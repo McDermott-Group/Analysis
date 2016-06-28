@@ -1,14 +1,18 @@
 function [t, e, n, f, n_qp, r_qp, P,...
-    Gamma_tr_inj, Gamma_tr_ph, Gamma_r_inj, Gamma_r_ph, f_nis, n_nis] = ...
-    twoRegionSteadyStateModelOptimized(Tph, tspan, V, rqp, rph, c,...
-    vol, N)
+    Gamma_tr_inj, Gamma_tr_ph, Gamma_r_inj, Gamma_r_ph,...
+    n_nis, f_nis, n_qp_nis] = ...
+    twoRegionSteadyStateModelOptimized(Tph, tspan, V, rqp, rph,...
+    cqp, cph, vol, N)
 % twoRegionSteadyStateModelOptimized Two-region, one corresponds to
 % a normal metal-isolator-superconductor junction (NIS) and the other one -
 % to a resonator, quasi-0D model for computing the steady-state
 % quasiparticle densities. This code is somewhat computationally optimized.
 %
-% [t, e, n, f, n_qp, r_qp, P] = ...
-%   twoRegionSteadyStateModelOptimized(Tph, tspan, V, rqp, rph, c,...
+% t, e, n, f, n_qp, r_qp, P,...
+%     Gamma_tr_inj, Gamma_tr_ph, Gamma_r_inj, Gamma_r_ph,...
+%     n_nis, f_nis, n_qp_nis] = ...
+%     twoRegionSteadyStateModelOptimized(Tph, tspan, V, rqp, rph,...
+%     cqp, cph, vol, N)
 %   vol, N) computes the quasiparticle dynamics using
 %   a two-point quasi-0D model. The quasiparticles are directly injected
 %   into NIS junction. The equlibrium quasiparticle distribution and
@@ -26,7 +30,8 @@ function [t, e, n, f, n_qp, r_qp, P,...
 %      rqp is the quasiparticle injection rate in n_{cp}/\tau_0,
 %      rph is the fraction of the phonons that go to the resonator,
 %      dimensionless,
-%      c is the trapping (capture) rate in n_{cp}/\tau_0,
+%      cqp is the trapping efficiency at the NIS junction (dimensionless),
+%      cph is the trapping efficiency at the resonator (dimensionless),
 %      vol is the injection volume in um^3,
 %      N is the number of the energy bins (50-1000 or so).
 %
@@ -91,7 +96,7 @@ P = power_calib * P; % W
 
 Gr = Grecombination(e, Tph, Tc);
 
-Gtr = Gtrapping(e, Tph, Tc, c);
+Gtr = Gtrapping(e, Tph, Tc, cqp);
 
 Rqp = DirectInjection(e, rho_de, V, rqp);
 
@@ -106,6 +111,7 @@ options = odeset('AbsTol', 1e-10);
 % Occupation numbers.
 f_nis = n ./ (ones(length(t), 1) * rho_de');
 n_nis = n;
+n_qp_nis = 2 * ncp * sum(n, 2);
 
 % Equilibrium distribution.
 n_inj = n(end, :)';
@@ -115,7 +121,7 @@ Gamma_r_inj = trapz(e, 2 * n_inj .* (Gr * n_inj)) / trapz(e, n_inj) / tau_0;
 
 Rph_rec = RecombinationInjection(e, de, n_inj, rph, Tc, Tph);
 Rph_sct = ScatteringInjection(e, de, n_inj, rph, Tc, Tph, V);
-Rph_trp = TrapInjection(e, de, n_inj, rph, Tc, Tph, V, c);
+Rph_trp = TrapInjection(e, de, n_inj, rph, Tc, Tph, V, cph);
 
 % Solve the ODE at the resonator.
 options = odeset('AbsTol', 1e-10, 'RelTol', 1e-6);
