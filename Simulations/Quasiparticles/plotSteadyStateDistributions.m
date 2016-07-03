@@ -45,8 +45,8 @@ semilogy(e, f_nis(end, :), e, f_nis_tr(end, :),...
          e, f_res(end, :), e, f_res_tr(end, :), 'LineWidth', 3)
 xlabel('Energy (\epsilon=E/\Delta)', 'FontSize', 14)
 ylabel('Occupation Numbers f', 'FontSize', 14)
-legend('f_{NIS}(\epsilon) (c=0)', ['f_{NIS}(\epsilon) (c=', num2str(c),')'],...
-       'f_{res}(\epsilon) (c=0)', ['f_{res}(\epsilon) (c=', num2str(c),')'])
+legend('f^{NIS}(\epsilon) (c=0)', ['f^{NIS}(\epsilon) (c=', num2str(c),')'],...
+       'f^{res}(\epsilon) (c=0)', ['f^{res}(\epsilon) (c=', num2str(c),')'])
 axis tight
 xlim([1, max(V)])
 grid on
