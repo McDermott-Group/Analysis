@@ -1,6 +1,6 @@
 function steadyStateModelFit2TrapNoTrap
 %steadyStateModelFit2TrapNoTrap Fitting to the `TrapNoTrap` dataset using
-% the two-point equilibrium quasi-0D model
+% the two-region steady-state quasi-0D model.
 
 r_direct = 1.501e-05; r_phonon = 1.076e+00; c = 1.159e-02; vol = 2.600e+04;
 r_direct_no_tr = r_direct; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}

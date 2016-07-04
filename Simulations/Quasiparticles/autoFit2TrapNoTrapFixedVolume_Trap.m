@@ -1,5 +1,5 @@
 function autoFit2TrapNoTrapFixedVolume_Trap
-%autoFit2TrapNoTrapFixedVolume_Trap Fitting to the TrapNoTrap dataset.
+%autoFit2TrapNoTrapFixedVolume_Trap Fitting to the `TrapNoTrap` dataset.
 
 % With traps.
 % r_direct in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}

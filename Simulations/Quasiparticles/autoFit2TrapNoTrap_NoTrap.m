@@ -1,5 +1,5 @@
 function autoFit2TrapNoTrap_NoTrap
-%autoFit2TrapNoTrap_NoTrap Fitting to the TrapNoTrap dataset.
+%autoFit2TrapNoTrap_NoTrap Fitting to the `TrapNoTrap` dataset.
 
 % No traps.
 % r_direct in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
