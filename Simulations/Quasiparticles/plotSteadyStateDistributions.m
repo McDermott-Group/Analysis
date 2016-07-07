@@ -1,5 +1,5 @@
 function plotSteadyStateDistributions
-%plotSingleSolution Quasiparticle dynamics plots.
+%plotSingleSolution Quasiparticle distribution plots.
 
 % r_direct in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
 % r_phonon dimensionless
