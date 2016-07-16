@@ -1,11 +1,11 @@
-function autoFit2NIS04212016_NearFar
-%autoFit2NIS04212016_NearFar Fitting to the `NIS04212016` dataset.
+function autoFit2NIS04212016_MultiNearFar
+%autoFit2NIS04212016_MultiNearFar Fitting to the `NIS04212016` dataset.
 
 % r_direct in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
 % r_phonon_n and r_phonon_f dimensionless
 % c dimensionless
 % vol in units of um^3
-r_direct = 1.369e-04; r_phonon_n = 3.153e-01; r_phonon_f = 9.410e-02; c = 1.057e-01; vol = 2.600e+04;
+r_direct = 1.301e-03; r_phonon_n = 2.639e-01; r_phonon_f = 7.415e-02; c = 1.794e-01; vol = 2.600e+04;
 
 Tph = 0.051; % K
 tspan = [-510, -10]; % in units of \tau_0
@@ -55,7 +55,7 @@ function error = simulations(x, Tph, tspan, V_n, nqp_n, V_f, nqp_f, vol, N)
     r_ph = x(2);
     c = x(4);
     parfor k = 1:length(V_n)
-        [~, ~, ~, ~, n_qp] = twoRegionSteadyStateModelOptimized(Tph, tspan,...
+        [~, ~, ~, ~, n_qp] = multiRegionSteadyStateModel(Tph, tspan,...
             V_n(k), r_qp, r_ph, c, c, vol, N);
         nqp_sim_n(k) = n_qp(end);
     end
@@ -68,7 +68,7 @@ function error = simulations(x, Tph, tspan, V_n, nqp_n, V_f, nqp_f, vol, N)
     r_ph = x(3);
     c = x(4);
     parfor k = 1:length(V_f)
-        [~, ~, ~, ~, n_qp] = twoRegionSteadyStateModelOptimized(Tph, tspan,...
+        [~, ~, ~, ~, n_qp] = multiRegionSteadyStateModel(Tph, tspan,...
             V_f(k), r_qp, r_ph, c, c, vol, N);
         nqp_sim_f(k) = n_qp(end);
     end

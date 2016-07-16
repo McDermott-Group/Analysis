@@ -1,12 +1,13 @@
-function steadyStateModelFit2NIS04212016
-%steadyStateModelFit2NIS04212016 Fitting to the `NIS04212016` dataset
-% using the two-region steady-state quasi-0D model.
+function steadyStateMultiRegionModelFit2NIS04212016
+%steadyStateMultiRegionModelFit2NIS04212016 Fitting to the `NIS04212016`
+% dataset using the two-region steady-state quasi-0D model.
 
 % r_direct in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
 % r_phonon_n and r_phonon_f dimensionless
 % c dimensionless
 % vol in units of um^3
-r_direct = 8.539e-05; r_phonon_n = 3.130e-01; r_phonon_f = 9.853e-02; c = 1.415e-01; vol = 2.600e+04;
+% r_direct = 1.301e-03; r_phonon_n = 2.639e-01; r_phonon_f = 7.415e-02; c = 1.794e-01; vol = 2.600e+04;
+r_direct = 1.541e-03; r_phonon_n = 3.377e-01; r_phonon_f = 7.814e-02; c = 8.946e-02; vol = 2.600e+04;
 
 Tph = 0.051; % K
 tspan = [-510, -10]; % in units of \tau_0
@@ -41,7 +42,7 @@ nqp_sim_f = NaN(size(V_sim_f));
 parfor k = 1:length(V_sim_n)
     if V_sim_n(k) > 1
         [~, ~, ~, ~, nqp] =...
-            twoRegionSteadyStateModelOptimized(Tph, tspan,...
+            multiRegionSteadyStateModel(Tph, tspan,...
             V_sim_n(k), r_direct, r_phonon_n, c, c, vol, N);
         nqp_sim_n(k) = max(nqp);
     else
@@ -53,7 +54,7 @@ fprintf('\n')
 parfor k = 1:length(V_sim_f)
     if V_sim_f(k) > 1
         [~, ~, ~, ~, nqp] = ...
-            twoRegionSteadyStateModelOptimized(Tph, tspan,...
+            multiRegionSteadyStateModel(Tph, tspan,...
             V_sim_f(k), r_direct, r_phonon_f, c, c, vol, N);
         nqp_sim_f(k) = max(nqp);
     else
