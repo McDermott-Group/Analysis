@@ -92,7 +92,7 @@ for k = 1:length(dep_vars)
     processed_data_var = ['CutSubtracted_', data_variable];
     data2plot = data{1};
     data2plot.(processed_data_var) = avg_data / length(data);
-    data2plot.units.(processed_data_var) = '';
+    data2plot.units.(processed_data_var) = data{1}.units.(data_variable);
     data2plot.rels.(processed_data_var) = data{1}.rels.(data_variable);
     data2plot.dep{length(data{1}.dep) + 1} = processed_data_var;
     data2plot.plotting.(processed_data_var).plot_title =...
@@ -107,5 +107,8 @@ for k = 1:length(dep_vars)
         ['_', normalization_direction];
 
     plotDataVar(data2plot, processed_data_var);
+    
+    saveMeasData(data2plot, [data_variable, '_avgCutSubtr'])
+
 end
 end
