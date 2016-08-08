@@ -72,6 +72,6 @@ function error = simulations(x, Tph, tspan, V_n, nqp_n, V_f, nqp_f, vol, N)
             V_f(k), r_qp, r_ph, c, c, vol, N);
         nqp_sim_f(k) = n_qp(end);
     end
-    error = sum(log(abs(nqp_sim_n - nqp_n)).^2) +...
-            sum(log(abs(nqp_sim_f - nqp_f)).^2);
+    error = sum((log(nqp_sim_f ./ nqp_f)).^2 +...
+                (log(nqp_sim_n ./ nqp_n)).^2);
 end

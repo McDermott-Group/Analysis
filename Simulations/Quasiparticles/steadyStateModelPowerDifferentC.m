@@ -1,6 +1,6 @@
 function steadyStateModelPowerDifferentC
 %steadyStateModelPowerDifferentC Explore the quasiparticle power budget
-%at different injection voltages.
+%at different trapping rates.
 
 r_direct = 1e-05; % in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
 r_phonon = 1; % dimensionless
