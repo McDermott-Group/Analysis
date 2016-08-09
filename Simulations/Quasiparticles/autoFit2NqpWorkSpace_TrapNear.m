@@ -6,21 +6,22 @@ function autoFit2NqpWorkSpace_TrapNear
 % r_phonon dimensionless
 % c dimensionless
 % vol in units of um^3
-r_direct = 7.397e-06; r_phonon = 1.786e-01; c = 6.825e-02; vol = 2.034e+05;
+r_direct = 3.135e-05; r_phonon = 1.020e+00; c = 8.442e-02; vol = 4.017e+04;
 
 Tph = 0.051; % K
 tspan = [-510, -10]; % in units of \tau_0
 
 % Number of the energy bins.
-N = 200;
+N = 100;
 
 delta = 0.18e-3; % eV (aluminum superconducting gap)
 data = load('NqpWorkSpace.mat');
 
 % With traps.
-V = data.TrapNear(:, 1) / delta;
-P = data.TrapNear(:, 2);
-nqp = data.TrapNear(:, 4);
+% TrapFar is actually TrapNear.
+V = data.TrapFar(:, 1) / delta;
+P = data.TrapFar(:, 2);
+nqp = data.TrapFar(:, 4);
 
 options = optimset('Display', 'iter', 'MaxIter', 30, 'TolFun', 1e-2);
 x = fminsearch(@(x) simulations(x, Tph, tspan, V, P, nqp, N),...
@@ -33,7 +34,7 @@ disp(['r_direct = ', num2str(x(1), '%.3e'), '; ',...
 end
 
 function error = simulations(x, Tph, tspan, V, P, nqp, N)
-    indices = (V > 4) & (nqp > 0) & (V < 16);
+    indices = (V > 1) & (nqp > 0) & (V < 10);
     P = P(indices);
     nqp = nqp(indices);
     V = V(indices);

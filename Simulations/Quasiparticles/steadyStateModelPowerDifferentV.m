@@ -41,12 +41,13 @@ legend('recombination', 'scattering', 'scattering above 2\Delta',...
     'total above 2\Delta', 'Location', 'SouthEast')
 title(['r_{qp} = ', num2str(r_direct, '%.2e'), '/\tau_0', ', ',...
      'r_{ph} = ', num2str(r_phonon, '%.3f'), ', ',...
-     'c = ', num2str(c, '%.3f'), ', ',...
-     'v = ', num2str(vol, '%.2e'), ' \mu{m}^3'])
+     'c = ', num2str(c, '%.3f'),...
+     ...% ', ', 'v = ', num2str(vol, '%.2e'), ' \mu{m}^3'
+     ])
 axis tight
 xlim([1, max(V)])
 grid on
 set(gca, 'box', 'on')
 savePDF(h, 'SimPowerBudget.pdf')
-print(h, 'SimPowerBudget.fig')
+savefig(h, 'SimPowerBudget.fig')
 end

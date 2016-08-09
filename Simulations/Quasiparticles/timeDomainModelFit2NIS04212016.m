@@ -35,7 +35,7 @@ Tph = 0.051; % K
 tspan = [-500, 2000]; % in units of \tau_0
 
 % Number of energy bins.
-N = 100;
+N = 150;
 
 tau_p = NaN(size(V));
 err_p = NaN(size(V));
@@ -63,11 +63,12 @@ F = median(tau_p_n ./ tau_p(1:length(tau_p_n)));
 tau_p = F * tau_p;
 tau_r = F * tau_r;
 
+% load('SimNIS24062016.mat')
+
 h = figure;
 hold on
-plot(E_p_n, tau_p_n, 'rh', 'MarkerSize', 9, 'LineWidth', 1.5,...
-    'MarkerFaceColor', 'r')
-plot(E_r_n, tau_r_n, 'rh', 'MarkerSize', 9, 'LineWidth', 1.5)
+plot(E_p_n, tau_p_n, 'r^', 'MarkerSize', 9, 'LineWidth', 1.5)
+plot(E_r_n, tau_r_n, 'r^', 'MarkerSize', 9, 'LineWidth', 1.5)
 errorbar(V, tau_p, err_p, '*', 'MarkerSize', 10, 'LineWidth', 1.5)
 errorbar(V, tau_r, err_r, '*', 'MarkerSize', 10, 'LineWidth', 1.5)
 set(gca, 'xscale', 'Log')
@@ -77,7 +78,8 @@ ylabel('Time Constant (\mu{s})', 'FontSize', 14)
 legend({'poisoning, near trap', 'recovery, near trap',...
     'poisoning simulation', 'recovery simulation'},...
     'Location', 'SouthWest')
-title({'Time Constants', ['r_{qp} = ', num2str(r_direct, '%.3e'),...
+title({'Time Constants',...
+    ['r_{qp} = ', num2str(r_direct, '%.3e'), '/\tau_0',...
     ', r_{ph} = ', num2str(r_phonon, '%.3e'),...
     ', c = ', num2str(c, '%.3e'),...
     ', F = ', num2str(F, '%.3f')]})
@@ -85,13 +87,34 @@ axis tight
 grid on
 set(gca, 'box', 'on')
 savePDF(h, 'SimNIS24062016_tau.pdf')
+savefig(h, 'SimNIS240062016_tau.fig')
+
+h = figure;
+hold on
+plot(E_p_n, tau_p_n, 'r^', 'MarkerSize', 9, 'LineWidth', 1.5)
+plot(V, tau_p, 'mo', 'MarkerSize', 10, 'LineWidth', 1.5, 'MarkerFaceColor', 'm')
+set(gca, 'xscale', 'Log')
+hold off
+xlabel('Normalized Injection Bias eV/\Delta', 'FontSize', 14)
+ylabel('Time Constant (\mu{s})', 'FontSize', 14)
+legend({'poisoning, near trap', 'poisoning simulation'},...
+    'Location', 'SouthWest')
+title({'Time Constants',...
+    ['r_{qp} = ', num2str(r_direct, '%.3e'), '/\tau_0',...
+    ', r_{ph} = ', num2str(r_phonon, '%.3e'),...
+    ', c = ', num2str(c, '%.3e'),...
+    ', F = ', num2str(F, '%.3f')]})
+axis tight
+grid on
+set(gca, 'box', 'on')
+savePDF(h, 'SimNIS24062016_taup.pdf')
+savefig(h, 'SimNIS240062016_taup.fig')
  
 h = figure;
 hold on
-plot(E_p_n, nqp_p_n, 'rh', 'MarkerSize', 9, 'LineWidth', 1.5,...
-    'MarkerFaceColor', 'r')
-plot(E_r_n, nqp_r_n, 'rh', 'MarkerSize', 9, 'LineWidth', 1.5)
-plot(V, nqp, '*', 'MarkerSize', 10, 'LineWidth', 1.5)
+plot(E_p_n, nqp_p_n, 'r^', 'MarkerSize', 9, 'LineWidth', 1.5)
+plot(E_r_n, nqp_r_n, 'r^', 'MarkerSize', 9, 'LineWidth', 1.5)
+plot(V, nqp, 'mo', 'MarkerSize', 10, 'LineWidth', 1.5, 'MarkerFaceColor', 'm')
 hold off
 set(gca, 'xscale', 'Log', 'yscale', 'Log')
 xlabel('Normalized Injection Bias eV/\Delta', 'FontSize', 14)
@@ -99,7 +122,7 @@ ylabel('Quasiparticle Density (\mu{m}^{-3})', 'FontSize', 14)
 legend({'poisoning, near trap', 'recovery, near trap', 'simulation'},...
     'Location', 'NorthWest')
 title({'Quasiparticle Steady-State Density',...
-    ['r_{qp} = ', num2str(r_direct, '%.3e'),...
+    ['r_{qp} = ', num2str(r_direct, '%.3e'), '/\tau_0',...
     ', r_{ph} = ', num2str(r_phonon, '%.3e'),...
     ', c = ', num2str(c, '%.3e'),...
     ', F = ', num2str(F, '%.3f')]})
@@ -108,8 +131,10 @@ axis tight
 grid on
 set(gca, 'box', 'on')
 savePDF(h, 'SimNIS24062016_nqp.pdf')
+savefig(h, 'SimNIS24062016_nqp.fig')
 
 save('SimNIS24062016.mat', 'E_p_n', 'tau_p_n', 'nqp_p_n',...
-    'E_r_n', 'tau_r_n', 'nqp_r_n', 'V', 'nqp', 'tau_p', 'tau_r', 'F')
+    'E_r_n', 'tau_r_n', 'nqp_r_n', 'V', 'nqp', 'tau_p', 'tau_r', 'F',...
+    'err_p', 'err_r')
 
 end
