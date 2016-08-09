@@ -1,32 +1,38 @@
 function plotSingleSolution
-%PLOTSINGLESOLUTION Generate the quasiparticle dynamics plots.
+%plotSingleSolution Quasiparticle dynamics plots.
 
-% r = 1e-8; % in units of 1 / \tau_0
-% r = 2 * 1.7 * 1e-10 / (sqrt(8) - sqrt(2.8^2 - 1));
-%                                       %(assuming n_{qp} in units of n_{cp})
-% c = 1; % trapping rate in units of 1 / \tau_0
-% V = 2; %[2.8, 3]; % in units of \Delta
-% Tph = .050; % K
-% tspan = [-10000, 10000]; % in units of \tau_0
+% r_direct in units of 1/\tau_0, assuming n_{qp} in units of n_{cp}
+% r_phonon dimensionless
+% c dimensionless
+% vol in units of um^3
+r_direct = 2e-05; r_phonon = 5e-01; c = 5e-02; vol = 5.000e+03; 
 
-rqp = 1e-5; % in units of 1 / \tau_0 %(assuming n_{qp} in units of n_{cp})
-rph = 1e-8;
-c = 0.00; % trapping rate in units of 1 / \tau_0
-V = 1.8; % in units of \Delta
+N = 50;
+
 Tph = 0.051; % K
-tspan = [-200, 10]; % in units of \tau_0
+tspan = [-500, 2000]; % in units of \tau_0
 
-% [t, e, ~, f, n_qp] = noTrapping0DModel(rqp, V, Tph, tspan);
-% [t, e, ~, f, n_qp] = directInjection0DModel(Tph, tspan, V, rqp, c);
-% [t, e, ~, f, n_qp] = phononMediatedQuasi0DModel(Tph, tspan, V, rph, c);
-% [t, e, ~, f, n_qp] = mixedInjectionQuasi0DModel(Tph, tspan, V, rqp, rph, c);
-[t, e, ~, f, n_qp] = recombinationIncludedQuasi0DModel(Tph, tspan, V, rqp, rph, c);
+V = 2;
+
+% [t, e, n, f, n_qp] = ...
+%     twoRegionSteadyStateModel(Tph, tspan, V,...
+%     r_direct, r_phonon, c, vol, N, true);
+% [t, e, n, f, n_qp] = ...
+%     twoRegionSteadyStateModelOptimized(Tph, tspan, V,...
+%     r_direct, r_phonon, c, vol, N);
+% clear twoRegionTimeDomainModel
+% [t, e, n, f, n_qp] = ...
+%     twoRegionTimeDomainModel(Tph, tspan, V,...
+%     r_direct, r_phonon, c, vol, N);
+[t, e, n, f, n_qp] = ...
+    twoRegionTimeDomainModelOptimized(Tph, tspan, V,...
+    r_direct, r_phonon, c, vol, N);
 
 figure
 plot(t, n_qp, 'LineWidth', 3)
 hold on
 xlabel('Time (\tau_0)', 'FontSize', 14)
-ylabel('n_{\rm qp} / n_{\rm cp}', 'FontSize', 14)
+ylabel('n_{\rm qp} (\mu m^{-3})', 'FontSize', 14)
 title({'Quasipaticle Dynamics',...
        '(injection at t < 0, recovery at t > 0)'})
 grid on
@@ -34,12 +40,29 @@ grid minor
 axis tight
 
 figure
-plotSmooth(t, e, f)
+[Ind1, Ind2] = ndgrid(t, e);
+hndl = surf(Ind1, Ind2, f);
+set(gca, 'View', [0 90])
+set(hndl, 'LineStyle', 'none', 'FaceColor', 'interp', 'FaceLighting', 'phong');
+axis tight
+colormap(jet)
+colorbar
 xlabel('Time (\tau_0)', 'FontSize', 14)
 ylabel('Energy (\epsilon/\Delta)', 'FontSize', 14)
 title({'Occupational Number f(\epsilon) Time Evolution',...
        '(injection at t < 0, recovery at t > 0)'})
 
-extractTimeConstants(t, n_qp, true);
+figure
+n(n < 0) = NaN;
+f(f < 0) = NaN;
+semilogy(e, n(end, :), e, f(end, :), 'LineWidth', 3)
+xlabel('Energy (\Delta)', 'FontSize', 14)
+ylabel('n(\epsilon), f(\epsilon)', 'FontSize', 14)
+legend('n(\epsilon)', 'f(\epsilon)')
+axis tight
+xlim([1, max(V)])
+grid on
+
+[tau_p, err_p, tau_r, err_r] = estimateTimeConstants(t, n_qp, true)
 
 end

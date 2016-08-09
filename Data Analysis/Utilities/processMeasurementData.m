@@ -19,6 +19,12 @@ function data = processMeasurementData(data)
                 data = renameVariable(data, fields{k},...
                     'Switching_Probability');
 
+            case 'Number_of_Repetitions'
+                if ~isnumeric(data.(fields{k}))
+                    data = renameVariable(data, fields{k},...
+                        'Benchmarking_Number_of_Repetitions');
+                end
+                
             case 'Reps'
                 if isfield(data, 'Actual_Reps') ||...
                         isfield(data, 'Number_of_Repetitions')
@@ -114,7 +120,7 @@ function data = processMeasurementData(data)
     % Estimate errors.
     N = 1;
     if isfield(data, 'Number_of_Repetitions')
-        if ~isfield(data, 'Time')  || length(data.Time) ~= 4096 ||...
+        if ~isfield(data, 'Time') || length(data.Time) ~= 4096 ||...
                 any(data.Time(:)' ~= 0:2:8190)
             N = double(N * data.Number_of_Repetitions);
         end
