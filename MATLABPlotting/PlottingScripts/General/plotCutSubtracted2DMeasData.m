@@ -1,8 +1,8 @@
-function data = plotCutSubtracted2DMeasData(normalization_direction,...
+function plotCutSubtracted2DMeasData(normalization_direction,...
     data_variable)
 %plotCutSubtracted2DMeasData(NORMALIZATION_DIRECTION, DATA_VARIABLE) Plot
 %a 2D data subtracting a median cut from each slice.
-%   DATA = plotCutSubtracted2DMeasData(DATA_VARIABLE, NORMALIZATION_DIRECTION)
+%   plotCutSubtracted2DMeasData(DATA_VARIABLE, NORMALIZATION_DIRECTION)
 %   plots cut-substracted data. The slices are averaged and removed from
 %   the data.
 
@@ -59,4 +59,6 @@ if length(dep_rels) == 2
         ['_', normalization_direction];
 
     plotDataVar(data, processed_data_var);
+    
+    saveMeasData(data, [data_variable, '_cut_subtr'])
 end

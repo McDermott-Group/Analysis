@@ -108,7 +108,6 @@ for k = 1:length(dep_vars)
 
     plotDataVar(data2plot, processed_data_var);
     
-    saveMeasData(data2plot, [data_variable, '_avgCutSubtr'])
-
+    saveMeasData(data2plot, [data_variable, '_avg_cut_subtr'])
 end
 end
