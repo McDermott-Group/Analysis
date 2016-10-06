@@ -1,4 +1,14 @@
-function [ h ] = plotAllCutsLogMag()
+function [  ] = plotAllCutsLogMag()
+% Function to take an existing data plot that's already open in MATLAB (and
+% in focus) and plots all cuts along the X axis on a common plot instead of
+% using the 2D false color plot.
+%
+% n.b. if you aren't sure what plot is in focus and want to be sure, type 
+%
+%      figure(n)
+%
+% where n is the figure number assigned to the figure you wish to cut.
+
 h = gcf;
 axesObjs = get(h,'Children'); dataObjs = get(axesObjs,'Children');
 temp = dataObjs{2};
