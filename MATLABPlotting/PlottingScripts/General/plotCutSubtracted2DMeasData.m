@@ -30,6 +30,8 @@ end
 % Check that the data variable exists (compute it if necessary).
 [data, data_variable] = checkDataVar(data, data_variable);
 
+[~, filename, ~] = fileparts(data.Filename);
+
 dep_vals = data.(data_variable);
 dep_rels = data.rels.(data_variable);
     
@@ -50,7 +52,7 @@ if length(dep_rels) == 2
         
     processed_data_var = ['CutSubtracted_', data_variable];
     data.(processed_data_var) = dep_vals;
-    data.units.(processed_data_var) = '';
+    data.units.(processed_data_var) = data.units.(data_variable);
     data.rels.(processed_data_var) = data.rels.(data_variable);
     data.dep{length(data.dep) + 1} = processed_data_var;
     data.plotting.(processed_data_var).full_name =...
@@ -60,5 +62,5 @@ if length(dep_rels) == 2
 
     plotDataVar(data, processed_data_var);
     
-    saveMeasData(data, [data_variable, '_cut_subtr'])
+    saveMeasData(data, [filename, '_', data_variable, '_cut_subtr'])
 end
