@@ -1,11 +1,17 @@
-function plotMeasData(data_variable)
+function plotMeasData(data_variable, loadedData)
 %plotMeasData   Plot data from a data file.
 %   plotDataVar(DATA_VARIABLE) plots data from a selected data file.
 %   If DATA_VARIABLE is specified, only the corresponding data will be
 %   plotted.
 
 % Select a file.
-data = loadMeasurementData;
+
+if ~exist('loadedData', 'var')
+    data = loadMeasurementData;
+else
+    data = loadedData;
+end
+
 if isempty(fields(data))
     return
 end
