@@ -2,7 +2,10 @@ function plotMeasData(data_variable, loadedData)
 %plotMeasData   Plot data from a data file.
 %   plotDataVar(DATA_VARIABLE) plots data from a selected data file.
 %   If DATA_VARIABLE is specified, only the corresponding data will be
-%   plotted.
+%   plotted. 
+
+% Additional functionality Oct 2016: able to specify an already loaded data
+%   structure that has been loaded via loadMeasurementData
 
 % Select a file.
 
