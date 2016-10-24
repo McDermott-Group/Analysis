@@ -69,7 +69,7 @@ if length(dep_rels) == 1
     data.plotting.(name).plot_title = full_title;
     data.(name) = f(indep_vals);
     
-    % Plot an errobar graph.
+    % Plot an errorbar graph.
     if isfield(data, 'error') && isfield(data.error, data_variable)
         createFigure('right');
         plotErrorbar(indep_vals, dep_vals, data.error.(data_variable))
