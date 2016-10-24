@@ -8,61 +8,67 @@ function [data] = plotPiandNoPiIQBlobs(gateI, gateX)
 % Plots the dots and also returns stacked data in a struct.
 
 %% Initialize and stack the data
-data.Is.gateI = [];
-data.Qs.gateI = [];
-data.Is.gateX = [];
-data.Qs.gateX = [];
+data.gateI.Is = [];
+data.gateI.Qs = [];
+data.gateX.Is = [];
+data.gateX.Qs = [];
 
 for n = 1:length(gateI.Trial)
-   data.Is.gateI = [data.Is.gateI gateI.Is(n,:)];
-   data.Qs.gateI = [data.Qs.gateI gateI.Qs(n,:)];
-   data.Is.gateX = [data.Is.gateX gateX.Is(n,:)];
-   data.Qs.gateX = [data.Qs.gateX gateX.Qs(n,:)];
+   data.gateI.Is = [data.gateI.Is gateI.Is(n,:)];
+   data.gateI.Qs = [data.gateI.Qs gateI.Qs(n,:)];
+   data.gateX.Is = [data.gateX.Is gateX.Is(n,:)];
+   data.gateX.Qs = [data.gateX.Qs gateX.Qs(n,:)];
 end
 
-data.Is.all = [data.Is.gateI(1,:) data.Is.gateX(1,:)]';
-data.Qs.all = [data.Qs.gateI(1,:) data.Qs.gateX(1,:)]';
+data.gateI.IQs = [data.gateI.Is' data.gateI.Qs'];
+data.gateX.IQs = [data.gateX.Is' data.gateX.Qs'];
 
-data.allIQs = [data.Is.all data.Qs.all];
+data.all.Is = [data.gateI.Is(1,:) data.gateX.Is(1,:)]';
+data.all.Qs = [data.gateI.Qs(1,:) data.gateX.Qs(1,:)]';
+data.all.IQs = [data.all.Is data.all.Qs];
 
 %% Calculate mean IQ values via real data and via kmeans clustering
 % mean values
-data.I.gateI = mean(data.Is.gateI);
-data.Q.gateI = mean(data.Qs.gateI);
+data.gateI.I = mean(data.gateI.Is);
+data.gateI.Q = mean(data.gateI.Qs);
 
-data.I.gateX = mean(data.Is.gateX);
-data.Q.gateX = mean(data.Qs.gateX);
+data.gateX.I = mean(data.gateX.Is);
+data.gateX.Q = mean(data.gateX.Qs);
 
 % kmeans clustering
 opts = statset('Display','final',...
                'UseParallel', 1,...
                'MaxIter', 10000);
-[data.idx, data.C] = kmeans(data.allIQs, 2, 'Replicates', 1,...
+[data.gateI.idx, data.gateI.C] = kmeans(data.all.IQs, 2,...
+                                            'Replicates', 1,...
+                                            'Options', opts);          
+
+[data.all.idx, data.all.C] = kmeans(data.all.IQs, 2, 'Replicates', 1,...
                                             'Options', opts);
 
 %% Do the plotting
 % mean values
 figure;
 subplot(1,2,1)
-plot(data.Is.gateI, data.Qs.gateI,'b.',...
+plot(data.gateI.Is, data.gateI.Qs,'b.',...
     'MarkerSize',2,'DisplayName','0')
 hold on
-plot(data.Is.gateX, data.Qs.gateX,'r.',...
+plot(data.gateX.Is, data.gateX.Qs,'r.',...
     'MarkerSize',2,'DisplayName','1')
 xlabel('I (V)')
 ylabel('Q (V)')
 title({'Raw Quadrature Space Plot for ', ...
-    [num2str(length(data.Is.gateI)) ' Shots']})
+    [num2str(length(data.gateI.Is)) ' Shots']})
 axis square
 grid on
 set(gca,'FontSize',14)
-plot([data.I.gateI data.I.gateX],[data.Q.gateI data.Q.gateX],'g+',...
+plot([data.gateI.I data.gateX.I],[data.gateI.Q data.gateX.Q],'g+',...
     'MarkerSize',10,'LineWidth',3,'DisplayName','Actual Blob Centers');
 legend('show')
 hold off
 
 % kmeans clustering
-if data.idx(1) == 1
+if data.all.idx(1) == 1
     blobAColor = 'b.';
     blobBColor = 'r.';
 else
@@ -70,21 +76,21 @@ else
     blobBColor = 'b.';
 end
 subplot(1,2,2)
-plot(data.allIQs(data.idx==1,1),data.allIQs(data.idx==1,2),blobAColor,...
+plot(data.all.IQs(data.all.idx==1,1),data.all.IQs(data.all.idx==1,2),blobAColor,...
     'MarkerSize',2,'DisplayName','Blob A')
 hold on
-plot(data.allIQs(data.idx==2,1),data.allIQs(data.idx==2,2),blobBColor,...
+plot(data.all.IQs(data.all.idx==2,1),data.all.IQs(data.all.idx==2,2),blobBColor,...
     'MarkerSize',2,'DisplayName','Blob B')
-plot(data.C(:,1),data.C(:,2),'kx',...
+plot(data.all.C(:,1),data.all.C(:,2),'kx',...
     'MarkerSize',15,'LineWidth',3,'DisplayName','Fitted Centers')
 xlabel('I (V)')
 ylabel('Q (V)')
 title({'Clustered Quadrature Space Plot for ',...
-    [num2str(length(data.Is.gateI)) ' Shots']})
+    [num2str(length(data.gateI.Is)) ' Shots']})
 axis square
 grid on
 set(gca,'FontSize',14)
-plot([data.I.gateI data.I.gateX],[data.Q.gateI data.Q.gateX],'g+',...
+plot([data.gateI.I data.gateX.I],[data.gateI.Q data.gateX.Q],'g+',...
     'MarkerSize',10,'LineWidth',3,'DisplayName','Actual Blob Centers');
 
 legend('show')
