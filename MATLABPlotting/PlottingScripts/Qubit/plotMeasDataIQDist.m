@@ -73,7 +73,6 @@ for data_index = 1:length(data1.dep)
         indep2 = data2.(I2_rels{k});
         if any(indep1 ~= indep2)
             if all(flip(indep2) == indep1)
-                disp(I2_rels{k})
                 I2 = flip(I2, k);
                 Q2 = flip(Q2, k);
             else
