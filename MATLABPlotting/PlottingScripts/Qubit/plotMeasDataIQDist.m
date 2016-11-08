@@ -61,12 +61,24 @@ for data_index = 1:length(data1.dep)
         if ~strcmp(I1_rels{k}, I2_rels{k}) ||...
                ~strcmp(Q1_rels{k}, Q2_rels{k}) ||...
                ~strcmp(I1_rels{k}, Q1_rels{k}) ||...
-               length(I1_rels{k}) ~= length(I2_rels{k}) ||...
-               length(Q1_rels{k}) ~= length(Q2_rels{k}) ||...
-               length(I1_rels{k}) ~= length(Q1_rels{k}) ||...
-               any(I1_rels{k} ~= I2_rels{k}) ||...
-               any(Q1_rels{k} ~= Q2_rels{k})
+               length(data1.(I1_rels{k})) ~= length(data2.(I2_rels{k})) ||...
+               length(data1.(Q1_rels{k})) ~= length(data2.(Q2_rels{k})) ||...
+               length(data1.(I1_rels{k})) ~= length(data2.(Q1_rels{k}))
             error('The selected files do not match.')
+        end
+    end
+    
+    for k = 1:length(I1_rels)
+        indep1 = data1.(I1_rels{k});
+        indep2 = data2.(I2_rels{k});
+        if any(indep1 ~= indep2)
+            if all(flip(indep2) == indep1)
+                disp(I2_rels{k})
+                I2 = flip(I2, k);
+                Q2 = flip(Q2, k);
+            else
+                error('The selected files do not match.')
+            end
         end
     end
     
@@ -77,7 +89,7 @@ for data_index = 1:length(data1.dep)
     end
 
     data = data1;
-    dist_name = strrep(I_name, 'I', 'Phase_Space_Distance');
+    dist_name = strrep(I_name, 'I', 'Quadrature_Distance');
     data.(dist_name) = distance;
     data.units.(dist_name) = data1.units.(I_name);
     data.rels.(dist_name) = I1_rels;
