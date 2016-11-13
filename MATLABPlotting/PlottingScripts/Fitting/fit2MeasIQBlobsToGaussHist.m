@@ -1,4 +1,4 @@
-function [data, maxFidelity, probOne, rotInfo] = fit2MeasIQBlobsToGaussHist(GATE_I, GATE_X)
+function [data, maxFidelity, probOne, rotInfo] = fit2MeasIQBlobsToGaussHist(GATE_I, GATE_X, PLOT_HIST)
 %% This function is meant to take data from an identitiy gate and a Pi gate
 % and find the centroids of the IQ space blobs, center and rotate them
 % along the I axis and take a line cut through them. Additionally, it will
@@ -25,11 +25,11 @@ else
     gateX = GATE_X;
 end
 
-% if ~exist('PLOT_COMBINED','var')
-%     plotCombined = 0;
-% else
-%     plotCombined = PLOT_COMBINED;
-% end
+if ~exist('PLOT_HIST','var')
+    plotHist = 1;
+else
+    plotHist = PLOT_HIST;
+end
 
 %% Initialize the data stack
 data.gateI.Is = gateI.Is();
@@ -50,52 +50,69 @@ data.allIQs = [data.allIs data.allQs];
 %% Call centerAndRoate function that finds the IQ blob centers of the combined I and X data sets
 [data.allIQsRot, rotInfo] = centerAndRotate(data.allIQs);
 
-% figure; plot(data.allIQsRot(1:end/2,1),data.allIQsRot(1:end/2,2),'g.'); axis([-.4 .4 -.4 .4]);
-% hold on;
-% plot(data.allIQsRot(end/2:end,1),data.allIQsRot(end/2:end,2),'.'); axis([-.4 .4 -.4 .4]);
 
+if plotHist
+    
+    figure;
+    histI = histogram(data.allIQsRot(1:end/2,1),250); hold on;
+    histX = histogram(data.allIQsRot(end/2:end,1),250);
 
-figure;
-histI = histogram(data.allIQsRot(1:end/2,1),250); hold on;
-histX = histogram(data.allIQsRot(end/2:end,1),250);
+    xValuesI = linspace(histI.BinLimits(1),histI.BinLimits(2),histI.NumBins);
+    fitI = fit(xValuesI', histI.Values', 'gauss1');
+    if fitI.b1 > 0
+        rotInfo.ZeroStateLoc = 1;
+    else
+        rotInfo.ZeroStateLoc = -1;
+    end
 
-xValuesI = linspace(histI.BinLimits(1),histI.BinLimits(2),histI.NumBins);
-fitI = fit(xValuesI', histI.Values', 'gauss1');
-if fitI.b1 > 0
-    rotInfo.ZeroStateLoc = 1;
-else
-    rotInfo.ZeroStateLoc = -1;
-end
-
-xValuesX = linspace(histX.BinLimits(1),histX.BinLimits(2),histX.NumBins);
-%options = fitoptions('gauss2', 'StartPoint', [100 -fitI.b1 1 100 fitI.b1 1]); 
+    xValuesX = linspace(histX.BinLimits(1),histX.BinLimits(2),histX.NumBins);
+    %options = fitoptions('gauss2', 'StartPoint', [100 -fitI.b1 1 100 fitI.b1 1]); 
 fitX = fit(xValuesX', histX.Values', 'gauss1');
 
-h = plot(fitI, '-b');
-set(h, 'LineWidth',2);
-h = plot(fitX, '-r');
-set(h, 'LineWidth',2);
+    h = plot(fitI, '-b');
+    set(h, 'LineWidth',2);
+    h = plot(fitX, '-r');
+    set(h, 'LineWidth',2);
 
-funX = @(x) fitX(x);
-
-intX = cumtrapz(xValuesX,histX.Values);
-probOne = integral(funX,-inf,xValuesX(end/2),'ArrayValued',true)/integral(funX,-inf,inf,'ArrayValued',true);
-intI = cumtrapz(xValuesI,histI.Values);
+    funX = @(x) fitX(x);
+    
+    intX = cumtrapz(xValuesX,histX.Values);
+    probOne = integral(funX,-inf,xValuesX(end/2),'ArrayValued',true)/integral(funX,-inf,inf,'ArrayValued',true);
+    intI = cumtrapz(xValuesI,histI.Values);
 fidelity =  @(x) 0.5 * abs((erf((x-fitI.b1)/(fitI.c1))) - (erf((x-fitX.b1)/(fitX.c1))));
 allX = [xValuesX xValuesI];
 for n = 1:length(allX)
     fids(n) = fidelity(allX(n));
 end
 maxFidelity = max(fids)
-
+    
 % Note: yyaxis not available before 2016a
-yyaxis right;
-h = plot(xValuesI,intI/max(intI), '-b');
-ax = gca;
-ax.YColor = [0,0,0];
-set(h, 'LineWidth',2);
-h = plot(xValuesX,intX/max(intX), '-r');
-set(h, 'LineWidth',2);
+    yyaxis right;
+    h = plot(xValuesI,intI/max(intI), '-b');
+    ax = gca;
+    ax.YColor = [0,0,0];
+    set(h, 'LineWidth',2);
+    h = plot(xValuesX,intX/max(intX), '-r');
+    set(h, 'LineWidth',2);
+    
+else
+    
+    [Icounts, Iedges] = histcounts(data.allIQsRot(1:end/2,1),250);
+    % [Xcounts, Xedges] = histcounts(data.allIQsRot(end/2:end,1),250);
+    xValuesI = zeros(length(Iedges)-1,1);
+    for i=1:length(Iedges)-1
+       xValuesI(i) = mean([Iedges(i) Iedges(i+1)]);
+       % xValuesX = mean([Xedges(i) Xedges(i+1)]);
+    end
+    fitI = fit(xValuesI, Icounts', 'gauss1');
+    if fitI.b1 > 0
+        rotInfo.ZeroStateLoc = 1;
+    else
+        rotInfo.ZeroStateLoc = -1;
+    end
+    maxFidelity = Inf;
+    probOne = Inf;
+end
 
 end
 
