@@ -1,4 +1,4 @@
-function [data] = plotIQBlobsP1(CAL_I, CAL_X, DATA)
+function [data] = plotIQBlobsP1(CAL_I, CAL_X, DATA, MAKE_PLOTS)
 %% Select the calibration and data files
 %calibration
 if ~exist('CAL_I','var')
@@ -26,10 +26,16 @@ else
     data = DATA;
 end
 
+if ~exist('MAKE_PLOTS','var')
+    makePlots = 1;
+else
+    makePlots = MAKE_PLOTS;
+end
+
 % Call external function to find the threshold bisector and offset from the
 % calibration files for |0> and |1>. rotInfo contains a shift and rotation
 % matrix to threshold the data in the same fashion as the calibration files
-[~, ~, ~, rotInfo] = fit2MeasIQBlobsToGaussHist(calI,calX);
+[~, ~, ~, rotInfo] = fit2MeasIQBlobsToGaussHist(calI,calX,makePlots);
 
 %% Calculate P1 based on thresholding
 % In the case of only one set of Is/Qs (no sweep parameter), only calculate
@@ -63,11 +69,13 @@ else
     end
 end
 
-figure(); plot(data.(data.indep{1}),data.P1);
-grid on
-ylabel('P1')
-set(gca,'FontSize',16)
-xlabel([data.indep{1} ' (' data.units.(data.indep{1}) ')'])
+if makePlots
+    figure(); plot(data.(data.indep{1}),data.P1);
+    grid on
+    ylabel('P1')
+    set(gca,'FontSize',16)
+    xlabel([data.indep{1} ' (' data.units.(data.indep{1}) ')'])
+end
 end
 
 
