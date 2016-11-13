@@ -6,4 +6,5 @@ cD = get(temp,'CData');
 yD = get(temp,'YData');
 xD = get(temp,'XData');
 figure();
-plot(yD,cD(:,52))
+mD=cD(:,13);
+plot(yD,cD(:,13))
