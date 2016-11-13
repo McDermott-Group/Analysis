@@ -69,7 +69,7 @@ if length(dep_rels) == 1
     data.plotting.(name).plot_title = full_title;
     data.(name) = f(indep_vals);
     
-    % Plot an errobar graph.
+    % Plot an errorbar graph.
     if isfield(data, 'error') && isfield(data.error, data_variable)
         createFigure('right');
         plotErrorbar(indep_vals, dep_vals, data.error.(data_variable))
@@ -98,20 +98,22 @@ if length(dep_rels) == 1
         '_expfit_simple']));
 
 elseif length(dep_rels) == 2 % Plot 2D data.
-    if ~isempty(strfind(dep_rels{1}, 'Time'))
+    if ~isempty(strfind(dep_rels{1}, 'Time')) ...
+            || ~isempty(strfind(dep_rels{1}, 'Duration'))
         indep_name1 = dep_rels{2};
         indep_name2 = dep_rels{1};
         indep_vals1 = data.(dep_rels{2});
         indep_vals2 = data.(dep_rels{1});
         dep_vals = dep_vals';
-    elseif ~isempty(strfind(dep_rels{2}, 'Time'))
+    elseif ~isempty(strfind(dep_rels{2}, 'Time')) ...
+            || ~isempty(strfind(dep_rels{2}, 'Duration'))
         indep_name1 = dep_rels{1};
         indep_name2 = dep_rels{2};
         indep_vals1 = data.(dep_rels{1});
         indep_vals2 = data.(dep_rels{2});
     else
         error(['The data does not appear to depenend on any ',...
-            '''Time'' variable.'])
+            '''Time'' or ''Duration'' variables.'])
     end
 
     dep_units = data.units.(data_variable);

@@ -55,23 +55,27 @@ for data_index = 1:length(data.dep)
     xunits = getUnits(data, I_name);
     yunits = getUnits(data, Q_name);
     iunits = getUnits(data, indep);
-    xlabel([strrep(I_name, '_', ' '), xunits], 'FontSize', 14)
-    ylabel([strrep(Q_name, '_', ' '), yunits], 'FontSize', 14)
 
-    axis([min(I(:)) max(I(:)) min(Q(:)) max(Q(:))])
+    xl = [min(I(:)) max(I(:))];
+    yl = [min(Q(:)) max(Q(:))];
+    plot(xl, yl)
+    xlim(xl)
+    ylim(yl)
     axis equal
     axs = axis;
     for k = 1:length(indep_vals)
         plot(I(:, k), Q(:, k), '.', 'MarkerSize', 10)
         hold on
-            plot(meanI(1:k), meanQ(1:k), 'r-', 'LineWidth', 2)
-            plot(meanI(k), meanQ(k), 'k+', 'MarkerSize', 10)
+        plot(meanI(1:k), meanQ(1:k), 'r-', 'LineWidth', 2)
+        plot(meanI(k), meanQ(k), 'k+', 'MarkerSize', 10)
         hold off
-        axis(axs)
+        axis(axs);
         grid on
         title({[filename, ext, ' [', data.Timestamp, ']'],...
             [strrep(indep, '_', ' '), ' = ', num2str(indep_vals(k)), iunits]},...
             'Interpreter', 'none', 'FontSize', 10)
+        xlabel([strrep(I_name, '_', ' '), xunits], 'FontSize', 14)
+        ylabel([strrep(Q_name, '_', ' '), yunits], 'FontSize', 14)
         % Write each frame to the file.
         writeVideo(vidObj, getframe(gcf));
     end

@@ -122,8 +122,9 @@ for data_index = 1:length(data{1}.dep)
     % Plot a simple trajectories.
     createFigure([.01, .1, .88, .8]);
     hold on
-    for k = 1:length(data);
-        plot(data{k}.(I_name), data{k}.(Q_name), '.', 'MarkerSize', 15)
+    for k = 1:length(data)
+        % plot(data{k}.(I_name), data{k}.(Q_name), '.', 'MarkerSize', 15)
+        scatter(data{k}.(I_name), data{k}.(Q_name), '.')                                           
     end
     hold off
     grid on
