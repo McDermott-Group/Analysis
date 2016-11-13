@@ -69,7 +69,7 @@ end
 
 xValuesX = linspace(histX.BinLimits(1),histX.BinLimits(2),histX.NumBins);
 %options = fitoptions('gauss2', 'StartPoint', [100 -fitI.b1 1 100 fitI.b1 1]); 
-fitX = fit(xValuesX', histX.Values', 'gauss2');
+fitX = fit(xValuesX', histX.Values', 'gauss1');
 
 h = plot(fitI, '-b');
 set(h, 'LineWidth',2);
@@ -81,7 +81,14 @@ funX = @(x) fitX(x);
 intX = cumtrapz(xValuesX,histX.Values);
 probOne = integral(funX,-inf,xValuesX(end/2),'ArrayValued',true)/integral(funX,-inf,inf,'ArrayValued',true);
 intI = cumtrapz(xValuesI,histI.Values);
+fidelity =  @(x) 0.5 * abs((erf((x-fitI.b1)/(fitI.c1))) - (erf((x-fitX.b1)/(fitX.c1))));
+allX = [xValuesX xValuesI];
+for n = 1:length(allX)
+    fids(n) = fidelity(allX(n));
+end
+maxFidelity = max(fids)
 
+% Note: yyaxis not available before 2016a
 yyaxis right;
 h = plot(xValuesI,intI/max(intI), '-b');
 ax = gca;
@@ -89,9 +96,6 @@ ax.YColor = [0,0,0];
 set(h, 'LineWidth',2);
 h = plot(xValuesX,intX/max(intX), '-r');
 set(h, 'LineWidth',2);
-fidelity = intI/max(intI) - intX/max(intX);
-fidelity = abs(fidelity);
-maxFidelity = max(fidelity);
 
 end
 
