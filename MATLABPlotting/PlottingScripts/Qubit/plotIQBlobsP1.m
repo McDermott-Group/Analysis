@@ -37,9 +37,12 @@ end
 % matrix to threshold the data in the same fashion as the calibration files
 [~, ~, ~, rotInfo] = fit2MeasIQBlobsToGaussHist(calI, calX, makePlots);
 
+if isempty(fields(data))
+    return
+end
 % Calculate P1 based on thresholding.
 % In the case of only one set of Is/Qs (no sweep parameter), only calculate
-% P1 for the one set of reps
+% P1 for the one set of reps.
 if length(data.Is(1,:)) == 1
     data.allIQs(:,:) = [data.Is(:) data.Qs(:)];
     data.allIQsTransformed(:,:) = shiftAndSpin(rotInfo, data.allIQs(:,:));

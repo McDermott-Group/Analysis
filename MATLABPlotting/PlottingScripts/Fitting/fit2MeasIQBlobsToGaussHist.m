@@ -91,12 +91,12 @@ if plotHist
     end
     maxFidelity = max(fids);
     
-    ylabel('Counts')
+    ylabel('Counts', 'FontSize', 14)
     % Note: yyaxis not available before 2016a
     try
         yyaxis right
         h = plot(xValuesI, intI/max(intI), '-b');
-        ylabel('Probability')
+        ylabel('Occupation Probability', 'FontSize', 14)
         ax = gca;
         ax.YColor = [0,0,0];
         set(h, 'LineWidth',2);
@@ -109,8 +109,9 @@ if plotHist
     xlabel(['Generalized Quadrature Coordinate', xunits], 'FontSize', 14)
     [~, filenameI, extI] = fileparts(gateI.Filename);
     [~, filenameX, extX] = fileparts(gateX.Filename);
-    title({['Dataset A: ', strrep(filenameI, '_', '\_'), extI,...
-            ' [', gateI.Timestamp, ']'],
+    title({['Maximum Fidelity = ', num2str(100 * maxFidelity, '%.3f'), '%'],...
+           ['Dataset A: ', strrep(filenameI, '_', '\_'), extI,...
+            ' [', gateI.Timestamp, ']'],...
            ['Dataset B: ', strrep(filenameX, '_', '\_'), extX,...
             ' [', gateX.Timestamp, ']']}, 'FontSize', 10)
      legend('dataset A', 'dataset B',...
