@@ -87,6 +87,7 @@ try
     V_grnd = V(I ./ V > cond & abs(I) < .75 * min(max(I), abs(min(I))));
     I_grnd = I(I ./ V > cond & abs(I) < .75 * min(max(I), abs(min(I))));
 
+    warning('error', 'MATLAB:polyfit:PolyNotUnique');
     p = polyfit(I_grnd, V_grnd, 1);
     data.Voltage = data.Voltage - mean(V_grnd);
 
