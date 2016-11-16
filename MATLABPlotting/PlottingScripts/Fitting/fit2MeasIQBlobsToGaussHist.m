@@ -98,7 +98,7 @@ maxFidelity = max(fids);
 % indicies actually compares like X values
 intX_interp = interp1(xValuesX,intX,xValuesI);
 
-singleShotFidelity = max( abs( intX_interp'/max(intX) - intI/max(intI) ) );
+[singleShotFidelity, SSFMax_idx] = max( abs( intX_interp'/max(intX) - intI/max(intI) ) );
 
 
 if plotHist
@@ -123,9 +123,14 @@ if plotHist
         set(h, 'LineWidth',2);
         h = plot(xValuesX, intX/max(intX), '--r');
         set(h, 'LineWidth',2);
+        line([xValuesI(SSFMax_idx),xValuesI(SSFMax_idx)],...
+             [intI(SSFMax_idx)/max(intI),intX_interp(SSFMax_idx)/max(intX)],...
+             'DisplayName','Max Fidelity',...
+             'Color','k','LineStyle','--','LineWidth',2)
     catch
     end
     
+    grid on
     xunits = getUnits(gateI, 'Is');
     xlabel(['Generalized Quadrature Coordinate', xunits], 'FontSize', 20)
     [~, filenameI, extI] = fileparts(gateI.Filename);
@@ -137,7 +142,9 @@ if plotHist
            ['Dataset B: ', strrep(filenameX, '_', '\_'), extX,...
             ' [', gateX.Timestamp, ']']}, 'FontSize', 14)
      legend('dataset A', 'dataset B',...
-         'gaussian fit to A', 'gaussian fit to B', 'Int dataset A', 'Int dataset B', 'Location', 'NorthWest')
+         'gaussian fit to A', 'gaussian fit to B',...
+         'Int dataset A', 'Int dataset B',...
+         'Location', 'NorthWest')
 
 end
 end
