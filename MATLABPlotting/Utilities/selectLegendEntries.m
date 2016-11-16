@@ -19,8 +19,8 @@ fields = fieldnames(data{1});
 legend_options = cell(length(fields), 1);
 for f = 1:length(fields)
     flag = true;
+    values = cell(cell_size, 1);
     if isnumeric(data{1}.(fields{f})) && length(data{1}.(fields{f})) == 1
-        values = NaN(cell_size, 1);
         for k = 1:cell_size
             if isfield(data{k}, fields{f})
                 if ~isnumeric(data{k}.(fields{f})) ||...
@@ -28,14 +28,19 @@ for f = 1:length(fields)
                     flag = false;
                     break   
                 else
-                    values(k) = data{k}.(fields{f});
+                    val = num2str(data{k}.(fields{f}));
+                    if isfield(data{k}.units, fields{f})
+                        units = [' ', data{k}.units.(fields{f})];
+                    else
+                        units = '';
+                    end
+                    values{k} = [val, units];
                 end
             else
                 flag = false;
             end
         end
     elseif ischar(data{1}.(fields{f}))
-        values = cell(cell_size, 1);
         for k = 1:cell_size
             if ~ischar(data{k}.(fields{f}))
                 flag = false;
