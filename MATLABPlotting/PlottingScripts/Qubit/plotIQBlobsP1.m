@@ -35,7 +35,7 @@ end
 % Call external function to find the threshold bisector and offset from the
 % calibration files for |0> and |1>. rotInfo contains a shift and rotation
 % matrix to threshold the data in the same fashion as the calibration files
-[~, ~, ~, rotInfo] = fit2MeasIQBlobsToGaussHist(calI, calX, makePlots);
+[~, ~, ~, ~, rotInfo] = fit2MeasIQBlobsToGaussHist(calI, calX, makePlots);
 
 if isempty(fields(data))
     return
