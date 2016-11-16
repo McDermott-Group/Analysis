@@ -114,7 +114,7 @@ end
 full_title = {'Power Sensitivity',...
     [strrep(filename, '_', '\_'), ext, ' [', data.Timestamp, ']']};
 
-name = 'Power_Sensetivity';
+name = 'Power_Sensitivity';
 data.(name) = dep_vals / N;
 data.units.(name) = '';
 data.rels.(name) = dep_rels;
