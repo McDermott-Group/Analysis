@@ -1,4 +1,4 @@
-function [data, maxFidelity, probOne, rotInfo] = ...
+function [data, maxFidelity, singleShotFidelity, probOne, rotInfo] = ...
         fit2MeasIQBlobsToGaussHist(GATE_I, GATE_X, PLOT_HIST)
 % This function is meant to take data from an identitiy gate and a Pi gate
 % and find the centroids of the IQ space blobs, center and rotate them
@@ -55,84 +55,91 @@ data.allIQs = [data.allIs data.allQs];
 % the combined I and X data sets
 [data.allIQsRot, rotInfo] = centerAndRotate(data.allIQs);
 
+% Histogram the data and create requisite arrays for fitting
+[Icounts, Iedges] = histcounts(data.allIQsRot(1:end/2,1), Nbins);
+[Xcounts, Xedges] = histcounts(data.allIQsRot(end/2:end,1), Nbins);
+xValuesI = zeros(length(Iedges)-1,1);
+xValuesX = zeros(length(Xedges)-1,1);
+for i=1:length(Iedges)-1
+   xValuesI(i) = mean([Iedges(i) Iedges(i+1)]);
+   xValuesX(i) = mean([Xedges(i) Xedges(i+1)]);
+end
+
+% Fit the data and determine the location of the "1" state
+fitI = fit(xValuesI, Icounts', 'gauss1');
+fitX = fit(xValuesX, Xcounts', 'gauss1');
+
+if fitI.b1 > 0
+    rotInfo.ZeroStateLoc = 1;
+else
+    rotInfo.ZeroStateLoc = -1;
+end
+
+% Integrate over the histograms to learn the cumulative probatility of each
+% given outcome. 
+intX = cumtrapz(xValuesX, Xcounts);
+intI = cumtrapz(xValuesI, Icounts);
+funX = @(x) fitX(x);
+probOne = integral(funX, -inf, xValuesX(end/2), 'ArrayValued', true) /...
+    integral(funX, -inf, inf, 'ArrayValued', true);
+
+% Use the fitted values of the gaussian histograms to find the maximum 
+% measurement fidelity (separation fidelity)
+fidelity =  @(x) 0.5 * abs((erf((x-fitI.b1)/(fitI.c1))) - (erf((x-fitX.b1)/(fitX.c1))));
+allX = [xValuesX xValuesI];
+fids = zeros(size(allX));
+for n = 1:length(allX)
+    fids(n) = fidelity(allX(n));
+end
+maxFidelity = max(fids);
+
+% Interpolate one of the cumtrapz so the indicies match up with the other
+% for a fair comparison. This will ensure that doing simple subtraction via
+% indicies actually compares like X values
+intX_interp = interp1(xValuesX,intX,xValuesI);
+
+singleShotFidelity = max( abs( intX_interp'/max(intX) - intI/max(intI) ) );
+
+
 if plotHist
-    figure
-    histI = histogram(data.allIQsRot(1:end/2,1), Nbins); 
+    figure;
+    histogram(data.allIQsRot(1:end/2,1), Nbins); 
     hold on
-    histX = histogram(data.allIQsRot(end/2:end,1), Nbins);
-
-    xValuesI = linspace(histI.BinLimits(1), histI.BinLimits(2), histI.NumBins);
-    fitI = fit(xValuesI', histI.Values', 'gauss1');
-    if fitI.b1 > 0
-        rotInfo.ZeroStateLoc = 1;
-    else
-        rotInfo.ZeroStateLoc = -1;
-    end
-
-    xValuesX = linspace(histX.BinLimits(1), histX.BinLimits(2), histX.NumBins);
-    fitX = fit(xValuesX', histX.Values', 'gauss1');
+    histogram(data.allIQsRot(end/2:end,1), Nbins);
 
     h = plot(fitI, '-b');
     set(h, 'LineWidth',2);
     h = plot(fitX, '-r');
     set(h, 'LineWidth',2);
 
-    funX = @(x) fitX(x);
-    
-    intX = cumtrapz(xValuesX, histX.Values);
-    probOne = integral(funX, -inf, xValuesX(end/2), 'ArrayValued', true) /...
-        integral(funX, -inf, inf, 'ArrayValued', true);
-    intI = cumtrapz(xValuesI, histI.Values);
-    fidelity =  @(x) 0.5 * abs((erf((x-fitI.b1)/(fitI.c1))) - (erf((x-fitX.b1)/(fitX.c1))));
-    allX = [xValuesX xValuesI];
-    fids = zeros(size(allX));
-    for n = 1:length(allX)
-        fids(n) = fidelity(allX(n));
-    end
-    maxFidelity = max(fids);
-    
     ylabel('Counts', 'FontSize', 14)
     % Note: yyaxis not available before 2016a
     try
         yyaxis right
-        h = plot(xValuesI, intI/max(intI), '-b');
-        ylabel('Occupation Probability', 'FontSize', 14)
+        h = plot(xValuesI, intI/max(intI), '--b');
+        ylabel('Occupation Probability', 'FontSize', 20)
         ax = gca;
         ax.YColor = [0,0,0];
         set(h, 'LineWidth',2);
-        h = plot(xValuesX, intX/max(intX), '-r');
+        h = plot(xValuesX, intX/max(intX), '--r');
         set(h, 'LineWidth',2);
     catch
     end
     
     xunits = getUnits(gateI, 'Is');
-    xlabel(['Generalized Quadrature Coordinate', xunits], 'FontSize', 14)
+    xlabel(['Generalized Quadrature Coordinate', xunits], 'FontSize', 20)
     [~, filenameI, extI] = fileparts(gateI.Filename);
     [~, filenameX, extX] = fileparts(gateX.Filename);
     title({['Maximum Fidelity = ', num2str(100 * maxFidelity, '%.3f'), '%'],...
+           ['Single Shot Fidelity = ', num2str(100 * singleShotFidelity, '%.3f'), '%'],...
            ['Dataset A: ', strrep(filenameI, '_', '\_'), extI,...
             ' [', gateI.Timestamp, ']'],...
            ['Dataset B: ', strrep(filenameX, '_', '\_'), extX,...
-            ' [', gateX.Timestamp, ']']}, 'FontSize', 10)
+            ' [', gateX.Timestamp, ']']}, 'FontSize', 14)
      legend('dataset A', 'dataset B',...
-         'gaussian fit to A', 'gaussian fit to B', 'Location', 'NorthWest')
-else
-    
-    [Icounts, Iedges] = histcounts(data.allIQsRot(1:end/2,1), Nbins);
-    xValuesI = zeros(length(Iedges)-1,1);
-    for i=1:length(Iedges)-1
-       xValuesI(i) = mean([Iedges(i) Iedges(i+1)]);
-    end
-    fitI = fit(xValuesI, Icounts', 'gauss1');
-    if fitI.b1 > 0
-        rotInfo.ZeroStateLoc = 1;
-    else
-        rotInfo.ZeroStateLoc = -1;
-    end
-    maxFidelity = Inf;
-    probOne = Inf;
-end
+         'gaussian fit to A', 'gaussian fit to B', 'Int dataset A', 'Int dataset B', 'Location', 'NorthWest')
 
+end
 end
 
 function [IQshiftRot, rotInfo] = centerAndRotate(allIQs)
@@ -142,8 +149,7 @@ function [IQshiftRot, rotInfo] = centerAndRotate(allIQs)
 %  this information and the rotation matrix such that other functions may
 %  perform the exact same rotation and shift in IQ space.
 
-    opts = statset('Display','final',...
-                   'UseParallel', 0,...
+    opts = statset('UseParallel', 0,...
                    'MaxIter', 10000);
 
     [~, C] = kmeans(allIQs, 2, 'Replicates', 1, 'Options', opts);
