@@ -67,7 +67,7 @@ probability = sum(result, rep_index) ./ size(result, rep_index);
 prob_err = 1.95 * sqrt(probability .* (1 - probability) ./...
         size(result, rep_index));
 
-prob_name = 'Probability';
+prob_name = 'Switching_Probability';
 data.(prob_name) = probability;
 data.error.(prob_name) = prob_err;
 data.units.(prob_name) = '';

@@ -66,17 +66,17 @@ choice = showMenu(['Select a legend option for the ',...
 legend_entries = cell(cell_size, 1);
 if choice > 0
     legend_param = legend_options{choice};
-    if isfield(data{1}.units, legend_param) &&...
-            ~isempty(data{1}.units.(legend_param))
-        lunits = [' ', data{1}.units.(legend_param)];
-    else
-        lunits = '';
-    end
     for k = 1:cell_size
-        if isnumeric(data{1}.(legend_param))
+        if isfield(data{k}.units, legend_param) &&...
+            ~isempty(data{k}.units.(legend_param))
+            lunits = [' ', data{k}.units.(legend_param)];
+        else
+            lunits = '';
+        end
+        if isnumeric(data{k}.(legend_param))
             legend_entries{k} = [legend_options_whitespaces{choice},...
                 ' = ', num2str(data{k}.(legend_param)), lunits];
-        elseif ischar(data{1}.(legend_param))
+        elseif ischar(data{k}.(legend_param))
             if strcmp(legend_param, 'Filename')
                 [~, name, ext] = fileparts(data{k}.(legend_param));
                 legend_entries{k} = [name, ext];
