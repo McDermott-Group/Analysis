@@ -12,6 +12,8 @@ function data = importMeasurementData(filename)
     [~, ~, ext] = fileparts(filename);
     if strcmp(ext, '.mat')
         data = importMat_v0p0(filename);
+    elseif strcmp(ext, '.hdf5')
+        data = importHdf5_v0p0(filename);
     elseif strcmp(ext, '.txt')
         [fid, msg] = fopen(filename, 'r');
 
@@ -23,7 +25,7 @@ function data = importMeasurementData(filename)
         if ~ischar(line)
             error(['Datafile ', filename, ' is empty. The first line ',...
                 'should be either the format version ',...
-                '(or the experiment name).']);
+                'or the experiment name.']);
         elseif strcmp(line, 'Format Version: 0.1')
             data = importTxt_v0p1(filename, fid, line);
         else
@@ -136,6 +138,76 @@ function data = importMat_v0p0(filename)
             end
         end
     end
+end
+
+function data = importHdf5_v0p0(filename)
+    data.Filename = filename;
+    [~, fn, ~] = fileparts(filename);
+    data.Experiment_Name = char(fn);
+    timestamp = h5readatt(filename, '/', 'Date Created');
+    data.Timestamp = strrep(timestamp, 'T', ' ');
+    parts = strsplit(char(data.Timestamp), '.');
+    data.Timestamp = parts{1};
+    
+    indeps = h5readatt(filename, '/independents', 'names');
+    data.indep = {};
+    for k = 1:length(indeps)
+        indep_name = strrep(strtrim(indeps{k}), char(0), '');
+        indep_field = strrep(indep_name, ' ', '_');
+        indep_location = strcat('/independents/', indep_name);
+        data.indep{k} = indep_field;
+        data.(indep_field) = h5read(filename, indep_location);
+        data.units.(indep_field) = char(h5readatt(filename,...
+                indep_location, 'units'));
+    end
+    
+    deps = h5readatt(filename, '/dependents', 'names');
+    data.dep = {};
+    for k = 1:length(deps)
+        dep_name =  strrep(strtrim(deps{k}), char(0), '');
+        dep_field = strrep(dep_name, ' ', '_');
+        dep_location = strcat('/dependents/', dep_name);
+        data.dep{k} = dep_field;
+        data.(dep_field) = h5read(filename, dep_location);
+        data.units.(dep_field) = char(h5readatt(filename,...
+                dep_location, 'units'));
+    end
+    
+    data.distr = {};
+    data.rels = struct();
+
+    params = h5info(filename, '/parameters');
+    for k = 1:length(params.Attributes)
+        param_name =  params.Attributes(k).Name;
+        param_field = strrep(strtrim(param_name), char(0), '');
+        param_field = strrep(param_field, ' ', '_');
+        value = h5readatt(filename, '/parameters', param_name);
+        if length(param_field) > 6 &&...
+                    strcmp(param_field(end-5:end), '_Units')
+            data.units.(param_field(1:end-6)) = char(value);
+        elseif length(param_field) > 13 &&...
+                    strcmp(param_field(end-12:end), '_Distribution')
+            data.distr.(param_field(1:end-13)) = char(value);
+        elseif length(param_field) > 13 &&...
+                    strcmp(param_field(end-12:end), '_Dependencies')
+            deps_line = char(value);
+            % char(39) is a single quotation mark.
+            rels_pos = strfind(deps_line, char(39));
+            if mod(length(rels_pos), 2) ~= 0
+                error(['Data variable dependencies are not properly',...
+                    'specified in ', filename, '.']);
+            end
+            relationships = cell(1, length(rels_pos)/2);
+            for q = 1:2:length(rels_pos)
+                relationships{(q+1)/2} =...
+                    strrep(deps_line(rels_pos(q)+1:rels_pos(q+1)-1),...
+                    ' ', '_');
+            end
+            data.rels.(param_field(1:end-13)) = relationships;
+        else
+            data.(param_field) = value;
+        end
+    end 
 end
 
 function data = importTxt_v0p1(filename, fid, first_line)
