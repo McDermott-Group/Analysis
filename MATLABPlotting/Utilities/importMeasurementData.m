@@ -39,7 +39,7 @@ end
 
 function data = importMat_v0p0(filename)
     [~, fn, ~] = fileparts(filename);
-    data = load(filename);
+    data = load(filename, '-mat');
 
     if isfield(data, fn)
         data = data.(fn);
@@ -175,6 +175,7 @@ function data = importHdf5_v0p0(filename)
     
     data.distr = {};
     data.rels = struct();
+    sizes = {};
 
     params = h5info(filename, '/parameters');
     for k = 1:length(params.Attributes)
@@ -204,10 +205,36 @@ function data = importHdf5_v0p0(filename)
                     ' ', '_');
             end
             data.rels.(param_field(1:end-13)) = relationships;
+        elseif length(param_field) > 5 &&...
+                    strcmp(param_field(end-4:end), '_Size')
+            sizes.(param_field(1:end-5)) = value;
         else
             data.(param_field) = value;
         end
-    end 
+    end
+    
+    for k = 1:length(data.dep)
+        dep = data.dep{k};
+        if length(data.rels.(dep)) == 2
+            indep1 = data.rels.(dep){1};
+            indep2 = data.rels.(dep){2};
+            shape = [sizes.(indep2), sizes.(indep1)];
+            dep_vals = data.(dep);
+            if length(dep_vals) == prod(shape)
+                data.(dep) = reshape(dep_vals, shape)';
+            end
+            indep_vals1 = data.(indep1);
+            if length(indep_vals1) == prod(shape)
+                data.(indep1) = reshape(indep_vals1, shape);
+                data.(indep1) = double(data.(indep1)(1, :)');
+            end
+            indep_vals2 = data.(indep2);
+            if length(indep_vals2) == prod(shape)
+                data.(indep2) = reshape(indep_vals2, shape);
+                data.(indep2) = double(data.(indep2)(:, 1));
+            end
+        end
+    end
 end
 
 function data = importTxt_v0p1(filename, fid, first_line)
