@@ -4,19 +4,13 @@ import plotly.graph_objs as go
 import plotly.tools as tls
 from plotly.offline import download_plotlyjs, init_notebook_mode, iplot
 
-# import matplotlib.pyplot as plt
-# %matplotlib inline
-
 # Sign in to Plotly for API access (required if publishing online)
-# Comment out to prevent accidental publishing
-# py.sign_in('iamed18','o9sd2728op')
 
 # Import extra modules as needed
 import numpy as np
 import matplotlib as mpl
 import scipy as sp
 
-import peakutils
 import re
 import os
 import pandas
