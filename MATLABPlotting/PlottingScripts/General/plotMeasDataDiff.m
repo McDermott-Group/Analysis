@@ -64,6 +64,7 @@ for data_index = 1:length(range)
     end
     
     data = data1;
+    data.dep = {};
     diff_name = ['Difference_in_', dep_name];
     data.(diff_name) = dep_vals1 - dep_vals2;
     if isfield(data1, 'error') && isfield(data1.error, dep_name) &&...
@@ -85,6 +86,24 @@ for data_index = 1:length(range)
     data.plotting.(diff_name).plot_filename =...
         fullfile(plts_path, [base_filename1, '-', base_filename2, '_',...
         diff_name]);
-     
-    plotDataVar(data, diff_name);
+end
+
+if ~exist('data_variable', 'var')
+    dep_vars = selectDepDataVars(data);
+    if isempty(dep_vars)
+        return
+    end
+    for data_index = 1:length(dep_vars)
+        dep_name = dep_vars{data_index};
+        if ~isempty(strfind(dep_name, '_Std_Dev')) ||...
+                 ~isempty(strfind(dep_name, '_Error'))
+            continue
+        end
+        if ~isempty(strfind(dep_name, 'Phase'))
+            data.(dep_name) = unwrap(data.(dep_name));
+        end
+        plotDataVar(data, dep_name);
+    end
+else
+    plotDataVar(data, data_variable);
 end

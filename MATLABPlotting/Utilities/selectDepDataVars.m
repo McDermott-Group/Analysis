@@ -54,6 +54,13 @@ if isempty(dep_vars)
     error('No (matching) dependent variables are found.')
 end
 dep_vars_menu = dep_vars;
+
+% If there is only one dependent variable, there is no point in showing
+% the selection menu.
+if length(dep_vars) == 1
+    return
+end
+
 % Show the option to select all variables if SINGLE is false.
 if ~single
     dep_vars_menu{end+1} = 'All';
