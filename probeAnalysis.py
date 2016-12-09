@@ -22,40 +22,31 @@ init_notebook_mode()
 
 
 class probeTest(object):
-
-    def __init__(self, path, n_die_x = 11, n_die_y = 11, header_lines = 1,bounds=None):
+    
+    def __init__(self, path, n_die_x = 11, n_die_y = 11,bounds=None):
         """bounds should be in the form {area: (lower,upper)}"""
-        if type(path) is list:
-            chest = dataChest(path[:-1])
-            chest.openDataset(path[-1])
-            self.data = [(row[2],row[1],row[0],str(row[3])) for row in chest.getData()
-                         if not np.isnan(row[2]) \
-                         and (bounds==None \
-                              or row[1] not in bounds \
-                              or (row[2]>bounds[row[1]][0] \
-                                  and row[2]<bounds[row[1]][1]))]
-            self.n_die_x = n_die_x
-            self.n_die_y = n_die_y
-        else:
-            self.n_die_x = n_die_x
-            self.n_die_y = n_die_y
-            df = pandas.read_csv(path, comment='#', skip_blank_lines=True,
-                                 skiprows=header_lines-1, sep=r'[,\t]', engine='python')
-            self.data = [ (row['resistance'],row['area'],row['die'],row['comments']) \
-                         for i,row in df.iterrows() \
-                         if not np.isnan(row['resistance']) \
-                         and '[IGNORE]' not in str(row['comments']) \
-                         and (bounds==None \
-                              or row[1] not in bounds \
-                              or (row[2]>bounds[row[1]][0] \
-                                  and row[2]<bounds[row[1]][1]))]
+        chest = dataChest(path[:-1])
+        chest.openDataset(path[-1])
+        # data should be in format (die, area, range, resistance)
+        self.data = [(row[3],row[1],row[0],str(row[2])) for row in chest.getData()
+                     if not np.isnan(row[2]) \
+                     and (bounds==None \
+                          or row[1] not in bounds \
+                          or (row[3]>bounds[row[1]][0] \
+                              and row[3]<bounds[row[1]][1]))]
+        self.odd = chest.getParameter('Odd')
+        self.inner_diameter = chest.getParameter('Inner Diameter')
+        self.pitchX = chest.getParameter('Pitch X')
+        self.pitchY = chest.getParameter('Pitch Y')
+        self.n_die_x = n_die_x
+        self.n_die_y = n_die_y
         # what areas do we have?
         self.areas = []
         for row in self.data:
             a = float(row[1])
             if a not in self.areas:
                 self.areas.append(a)
-
+        
     def calcMean(self):
         """Returns a dictionary of {area:average}"""
         avg = {a:{'sum':0, 'n':0} for a in self.areas}
@@ -66,13 +57,13 @@ class probeTest(object):
         for a in avg:
             avg[a] = avg[a]['sum']/avg[a]['n']
         return avg
-
+    
     def theoreticalR(self, Jc, gap=380):
         """Calculate what we expect theoretically for room temperature R,
         based on area (in um^2), gap 2\Delta/e (in uV), and critical current
         density (in A/cm^2)."""
         return {a:np.pi/4*gap*1e-6/(Jc*1e4*a*1e-12) for a in self.areas}
-
+    
     def resistancePlot(self):
         x = [1/float(line[1]) for line in self.data]
         y = [float(line[0]) for line in self.data]
@@ -91,14 +82,14 @@ class probeTest(object):
                 mode = 'line',
                 name = 'Fit'
             )
-        fig = dict(data = [scatter,fit],
+        fig = dict(data = [scatter,fit], 
                    layout = {'title':'',
                             'xaxis':{'title':'1/JJ Area [1/um^2]'},
                             'yaxis':{'title':'Room Temperature Resistance [\Omega]'}
                             }
                   )
         iplot(fig)
-
+    
     def resistanceHistogram(self, area=None):
         hist = [go.Histogram(
             x = [float(line[0]) for line in self.data],
@@ -110,9 +101,9 @@ class probeTest(object):
             )
         )]
         iplot(hist)
-
+        
     def dieMap(self, area):
-        w = WaferMap()
+        w = WaferMap(inner_diameter=self.inner_diameter, pitch=self.pitchX, odd=self.odd, title=None)
         data = [row for row in self.data if float(row[1])==float(area)]
         for row in data:
             die = row[2]
