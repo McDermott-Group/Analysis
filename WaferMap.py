@@ -7,13 +7,12 @@ import plotly.tools as tls
 from plotly.offline import download_plotlyjs, init_notebook_mode, iplot
 
 class WaferMap(object):
-    def __init__(self, wafer_diameter=76.2, sputter_diameter=71.12, inner_diameter=65., pitch=6.2, odd=True, oldLabel=False, title=None):
+    def __init__(self, wafer_diameter=76.2, sputter_diameter=71.12, inner_diameter=65., pitch=6.2, odd=True, title=None):
         """Old Label is where the second index in C3 means 3 down from the top die, not 3 down from the top of the grid."""
         self.wafer_diameter = wafer_diameter
         self.sputter_diameter = sputter_diameter
         self.inner_diameter = inner_diameter
         self.pitch = pitch
-        self.oldLabel = oldLabel
         self.title = title
         if odd:
             self.ndie = int(np.floor(inner_diameter/pitch))
@@ -35,23 +34,18 @@ class WaferMap(object):
     def __setitem__(self, key, value):
         colIndex = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ'.find(key.upper()[0])
         rowIndex = int(key[1:]) - 1
-        if self.oldLabel:
-            firstIndex = np.where(self.dieMapMask[colIndex]==True)[0][0] # find the index at which the first die is on the wafer
-        else:
-            firstIndex = 1#-1
-        self.dieMapData[rowIndex+firstIndex][colIndex] = value
+        self.dieMapData[rowIndex+1][colIndex] = value
         return
-        if self.dieMapMask[colIndex][rowIndex+firstIndex]:
-            self.dieMapData[rowIndex+firstIndex][colIndex] = value
-        else:
+        if self.dieMapMask[colIndex][rowIndex+1]:
+            self.dieMapData[rowIndex+1][colIndex] = value
+        else: 
             raise KeyError('die not on wafer: '+key)
     def __getitem__(self, key):
         colIndex = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ'.find(key.upper()[0])
         rowIndex = int(key[1:]) - 1
-        firstIndex = np.where(self.dieMapMask[colIndex]==True)[0][0] # find the index at which the first die is on the wafer
-        if self.dieMapMask[colIndex][rowIndex+firstIndex]:
-            return self.dieMapData[rowIndex+firstIndex][colIndex]
-        else:
+        if self.dieMapMask[colIndex][rowIndex+1]:
+            return self.dieMapData[rowIndex+1][colIndex]
+        else: 
             raise KeyError('die not on wafer')
     def show(self):
         annotations = []
@@ -64,9 +58,9 @@ class WaferMap(object):
                 x = [c for c in ' ABCDEFGHIJKLMNOPQRSTUVWXYZ'],
                 # y = [str(self.ndie-i)+'a' for i in range(self.ndie)]
             )
-        if self.title is None:
+        if self.title is None: 
             self.title = 'Wafer Die Map'
-        fig = dict(data = [trace],
+        fig = dict(data = [trace], 
                    layout = {'title': self.title,
                              'width':500,
                              'height':500,
