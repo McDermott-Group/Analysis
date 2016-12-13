@@ -34,6 +34,7 @@ class probeTest(object):
                           or row[1] not in bounds \
                           or (row[3]>bounds[row[1]][0] \
                               and row[3]<bounds[row[1]][1]))]
+        # data in format (resistance, area, die, range)
         self.odd = chest.getParameter('Odd')
         self.inner_diameter = chest.getParameter('Inner Diameter')
         self.pitchX = chest.getParameter('Pitch X')
@@ -91,15 +92,19 @@ class probeTest(object):
         iplot(fig)
     
     def resistanceHistogram(self, area=None):
+        if area:
+            areaList = [area]
+        else:
+            areaList = self.areas
         hist = [go.Histogram(
-            x = [float(line[0]) for line in self.data],
+            x = [float(line[0]) for line in self.data if line[1]==a],
             autobinx=False,
             xbins=dict(
                 start=0,
                 end=1000,
                 size=10
             )
-        )]
+        ) for a in areaList]
         iplot(hist)
         
     def dieMap(self, area):
