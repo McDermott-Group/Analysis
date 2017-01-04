@@ -108,7 +108,8 @@ for data_index = 1:length(data{1}.dep)
         hold off
         grid on
         axis equal
-        
+        set(gca, 'box', 'on')
+
         xlabel([strrep(I_name, '_', ' '), xunits], 'FontSize', 14)
         ylabel([strrep(Q_name, '_', ' '), yunits], 'FontSize', 14)
         title(plot_title, 'FontSize', 10)
@@ -123,12 +124,12 @@ for data_index = 1:length(data{1}.dep)
     createFigure([.01, .1, .88, .8]);
     hold on
     for k = 1:length(data)
-        % plot(data{k}.(I_name), data{k}.(Q_name), '.', 'MarkerSize', 15)
-        scatter(data{k}.(I_name), data{k}.(Q_name), '.')                                           
+        scatter(data{k}.(I_name), data{k}.(Q_name), '.')
     end
     hold off
     grid on
     axis equal
+    set(gca, 'box', 'on')
 
     xlabel([strrep(I_name, '_', ' '), xunits], 'FontSize', 14)
     ylabel([strrep(Q_name, '_', ' '), yunits], 'FontSize', 14)

@@ -91,18 +91,19 @@ fids = zeros(size(allX));
 for n = 1:length(allX)
     fids(n) = fidelity(allX(n));
 end
-maxFidelity = max(fids);
+maxFidelity = max(fids(:));
 
 % Interpolate one of the cumtrapz so the indicies match up with the other
 % for a fair comparison. This will ensure that doing simple subtraction via
 % indicies actually compares like X values
 intX_interp = interp1(xValuesX,intX,xValuesI);
 
-[singleShotFidelity, SSFMax_idx] = max( abs( intX_interp'/max(intX) - intI/max(intI) ) );
+[singleShotFidelity, SSFMax_idx] = max(abs(intX_interp'/max(intX) - ...
+                                           intI/max(intI)));
 
 
 if plotHist
-    figure;
+    createFigure([.9, .1, .88, .8]);
     histogram(data.allIQsRot(1:end/2,1), Nbins); 
     hold on
     histogram(data.allIQsRot(end/2:end,1), Nbins);
@@ -117,26 +118,28 @@ if plotHist
     try
         yyaxis right
         h = plot(xValuesI, intI/max(intI), '--b');
-        ylabel('Occupation Probability', 'FontSize', 20)
+        ylabel('Occupation Probability', 'FontSize', 14)
         ax = gca;
         ax.YColor = [0,0,0];
         set(h, 'LineWidth',2);
         h = plot(xValuesX, intX/max(intX), '--r');
         set(h, 'LineWidth',2);
-        line([xValuesI(SSFMax_idx),xValuesI(SSFMax_idx)],...
-             [intI(SSFMax_idx)/max(intI),intX_interp(SSFMax_idx)/max(intX)],...
-             'DisplayName','Max Fidelity',...
-             'Color','k','LineStyle','--','LineWidth',2)
+        line([xValuesI(SSFMax_idx), xValuesI(SSFMax_idx)],...
+             [intI(SSFMax_idx)/max(intI), intX_interp(SSFMax_idx)/max(intX)],...
+             'DisplayName', 'Max Fidelity',...
+             'Color', 'k', 'LineStyle', '--', 'LineWidth', 2)
     catch
     end
     
     grid on
     xunits = getUnits(gateI, 'Is');
-    xlabel(['Generalized Quadrature Coordinate', xunits], 'FontSize', 20)
+    xlabel(['Generalized Quadrature Coordinate', xunits], 'FontSize', 14)
     [~, filenameI, extI] = fileparts(gateI.Filename);
     [~, filenameX, extX] = fileparts(gateX.Filename);
-    title({['Maximum Fidelity = ', num2str(100 * maxFidelity, '%.3f'), '%'],...
-           ['Single Shot Fidelity = ', num2str(100 * singleShotFidelity, '%.3f'), '%'],...
+    title({['Separation Fidelity = ',...
+                num2str(100 * maxFidelity, '%.3f'), '%'],...
+           ['Single Shot Fidelity = ',...
+                num2str(100 * singleShotFidelity, '%.3f'), '%'],...
            ['Dataset A: ', strrep(filenameI, '_', '\_'), extI,...
             ' [', gateI.Timestamp, ']'],...
            ['Dataset B: ', strrep(filenameX, '_', '\_'), extX,...
@@ -165,8 +168,8 @@ function [IQshiftRot, rotInfo] = centerAndRotate(allIQs)
     rotCenterI = mean(C(:,1));
     rotCenterQ = mean(C(:,2));
 
-    IQshift = [allIQs(:,1)- rotCenterI allIQs(:,2) - rotCenterQ];
-    centShift = [C(:,1) - rotCenterI C(:,2) - rotCenterQ];
+    IQshift = [allIQs(:,1)- rotCenterI, allIQs(:,2) - rotCenterQ];
+    centShift = [C(:,1) - rotCenterI, C(:,2) - rotCenterQ];
     angle = atan(centShift(1,2) / centShift(1,1));
 
     rotMatrix = [cos(angle) -sin(angle);...
