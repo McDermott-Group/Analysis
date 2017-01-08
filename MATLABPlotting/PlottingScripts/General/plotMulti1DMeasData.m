@@ -111,6 +111,7 @@ for data_index = 1:length(dep_vars)
             hold off
             axis tight
             grid on
+            set(gca, 'box', 'on')
 
             xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14)
             ylabel([strrep(dep_name, '_', ' '), yunits], 'FontSize', 14)
@@ -129,6 +130,7 @@ for data_index = 1:length(dep_vars)
         hold off
         axis tight
         grid on
+        set(gca, 'box', 'on')
 
         xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14)
         ylabel([strrep(dep_name, '_', ' '), yunits], 'FontSize', 14)
