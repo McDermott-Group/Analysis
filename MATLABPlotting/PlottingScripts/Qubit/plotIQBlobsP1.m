@@ -1,4 +1,4 @@
-function data = plotIQBlobsP1(CAL_I, CAL_X, DATA, MAKE_PLOTS)
+function plotIQBlobsP1(CAL_I, CAL_X, DATA, MAKE_PLOTS)
 
 % Select the calibration files.
 if ~exist('CAL_I', 'var')

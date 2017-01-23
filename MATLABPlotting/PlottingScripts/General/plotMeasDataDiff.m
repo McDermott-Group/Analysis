@@ -33,6 +33,9 @@ else
     range = data1.dep;
 end
 
+data = data1;
+data.dep = {};
+
 for data_index = 1:length(range)
     dep_name = range{data_index};
     if ~isempty(strfind(dep_name, '_Std_Dev')) ||...
@@ -41,7 +44,6 @@ for data_index = 1:length(range)
     end
     dep_vals1 = data1.(dep_name);
     if ~isfield(data2, dep_name)
-        disp(dep_name)
         error('The selected files do not match.')
     else
         dep_vals2 = data2.(dep_name);
@@ -62,10 +64,9 @@ for data_index = 1:length(range)
             error('The selected files do not match.')
         end
     end
-    
-    data = data1;
-    data.dep = {};
+
     diff_name = ['Difference_in_', dep_name];
+    
     data.(diff_name) = dep_vals1 - dep_vals2;
     if isfield(data1, 'error') && isfield(data1.error, dep_name) &&...
        isfield(data2, 'error') && isfield(data2.error, dep_name)

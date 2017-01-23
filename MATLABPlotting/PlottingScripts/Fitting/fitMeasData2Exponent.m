@@ -1,4 +1,4 @@
-function data = fitMeasData2Exponent(data_variable, data)
+function fitMeasData2Exponent(data_variable, data)
 %fitMeasData2Exponent(DATA_VARIABLE, DATA) Fit data to an exponential
 %function, plot the data and the fit. 
 %   data = fitMeasData2Exponent(DATA_VARIABLE, DATA) fits data for
@@ -154,6 +154,8 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     data.rels.(name){1} = indep_name1;
     data.dep{length(data.dep) + 1} = name;
     plotDataVar(data, name, 'errorbar')
+    
+    saveMeasData(data, [filename, '_', data_variable, '_expfit'])
 end
 end
 

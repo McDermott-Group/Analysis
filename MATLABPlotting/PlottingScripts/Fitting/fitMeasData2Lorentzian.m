@@ -29,8 +29,19 @@ plts_path = makeDirPlots(pathname);
 [data, data_variable] = checkDataVar(data, data_variable);
 
 if strcmp(data.units.(data_variable), 'dB')
-    data.(data_variable) = 10.^(data.(data_variable) / 20);
+    data.(data_variable) = 10.^(data.(data_variable) / 10);
     data.units.(data_variable) = 'Arb. Units';
+    disp('The values in dB are converted to arbitrary power units.')
+elseif strcmp(data.units.(data_variable), 'V')
+    data.(data_variable) = data.(data_variable).^2;
+    data.units.(data_variable) = 'V^2';
+    disp(['The data values in V are squared to obtain a quantaty',...
+         ' proportional to the power.'])
+elseif strcmp(data.units.(data_variable), 'ADC Units')
+    data.(data_variable) = data.(data_variable).^2;
+    data.units.(data_variable) = 'ADC Units^2';
+    disp(['The data values in ADC Units are squared to obtain a quantaty',...
+         ' proportional to the power.'])
 end
 
 dep_vals = data.(data_variable);
@@ -75,9 +86,12 @@ if length(dep_rels) == 1
     ee = max([abs(ci(1, 5) - f.e), abs(ci(2, 5) - f.e)]);
     background_txt = ['Background = ', num2str(f.e), ' ± ', num2str(ee),...
         yunits];
+
+    Q = f.b ./ (2 * pi * f.c);
+    Q_txt = ['Q = ', num2str(Q), ' ± ', num2str(Q * (be / f.b + ce / f.c))];
     
     full_title = {[strrep(filename, '_', '\_'), ext,...
-        ' [', data.Timestamp, ']'], f_c_txt, FWHM_txt, amplitude_txt,...
+        ' [', data.Timestamp, ']'], f_c_txt, FWHM_txt, Q_txt, amplitude_txt,...
         [slope_txt, '; ', background_txt]};
 
     name = ['Fitted_', data_variable];
@@ -162,7 +176,6 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     end
     data.rels.(name){1} = indep_name1;
     data.dep{length(data.dep) + 1} = name;
-    plotDataVar(data, name, 'errorbar')
     
     name = 'Extracted_Resonance_Frequency';
     data.(name) = f_c(:, 1);
@@ -170,7 +183,7 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     data.units.(name) = indep2_units;
     data.rels.(name){1} = indep_name1;
     data.dep{length(data.dep) + 1} = name;
-    plotDataVar(data, name, 'errorbar')
+    plotDataVar(data, name)
     
     name = 'Extracted_FWHM';
     data.(name) = FWHM(:, 1);
@@ -178,7 +191,17 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     data.units.(name) = indep2_units;
     data.rels.(name){1} = indep_name1;
     data.dep{length(data.dep) + 1} = name;
-    plotDataVar(data, name, 'errorbar')
+    plotDataVar(data, name)
+    
+    name = 'Extracted_Q';
+    data.(name) = f_c(:, 1) ./ (2 * pi * FWHM(:, 1));
+    data.error.(name) = data.(name) .* ...
+        (mean( f_c(:, 2:3), 2) ./  f_c(:, 1) +...
+         mean(FWHM(:, 2:3), 2) ./ FWHM(:, 1));
+    data.units.(name) = '';
+    data.rels.(name){1} = indep_name1;
+    data.dep{length(data.dep) + 1} = name;
+    plotDataVar(data, name)
 
     name = 'Extracted_Slope';
     data.(name) = slopes(:, 1);
@@ -190,7 +213,6 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     end
     data.rels.(name){1} = indep_name1;
     data.dep{length(data.dep) + 1} = name;
-    plotDataVar(data, name, 'errorbar')
     
     name = 'Extracted_Background_Level';
     data.(name) = backgrounds(:, 1);
@@ -198,7 +220,6 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     data.units.(name) = dep_units;
     data.rels.(name){1} = indep_name1;
     data.dep{length(data.dep) + 1} = name;
-    plotDataVar(data, name, 'errorbar')
    
     plotDataVar(data, data_variable, 'pixelated');
 
@@ -210,104 +231,6 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     plotDataVar(data, name, 'pixelated');
     
     saveMeasData(data, [filename, '_', data_variable, '_lorentzfit'])
-
-% elseif length(dep_rels) == 3
-%     
-%     freq_name = dep_rels(cellfun(@(x) ~isempty(strfind(x, 'Frequency')), dep_rels));
-%     if isempty(freq_name)
-%         error(['The data appears to depend on any ' ...
-%                '"Frequency" variables.']) 
-%     elseif length(freq_name) > 1
-%         error(['The data appears to depend on more than one ' ...
-%                '"Frequency" variable.'])
-%     end
-%     freq_name = char(freq_name);
-%     freq_vals = data.(freq_name);
-%     freq_units = data.units.(freq_name);
-%     
-%     indep_names = dep_rels(cellfun(@(x) isempty(strfind(x, 'Frequency')), dep_rels));
-%     
-%     if length(indep_names) > 2
-%         error(['There are more than two independent variables. Not ' ...
-%                 'implemented.'])
-%     end
-%     
-%     indep_vals = {};
-%     indep_units = {};
-%     indep_len = {};
-%     for k=1:length(indep_names)
-%         indep_vals{k} = data.(char(indep_names{k}));
-%         indep_units{k} = data.units.(char(indep_names{k}));
-%         indep_len{k} = length(indep_vals{k});
-%     end
-%         
-%     f_c = zeros(indep_len{1}, indep_len{2}, 3);
-%     FWHM = zeros(size(f_c));
-%     amplitudes = zeros(size(f_c));
-%     backgrounds = zeros(size(f_c));
-%     slopes = zeros(size(f_c));
-%     for j = 1:indep_len{1}
-%         for k = 1:indep_len{2}
-%             f = BiasedLorentzian(freq_vals, squeeze(dep_vals(j, k, :)));
-%             ci = confint(f);
-%             amplitudes(j, k, :) = [f.a, f.a - ci(2, 1), ci(1, 1) - f.a];
-%             f_c(j, k, :) = [f.b, f.b - ci(2, 2), ci(1, 2) - f.b];
-%             FWHM(j, k, :) = [f.c, f.c - ci(2, 3), ci(1, 3) - f.c];
-%             slopes(j, k, :) = [f.d, f.d - ci(2, 4), ci(1, 4) - f.d];
-%             backgrounds(j, k, :) = [f.e, f.e - ci(2, 5), ci(1, 5) - f.e];
-%         end
-%     end
-%     
-%     name = 'Extracted_Amplitude';
-%     data.(name) = amplitudes(:, :, 1);
-%     data.error.(name) = amplitudes(:, 2:3);
-%     if strcmp(dep_units, '')
-%         data.units.(name) = [indep2_units, '^2'];
-%     else
-%         data.units.(name) = [dep_units, '*', indep2_units, '^2'];
-%     end
-%     data.rels.(name){1} = indep_name1;
-%     data.dep{length(data.dep) + 1} = name;
-%     plotDataVar(data, name, 'errorbar')
-%     
-%     name = 'Extracted_Resonance_Frequency';
-%     data.(name) = f_c(:,:, 1);
-%     data.error.(name) = f_c(:,:, 2:3);
-%     data.units.(name) = freq_units;
-%     data.rels.(name) = indep_names;
-%     data.dep{length(data.dep) + 1} = name;
-%     plotDataVar(data, name, 'pixelated')
-%     plotDataVar(data, name, 'scatter')
-%     
-%     name = 'Extracted_FWHM';
-%     data.(name) = FWHM(:, 1);
-%     data.error.(name) = FWHM(:, 2:3);
-%     data.units.(name) = indep2_units;
-%     data.rels.(name){1} = indep_name1;
-%     data.dep{length(data.dep) + 1} = name;
-%     plotDataVar(data, name, 'errorbar')
-% 
-%     name = 'Extracted_Slope';
-%     data.(name) = slopes(:, 1);
-%     data.error.(name) = slopes(:, 2:3);
-%     if strcmp(dep_units, '')
-%         data.units.(name) = ['1/', indep2_units];
-%     else
-%         data.units.(name) = [dep_units, '/', indep2_units];
-%     end
-%     data.rels.(name){1} = indep_name1;
-%     data.dep{length(data.dep) + 1} = name;
-%     plotDataVar(data, name, 'errorbar')
-%     
-%     name = 'Extracted_Background_Level';
-%     data.(name) = backgrounds(:, 1);
-%     data.error.(name) = backgrounds(:, 2:3);
-%     data.units.(name) = dep_units;
-%     data.rels.(name){1} = indep_name1;
-%     data.dep{length(data.dep) + 1} = name;
-%     plotDataVar(data, name, 'errorbar')
-%     
-%     saveMeasData(data, [filename, '_', data_variable, '_lorentzfit'])
 end
 
 end

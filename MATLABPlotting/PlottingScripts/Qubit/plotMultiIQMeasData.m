@@ -114,7 +114,7 @@ for data_index = 1:length(data{1}.dep)
         ylabel([strrep(Q_name, '_', ' '), yunits], 'FontSize', 14)
         title(plot_title, 'FontSize', 10)
         if length(data) > 1
-            legend(legend_entries, 'Interpreter', 'none')
+            legend(legend_entries, 'Interpreter', 'none', 'Location', 'Best')
         end
 
         savePlot(fullfile(plts_path, [I_name, '-', Q_name, '_errorcirc']));
@@ -135,7 +135,7 @@ for data_index = 1:length(data{1}.dep)
     ylabel([strrep(Q_name, '_', ' '), yunits], 'FontSize', 14)
     title(plot_title, 'FontSize', 10)
     if length(data) > 1
-        legend(legend_entries, 'Interpreter', 'none')
+        legend(legend_entries, 'Interpreter', 'none', 'Location', 'Best')
     end
 
     savePlot(fullfile(plts_path, [I_name, '-', Q_name, '_simple']));
