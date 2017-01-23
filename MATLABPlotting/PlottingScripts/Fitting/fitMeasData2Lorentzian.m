@@ -87,7 +87,7 @@ if length(dep_rels) == 1
     background_txt = ['Background = ', num2str(f.e), ' ± ', num2str(ee),...
         yunits];
 
-    Q = f.b ./ (2 * pi * f.c);
+    Q = f.b ./ f.c;
     Q_txt = ['Q = ', num2str(Q), ' ± ', num2str(Q * (be / f.b + ce / f.c))];
     
     full_title = {[strrep(filename, '_', '\_'), ext,...
@@ -194,7 +194,7 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     plotDataVar(data, name)
     
     name = 'Extracted_Q';
-    data.(name) = f_c(:, 1) ./ (2 * pi * FWHM(:, 1));
+    data.(name) = f_c(:, 1) ./ FWHM(:, 1);
     data.error.(name) = data.(name) .* ...
         (mean( f_c(:, 2:3), 2) ./  f_c(:, 1) +...
          mean(FWHM(:, 2:3), 2) ./ FWHM(:, 1));
