@@ -73,11 +73,12 @@ if errorbar_flag
     hold off
     axis tight
     grid on
+    set(gca, 'box', 'on')
 
     xlabel(xlables, 'FontSize', 14)
     ylabel(ylables, 'FontSize', 14)
     title(plot_title, 'Interpreter', 'none', 'FontSize', 10)
-    legend(legends, 'Interpreter', 'none')
+    legend(legends, 'Interpreter', 'none', 'Location', 'Best')
     savePlot(fullfile(plts_path, [filename, '_comb_errorbar']));
 end
 
@@ -96,10 +97,11 @@ end
 hold off
 axis tight
 grid on
+set(gca, 'box', 'on')
 
 xlabel(xlables, 'FontSize', 14)
 ylabel(ylables, 'FontSize', 14)
 title(plot_title, 'Interpreter', 'none', 'FontSize', 10)
-legend(legends, 'Interpreter', 'none')
+legend(legends, 'Interpreter', 'none', 'Location', 'Best')
 savePlot(fullfile(plts_path, [filename, '_comb_simple']));
 end
