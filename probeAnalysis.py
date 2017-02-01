@@ -20,10 +20,9 @@ from dataChest import dataChest
 
 init_notebook_mode()
 
-
 class probeTest(object):
     
-    def __init__(self, path, n_die_x = 11, n_die_y = 11,bounds=None):
+    def __init__(self, path, bounds=None):
         """bounds should be in the form {area: (lower,upper)}"""
         chest = dataChest(path[:-1])
         chest.openDataset(path[-1])
@@ -35,12 +34,17 @@ class probeTest(object):
                           or (row[3]>bounds[row[1]][0] \
                               and row[3]<bounds[row[1]][1]))]
         # data in format (resistance, area, die, range)
-        self.odd = chest.getParameter('Odd')
-        self.inner_diameter = chest.getParameter('Inner Diameter')
-        self.pitchX = chest.getParameter('Pitch X')
-        self.pitchY = chest.getParameter('Pitch Y')
-        self.n_die_x = n_die_x
-        self.n_die_y = n_die_y
+        self.odd = True
+        self.inner_diameter = 65
+        self.pitchX = 6.2
+        self.pitchY = 6.2
+        try:
+            self.odd = chest.getParameter('Odd')
+            self.inner_diameter = chest.getParameter('Inner Diameter')
+            self.pitchX = chest.getParameter('Pitch X')
+            self.pitchY = chest.getParameter('Pitch Y')
+        except:
+            pass
         # what areas do we have?
         self.areas = []
         for row in self.data:
@@ -91,7 +95,7 @@ class probeTest(object):
                   )
         iplot(fig)
     
-    def resistanceHistogram(self, area=None):
+    def resistanceHistogram(self, area=None, binWidth=10):
         if area:
             areaList = [area]
         else:
@@ -102,16 +106,16 @@ class probeTest(object):
             xbins=dict(
                 start=0,
                 end=1000,
-                size=10
+                size=binWidth
             )
         ) for a in areaList]
         iplot(hist)
         
-    def dieMap(self, area):
+    def dieMap(self, area, fn=np.mean):
         w = WaferMap(inner_diameter=self.inner_diameter, pitch=self.pitchX, odd=self.odd, title=None)
         data = [row for row in self.data if float(row[1])==float(area)]
         for row in data:
             die = row[2]
-            dieData = [row[0] for row in data if row[2] is die]
-            w[die] = np.mean(dieData)# - self.calcMean()[area]
+            dieData = [row[0] for row in data if row[2] == die]
+            w[die] = fn(dieData)# - self.calcMean()[area]
         w.show()
