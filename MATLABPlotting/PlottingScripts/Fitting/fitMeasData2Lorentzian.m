@@ -136,11 +136,14 @@ elseif length(dep_rels) == 2 % Plot 2D data.
         indep_vals1 = data.(dep_rels{2});
         indep_vals2 = data.(dep_rels{1});
         dep_vals = dep_vals';
+        flip_fit = true;
     elseif ~isempty(strfind(dep_rels{2}, 'Frequency'))
         indep_name1 = dep_rels{1};
         indep_name2 = dep_rels{2};
         indep_vals1 = data.(dep_rels{1});
         indep_vals2 = data.(dep_rels{2});
+        fit_rels = dep_rels;
+        flip_fit = false;
     else
         error(['The data does not appear to depenend on any ',...
             '''Frequency'' variable.'])
@@ -165,7 +168,10 @@ elseif length(dep_rels) == 2 % Plot 2D data.
         backgrounds(k, :) = [f.e, f.e - ci(2, 5), ci(1, 5) - f.e];
         fit(k, :) = f(indep_vals2);
     end
-    
+    if flip_fit
+        fit = fit';
+    end
+
     name = 'Extracted_Amplitude';
     data.(name) = amplitudes(:, 1);
     data.error.(name) = amplitudes(:, 2:3);
@@ -226,7 +232,7 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     name = ['Fitted_', data_variable];
     data.(name) = fit;
     data.units.(name) = dep_units;
-    data.rels.(name) = data.rels.(data_variable);
+    data.rels.(name) = dep_rels;
     data.dep{length(data.dep) + 1} = name;
     plotDataVar(data, name, 'pixelated');
     
