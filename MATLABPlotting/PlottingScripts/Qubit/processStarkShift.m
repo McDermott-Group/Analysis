@@ -5,7 +5,7 @@ function processStarkShift(data, chi_0, alpha, f_cavity)
 %   DAC Stark amplitude specified in the data structure DATA, assuming
 %   CHI_0 shift, given in MHz, and anharmonicity of the qubit ALPHA,
 %   specified in MHz (the value should be negative). F_CAVITY is the bare
-%   cavity frequency.
+%   cavity frequency in GHz.
 %
 %   For details, see M. Boissonneault et al., PRL 105, 100504 (2010):
 %   http://journals.aps.org/prl/pdf/10.1103/PhysRevLett.105.100504
