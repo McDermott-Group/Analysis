@@ -153,7 +153,13 @@ function data = processMeasurementData(data)
                     end
                 end
             end
+        % The following case is kept for the historical reasons.
         elseif strcmp(data.distr.(dep_name), 'uknown')
+            err_name = [dep_name, '_Error'];
+            if isfield(data, err_name)
+                data.error.(dep_name) = data.(err_name);
+            end
+        elseif strcmp(data.distr.(dep_name), 'unknown')
             err_name = [dep_name, '_Error'];
             if isfield(data, err_name)
                 data.error.(dep_name) = data.(err_name);

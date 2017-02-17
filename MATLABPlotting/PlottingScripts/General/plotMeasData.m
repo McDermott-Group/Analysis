@@ -8,7 +8,6 @@ function plotMeasData(data_variable, loadedData)
 %   structure that has been loaded via loadMeasurementData
 
 % Select a file.
-
 if ~exist('loadedData', 'var')
     data = loadMeasurementData;
 else
