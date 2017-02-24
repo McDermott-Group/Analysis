@@ -59,7 +59,7 @@ for data_index = 1:length(dep_vars)
     if ~isempty(units)
         prefix = ' * ';
     else
-        prefix = ' ';
+        prefix = '';
     end
     disp(['''', depWname, ''': ', num2str(val, format),...
         prefix, units, ',']) 
