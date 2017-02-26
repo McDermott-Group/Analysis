@@ -21,24 +21,129 @@ for k=1:3
     end
 end
 
-p_pi = data.Pi_Pulse_Switching_Probability;
-p_no = data.No_Pulse_Switching_Probability;
-p_dark = data.Dark_Switching_Probability;
+P_X = data.Pi_Pulse_Switching_Probability;
+P_I = data.No_Pulse_Switching_Probability;
+P_0 = data.Dark_Switching_Probability;
 
-infidelity = (p_no - p_dark) ./ (p_pi - 2 * p_no);
+% Check that the errors are given.
+error_flag = true;
+for k=1:3
+    if ~isfield(data.error, probabilities{k}) 
+        error_flag = false;
+    end
+end
 
-processed_data_var = 'Preparation_Infidelity';
-data.(processed_data_var) = infidelity;
-data.units.(processed_data_var) = '';
-data.rels.(processed_data_var) = dep_rels;
-data.dep{length(data.dep) + 1} = processed_data_var;
+if error_flag
+    E_X = data.error.Pi_Pulse_Switching_Probability;
+    E_I = data.error.No_Pulse_Switching_Probability;
+    E_0 = data.error.Dark_Switching_Probability;
+end
+
 if isfield(data, 'Driving_on_Dressed_One') &&...
         strcmp(data.Driving_on_Dressed_One, 'True')
-    full_name = 'Ground State Preparation Infidelity';
+    % infidelity = (P_I - P_0) ./ (P_X - 2 * P_I);
+    infidelity = (P_X - P_0) ./ (2 * P_X) .*...
+            (1 - sqrt(1 - 4 * P_X .* (P_I - P_0) ./ (P_X - P_0).^2));
+    processed_data_var = 'Ground_State_Preparation_Infidelity';
 else
-    full_name = 'Excited State Preparation Infidelity';
+    infidelity = (P_I - P_0) ./ (2 * P_I) .*...
+            (1 - sqrt(1 - 4 * P_I .* (P_X - P_0) ./ (P_I - P_0).^2));
+    processed_data_var = 'Excited_State_Preparation_Infidelity';
 end
-data.plotting.(processed_data_var).full_name = full_name;
+
+if error_flag
+    E = infidelity .* (sqrt(E_X.^2 + E_0.^2) ./ (P_X - P_0) + ...
+                       sqrt(E_I.^2 + E_0.^2) ./ (P_I - P_0));
+end
+
+E(imag(infidelity) ~= 0) = NaN;
+infidelity(imag(infidelity) ~= 0) = NaN;
+E(infidelity < 0) = NaN;
+infidelity(infidelity < 0) = NaN;
+
+sorted_infidelity = sort(infidelity);
+sorted_infidelity(~isfinite(sorted_infidelity)) = [];
+N = 20;
+if length(sorted_infidelity) > N
+    sorted_infidelity = sorted_infidelity(1:N);
+end
+
+percntiles = prctile(sorted_infidelity, [15 75]);
+sorted_infidelity = sorted_infidelity(sorted_infidelity > percntiles(1) &...
+                                      sorted_infidelity < percntiles(2));
+
+bound = mean(sorted_infidelity);
+bound_error = std(sorted_infidelity) / sqrt(N - 1);
+if isfield(data, 'Driving_on_Dressed_One') &&...
+        strcmp(data.Driving_on_Dressed_One, 'True')
+    disp(['Ground State Preparation Infidelity = ', num2str(bound),...
+        ' ± ', num2str(bound_error)]);
+else
+    disp(['Excited State Preparation Infidelity = ', num2str(bound),...
+        ' ± ', num2str(bound_error)]);
+end
+
+data.(processed_data_var) = infidelity;
+data.units.(processed_data_var) = '';
+if error_flag
+    data.error.(processed_data_var) = E;
+end
+data.rels.(processed_data_var) = dep_rels;
+data.dep{length(data.dep) + 1} = processed_data_var;
+
+plotDataVar(data, processed_data_var);
+
+if isfield(data, 'Driving_on_Dressed_One') &&...
+        strcmp(data.Driving_on_Dressed_One, 'True')
+    infidelity = (1 - P_X) ./ (P_X - 2 * P_I);
+    if error_flag
+        E = infidelity .* (E_X ./ (1 - P_X) + ...
+                sqrt(E_X.^2 + 4 * E_I.^2) ./ (P_X - 2 * P_I));
+    end
+    processed_data_var = 'Excited_State_Preparation_Infidelity';
+else
+    infidelity = (1 - P_I) ./ (P_I - 2 * P_X);
+    if error_flag
+        E = infidelity .* (E_I ./ (1 - P_I) + ...
+                sqrt(E_I.^2 + 4 * E_X.^2) ./ (P_I - 2 * P_X));
+    end
+    processed_data_var = 'Ground_State_Preparation_Infidelity';
+end
+
+E(imag(infidelity) ~= 0) = NaN;
+infidelity(imag(infidelity) ~= 0) = NaN;
+E(infidelity < 0) = NaN;
+infidelity(infidelity < 0) = NaN;
+
+sorted_infidelity = sort(infidelity);
+sorted_infidelity(~isfinite(sorted_infidelity)) = [];
+N = 20;
+if length(sorted_infidelity) > N
+    sorted_infidelity = sorted_infidelity(1:N);
+end
+
+percntiles = prctile(sorted_infidelity, [15 75]);
+sorted_infidelity = sorted_infidelity(sorted_infidelity > percntiles(1) &...
+                                      sorted_infidelity < percntiles(2));
+
+bound = mean(sorted_infidelity);
+bound_error = std(sorted_infidelity) / sqrt(N - 1);
+if isfield(data, 'Driving_on_Dressed_One') &&...
+        strcmp(data.Driving_on_Dressed_One, 'True')
+    disp(['Excited State Preparation Infidelity = ', num2str(bound),...
+        ' ± ', num2str(bound_error)]);
+else
+    disp(['Groud State Preparation Infidelity = ', num2str(bound),...
+        ' ± ', num2str(bound_error)]);
+end
+
+data.(processed_data_var) = infidelity;
+data.units.(processed_data_var) = '';
+if error_flag
+    data.error.(processed_data_var) = E;
+end
+data.rels.(processed_data_var) = dep_rels;
+data.dep{length(data.dep) + 1} = processed_data_var;
 
 plotDataVar(data, processed_data_var);
 end

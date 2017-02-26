@@ -1,8 +1,9 @@
 function plotDataVars(data_variables)
-%plotDataVars(DATA_VARIABLES)  Plot data variables listed in the cell
-%in a sinle plot.
+%plotDataVars(DATA_VARIABLES)  Plot several data variables in a single
+%plot.
 %   plotDataVars(DATA_VARIABLES) plots several data variables in a single
-%   plot.
+%   plot. DATA_VARIABLES should be a list containing dependent variable
+%   names.
 
 if ~iscell(data_variables)
     error('Data variable names should be fed in a cell.')
@@ -89,7 +90,7 @@ for k = 1:length(data_variables)
     if strcmp(data_variables{k},'Phase')
         data.(data_variables{k}) = unwrap(data.(data_variables{k}));
     end
-        
+   
     indeps = data.rels.(data_variables{k});
     plot(data.(indeps{1}), data.(data_variables{k}),...
         '.-', 'LineWidth', 1, 'MarkerSize', 15)
