@@ -1,10 +1,9 @@
 function fitMeasData2Lorentzian(data_variable)
-%fitMeasData2Lorentzian(DATA_VARIABLE) Fit data to Lorentzians
-% superimposed on linear backgrounds, plot the data and the fit.
-%   fitMeasData2Lorentzian(DATA_VARIABLE)
-%   fits data for DATA_VARIABLE to Lorentzians superimposed on linear
-%   backgrounds, plots the data and the fit, and saves the data structure
-%   DATA with the fit appended to it.
+%fitMeasData2Lorentzian(DATA_VARIABLE)  Fit data to a Lorentzian
+%superimposed on a linear background.
+%   fitMeasData2Lorentzian(DATA_VARIABLE) fits data for DATA_VARIABLE to
+%   a Lorentzian superimposed on a linear background, plots the data and
+%   the fit, and saves the data structure containing the fit.
 
 % Select a file.
 data = loadMeasurementData;
@@ -106,7 +105,7 @@ if length(dep_rels) == 1
         createFigure('right');
         plotErrorbar(indep_vals, dep_vals, data.error.(data_variable))
         hold on
-            plot(indep_vals, f(indep_vals), 'r', 'Linewidth', 2)
+        plot(indep_vals, f(indep_vals), 'r', 'Linewidth', 2)
         hold off
         legend('data', 'fit')
         xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14)
@@ -120,7 +119,7 @@ if length(dep_rels) == 1
     createFigure;
     plotSimple(indep_vals, dep_vals, '.')
     hold on
-        plot(indep_vals, f(indep_vals), 'r', 'Linewidth', 2)
+    plot(indep_vals, f(indep_vals), 'r', 'Linewidth', 2)
     hold off
     legend('data', 'fit')
     xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14)
@@ -142,7 +141,6 @@ elseif length(dep_rels) == 2 % Plot 2D data.
         indep_name2 = dep_rels{2};
         indep_vals1 = data.(dep_rels{1});
         indep_vals2 = data.(dep_rels{2});
-        fit_rels = dep_rels;
         flip_fit = false;
     else
         error(['The data does not appear to depenend on any ',...
@@ -157,7 +155,7 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     amplitudes = zeros(size(f_c));
     backgrounds = zeros(size(f_c));
     slopes = zeros(size(f_c));
-    fit = zeros(size(dep_vals));
+    fitted = zeros(size(dep_vals));
     for k = 1:length(indep_vals1)
         f = BiasedLorentzian(indep_vals2, dep_vals(k, :));
         ci = confint(f);
@@ -166,10 +164,10 @@ elseif length(dep_rels) == 2 % Plot 2D data.
         FWHM(k, :) = [abs(f.c), f.c - ci(2, 3), ci(1, 3) - f.c];
         slopes(k, :) = [f.d, f.d - ci(2, 4), ci(1, 4) - f.d];
         backgrounds(k, :) = [f.e, f.e - ci(2, 5), ci(1, 5) - f.e];
-        fit(k, :) = f(indep_vals2);
+        fitted(k, :) = f(indep_vals2);
     end
     if flip_fit
-        fit = fit';
+        fitted = fitted';
     end
 
     name = 'Extracted_Amplitude';
@@ -226,11 +224,10 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     data.units.(name) = dep_units;
     data.rels.(name){1} = indep_name1;
     data.dep{length(data.dep) + 1} = name;
-   
     plotDataVar(data, data_variable, 'pixelated');
 
     name = ['Fitted_', data_variable];
-    data.(name) = fit;
+    data.(name) = fitted;
     data.units.(name) = dep_units;
     data.rels.(name) = dep_rels;
     data.dep{length(data.dep) + 1} = name;
