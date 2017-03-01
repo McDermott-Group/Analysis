@@ -13,7 +13,11 @@ function data = importMeasurementData(filename)
     if strcmp(ext, '.mat')
         data = importMat_v0p0(filename);
     elseif strcmp(ext, '.hdf5')
-        data = importHdf5_v0p0(filename);
+        try
+            data = importHdf5_v0p0(filename);
+        catch
+            data = importHdf5_v0p1(filename);
+        end
     elseif strcmp(ext, '.txt')
         [fid, msg] = fopen(filename, 'r');
 
@@ -135,6 +139,104 @@ function data = importMat_v0p0(filename)
         for k = 1:length(data.dep)
             if ~isfield(data.distr, data.dep{k})
                 data.distr.(data.dep{k}) = '';
+            end
+        end
+    end
+end
+
+function data = importHdf5_v0p1(filename)
+    data.Filename = filename;
+    [~, fn, ~] = fileparts(filename);
+    data.Experiment_Name = char(fn);
+    timestamp = h5readatt(filename, '/', 'Date Created');
+    data.Timestamp = strrep(timestamp, 'T', ' ');
+    parts = strsplit(char(data.Timestamp), '.');
+    data.Timestamp = parts{1};
+    
+    indeps = h5readatt(filename, '/independents', 'names');
+    data.indep = {};
+    for k = 1:length(indeps)
+        indep_name = strrep(strtrim(indeps{k}), char(0), '');
+        indep_field = strrep(indep_name, ' ', '_');
+        indep_location = strcat('/independents/', indep_name);
+        data.indep{k} = indep_field;
+        data.(indep_field) = h5read(filename, indep_location);
+        data.units.(indep_field) = char(h5readatt(filename,...
+                indep_location, 'units'));
+    end
+    
+    deps = h5readatt(filename, '/dependents', 'names');
+    data.dep = {};
+    for k = 1:length(deps)
+        dep_name =  strrep(strtrim(deps{k}), char(0), '');
+        dep_field = strrep(dep_name, ' ', '_');
+        dep_location = strcat('/dependents/', dep_name);
+        data.dep{k} = dep_field;
+        data.(dep_field) = h5read(filename, dep_location);
+        data.units.(dep_field) = char(h5readatt(filename,...
+                dep_location, 'units'));
+    end
+    
+    data.distr = {};
+    data.rels = struct();
+    sizes = {};
+
+    params = h5info(filename, '/parameters');
+    for k = 1:length(params.Groups)
+        full_param_name = params.Groups(k).Name;
+        pos = strfind(full_param_name, '/');
+        param_name = full_param_name(pos(end)+1:end);
+        param_name = strrep(param_name, ' ', '_');
+        value = h5readatt(filename, full_param_name, 'value');
+        if length(param_name) > 6 &&...
+                    strcmp(param_name(end-4:end), 'Units')
+            data.units.(param_name(1:end-6)) = char(value);
+        elseif length(param_name) > 13 &&...
+                    strcmp(param_name(end-11:end), 'Distribution')
+            data.distr.(param_name(1:end-13)) = char(value);
+        elseif length(param_name) > 13 &&...
+                    strcmp(param_name(end-11:end), 'Dependencies')
+            deps_line = char(value);
+            % char(39) is a single quotation mark.
+            rels_pos = strfind(deps_line, char(39));
+            if mod(length(rels_pos), 2) ~= 0
+                error(['Data variable dependencies are not properly',...
+                    'specified in ', filename, '.']);
+            end
+            relationships = cell(1, length(rels_pos)/2);
+            for q = 1:2:length(rels_pos)
+                relationships{(q+1)/2} =...
+                    strrep(deps_line(rels_pos(q)+1:rels_pos(q+1)-1),...
+                    ' ', '_');
+            end
+            data.rels.(param_name(1:end-13)) = relationships;
+        elseif length(param_name) > 5 &&...
+                    strcmp(param_name(end-3:end), 'Size')
+            sizes.(param_name(1:end-5)) = value;
+        else
+            data.(param_name) = value;
+        end
+    end
+
+    for k = 1:length(data.dep)
+        dep = data.dep{k};
+        if length(data.rels.(dep)) == 2
+            indep1 = data.rels.(dep){1};
+            indep2 = data.rels.(dep){2};
+            shape = [sizes.(indep2), sizes.(indep1)];
+            dep_vals = data.(dep);
+            if length(dep_vals) == prod(shape)
+                data.(dep) = reshape(dep_vals, shape)';
+            end
+            indep_vals1 = data.(indep1);
+            if length(indep_vals1) == prod(shape)
+                data.(indep1) = reshape(indep_vals1, shape);
+                data.(indep1) = double(data.(indep1)(1, :)');
+            end
+            indep_vals2 = data.(indep2);
+            if length(indep_vals2) == prod(shape)
+                data.(indep2) = reshape(indep_vals2, shape);
+                data.(indep2) = double(data.(indep2)(:, 1));
             end
         end
     end
