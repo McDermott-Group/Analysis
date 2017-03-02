@@ -51,6 +51,9 @@ else
     processed_data_var = 'Excited_State_Preparation_Infidelity';
 end
 
+correction = 1 ./ (1 - infidelity);
+correction(0 >= infidelity | infidelity > .5 | ~isfinite(infidelity)) = 2; 
+
 if error_flag
     E = infidelity .* (sqrt(E_X.^2 + E_0.^2) ./ (P_X - P_0) + ...
                        sqrt(E_I.^2 + E_0.^2) ./ (P_I - P_0));
@@ -95,17 +98,19 @@ plotDataVar(data, processed_data_var);
 
 if isfield(data, 'Driving_on_Dressed_One') &&...
         strcmp(data.Driving_on_Dressed_One, 'True')
-    infidelity = (1 - P_X) ./ (P_X - 2 * P_I);
+    infidelity = (1 - P_X) ./ (P_X - correction .* P_I);
     if error_flag
         E = infidelity .* (E_X ./ (1 - P_X) + ...
-                sqrt(E_X.^2 + 4 * E_I.^2) ./ (P_X - 2 * P_I));
+                sqrt(E_X.^2 + correction.^2 .* E_I.^2) ./ ...
+                (P_X - correction .* P_I));
     end
     processed_data_var = 'Excited_State_Preparation_Infidelity';
 else
-    infidelity = (1 - P_I) ./ (P_I - 2 * P_X);
+    infidelity = (1 - P_I) ./ (P_I - correction * P_X);
     if error_flag
         E = infidelity .* (E_I ./ (1 - P_I) + ...
-                sqrt(E_I.^2 + 4 * E_X.^2) ./ (P_I - 2 * P_X));
+                sqrt(E_I.^2 + correction.^2 .* E_X.^2) ./ ...
+                (P_I - correction .* P_X));
     end
     processed_data_var = 'Ground_State_Preparation_Infidelity';
 end
@@ -117,7 +122,7 @@ infidelity(infidelity < 0) = NaN;
 
 sorted_infidelity = sort(infidelity);
 sorted_infidelity(~isfinite(sorted_infidelity)) = [];
-N = 20;
+N = 10;
 if length(sorted_infidelity) > N
     sorted_infidelity = sorted_infidelity(1:N);
 end
