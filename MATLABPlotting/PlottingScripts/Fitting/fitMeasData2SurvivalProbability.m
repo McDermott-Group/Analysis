@@ -42,6 +42,8 @@ phi_ig = data.Interleaved_Probability;
 
 gate = strrep(data.RB_Interleaving_Gate(4:end-3), '''', '');
 
+rb_reps = data.RB_Reps;
+
 % Check that the errors are given.
 error_flag = true;
 for k=1:length(probabilities)
@@ -160,10 +162,10 @@ if length(dep_rels) == 1
     % Plot an errorbar graph.
     if error_flag
         createFigure('right');
-        plotErrorbar(indep_vals, phi_no, phi_no_err)
+        plotErrorbar(indep_vals, phi_no, phi_no_err / sqrt(rb_reps - 1))
         hold on
         plot(indep_vals, f_no(indep_vals), 'b', 'Linewidth', 2)
-        plotErrorbar(indep_vals, phi_ig, phi_ig_err)
+        plotErrorbar(indep_vals, phi_ig, phi_ig_err / sqrt(rb_reps - 1))
         plot(indep_vals, f_ig(indep_vals), 'r', 'Linewidth', 2)
         hold off
         legend(legends, 'Location', 'Best')
@@ -175,10 +177,10 @@ if length(dep_rels) == 1
 
     % Plot a simple 1D graph.
     createFigure;
-    plotSimple(indep_vals, phi_no, 'o')
+    plotSimple(indep_vals, phi_no, 'bo')
     hold on
     plot(indep_vals, f_no(indep_vals), 'b', 'Linewidth', 2)
-    plotSimple(indep_vals, phi_ig, 'o')
+    plotSimple(indep_vals, phi_ig, 'ro')
     plot(indep_vals, f_ig(indep_vals), 'r', 'Linewidth', 2)
     hold off
     legend(legends, 'Location', 'Best')
@@ -194,8 +196,10 @@ function f = SurvivalProbabilityFit(m, p)
         'independent', 'm', 'dependent', 'p' );
     opts = fitoptions('Method', 'NonlinearLeastSquares');
     opts.Display = 'Off';
+    opts.TolX = 1e-9;
+    opts.TolFun = 1e-9;
     opts.Lower = [0 0 0 0];
-    opts.StartPoint = [max(p) / 3 min(p) 0.001 sqrt(max(p))];
+    opts.StartPoint = [max(p) / 2 min(p) 0.0005 sqrt(max(p))];
     opts.Upper = [1 1 1 1];
     f = fit(m, p, ft, opts);
 end
