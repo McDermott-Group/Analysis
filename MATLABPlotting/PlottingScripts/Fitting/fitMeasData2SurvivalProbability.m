@@ -68,16 +68,20 @@ if length(dep_rels) == 1
 
     ci = confint(f_no);
     ae_no = max([abs(ci(1, 1) - f_no.a), abs(ci(2, 1) - f_no.a)]);
-    astr_no = ['  a = ', num2str(f_no.a, 4), ' ± ', num2str(ae_no, 3)];
+    astr_no = ['  a = ', num2str(f_no.a, '%.4f'), ' ± ',...
+                         num2str(ae_no, '%.4f')];
     
     be_no = max([abs(ci(1, 2) - f_no.b), abs(ci(2, 2) - f_no.b)]);
-    bstr_no = ['  b = ', num2str(f_no.b, 4), ' ± ', num2str(be_no, 3)];
+    bstr_no = ['  b = ', num2str(f_no.b, '%.4f'), ' ± ',...
+                         num2str(be_no, '%.4f')];
     
     ce_no = max([abs(ci(1, 3) - f_no.c), abs(ci(2, 3) - f_no.c)]);
-    cstr_no = ['  c = ', num2str(f_no.c, 4), ' ± ', num2str(ce_no, 3)];
+    cstr_no = ['  c = ', num2str(f_no.c, '%.4f'), ' ± ',...
+                         num2str(ce_no, '%.4f')];
     
     pe_no = max([abs(ci(1, 4) - f_no.d), abs(ci(2, 4) - f_no.d)]);
-    pstr_no = ['  p = ', num2str(f_no.d, 4), ' ± ', num2str(pe_no, 3)];
+    pstr_no = ['  p = ', num2str(f_no.d, '%.4f'), ' ± ',...
+                         num2str(pe_no, '%.4f')];
     
     f_ig = SurvivalProbabilityFit(indep_vals(:), phi_ig);
 
@@ -92,16 +96,20 @@ if length(dep_rels) == 1
     
     ci = confint(f_ig);
     ae_ig = max([abs(ci(1, 1) - f_ig.a), abs(ci(2, 1) - f_ig.a)]);
-    astr_ig = ['  a = ', num2str(f_ig.a, 4), ' ± ', num2str(ae_ig, 3)];
+    astr_ig = ['  a = ', num2str(f_ig.a, '%.4f'), ' ± ',...
+                         num2str(ae_ig, '%.4f')];
     
     be_ig = max([abs(ci(1, 2) - f_ig.b), abs(ci(2, 2) - f_ig.b)]);
-    bstr_ig = ['  b = ', num2str(f_ig.b, 4), ' ± ', num2str(be_ig, 3)];
+    bstr_ig = ['  b = ', num2str(f_ig.b, '%.4f'), ' ± ',...
+                         num2str(be_ig, '%.4f')];
     
     ce_ig = max([abs(ci(1, 3) - f_ig.c), abs(ci(2, 3) - f_ig.c)]);
-    cstr_ig = ['  c = ', num2str(f_ig.c, 4), ' ± ', num2str(ce_ig, 3)];
+    cstr_ig = ['  c = ', num2str(f_ig.c, '%.4f'), ' ± ',...
+                         num2str(ce_ig, '%.4f')];
     
     pe_ig = max([abs(ci(1, 4) - f_ig.d), abs(ci(2, 4) - f_ig.d)]);
-    pstr_ig = ['  p = ', num2str(f_ig.d, 4), ' ± ', num2str(pe_ig, 3)];
+    pstr_ig = ['  p = ', num2str(f_ig.d, '%.4f'), ' ± ',...
+                         num2str(pe_ig, '%.4f')];
 
     disp('No interleaving gate:')
     disp(astr_no)
@@ -116,18 +124,19 @@ if length(dep_rels) == 1
     disp(pstr_ig)
     
     disp('Average error rate over all Cliffords:')
-    disp(['  r(average) = ', num2str(r), ' ± ', num2str((d - 1) * ae_no / d, 3)]);
+    disp(['  r(average) = ', num2str(r, '%.4f'), ' ± ',...
+            num2str((d - 1) * ae_no / d, '%.4f')]);
     
     disp(['Gate ', gate, ', error:'])
-    disp(['  r(', gate, ') = ', num2str(r_gate), ' ± ',...
-            num2str(r_gate_error, 3)]);
+    disp(['  r(', gate, ') = ', num2str(r_gate, '%.4f'), ' ± ',...
+            num2str(r_gate_error, '%.4f')]);
 
     full_title = {[strrep(filename, '_', '\_'), ext,...
             ' [', data.Timestamp, ']'],...
             ['Depolarization Parameters: p_{no gate} = ',...
               pstr_no(7:end), '; p_{', gate, '} = ', pstr_ig(7:end)],...
-            [gate, ' Gate Error: r_{', gate, '} = ', num2str(r_gate), ' ± ',...
-              num2str(r_gate_error, 3)]};
+            [gate, ' Gate Error: r_{', gate, '} = ', num2str(r_gate,...
+             '%.4f'), ' ± ', num2str(r_gate_error, '%.4f')]};
 
     legends = {'no interleaving gate, data',...
                 'no interleaving gate, fit',...
@@ -186,7 +195,7 @@ function f = SurvivalProbabilityFit(m, p)
     opts = fitoptions('Method', 'NonlinearLeastSquares');
     opts.Display = 'Off';
     opts.Lower = [0 0 0 0];
-    opts.StartPoint = [1 min(p) 0 max(sqrt(p))];
-    opts.Upper = [10 10 10 1];
+    opts.StartPoint = [max(p) / 3 min(p) 0.001 sqrt(max(p))];
+    opts.Upper = [1 1 1 1];
     f = fit(m, p, ft, opts);
 end
