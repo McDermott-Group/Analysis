@@ -12,7 +12,7 @@ probabilities = {'Pi_Pulse_Switching_Probability',...
                  'No_Pulse_Switching_Probability',...
                  'Dark_Switching_Probability'};
 % Check that the data variable exists.
-for k=1:3
+for k=1:length(probabilities)
     [data, probabilities{k}] = checkDataVar(data, probabilities{k});
     dep_rels = data.rels.(probabilities{k});
     if isempty(dep_rels)
@@ -27,7 +27,7 @@ P_0 = data.Dark_Switching_Probability;
 
 % Check that the errors are given.
 error_flag = true;
-for k=1:3
+for k=1:length(probabilities)
     if ~isfield(data.error, probabilities{k}) 
         error_flag = false;
     end
