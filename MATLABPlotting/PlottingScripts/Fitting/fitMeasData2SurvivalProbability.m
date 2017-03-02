@@ -159,14 +159,15 @@ if length(dep_rels) == 1
     data.plotting.(name).plot_title = full_title;
     data.(name) = f_ig(indep_vals);
     
+    indep_fits = min(indep_vals):max(indep_vals);
     % Plot an errorbar graph.
     if error_flag
         createFigure('right');
         plotErrorbar(indep_vals, phi_no, phi_no_err / sqrt(rb_reps - 1))
         hold on
-        plot(indep_vals, f_no(indep_vals), 'b', 'Linewidth', 2)
+        plot(indep_fits, f_no(indep_fits), 'b', 'Linewidth', 2)
         plotErrorbar(indep_vals, phi_ig, phi_ig_err / sqrt(rb_reps - 1))
-        plot(indep_vals, f_ig(indep_vals), 'r', 'Linewidth', 2)
+        plot(indep_fits, f_ig(indep_fits), 'r', 'Linewidth', 2)
         hold off
         legend(legends, 'Location', 'Best')
         xlabel(strrep(indep_name, '_', ' '), 'FontSize', 14)
@@ -179,9 +180,9 @@ if length(dep_rels) == 1
     createFigure;
     plotSimple(indep_vals, phi_no, 'bo')
     hold on
-    plot(indep_vals, f_no(indep_vals), 'b', 'Linewidth', 2)
+    plot(indep_fits, f_no(indep_fits), 'b', 'Linewidth', 2)
     plotSimple(indep_vals, phi_ig, 'ro')
-    plot(indep_vals, f_ig(indep_vals), 'r', 'Linewidth', 2)
+    plot(indep_fits, f_ig(indep_fits), 'r', 'Linewidth', 2)
     hold off
     legend(legends, 'Location', 'Best')
     xlabel(strrep(indep_name, '_', ' '), 'FontSize', 14)
