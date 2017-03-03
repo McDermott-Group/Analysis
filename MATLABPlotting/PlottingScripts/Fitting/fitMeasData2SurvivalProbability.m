@@ -1,14 +1,36 @@
-function fitMeasData2SurvivalProbability(data)
-%fitMeasData2SurvivalProbability(DATA)  Fit randomized benchmarking data
-% to a survival probability function.
-%   fitMeasData2SurvivalProbability(DATA) fits data  randomized
+function fitMeasData2SurvivalProbability(order, data)
+%fitMeasData2SurvivalProbability(ORDER, DATA)  Fit randomized benchmarking
+% datato a survival probability function.
+%   fitMeasData2SurvivalProbability(ORDER, DATA) fits data  randomized
 %   benchmarking data to a survival probability function, plots the data
-%   and the fit.
+%   and the fit. ORDER should be either 0 or 1, and detemines the fit order
+%   of the sequence fidelity model.
 %   
 %   See also:
 %   Magesan et al., PRL 109, 080505 (2012).
 
 d = 2; % Dimension of the system.
+
+if exist('order', 'var')
+    if isnumeric(order) && order
+        order = 1;
+    elseif ischar(order)
+        if strcmp(order(1:4), 'zero')
+            order = 0;
+        else
+            order = 1;
+        end
+    else
+        order = 0;
+    end
+else
+    order = 0;
+end
+if ~order
+    ordstr = 'Zeroth-Order';
+else
+    ordstr = 'First-Order';
+end
 
 if ~exist('data', 'var')
     % Select a file.
@@ -56,92 +78,105 @@ if error_flag
     phi_ig_err = data.error.Interleaved_Probability;
 end
 
-% Plot 1D data.
 if length(dep_rels) == 1
     indep_name = dep_rels{1};
     indep_vals = data.(indep_name);
 
-    f_no = SurvivalProbabilityFit(indep_vals(:), phi_no);
-    
+    disp(['Fitting to the ', lower(ordstr), ' model...'])
+    if ~order
+        f_no = SurvivalProbabilityZerothOrderModel(indep_vals(:), phi_no);
+    else
+        f_no = SurvivalProbabilityFirstOrderModel(indep_vals(:), phi_no);
+    end
     p_no = f_no.d;
     
-    % Compute the average error rate over all Clifford gates. 
-    r = (d - 1) * (1 - p_no) / d;
-
+    disp('No interleaving gate:')
     ci = confint(f_no);
     ae_no = max([abs(ci(1, 1) - f_no.a), abs(ci(2, 1) - f_no.a)]);
     astr_no = ['  a = ', num2str(f_no.a, '%.4f'), ' ± ',...
                          num2str(ae_no, '%.4f')];
+    disp(astr_no)
     
     be_no = max([abs(ci(1, 2) - f_no.b), abs(ci(2, 2) - f_no.b)]);
     bstr_no = ['  b = ', num2str(f_no.b, '%.4f'), ' ± ',...
                          num2str(be_no, '%.4f')];
+    disp(bstr_no)
     
-    ce_no = max([abs(ci(1, 3) - f_no.c), abs(ci(2, 3) - f_no.c)]);
-    cstr_no = ['  c = ', num2str(f_no.c, '%.4f'), ' ± ',...
-                         num2str(ce_no, '%.4f')];
-    
-    pe_no = max([abs(ci(1, 4) - f_no.d), abs(ci(2, 4) - f_no.d)]);
+    if order
+        ce_no = max([abs(ci(1, 3) - f_no.c), abs(ci(2, 3) - f_no.c)]);
+        cstr_no = ['  c = ', num2str(f_no.c, '%.4f'), ' ± ',...
+                             num2str(ce_no, '%.4f')];
+        disp(cstr_no)
+        pe_no = max([abs(ci(1, 4) - f_no.d), abs(ci(2, 4) - f_no.d)]);
+    else
+        pe_no = max([abs(ci(1, 3) - f_no.d), abs(ci(2, 3) - f_no.d)]);
+    end
     pstr_no = ['  p = ', num2str(f_no.d, '%.4f'), ' ± ',...
                          num2str(pe_no, '%.4f')];
+    disp(pstr_no)
     
-    f_ig = SurvivalProbabilityFit(indep_vals(:), phi_ig);
+    % Compute the average error rate over all Clifford gates. 
+    r_avg = (d - 1) * (1 - p_no) / d;
+    r_avg_error = (d - 1) * pe_no / d;
 
+    if ~order
+        f_ig = SurvivalProbabilityZerothOrderModel(indep_vals(:), phi_ig);
+    else
+        f_ig = SurvivalProbabilityFirstOrderModel(indep_vals(:), phi_ig);
+    end
     p_ig = f_ig.d;
     
+    % Compute the gate error. 
     r_gate = (d - 1) * (1 - p_ig / p_no) / d;
-    
     r_gate_error = ...
             min([(d - 1) * (abs(p_no - p_ig / p_no) + 1 - p_no) / d,...
                  2 * (d^2 - 1) * (1 - p_no) / (p_no * d^2) +...
                  4 * sqrt(1 - p_no) * sqrt(d^2 - 1) / p_no]);
     
+    disp(['With interleaving ', gate, ' gate:'])
     ci = confint(f_ig);
     ae_ig = max([abs(ci(1, 1) - f_ig.a), abs(ci(2, 1) - f_ig.a)]);
     astr_ig = ['  a = ', num2str(f_ig.a, '%.4f'), ' ± ',...
                          num2str(ae_ig, '%.4f')];
+    disp(astr_ig)
     
     be_ig = max([abs(ci(1, 2) - f_ig.b), abs(ci(2, 2) - f_ig.b)]);
     bstr_ig = ['  b = ', num2str(f_ig.b, '%.4f'), ' ± ',...
                          num2str(be_ig, '%.4f')];
+    disp(bstr_ig)
     
-    ce_ig = max([abs(ci(1, 3) - f_ig.c), abs(ci(2, 3) - f_ig.c)]);
-    cstr_ig = ['  c = ', num2str(f_ig.c, '%.4f'), ' ± ',...
-                         num2str(ce_ig, '%.4f')];
-    
-    pe_ig = max([abs(ci(1, 4) - f_ig.d), abs(ci(2, 4) - f_ig.d)]);
+    if order
+        ce_ig = max([abs(ci(1, 3) - f_ig.c), abs(ci(2, 3) - f_ig.c)]);
+        cstr_ig = ['  c = ', num2str(f_ig.c, '%.4f'), ' ± ',...
+                             num2str(ce_ig, '%.4f')];
+        disp(cstr_ig)
+        pe_ig = max([abs(ci(1, 4) - f_ig.d), abs(ci(2, 4) - f_ig.d)]);
+    else
+        pe_ig = max([abs(ci(1, 3) - f_ig.d), abs(ci(2, 3) - f_ig.d)]);
+    end
     pstr_ig = ['  p = ', num2str(f_ig.d, '%.4f'), ' ± ',...
                          num2str(pe_ig, '%.4f')];
-
-    disp('No interleaving gate:')
-    disp(astr_no)
-    disp(bstr_no)
-    disp(cstr_no)
-    disp(pstr_no)
-    
-    disp(['With interleaving ', gate, ' gate:'])
-    disp(astr_ig)
-    disp(bstr_ig)
-    disp(cstr_ig)
     disp(pstr_ig)
     
     disp('Average error rate over all Cliffords:')
-    disp(['  r(average) = ', num2str(r, '%.4f'), ' ± ',...
-            num2str((d - 1) * ae_no / d, '%.4f')]);
+    disp(['  r(average) = ', num2str(r_avg, '%.4f'), ' ± ',...
+            num2str(r_avg_error, '%.4f')]);
     
-    disp(['Gate ', gate, ', error:'])
+    disp(['Gate ', gate, ' error:'])
     disp(['  r(', gate, ') = ', num2str(r_gate, '%.4f'), ' ± ',...
             num2str(r_gate_error, '%.4f')]);
 
     full_title = {[strrep(filename, '_', '\_'), ext,...
             ' [', data.Timestamp, ']'],...
-            ['Depolarization Parameters: p_{no gate} = ',...
-              pstr_no(7:end), '; p_{', gate, '} = ', pstr_ig(7:end)],...
-            [gate, ' Gate Error: r_{', gate, '} = ', num2str(r_gate,...
-             '%.4f'), ' ± ', num2str(r_gate_error, '%.4f')]};
+            ['Depolarizations (', ordstr, '): p_{', gate, '} = ',...
+              pstr_ig(7:end),'; p_{no gate} = ', pstr_no(7:end)],...
+            ['Gate Errors: r_{', gate, '} = ', num2str(r_gate,...
+             '%.4f'), ' ± ', num2str(r_gate_error, '%.4f'),...
+             '; r_{average} = ', num2str(r_avg, '%.4f'), ' ± ',...
+             num2str(r_avg_error, '%.4f')]};
 
     legends = {'no interleaving gate, data',...
-                'no interleaving gate, fit',...
+               'no interleaving gate, fit',...
                ['interleaving ', gate, ' gate, data'],...
                ['interleaving ', gate, ' gate, fit']};
 
@@ -192,7 +227,20 @@ if length(dep_rels) == 1
 end
 end
 
-function f = SurvivalProbabilityFit(m, p)
+function f = SurvivalProbabilityZerothOrderModel(m, p)
+    ft = fittype('a * d^m + b',...
+        'independent', 'm', 'dependent', 'p' );
+    opts = fitoptions('Method', 'NonlinearLeastSquares');
+    opts.Display = 'Off';
+    opts.TolX = 1e-9;
+    opts.TolFun = 1e-9;
+    opts.Lower = [0 0  0];
+    opts.StartPoint = [max(p) / 2 min(p) sqrt(max(p))];
+    opts.Upper = [1 1 1];
+    f = fit(m, p, ft, opts);
+end
+
+function f = SurvivalProbabilityFirstOrderModel(m, p)
     ft = fittype('a * d^m + c * (m - 1) * d^(m - 2) + b',...
         'independent', 'm', 'dependent', 'p' );
     opts = fitoptions('Method', 'NonlinearLeastSquares');
@@ -200,7 +248,7 @@ function f = SurvivalProbabilityFit(m, p)
     opts.TolX = 1e-9;
     opts.TolFun = 1e-9;
     opts.Lower = [0 0 0 0];
-    opts.StartPoint = [max(p) / 2 min(p) 0.0005 sqrt(max(p))];
+    opts.StartPoint = [max(p) / 2 min(p) 0 sqrt(max(p))];
     opts.Upper = [1 1 1 1];
     f = fit(m, p, ft, opts);
 end
