@@ -64,7 +64,7 @@ distance2 = hypot(I - I2, Q - Q2);
 result = distance2 <= distance1;
 
 probability = sum(result, rep_index) ./ size(result, rep_index);
-prob_err = 1.95 * sqrt(probability .* (1 - probability) ./...
+prob_err = sqrt(probability .* (1 - probability) ./...
         size(result, rep_index));
 
 prob_name = 'Switching_Probability';
