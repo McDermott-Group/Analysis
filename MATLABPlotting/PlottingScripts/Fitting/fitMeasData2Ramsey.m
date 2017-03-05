@@ -54,23 +54,29 @@ if length(dep_rels) == 1
     % be = max([abs(ci(1, 2) - f.b), abs(ci(2, 2) - f.b)]);
     % bstr = ['b = ', num2str(f.b, 4), ' ± ', num2str(be, 3), yunits];
     
-    T2e = max([abs(ci(1, 3) - f.c), abs(ci(2, 3) - f.c)]);
-    T2str = ['T_2^* = ', num2str(f.c, 4), ' ± ', num2str(T2e, 3), xunits];
+    Tce = max([abs(ci(1, 3) - f.c), abs(ci(2, 3) - f.c)]);
+    Tcstr = ['T_{corr} = ', num2str(f.c, 4), ' ± ',...
+        num2str(Tce, 4), xunits];
     
     TRe = max([abs(ci(1, 4) - f.d), abs(ci(2, 4) - f.d)]);
-    TRstr = ['T_{Ramsey} = ', num2str(f.d, 4), ' ± ', num2str(TRe, 3),...
-            xunits];
+    TRstr = ['T_{Ramsey} = ', num2str(f.d, '%.1f'), ' ± ',...
+            num2str(TRe, '%.1f'), xunits];
 
     % phe = max([abs(ci(1, 5) - f.e), abs(ci(2, 5) - f.e)]);
     % phstr = ['phase = ', num2str(f.e, 4), ' ± ', num2str(phe, 3)];
+    
+    Twe = max([abs(ci(1, 6) - f.w), abs(ci(2, 6) - f.w)]);
+    Twstr = ['T_{white} = ', num2str(f.w, 4), ' ± ',...
+        num2str(Twe, 4), xunits];
 
     full_title = {[strrep(filename, '_', '\_'), ext,...
             ' [', data.Timestamp, ']'],...
-            [strrep(data_variable, '_', ' '),' = a + b * ',...'
-            'e^{-(', strrep(indep_name, '_', ' ') ,'/ T_2^*)^2}',...
+            [strrep(data_variable, '_', ' '),' = a + b',...'
+            'e^{-', strrep(indep_name, '_', ' ') ,'/ T_{white}-(',...
+                     strrep(indep_name, '_', ' ') ,'/ T_{corr})^2}',...
             'sin[2\pi(', strrep(indep_name, '_', ' '),...
             ' / T_{Ramsey}) + d]'],...
-            [T2str, '; ', TRstr]};
+            [Twstr, '; ', Tcstr, '; ', TRstr]};
 
     name = ['Fitted_', data_variable];
     data.units.(name) = data.units.(data_variable);
@@ -133,18 +139,20 @@ elseif length(dep_rels) == 2 % Plot 2D data.
 
     a = zeros(length(indep_vals1), 3);
     b = zeros(size(a));
+    Tcorr = zeros(size(a));
     TRamsey = zeros(size(a));
-    T2star = zeros(size(a));
     phase = zeros(size(a));
+    Twhite = zeros(size(a));
     fitted = zeros(size(a));
     for k = 1:length(indep_vals1)
         f = ExpFit(indep_vals2, dep_vals(k, :));
         ci = confint(f);
         a(k, :) = [f.a, f.a - ci(2, 1), ci(1, 1) - f.a];
         b(k, :) = [f.b, f.b - ci(2, 2), ci(1, 2) - f.b];
-        T2star(k, :) = [f.c, f.c - ci(2, 3), ci(1, 3) - f.c];
+        Tcorr(k, :) = [f.c, f.c - ci(2, 3), ci(1, 3) - f.c];
         TRamsey(k, :) = [f.d, f.d - ci(2, 4), ci(1, 4) - f.d];
         phase(k, :) = [f.e, f.e - ci(2, 5), ci(1, 5) - f.e];
+        Twhite(k, :) = [f.w, f.w - ci(2, 6), ci(1, 6) - f.w];
         fitted(k, :) = f(indep_vals2);
     end
     if flip_fit
@@ -165,9 +173,9 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     data.rels.(name){1} = indep_name1;
     data.dep{length(data.dep) + 1} = name;
     
-    name = 'Extracted_T2_Star';
-    data.(name) = T2star(:, 1);
-    data.error.(name) = T2star(:, 2:3);
+    name = 'Extracted_T_Correlated';
+    data.(name) = Tcorr(:, 1);
+    data.error.(name) = Tcorr(:, 2:3);
     data.units.(name) = indep2_units;
     data.rels.(name){1} = indep_name1;
     data.dep{length(data.dep) + 1} = name;
@@ -188,6 +196,14 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     data.rels.(name){1} = indep_name1;
     data.dep{length(data.dep) + 1} = name;
     
+    name = 'Extracted_T_White';
+    data.(name) = Twhite(:, 1);
+    data.error.(name) = Twhite(:, 2:3);
+    data.units.(name) = indep2_units;
+    data.rels.(name){1} = indep_name1;
+    data.dep{length(data.dep) + 1} = name;
+    plotDataVar(data, name, 'errorbar')
+    
     name = ['Fitted_', data_variable];
     data.(name) = fitted;
     data.units.(name) = dep_units;
@@ -200,16 +216,23 @@ end
 end
 
 function f = RamseyFit(x, y)
-    ft = fittype('a + b * exp(-(x / c)^2) * sin(2 * pi * (x / d) + e)',...
-        'independent', 'x', 'dependent', 'y' );
+    ft = fittype(['a + b * exp(-(x / w) - (x / c)^2) * ',...
+        'sin(2 * pi * (x / d) + e)'],...
+        'independent', 'x', 'dependent', 'y',...
+        'coefficients', {'a', 'b', 'c', 'd', 'e', 'w'});
     opts = fitoptions('Method', 'NonlinearLeastSquares');
     opts.Display = 'Off';
+    opts.TolX = 1e-9;
+    opts.TolFun = 1e-9;
     if y(1) < min(y(2:end)) || y(1) > max(y(2:end))
         x(1) = [];
         y(1) = [];
     end
-    opts.Lower = [-max(abs(y)) -max(abs(y)) max(x) / 100 0 -2 * pi];
-    opts.StartPoint = [y(1) max(y) - min(y) max(x) max(x) / 10 0];
-    opts.Upper = [max(abs(y)) max(abs(y)) 10 * max(x) 10 * max(x) 2 * pi];
+    opts.Lower = [-max(abs(y)), -max(abs(y)), max(x) / 100, 0, -2 * pi,...
+                   max(x) / 100];
+    opts.StartPoint = [y(1), max(y) - min(y), max(x) / 2, max(x) / 10,...
+                       0, 10 * max(x)];
+    opts.Upper = [max(abs(y)), max(abs(y)), 100 * max(x), 100 * max(x),...
+                   2 * pi, 10 * max(x)];
     f = fit(x, y, ft, opts);
 end
