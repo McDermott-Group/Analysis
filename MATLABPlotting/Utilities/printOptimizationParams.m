@@ -32,6 +32,8 @@ if ~exist('index', 'var')
         [~, index] = max(data.Fidelity);
     elseif isfield(data, 'Occupation_Contrast')
         [~, index] = max(data.Occupation_Contrast);
+    elseif isfield(data, 'Sideband_Suppression')
+        [~, index] = max(data.Sideband_Suppression);
     end
 end
 

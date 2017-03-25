@@ -16,6 +16,8 @@ plts_path = makeDirPlots(pathname);
 % Maximize IQ-contrast.
 data = maximizeIQContrast(data);
 
+saveMeasData(data, [filename, '_maxiqcontrast'])
+
 for data_index = 1:length(data.dep)
     I_name = data.dep{data_index};
     
@@ -48,8 +50,8 @@ for data_index = 1:length(data.dep)
         % Plot an errobar graph.
         if isfield(data, 'error') && isfield(data.error, I_name) &&...
                 isfield(data.error, Q_name)
-            dep_err = 1.96 * data.error.(dep_name);
-            res_err = 1.96 * data.error.(res_name);
+            dep_err = data.error.(dep_name);
+            res_err = data.error.(res_name);
             createFigure('right');
             plotErrorbar(indep_vals, res_vals, res_err)
             hold on
