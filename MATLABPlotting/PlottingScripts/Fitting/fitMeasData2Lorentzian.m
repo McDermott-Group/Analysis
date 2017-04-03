@@ -264,11 +264,15 @@ end
 start_point = [.3 * (max_y - min_y) * width^2 / 4,...
     start, width, 0, background];
 
-f = fit(x(:), y(:), '(a / ((x - b)^2 + (c / 2)^2)) + d * (x - b) + e',...
-        'StartPoint', start_point);
-    
-start_point = [(max_y - min_y) * f.c^2 / 4, start, f.c, f.b, f.e];
+opts = fitoptions('Method', 'NonlinearLeastSquares');
+opts.Display = 'Off';
+opts.TolX = 1e-10;
+opts.TolFun = 1e-10;
+opts.StartPoint = start_point;
 
-f = fit(x(:), y(:), '(a / ((x - b)^2 + (c / 2)^2)) + d * (x - b) + e',...
-        'StartPoint', start_point);
+f = fit(x(:), y(:), '(a / ((x - b)^2 + (c / 2)^2)) + d * (x - b) + e', opts);
+    
+opts.StartPoint = [(max_y - min_y) * f.c^2 / 4, start, f.c, f.b, f.e];
+
+f = fit(x(:), y(:), '(a / ((x - b)^2 + (c / 2)^2)) + d * (x - b) + e', opts);
 end
