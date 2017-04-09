@@ -59,12 +59,12 @@ for k=1:length(probabilities)
     end
 end
 
-phi_no = data.No_Interleaved_Probability;
-phi_ig = data.Interleaved_Probability;
+phi_no = double(data.No_Interleaved_Probability);
+phi_ig = double(data.Interleaved_Probability);
 
 gate = strrep(data.RB_Interleaving_Gate(4:end-3), '''', '');
 
-rb_reps = data.RB_Reps;
+rb_reps = single(data.RB_Reps);
 
 % Check that the errors are given.
 error_flag = true;
@@ -74,19 +74,19 @@ for k=1:length(probabilities)
     end
 end
 if error_flag
-    phi_no_err = data.error.No_Interleaved_Probability;
-    phi_ig_err = data.error.Interleaved_Probability;
+    phi_no_err = double(data.error.No_Interleaved_Probability);
+    phi_ig_err = double(data.error.Interleaved_Probability);
 end
 
 if length(dep_rels) == 1
     indep_name = dep_rels{1};
-    indep_vals = data.(indep_name);
+    indep_vals = double(data.(indep_name));
 
     disp(['Fitting to the ', lower(ordstr), ' model...'])
     if ~order
-        f_no = SurvivalProbabilityZerothOrderModel(indep_vals(:), phi_no);
+        f_no = SurvivalProbabilityZerothOrderModel(indep_vals, phi_no);
     else
-        f_no = SurvivalProbabilityFirstOrderModel(indep_vals(:), phi_no);
+        f_no = SurvivalProbabilityFirstOrderModel(indep_vals, phi_no);
     end
     p_no = f_no.d;
     
@@ -120,9 +120,9 @@ if length(dep_rels) == 1
     r_avg_error = (d - 1) * pe_no / d;
 
     if ~order
-        f_ig = SurvivalProbabilityZerothOrderModel(indep_vals(:), phi_ig);
+        f_ig = SurvivalProbabilityZerothOrderModel(indep_vals, phi_ig);
     else
-        f_ig = SurvivalProbabilityFirstOrderModel(indep_vals(:), phi_ig);
+        f_ig = SurvivalProbabilityFirstOrderModel(indep_vals, phi_ig);
     end
     p_ig = f_ig.d;
     
@@ -193,7 +193,7 @@ if length(dep_rels) == 1
     data.dep{length(data.dep) + 1} = name;
     data.plotting.(name).plot_title = full_title;
     data.(name) = f_ig(indep_vals);
-    
+
     indep_fits = min(indep_vals):max(indep_vals);
     % Plot an errorbar graph.
     if error_flag
@@ -237,7 +237,7 @@ function f = SurvivalProbabilityZerothOrderModel(m, p)
     opts.Lower = [0 0  0];
     opts.StartPoint = [max(p) / 2 min(p) sqrt(max(p))];
     opts.Upper = [1 1 1];
-    f = fit(m, p, ft, opts);
+    f = fit(m(:), p(:), ft, opts);
 end
 
 function f = SurvivalProbabilityFirstOrderModel(m, p)
@@ -250,5 +250,5 @@ function f = SurvivalProbabilityFirstOrderModel(m, p)
     opts.Lower = [0 0 0 0];
     opts.StartPoint = [max(p) / 2 min(p) 0 sqrt(max(p))];
     opts.Upper = [1 1 1 1];
-    f = fit(m, p, ft, opts);
+    f = fit(m(:), p(:), ft, opts);
 end
