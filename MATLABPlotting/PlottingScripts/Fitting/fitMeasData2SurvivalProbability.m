@@ -1,6 +1,6 @@
 function fitMeasData2SurvivalProbability(order, data)
 %fitMeasData2SurvivalProbability(ORDER, DATA)  Fit randomized benchmarking
-% datato a survival probability function.
+% data to a survival probability function.
 %   fitMeasData2SurvivalProbability(ORDER, DATA) fits data  randomized
 %   benchmarking data to a survival probability function, plots the data
 %   and the fit. ORDER should be either 0 or 1, and detemines the fit order

@@ -8,35 +8,68 @@ if isempty(fields(data))
     return
 end
 
-probabilities = {'Pi_Pulse_Switching_Probability',...
-                 'No_Pulse_Switching_Probability',...
-                 'Dark_Switching_Probability'};
-% Check that the data variable exists.
-for k=1:length(probabilities)
-    [data, probabilities{k}] = checkDataVar(data, probabilities{k});
-    dep_rels = data.rels.(probabilities{k});
-    if isempty(dep_rels)
-        error(['Independent (sweep) variables for data variable ''',...
-              strrep(data_variable, '_', ' '), ''' are not specified.'])
+try
+    probabilities = {'X_Gate_Switching_Probability',...
+                     'I_Gate_Switching_Probability',...
+                     'Dark_Switching_Probability'};
+    % Check that the data variable exists.
+    for k=1:length(probabilities)
+        [data, probabilities{k}] = checkDataVar(data, probabilities{k});
+        dep_rels = data.rels.(probabilities{k});
+        if isempty(dep_rels)
+            error(['Independent (sweep) variables for data variable ''',...
+                  strrep(data_variable, '_', ' '), ''' are not specified.'])
+        end
     end
-end
 
-P_X = data.Pi_Pulse_Switching_Probability;
-P_I = data.No_Pulse_Switching_Probability;
-P_0 = data.Dark_Switching_Probability;
+    P_X = data.X_Gate_Switching_Probability;
+    P_I = data.I_Gate_Switching_Probability;
+    P_0 = data.Dark_Switching_Probability;
 
-% Check that the errors are given.
-error_flag = true;
-for k=1:length(probabilities)
-    if ~isfield(data.error, probabilities{k}) 
-        error_flag = false;
+    % Check that the errors are given.
+    error_flag = true;
+    for k=1:length(probabilities)
+        if ~isfield(data.error, probabilities{k}) 
+            error_flag = false;
+        end
     end
-end
 
-if error_flag
-    E_X = data.error.Pi_Pulse_Switching_Probability;
-    E_I = data.error.No_Pulse_Switching_Probability;
-    E_0 = data.error.Dark_Switching_Probability;
+    if error_flag
+        E_X = data.error.X_Gate_Switching_Probability;
+        E_I = data.error.I_Gate_Switching_Probability;
+        E_0 = data.error.Dark_Switching_Probability;
+    end
+catch
+    probabilities = {'Pi_Pulse_Switching_Probability',...
+                     'No_Pulse_Switching_Probability',...
+                     'Dark_Switching_Probability'};
+    % Check that the data variable exists.
+    for k=1:length(probabilities)
+        [data, probabilities{k}] = checkDataVar(data, probabilities{k});
+        dep_rels = data.rels.(probabilities{k});
+        if isempty(dep_rels)
+            error(['Independent (sweep) variables for data variable ''',...
+                  strrep(data_variable, '_', ' '), ''' are not specified.'])
+        end
+    end
+
+    P_X = data.Pi_Pulse_Switching_Probability;
+    P_I = data.No_Pulse_Switching_Probability;
+    P_0 = data.Dark_Switching_Probability;
+
+    % Check that the errors are given.
+    error_flag = true;
+    for k=1:length(probabilities)
+        if ~isfield(data.error, probabilities{k}) 
+            error_flag = false;
+        end
+    end
+
+    if error_flag
+        E_X = data.error.Pi_Pulse_Switching_Probability;
+        E_I = data.error.No_Pulse_Switching_Probability;
+        E_0 = data.error.Dark_Switching_Probability;
+    end
 end
 
 if isfield(data, 'Driving_on_Dressed_One') &&...
