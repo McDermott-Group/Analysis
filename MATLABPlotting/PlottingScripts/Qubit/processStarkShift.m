@@ -1,11 +1,13 @@
 function processStarkShift(data, chi_0, alpha, f_cavity)
-%processStarkShift(DATA) Fit photon number to DAC amplitude assuming known
-% anharmonicity of the qubit that is treated as a three-level system.
+%processStarkShift(DATA, CHI_0, ALPHA, F_CAVITY) Fit photon number to DAC
+% amplitude assuming some known anharmonicity of the qubit that is treated
+% as a three-level system.
 %   processStarkShift(DATA, CHI_0, ALPHA, F_CAVITY) fits photon number to
 %   DAC Stark amplitude specified in the data structure DATA, assuming
 %   CHI_0 shift, given in MHz, and anharmonicity of the qubit ALPHA,
 %   specified in MHz (the value should be negative). F_CAVITY is the bare
-%   cavity frequency in GHz.
+%   cavity frequency in GHz. DATA should contain the resonance frequencies
+%   as a function of the Stark Amplitude.  
 %
 %   For details, see M. Boissonneault et al., PRL 105, 100504 (2010):
 %   http://journals.aps.org/prl/pdf/10.1103/PhysRevLett.105.100504

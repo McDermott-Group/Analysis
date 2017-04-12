@@ -27,6 +27,7 @@ plts_path = makeDirPlots(pathname);
 % Check that the data variable exists (compute it if necessary).
 [data, data_variable] = checkDataVar(data, data_variable);
 
+fitted_name = ['Fitted_', data_variable];
 if strcmp(data.units.(data_variable), 'dB')
     data.(data_variable) = 10.^(data.(data_variable) / 10);
     data.units.(data_variable) = 'Arb. Units';
@@ -34,11 +35,17 @@ if strcmp(data.units.(data_variable), 'dB')
 elseif strcmp(data.units.(data_variable), 'V')
     data.(data_variable) = data.(data_variable).^2;
     data.units.(data_variable) = 'V^2';
+    data = renameVariable(data, data_variable, [data_variable, '_Squared']);
+    data_variable = [data_variable, '_Squared'];
+    fitted_name = [fitted_name, '_Squared'];
     disp(['The data values in V are squared to obtain a quantaty',...
          ' proportional to the power.'])
 elseif strcmp(data.units.(data_variable), 'ADC Units')
     data.(data_variable) = data.(data_variable).^2;
     data.units.(data_variable) = 'ADC Units^2';
+    data = renameVariable(data, data_variable, [data_variable, '_Squared']);
+    data_variable = [data_variable, '_Squared'];
+    fitted_name = [fitted_name, '_Squared'];
     disp(['The data values in ADC Units are squared to obtain a quantaty',...
          ' proportional to the power.'])
 end
@@ -90,15 +97,17 @@ if length(dep_rels) == 1
     Q_txt = ['Q = ', num2str(Q), ' ± ', num2str(Q * (be / f.b + ce / f.c))];
     
     full_title = {[strrep(filename, '_', '\_'), ext,...
-        ' [', data.Timestamp, ']'], f_c_txt, FWHM_txt, Q_txt, amplitude_txt,...
-        [slope_txt, '; ', background_txt]};
+        ' [', data.Timestamp, ']'], f_c_txt, FWHM_txt, Q_txt};
+    
+    disp(amplitude_txt)
+    disp(slope_txt)
+    disp(background_txt)
 
-    name = ['Fitted_', data_variable];
-    data.units.(name) = data.units.(data_variable);
-    data.rels.(name) = data.rels.(data_variable);
-    data.dep{length(data.dep) + 1} = name;
-    data.plotting.(name).plot_title = full_title;
-    data.(name) = f(indep_vals);
+    data.units.(fitted_name) = data.units.(data_variable);
+    data.rels.(fitted_name) = data.rels.(data_variable);
+    data.dep{length(data.dep) + 1} = fitted_name;
+    data.plotting.(fitted_name).plot_title = full_title;
+    data.(fitted_name) = f(indep_vals);
 
     % Plot an errobar graph.
     if isfield(data, 'error') && isfield(data.error, data_variable)
@@ -225,13 +234,12 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     data.rels.(name){1} = indep_name1;
     data.dep{length(data.dep) + 1} = name;
     plotDataVar(data, data_variable, 'pixelated');
-
-    name = ['Fitted_', data_variable];
-    data.(name) = fitted;
-    data.units.(name) = dep_units;
-    data.rels.(name) = dep_rels;
-    data.dep{length(data.dep) + 1} = name;
-    plotDataVar(data, name, 'pixelated');
+ 
+    data.(fitted_name) = fitted;
+    data.units.(fitted_name) = dep_units;
+    data.rels.(fitted_name) = dep_rels;
+    data.dep{length(data.dep) + 1} = fitted_name;
+    plotDataVar(data, fitted_name, 'pixelated');
     
     saveMeasData(data, [filename, '_', data_variable, '_lorentzfit'])
 end
