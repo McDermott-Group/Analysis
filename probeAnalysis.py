@@ -85,7 +85,7 @@ class probeTest(object):
                 x = xfit,
                 y = yfit,
                 mode = 'line',
-                name = 'Fit'
+                name = 'Mean'
             )
         fig = dict(data = [scatter,fit], 
                    layout = {'title':'',
