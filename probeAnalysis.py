@@ -94,6 +94,27 @@ class probeTest(object):
                             }
                   )
         iplot(fig)
+        
+    def jcBoxPlot(self, gap=None):
+        area = [str(line[1]) + ' um^2' for line in self.data]
+        #area = [line[1] for line in self.data]
+        
+        jc = [np.pi/4*gap*1e-6/(line[0]*line[1]*1e-12)/1000/100**2 for line in self.data]
+        
+        area_boxes = go.Box(
+            y=jc,
+            x=area
+            #boxpoints='all'
+        )
+            
+
+        fig = dict(data = [area_boxes], 
+                   layout = {'title':'Theoretical Jc, gap=' + str(gap) + 'uV',
+                            'xaxis':{'title':'JJ Area [um^2]'},
+                            'yaxis':{'title':'Theoretical Jc [kA/cm^2]'}
+                            }
+                  )
+        iplot(fig)
     
     def resistanceHistogram(self, area=None, binWidth=10):
         if area:
