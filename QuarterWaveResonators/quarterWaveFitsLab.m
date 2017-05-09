@@ -88,6 +88,12 @@ dataFitResults = zeros(length(complexFiles),7);
         % convert raw resonator data to lin-magnitude for fitting
         linMagData = complexData.*conj(complexData);
         
+        
+        Thru = mean(logMagData(1:10));
+        
+        [~,j] = min(logMagData(:));
+        
+        fRes = f(j);
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %%%     the following chunk of code sets up and executes        %%%
         %%%     the fitting algorithm "fminsearchbnd.m" with            %%%
@@ -98,9 +104,9 @@ dataFitResults = zeros(length(complexFiles),7);
         
         
              %   f0            qi     qc      L   thru  alpha
-        start = [fres,         2.0e4, 2.8e4,  0,   -15,   0,   50];
-        lower = [start(1)-5e6, 1.0e3, 1.1e3, -2,   -30, -.5, -200];
-        upper = [start(1)+5e6, 1.0e6, 1.0e6,  2,   -5,  .5,  200];
+        start = [fRes,         2.0e4, 2.8e4,  0,   Thru,   0,   50];
+        lower = [start(1)-5e6, 1.0e3, 1.1e3, -2,   Thru-10, -.5, -200];
+        upper = [start(1)+5e6, 1.0e6, 1.0e6,  2,   Thru+10,  .5,  200];
         
         % Handle for fitting function mazinQuarter
         mazinModel = @mazinQuarter;
@@ -261,10 +267,10 @@ function [sse,error1,FittedCurve,signal] = mazinQuarter(params)
     % sum of square error is returned to fminseachbnd
     sse = sum(ErrorVector.^ 2);
     % uncomment the following lines to watch fit in real time
-    %  figure(14); clf;
-    %  plot(f,logMagData,'b-','markersize',.5);    hold all;
-    %  plot (f, signal, 'r--','linewidth',6);
-    %  drawnow;
+%     figure(14); clf;
+%     plot(f,logMagData,'b-','markersize',.5);    hold all;
+%     plot (f, signal, 'r--','linewidth',6);
+%     drawnow;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
