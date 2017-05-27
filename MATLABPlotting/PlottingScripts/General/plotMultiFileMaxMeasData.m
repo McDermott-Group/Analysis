@@ -76,7 +76,7 @@ for k = 1:length(dep_vars)
     
     processed_data = squeeze(max(max_data, [], 1));
     
-    processed_data_var = ['Mexima_', data_variable];
+    processed_data_var = ['Maxima_', data_variable];
     data2plot = data{1};
     data2plot.(processed_data_var) = processed_data;
     data2plot.units.(processed_data_var) = data{1}.units.(data_variable);
