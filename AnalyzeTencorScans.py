@@ -6,6 +6,8 @@ Created on Fri Mar 14 13:22:33 2014
 """
 
 import matplotlib.pyplot as mpl
+import numpy as np
+from Tencor import ScanImporter
 
 
 def labelForScan(scan, i=None):
@@ -15,7 +17,7 @@ def labelForScan(scan, i=None):
         label='%s %s' % (scan.sampleId, scan.comment)
     return label
 
-import numpy as np
+
 def remap(x1, y1, x2):
     if np.allclose(x1,x2):
         return y1
@@ -126,7 +128,7 @@ def analyzeScans(scans, minX=-1E10, maxX=+1E10, minIntensity=0, wafer=''):
 if __name__ == '__main__':
 #    import glob
     mpl.close('all')
-    from Tencor import ScanImporter
+
     case = 4
     if case == 1:
         fileName = 'KLK/2501.SCN'
