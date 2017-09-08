@@ -9,10 +9,10 @@ diff1 = abs(diff(indep1));
 diff2 = abs(diff(indep2));
 
 if min(diff1) < .95 * max(diff1) || min(diff2) < .95 * max(diff2)
-    disp(['The pixelated plot could not be plotted due to the ',...
+    disp(['The pixelated plot could be incorrect due to the ',...
           'ununiform data point spacing.'])
-    close(gcf);
-    return
+%     close(gcf);
+%     return
 end
 
 imagesc(indep1, indep2, dep);
