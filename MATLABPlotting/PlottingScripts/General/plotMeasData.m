@@ -37,3 +37,6 @@ if ~exist('data_variable', 'var')
 else
     plotDataVar(data, data_variable);
 end
+
+yeah=audioread('yeah.mp3');
+sound(yeah,44e3);
