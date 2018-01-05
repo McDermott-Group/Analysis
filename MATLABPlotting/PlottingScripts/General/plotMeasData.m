@@ -7,7 +7,7 @@ function plotMeasData(data_variable, loadedData)
 % Additional functionality Oct 2016: able to specify an already loaded data
 %   structure that has been loaded via loadMeasurementData
 
-% Select a file.
+% Select a file if loadedData doesn't exist
 if ~exist('loadedData', 'var')
     data = loadMeasurementData;
 else
@@ -25,11 +25,11 @@ if ~exist('data_variable', 'var')
     end
     for data_index = 1:length(dep_vars)
         dep_name = dep_vars{data_index};
-        if ~isempty(strfind(dep_name, '_Std_Dev')) ||...
-                 ~isempty(strfind(dep_name, '_Error'))
+        if contains(dep_name, '_Std_Dev') ||...
+                 contains(dep_name, '_Error')
             continue
         end
-        if ~isempty(strfind(dep_name, 'Phase'))
+        if contains(dep_name, 'Phase')
             data.(dep_name) = unwrap(data.(dep_name));
         end
         plotDataVar(data, dep_name);
