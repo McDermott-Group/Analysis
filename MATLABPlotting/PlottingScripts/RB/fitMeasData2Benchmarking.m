@@ -62,17 +62,13 @@ else
 end
 
 %plot the fits on top of the data
-powerfunc=@(a,b,c,x) a.*b.^x+c;
-m = min(data.Number_of_Cliffords):0.01:max(data.Number_of_Cliffords);
-no_int_fit_y = powerfunc(out.fr_No_Interleave.a,out.fr_No_Interleave.b,...
-                         out.fr_No_Interleave.c,m);
-int_fit_y = powerfunc(out.fr_Interleave.a,out.fr_Interleave.b,...
-                         out.fr_Interleave.c,m);
 
 ax=gca;
 ax.ColorOrderIndex=1;
-plotDots(m,no_int_fit_y);
-plotDots(m,int_fit_y);
+plotSimple(data.Number_of_Cliffords,...
+    out.fr_No_Interleave(data.Number_of_Cliffords),'-');
+plotSimple(data.Number_of_Cliffords,...
+    out.fr_Interleave(data.Number_of_Cliffords),'-');
 
 [~,filename,ext] = fileparts(data.Filename);
 filename=strrep(filename,'_','\_');

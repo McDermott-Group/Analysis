@@ -114,16 +114,18 @@ if length(dep_rels) == 1
         '_expfit_simple']));
 
 elseif length(dep_rels) == 2 % Plot 2D data.
-    if ~isempty(strfind(dep_rels{1}, 'Duration')) || ...
-            ~isempty(strfind(dep_rels{1}, 'Delay'))
+    % if ~isempty(strfind(dep_rels{1}, 'Duration')) || ...
+    if ~isempty(strfind(dep_rels{1}, 'Delay')) || ...
+            ~isempty(strfind(dep_rels{1}, 'Idle_Gate_Time'))
         indep_name1 = dep_rels{2};
         indep_name2 = dep_rels{1};
         indep_vals1 = data.(dep_rels{2});
         indep_vals2 = data.(dep_rels{1});
         dep_vals = dep_vals';
         flip_fit = true;
-    elseif ~isempty(strfind(dep_rels{2}, 'Duration')) || ...
-            ~isempty(strfind(dep_rels{2}, 'Delay'))
+    % if ~isempty(strfind(dep_rels{1}, 'Duration')) || ...
+    elseif ~isempty(strfind(dep_rels{2}, 'Delay')) || ...
+            ~isempty(strfind(dep_rels{2}, 'Idle_Gate_Time'))
         indep_name1 = dep_rels{1};
         indep_name2 = dep_rels{2};
         indep_vals1 = data.(dep_rels{1});
@@ -131,7 +133,7 @@ elseif length(dep_rels) == 2 % Plot 2D data.
         flip_fit = false;
     else
         error(['The data does not appear to depenend on any ',...
-               '''Duration'' or ''Delay'' variables.'])
+               '''Duration'', ''Delay'', or ''Time'' variables.'])
     end
 
     dep_units = data.units.(data_variable);
@@ -143,9 +145,9 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     TRamsey = zeros(size(a));
     phase = zeros(size(a));
     Twhite = zeros(size(a));
-    fitted = zeros(size(a));
+    fitted = zeros(length(a),length(indep_vals2));
     for k = 1:length(indep_vals1)
-        f = ExpFit(indep_vals2, dep_vals(k, :));
+        f = RamseyFit(indep_vals2, dep_vals(k, :)');
         ci = confint(f);
         a(k, :) = [f.a, f.a - ci(2, 1), ci(1, 1) - f.a];
         b(k, :) = [f.b, f.b - ci(2, 2), ci(1, 2) - f.b];
@@ -187,6 +189,7 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     data.units.(name) = indep2_units;
     data.rels.(name){1} = indep_name1;
     data.dep{length(data.dep) + 1} = name;
+    plotDataVar(data, name)
     plotDataVar(data, name, 'errorbar')
 
     name = 'Extracted_Phase';
@@ -220,10 +223,13 @@ function f = RamseyFit(x, y)
         'sin(2 * pi * (x / d) + e)'],...
         'independent', 'x', 'dependent', 'y',...
         'coefficients', {'a', 'b', 'c', 'd', 'e', 'w'});
-    opts = fitoptions('Method', 'NonlinearLeastSquares');
-    opts.Display = 'Off';
-    opts.TolX = 1e-9;
-    opts.TolFun = 1e-9;
+    opts = fitoptions('Method', 'NonlinearLeastSquares',...
+                      'Robust', 'LAR',...
+                      'MaxFunEvals',10000,...
+                      'MaxIter',10000);
+    % opts.Display = 'Off';
+    opts.TolX = 1e-10;
+    opts.TolFun = 1e-10;
     if y(1) < min(y(2:end)) || y(1) > max(y(2:end))
         x(1) = [];
         y(1) = [];
