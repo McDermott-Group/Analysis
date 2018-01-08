@@ -52,6 +52,8 @@ if ~isfield(data1, 'Readout_Amplitude') ||...
     error('Fast Pulse Time data is not properly specified.')
 end
 
+quant_eff_name = 'Quantum_Efficiency';
+
 for data_index = 1:length(data1.dep)
     dep_name = data1.dep{data_index};
     if ~strcmp(dep_name, 'Switching_Probability') &&...
@@ -122,7 +124,6 @@ for data_index = 1:length(data1.dep)
     quant_eff(quant_eff > 1) = 1;
 
     data = data1;
-    quant_eff_name = 'Quantum_Efficiency';
     data.(quant_eff_name) = quant_eff;
     data.units.(quant_eff_name) = '';
     data.rels.(quant_eff_name) = dep_rels1;
