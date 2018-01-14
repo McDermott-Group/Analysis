@@ -6,7 +6,6 @@ function fitMeasData2Ramsey(data_variable, data)
 %   the data structure containing the fit.
 
 if ~exist('data', 'var')
-    % Select a file.
     data = loadMeasurementData;
 end
 if isempty(fields(data))
@@ -115,17 +114,17 @@ if length(dep_rels) == 1
 
 elseif length(dep_rels) == 2 % Plot 2D data.
     % if ~isempty(strfind(dep_rels{1}, 'Duration')) || ...
-    if ~isempty(strfind(dep_rels{1}, 'Delay')) || ...
-            ~isempty(strfind(dep_rels{1}, 'Idle_Gate_Time'))
+    % if ~isempty(strfind(dep_rels{1}, 'Delay')) || ...
+     if      ~isempty(strfind(dep_rels{1}, 'Idle_Gate_Time'))
         indep_name1 = dep_rels{2};
         indep_name2 = dep_rels{1};
         indep_vals1 = data.(dep_rels{2});
         indep_vals2 = data.(dep_rels{1});
         dep_vals = dep_vals';
         flip_fit = true;
-    % if ~isempty(strfind(dep_rels{1}, 'Duration')) || ...
-    elseif ~isempty(strfind(dep_rels{2}, 'Delay')) || ...
-            ~isempty(strfind(dep_rels{2}, 'Idle_Gate_Time'))
+    % elseif ~isempty(strfind(dep_rels{1}, 'Duration')) || ...
+    % elseif ~isempty(strfind(dep_rels{2}, 'Delay')) || ...
+     elseif        ~isempty(strfind(dep_rels{2}, 'Idle_Gate_Time'))
         indep_name1 = dep_rels{1};
         indep_name2 = dep_rels{2};
         indep_vals1 = data.(dep_rels{1});
@@ -226,17 +225,21 @@ function f = RamseyFit(x, y)
     opts = fitoptions('Method', 'NonlinearLeastSquares',...
                       'Robust', 'LAR',...
                       'MaxFunEvals',10000,...
-                      'MaxIter',10000);
-    % opts.Display = 'Off';
-    opts.TolX = 1e-10;
-    opts.TolFun = 1e-10;
+                      'MaxIter',10000,...
+                      'DiffMaxChange',1,...
+                      'Algorithm','Trust-Region');
+    opts.Display = 'Off';
+    opts.TolX = 1e-9;
+    opts.TolFun = 1e-9;
     if y(1) < min(y(2:end)) || y(1) > max(y(2:end))
         x(1) = [];
         y(1) = [];
     end
     opts.Lower = [-max(abs(y)), -max(abs(y)), max(x) / 100, 0, -2 * pi,...
                    max(x) / 100];
-    opts.StartPoint = [y(1), max(y) - y(1), max(x) / 2, max(x) / 10,...
+%     opts.StartPoint = [y(1), max(y) - y(1), max(x) / 2, max(x) / 10,...
+%                        0, 10 * max(x)];
+    opts.StartPoint = [mean(y), max(y) - min(y), max(x) / 2, max(x) / 10,...
                        0, 10 * max(x)];
     opts.Upper = [max(abs(y)), max(abs(y)), 100 * max(x), 100 * max(x),...
                    2 * pi, 10 * max(x)];
