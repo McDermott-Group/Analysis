@@ -38,7 +38,7 @@ else
     plotDataVar(data, data_variable);
 end
 
-if ~ispc:
+if ~ispc
     yeah=audioread('yeah.mp3');
     sound(yeah,44e3);
 end

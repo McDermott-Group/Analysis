@@ -173,7 +173,4 @@ opts.StartPoint = [0.4 0.9 mean(yData)];
 % Fit model to data.
 [fitresult, gof] = fit( xData, yData, ft, opts );
 
-% Plot fit with data
-%figure(12);hold on
-%plot( fitresult, xData, yData );
 end

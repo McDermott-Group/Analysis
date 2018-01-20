@@ -40,8 +40,8 @@ end
 for data_index = 1:length(dep_vars)
     dep_name = replace(dep_vars{data_index}, ' ', '_');
     depWname = replace(dep_name, '_', ' ');
-    if ~isempty(strfind(dep_name, '_Std_Dev')) ||...
-             ~isempty(strfind(dep_name, '_Error'))
+    if contains(dep_name, '_Std_Dev') ||...
+             contains(dep_name, '_Error')
         continue
     end
     vals = data.(dep_name);
