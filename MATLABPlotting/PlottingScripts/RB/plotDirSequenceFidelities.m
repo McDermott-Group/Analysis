@@ -96,44 +96,48 @@ data.seq_fids(:,2) = data.seq_fids(:,1)./data.measure_fidelity;
 % end
 
 % divide out the contributions from the Rabi envelope (hardcoded for now)
-data.rabi_envelope_time = 165; % ns
+data.rabi_envelope_time = 198; % ns
 for j=1:length(data.seq_fids)
     data.seq_fids(j,3) = data.seq_fids(j,1) / exp(-data.seq_times(j)/(2*data.rabi_envelope_time));
 end
 
 % now plot it with its mean and std on the same plot
 createFigure; hold on;
-h(1:3)=bar([data.seq_fids(:,1), data.seq_fids(:,2), data.seq_fids(:,3)],'FaceColor','flat');
+h(1:2)=bar([data.seq_fids(:,1), data.seq_fids(:,3)],'FaceColor','flat');
 data.seq_fid_mean = mean(data.seq_fids(:,1));
 data.adj_seq_fid_mean = mean(data.seq_fids(:,3));
 data.seq_fid_std = std(data.seq_fids(:,1));
 data.adj_seq_fid_std = std(data.seq_fids(:,3));
-h(4)=refline(0,data.seq_fid_mean);
-h(4).Color = 'k';
-h(5)=refline(0,data.adj_seq_fid_mean);
-h(5).Color = 'b';
-hline=refline(0,data.seq_fid_mean+data.seq_fid_std);
-hline.Color = 'r';
-hline=refline(0,data.seq_fid_mean-data.seq_fid_std);
-hline.Color = 'r';
+h(3)=refline(0,data.seq_fid_mean);
+h(3).Color = 'k';
+h(4)=refline(0,data.adj_seq_fid_mean);
+h(4).Color = 'b';
+% hline=refline(0,data.seq_fid_mean+data.seq_fid_std);
+% hline.Color = 'r';
+% hline=refline(0,data.seq_fid_mean-data.seq_fid_std);
+% hline.Color = 'r';
 ax=gca;
 set(ax,'XTickLabelRotation',300)
 set(ax,'XTick',1:1:length(filenames))
 set(ax,'XTickLabel',data.gate_seqs)
 set(ax,'YGrid','on')
+set(ax,'YMinorGrid','on')
+set(ax,'XGrid','off')
+set(ax,'FontSize',12)
 %set(ax,'YLim',[0,1])
 xlabel('Gate Sequence')
 ylabel('Sequence Fidelity')
 title_str = {'Sequence Fidelities from experiment',...
     [data.sets.(filenames{1}).Experiment_Name,' on ',data.sets.(filenames{1}).Timestamp]};
 title(title_str)
-leg = legend(h,'Raw Data','Data Normalized to Identity','Data Adjusted for Rabi Decay Envelope',...
+leg = legend(h,'Raw Data',['Adjusted for ',num2str(data.rabi_envelope_time),...
+    ' ns Rabi Envelope'],...
     ['Raw Mean = (',num2str(data.seq_fid_mean),'\pm',num2str(data.seq_fid_std),')%'],...
     ['Adjusted Mean = (',num2str(data.adj_seq_fid_mean),'\pm',num2str(data.adj_seq_fid_std),')%']);
 set(leg,'Location','best');
 
 createFigure; hold on;
-nbins = 20;
+nbins = 13;
 histfit(data.seq_fids(:,3),nbins)
 xlabel('Adjusted Sequence Fidelity')
 ylabel('Counts')
