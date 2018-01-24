@@ -96,7 +96,7 @@ data.seq_fids(:,2) = data.seq_fids(:,1)./data.measure_fidelity;
 % end
 
 % divide out the contributions from the Rabi envelope (hardcoded for now)
-data.rabi_envelope_time = 198; % ns
+data.rabi_envelope_time = 124; % ns
 for j=1:length(data.seq_fids)
     data.seq_fids(j,3) = data.seq_fids(j,1) / exp(-data.seq_times(j)/(2*data.rabi_envelope_time));
 end

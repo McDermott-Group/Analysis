@@ -34,6 +34,8 @@ if ~exist('index', 'var')
         [~, index] = max(data.Occupation_Contrast);
     elseif isfield(data, 'Sideband_Suppression')
         [~, index] = max(data.Sideband_Suppression);
+    elseif isfield(data, 'Average_Sequence_Fidelity')
+        [~, index] = max(data.Average_Sequence_Fidelity);
     end
 end
 
