@@ -108,4 +108,37 @@ thetaticklabels({'+Y','|0> (-Z)','-Y','|1> (+Z)'})
 title(plot_title, 'Interpreter', 'none', 'FontSize', 10)
 savePlot(fullfile(plts_path, [filename, '_tomo_YZ']));
 
+% plot on the sphere
+[x,y,z] = sphere();
+figure;
+lightGrey = 0.8*[1 1 1]; % It looks better if the lines are lighter
+surface(x,y,z,'FaceColor','none','EdgeColor',lightGrey)
+hold on;
+% define the cartesian axes
+xAxis = [linspace(-1,1);zeros(1,100);zeros(1,100)];
+yAxis = [zeros(1,100);linspace(-1,1);zeros(1,100)];
+zAxis = [zeros(1,100);zeros(1,100);linspace(-1,1)];
+% plot the cartesian axes
+plot3(xAxis(1,:),xAxis(2,:),xAxis(3,:),'color','black');
+plot3(yAxis(1,:),yAxis(2,:),yAxis(3,:),'color','black');
+plot3(zAxis(1,:),zAxis(2,:),zAxis(3,:),'color','black');
+
+% plot the data
+%plot3(data.Sigma_X, data.Sigma_Y, -data.Sigma_Z,'b.','MarkerSize',30);
+scatter3(data.Sigma_X, data.Sigma_Y, -data.Sigma_Z,[],data.(indeps{1}),'filled');
+axis off
+text(0,0,1.1,'|0>','FontSize',12,'FontWeight','bold')
+text(0,0,-1.1,'|1>','FontSize',12,'FontWeight','bold')
+text(1.1,0,0,'x','FontSize',12,'FontWeight','bold')
+text(0,1.1,0,'y','FontSize',12,'FontWeight','bold')
+axis square
+cbar=colorbar;
+cbar.Label.String = xlables;
+cbar.Label.Rotation = 270;
+cbar.FontSize=14;
+cbar.Label.Position=cbar.Label.Position + [1 0 0];
+colormap jet;
+hold off;
+savePlot(fullfile(plts_path, [filename, '_bloch_trajectory']));
+
 
