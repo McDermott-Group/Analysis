@@ -142,6 +142,7 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     b = zeros(size(a));
     Tcorr = zeros(size(a));
     TRamsey = zeros(size(a));
+    FRamsey = zeros(size(a));
     phase = zeros(size(a));
     Twhite = zeros(size(a));
     fitted = zeros(length(a),length(indep_vals2));
@@ -152,6 +153,7 @@ elseif length(dep_rels) == 2 % Plot 2D data.
         b(k, :) = [f.b, f.b - ci(2, 2), ci(1, 2) - f.b];
         Tcorr(k, :) = [f.c, f.c - ci(2, 3), ci(1, 3) - f.c];
         TRamsey(k, :) = [f.d, f.d - ci(2, 4), ci(1, 4) - f.d];
+        FRamsey(k, :) = [1/f.d, 1/(f.d) - 1/(ci(2, 4)), 1/(ci(1, 4)) - 1/(f.d)];
         phase(k, :) = [f.e, f.e - ci(2, 5), ci(1, 5) - f.e];
         Twhite(k, :) = [f.w, f.w - ci(2, 6), ci(1, 6) - f.w];
         fitted(k, :) = f(indep_vals2);
@@ -188,9 +190,16 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     data.units.(name) = indep2_units;
     data.rels.(name){1} = indep_name1;
     data.dep{length(data.dep) + 1} = name;
-    plotDataVar(data, name)
     plotDataVar(data, name, 'errorbar')
 
+    name = 'Extracted_Ramsey_Detuning';
+    data.(name) = FRamsey(:, 1);
+    data.error.(name) = FRamsey(:, 2:3);
+    data.units.(name) = ['1/',indep2_units];
+    data.rels.(name){1} = indep_name1;
+    data.dep{length(data.dep) + 1} = name;
+    plotDataVar(data, name, 'errorbar')
+    
     name = 'Extracted_Phase';
     data.(name) = phase(:, 1);
     data.error.(name) = phase(:, 2:3);
@@ -237,10 +246,10 @@ function f = RamseyFit(x, y)
     end
     opts.Lower = [-max(abs(y)), -max(abs(y)), max(x) / 100, 0, -2 * pi,...
                    max(x) / 100];
-%     opts.StartPoint = [y(1), max(y) - y(1), max(x) / 2, max(x) / 10,...
-%                        0, 10 * max(x)];
-    opts.StartPoint = [mean(y), max(y) - min(y), max(x) / 2, max(x) / 10,...
+    opts.StartPoint = [y(1), max(y) - y(1), max(x) / 2, max(x) / 10,...
                        0, 10 * max(x)];
+%     opts.StartPoint = [mean(y), max(y) - min(y), max(x) / 2, max(x) / 10,...
+%                        0, 10 * max(x)];
     opts.Upper = [max(abs(y)), max(abs(y)), 100 * max(x), 100 * max(x),...
                    2 * pi, 10 * max(x)];
     f = fit(x, y, ft, opts);
