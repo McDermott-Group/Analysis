@@ -1,8 +1,8 @@
 function plotMultiFileAvg2DMeasData(data_variable)
-% plotMultiFileAvg2DMeasData(
-% DATA_VARIABLE) Plots a mean of several 3D data files along first variable
-% that you swept in those files. You can use this file to plot average of
-% 2D plots
+% plotMultiFileAvg2DMeasData(DATA_VARIABLE) Plots a pixel-by-pixel mean of
+%   several 2D sweep data files
+% 
+% 
 
 
 
