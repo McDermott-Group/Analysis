@@ -37,32 +37,42 @@ elseif ~iscell(data_variable)
 else
     dep_vars = data_variable;
 end
-
+shapes=size(data{1}.(dep_vars{1}));
+dep_vals = zeros(length(filenames),shapes(1),shapes(2));
 for k = 1:length(dep_vars)
     data_variable = dep_vars{k};
+    
+    % assume that the dep_vars for each file are the same
+    dep_rels1 = data{1}.rels.(data_variable);
     
     for q = 1:length(filenames)
         % Check that the data variable exists (compute it if necessary).
         [data{q}, data_variable] = checkDataVar(data{q}, data_variable);
-        dep_vals = data{q}.(data_variable);
-        dep_rels1 = data{q}.rels.(data_variable);
-        dep_rels = {dep_rels1{2}, dep_rels1{3}};
-        data{1}.rels.(data_variable)(:,1) = [];
-
-
-        if ~isfield(data{q}, data_variable)
-            error(['Could not find data variable ''', data_variable, ''' in ',...
-                'at least one of the files.'])
-        elseif isempty(dep_rels)
-                error(['Independent (sweep) variables for data variable ''',...
-                      strrep(data_variable, '_', ' '),...
-                      ''' are not specified.'])
+        dep_vals(q,:,:) = data{q}.(data_variable);
+        % dep_rels1 = data{q}.rels.(data_variable);
+        dep_rels = data{q}.rels.(data_variable);
+        
+        if ~isequal(dep_rels,dep_rels1)
+            error('Independent variables are not the same for all selected files.');
         end
-        dep_vals = mean(dep_vals,1);
-        avg_data1 = dep_vals;
+        
+        % data{1}.rels.(data_variable)(:,1) = [];
 
+
+%         if ~isfield(data{q}, data_variable)
+%             error(['Could not find data variable ''', data_variable, ''' in ',...
+%                 'at least one of the files.'])
+%         elseif isempty(dep_rels)
+%                 error(['Independent (sweep) variables for data variable ''',...
+%                       strrep(data_variable, '_', ' '),...
+%                       ''' are not specified.'])
+%         end
     end
-    avg_data(:,:) = avg_data1(:,:,:);
+    % dep_vals = mean(dep_vals,1);
+    avg_data = squeeze(mean(dep_vals,1));
+
+    
+    % avg_data(:,:) = avg_data1(:,:,:);
     processed_data_var = ['Average_', data_variable];
     data2plot = data{1};
     data2plot.(processed_data_var) = avg_data;

@@ -1,5 +1,5 @@
-function createFigure(position)
-%createFigure   Create a figure.
+function h=createFigure(position)
+%createFigure   Create a figure and return its handle to the caller.
 %
 %   createFigure(POSITION) creates a figure in the POSITION that is defined
 %   relatively to the screen size.
@@ -22,7 +22,7 @@ elseif strcmp(str_position, 'right')
 end
 
 scrsz = get(0, 'ScreenSize');
-figure('Position', position(:) * scrsz(4));
+h=figure('Position', position(:) * scrsz(4));
 
 end
 
