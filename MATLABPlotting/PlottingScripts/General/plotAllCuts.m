@@ -18,12 +18,16 @@ yD = get(temp, 'YData');
 xD = get(temp, 'XData');
 figure();
 hold on
+legend_str=[];
 for n=1:length(cD(1,:))
-    plot(yD, cD(:,n), 'DisplayName', num2str(xD(n)))
+    plotSimple(yD, cD(:,n))
+    legend_str{n}=[h.CurrentAxes.XLabel.String,': ',num2str(xD(n))];
 end
-legend(gca,'show')
+%legend(gca,'show')
+leg=legend(legend_str);
+leg.Location = 'best';
 title(h.CurrentAxes.Title.String);
 xlabel(h.CurrentAxes.YLabel.String);
 ylabel([h.CurrentAxes.Title.String{1}]);
-set(gca,'FontSize',14);
+set(gca,'FontSize',12);
 end

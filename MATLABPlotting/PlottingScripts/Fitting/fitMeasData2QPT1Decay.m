@@ -1,4 +1,4 @@
-function fitMeasData2QPT1Decay(data_variable, data)
+function fitMeasData2QPT1Decay(T1_expt, data_variable, data)
 %fitMeasData2Exponent(DATA_VARIABLE, DATA)  Fit data to an exponential
 %function. 
 %   data = fitMeasData2Exponent(DATA_VARIABLE, DATA) fits data for
@@ -22,6 +22,14 @@ if ~exist('data_variable', 'var')
     data_variable = data_variable{1};
 end
 
+if exist('T1_expt', 'var')
+    T1_set = true;
+    T1 = T1_expt;
+else
+    T1_set = false;
+    T1 = [];
+end
+
 [pathname, filename, ext] = fileparts(data.Filename);
 
 % Create folder Plots if necessary.
@@ -43,7 +51,7 @@ if length(dep_rels) == 1
     indep_name = dep_rels{1};
     indep_vals = data.(indep_name);
 
-    f = QPDecayFit(indep_vals(:), dep_vals(:));
+    f = QPDecayFit(indep_vals(:), dep_vals(:), T1_set, T1);
     
     xunits = getUnits(data, indep_name);
     yunits = getUnits(data, data_variable);
@@ -104,44 +112,66 @@ if length(dep_rels) == 1
         '_expfit_simple']));
 
 elseif length(dep_rels) == 2 % Plot 2D data.
-    if ~isempty(strfind(dep_rels{1}, 'Time')) ||...
-            ~isempty(strfind(dep_rels{1}, 'Duration')) ||...
-            ~isempty(strfind(dep_rels{1}, 'Qubit_Drive_to_Readout'))
+    if  ~isempty(strfind(dep_rels{1}, 'Qubit_Drive_to_Readout'))
         indep_name1 = dep_rels{2};
         indep_name2 = dep_rels{1};
         indep_vals1 = data.(dep_rels{2});
         indep_vals2 = data.(dep_rels{1});
         dep_vals = dep_vals';
         flip_fit = true;
-    elseif ~isempty(strfind(dep_rels{2}, 'Time')) ||...
-            ~isempty(strfind(dep_rels{2}, 'Duration')) ||...
-            ~isempty(strfind(dep_rels{2}, 'Qubit_Drive_to_Readout'))
+    elseif ~isempty(strfind(dep_rels{2}, 'Qubit_Drive_to_Readout'))
         indep_name1 = dep_rels{1};
         indep_name2 = dep_rels{2};
         indep_vals1 = data.(dep_rels{1});
         indep_vals2 = data.(dep_rels{2});
         flip_fit = false;
     else
-        error(['The data does not appear to depenend on any ',...
-            '''Time'', ''Duration'' or ''Qubit Drive to Readout'''...
-            'variables.'])
+        error(['The data does not appear to depenend on ',...
+            '''Qubit Drive to Readout'''])
     end
 
     dep_units = data.units.(data_variable);
     indep2_units = data.units.(indep_name2);
 
-    time_const = zeros(length(indep_vals1), 3);
-    amplitude = zeros(size(time_const));
-    offset = zeros(size(time_const));
-    fitted = zeros(size(dep_vals));
-    for k = 1:length(indep_vals1)
-        f = ExpFit(indep_vals2, dep_vals(k, :));
-        ci = confint(f);
-        amplitude(k, :) = [f.a, f.a - ci(2, 1), ci(1, 1) - f.a];
-        time_const(k, :) = [1/f.b, 1 / (ci(1, 2) - f.b),...
+    
+    if ~T1_set
+        time_const = zeros(length(indep_vals1), 3);
+        amplitude = zeros(length(indep_vals1), 3);
+        offset = zeros(length(indep_vals1), 3);
+        qp_time_const = zeros(length(indep_vals1), 3);
+        n_qp_avg = zeros(length(indep_vals1), 3);
+        fitted = zeros(size(dep_vals));
+        for k = 1:length(indep_vals1)
+            f = QPDecayFit(indep_vals2, dep_vals(k, :), T1_set, T1);
+            ci = confint(f);
+            amplitude(k, :) = [f.a, f.a - ci(2, 1), ci(1, 1) - f.a];
+            time_const(k, :) = [1/f.b, 1 / (ci(1, 2) - f.b),...
                                    1 / (f.b - ci(2, 2))];
-        offset(k, :) = [f.c, f.c - ci(2, 3), ci(1, 3) - f.c];
-        fitted(k, :) = f(indep_vals2);
+            offset(k, :) = [f.c, f.c - ci(2, 3), ci(1, 3) - f.c];
+            qp_time_const(k,:) = [1/f.d, 1 / (ci(1, 4) - f.d),...
+                                   1 / (f.d - ci(2, 4))];
+            n_qp_avg(k, :) = [f.n_qp, f.n_qp - ci(2, 5), ci(1, 5) - f.n_qp];                   
+            fitted(k, :) = f(indep_vals2);
+        end
+    else
+        % time_const = zeros(length(indep_vals1), 3);
+        amplitude = zeros(length(indep_vals1), 3);
+        offset = zeros(length(indep_vals1), 3);
+        qp_time_const = zeros(length(indep_vals1), 3);
+        n_qp_avg = zeros(length(indep_vals1), 3);
+        fitted = zeros(size(dep_vals));
+        for k = 1:length(indep_vals1)
+            f = QPDecayFit(indep_vals2, dep_vals(k, :), T1_set, T1);
+            ci = confint(f);
+            amplitude(k, :) = [f.a, f.a - ci(2, 1), ci(1, 1) - f.a];
+            % time_const(k, :) = [1/f.b, 1 / (ci(1, 2) - f.b),...
+            %                        1 / (f.b - ci(2, 2))];
+            offset(k, :) = [f.c, f.c - ci(2, 2), ci(1, 2) - f.c];
+            qp_time_const(k,:) = [1/f.d, 1 / (ci(1, 3) - f.d),...
+                                   1 / (f.d - ci(2, 3))];
+            n_qp_avg(k, :) = [f.n_qp, f.n_qp - ci(2, 4), ci(1, 4) - f.n_qp];                   
+            fitted(k, :) = f(indep_vals2);
+        end
     end
     if flip_fit
         fitted = fitted';
@@ -154,19 +184,37 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     data.rels.(name){1} = indep_name1;
     data.dep{length(data.dep) + 1} = name;
     plotDataVar(data, name, 'errorbar')
-    
-    name = 'Extracted_Time_Constant';
-    data.(name) = time_const(:, 1);
-    data.error.(name) = time_const(:, 2:3);
-    data.units.(name) = indep2_units;
-    data.rels.(name){1} = indep_name1;
-    data.dep{length(data.dep) + 1} = name;
-    plotDataVar(data, name, 'errorbar')
 
     name = 'Extracted_Offset';
     data.(name) = offset(:, 1);
     data.error.(name) = offset(:, 2:3);
     data.units.(name) = indep2_units;
+    data.rels.(name){1} = indep_name1;
+    data.dep{length(data.dep) + 1} = name;
+    plotDataVar(data, name, 'errorbar')
+    
+    if ~T1_set
+        name = 'Extracted_Time_Constant';
+        data.(name) = time_const(:, 1);
+        data.error.(name) = time_const(:, 2:3);
+        data.units.(name) = indep2_units;
+        data.rels.(name){1} = indep_name1;
+        data.dep{length(data.dep) + 1} = name;
+        plotDataVar(data, name, 'errorbar')
+    end
+    
+    name = 'Extracted_QP_Time_Constant';
+    data.(name) = qp_time_const(:, 1);
+    data.error.(name) = qp_time_const(:, 2:3);
+    data.units.(name) = indep2_units;
+    data.rels.(name){1} = indep_name1;
+    data.dep{length(data.dep) + 1} = name;
+    plotDataVar(data, name, 'errorbar')
+    
+    name = 'Extracted_Average_QP_Number';
+    data.(name) = n_qp_avg(:, 1);
+    data.error.(name) = n_qp_avg(:, 2:3);
+    data.units.(name) = dep_units;
     data.rels.(name){1} = indep_name1;
     data.dep{length(data.dep) + 1} = name;
     plotDataVar(data, name, 'errorbar')
@@ -182,18 +230,27 @@ elseif length(dep_rels) == 2 % Plot 2D data.
 end
 end
 
-function f = QPDecayFit(x, y)
+function f = QPDecayFit(x, y, t1_bool, t1_val)
     opts = fitoptions('Method', 'NonlinearLeastSquares',...
                       'Robust', 'LAR',...
                       'MaxFunEvals',10000,...
                       'MaxIter',10000,...
                       'DiffMaxChange',1,...
                       'Algorithm','Trust-Region');
-    opts.Display = 'Off';
+    % opts.Display = 'Off';
     opts.TolX = 1e-9;
     opts.TolFun = 1e-9;
-    opts.StartPoint = [y(1) - y(end), 1 / (max(x) - min(x) + 9 * eps),...
-            y(end), 0.5 / (max(x) - min(x) + 9 * eps), 1];
-    opts.Lower = [min(y), 0, min(y), 0, 0];
-    f = fit(x(:), y(:), 'a * exp(n_qp * (exp(-d * x) - 1) - b*x) + c', opts);
+    
+    if ~t1_bool
+        opts.StartPoint = [y(1) - y(end), 1 / (max(x) - min(x) + 9 * eps),...
+                y(end), 0.5 / (max(x) - min(x) + 9 * eps), 1];
+        opts.Lower = [min(y), 0, min(y), 0, 0];
+        opts.Upper = [max(y), 100*max(x), max(y), 100*max(x), 10];
+        f = fit(x(:), y(:), 'a * exp(n_qp * (exp(-d * x) - 1) - b*x) + c', opts);
+    else
+        opts.StartPoint = [y(1) - y(end), y(end), 0.5 / (max(x) - min(x) + 9 * eps), 1];
+        opts.Lower = [min(y), min(y), 0, 0];
+        func = ['a * exp(n_qp * (exp(-d * x) - 1) -x/',num2str(t1_val),') + c'];
+        f = fit(x(:), y(:), func, opts);
+    end
 end
