@@ -1,13 +1,14 @@
 function fitMeasData2QPT1Decay(T1_expt, data_variable, data)
-%fitMeasData2Exponent(DATA_VARIABLE, DATA)  Fit data to an exponential
-%function. 
-%   data = fitMeasData2Exponent(DATA_VARIABLE, DATA) fits data for
-%   DATA_VARIABLE to an exponent, and saves the data structure
+%fitMeasData2QPT1Decayu(T1_EXPT, DATA_VARIABLE, DATA)  Fit T1 data to a
+%multi-part exponential function with ability to feed in a known T1
+
+%   fitMeasData2Exponent(T1_expt, DATA_VARIABLE, DATA) fits data for
+%   DATA_VARIABLE to an exponent with a Poisson distribution of
+%   quasiparticles, and saves the data structure
 %   containing the fit, plots the data and the fit, and saves the data 
 %   structure containing the fit.
 
 if ~exist('data', 'var')
-    % Select a file.
     data = loadMeasurementData;
 end
 if isempty(fields(data))
@@ -154,7 +155,6 @@ elseif length(dep_rels) == 2 % Plot 2D data.
             fitted(k, :) = f(indep_vals2);
         end
     else
-        % time_const = zeros(length(indep_vals1), 3);
         amplitude = zeros(length(indep_vals1), 3);
         offset = zeros(length(indep_vals1), 3);
         qp_time_const = zeros(length(indep_vals1), 3);
@@ -164,8 +164,6 @@ elseif length(dep_rels) == 2 % Plot 2D data.
             f = QPDecayFit(indep_vals2, dep_vals(k, :), T1_set, T1);
             ci = confint(f);
             amplitude(k, :) = [f.a, f.a - ci(2, 1), ci(1, 1) - f.a];
-            % time_const(k, :) = [1/f.b, 1 / (ci(1, 2) - f.b),...
-            %                        1 / (f.b - ci(2, 2))];
             offset(k, :) = [f.c, f.c - ci(2, 2), ci(1, 2) - f.c];
             qp_time_const(k,:) = [1/f.d, 1 / (ci(1, 3) - f.d),...
                                    1 / (f.d - ci(2, 3))];
