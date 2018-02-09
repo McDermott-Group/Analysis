@@ -178,11 +178,16 @@ end
 end
 
 function f = ExpFit(x, y)
-    opts = fitoptions('Method', 'NonlinearLeastSquares');
+%     opts = fitoptions('Method', 'NonlinearLeastSquares');
+    opts = fitoptions('Method', 'NonlinearLeastSquares',...
+                      'Robust', 'LAR',...
+                      'MaxFunEvals',10000,...
+                      'MaxIter',10000,...
+                      'DiffMaxChange',1,...
+                      'Algorithm','Trust-Region');
     opts.Display = 'Off';
     opts.TolX = 1e-9;
     opts.TolFun = 1e-9;
-    opts.StartPoint = [y(1) - y(end), 1 / (max(x) - min(x) + 9 * eps),...
-            y(end)];
+    opts.StartPoint = [y(1) - y(end), 1 / (max(x) - min(x) + 9 * eps),y(end)];
     f = fit(x(:), y(:), 'a * exp(-b * x) + c', opts);
 end
