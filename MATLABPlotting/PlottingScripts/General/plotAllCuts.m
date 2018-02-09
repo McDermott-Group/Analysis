@@ -18,7 +18,7 @@ yD = get(temp, 'YData');
 xD = get(temp, 'XData');
 figure();
 hold on
-legend_str=[];
+legend_str=cell(length(cD(1,:)),1);
 for n=1:length(cD(1,:))
     plotSimple(yD, cD(:,n))
     legend_str{n}=[h.CurrentAxes.XLabel.String,': ',num2str(xD(n))];
