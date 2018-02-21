@@ -80,7 +80,7 @@ figure;
 subplot(1,2,1)
 th_xz = atan2(-data.Sigma_Z,data.Sigma_X);
 r_xz = sqrt(data.Sigma_Z.^2 + data.Sigma_X.^2);
-pax=polarscatter(th_xz,r_xz,[],data.(indeps{1}),'filled');
+polarscatter(th_xz,r_xz,[],data.(indeps{1}),'filled');
 colormap jet
 cbar=colorbar;
 cbar.Label.String = xlables;

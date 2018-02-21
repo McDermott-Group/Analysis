@@ -14,8 +14,8 @@ for data_index = 1:length(data.dep)
     dep_rels = data.rels.(I_name);
     
     if isempty(dep_rels) || length(dep_rels) > 2 ||...
-            ~isempty(strfind(I_name, 'I')) ||...
-            ~isempty(strfind(I_name, '_Std_Dev'))
+            contains(I_name, 'I') ||...
+            contains(I_name, '_Std_Dev')
         continue
     else
         Q_name = strrep(I_name, 'I', 'Q');

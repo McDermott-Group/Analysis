@@ -103,11 +103,11 @@ end
 
 % now plot it with its mean and std on the same plot
 createFigure; hold on;
-h(1:2)=bar([data.seq_fids(:,1), data.seq_fids(:,3)],'FaceColor','flat');
+h(1:2)=bar([data.seq_fids(:,1), data.seq_fids(:,2)],'FaceColor','flat');
 data.seq_fid_mean = mean(data.seq_fids(:,1));
-data.adj_seq_fid_mean = mean(data.seq_fids(:,3));
+data.adj_seq_fid_mean = mean(data.seq_fids(:,2));
 data.seq_fid_std = std(data.seq_fids(:,1));
-data.adj_seq_fid_std = std(data.seq_fids(:,3));
+data.adj_seq_fid_std = std(data.seq_fids(:,2));
 h(3)=refline(0,data.seq_fid_mean);
 h(3).Color = 'k';
 h(4)=refline(0,data.adj_seq_fid_mean);
@@ -130,17 +130,17 @@ ylabel('Sequence Fidelity')
 title_str = {'Sequence Fidelities from experiment',...
     [data.sets.(filenames{1}).Experiment_Name,' on ',data.sets.(filenames{1}).Timestamp]};
 title(title_str)
-leg = legend(h,'Raw Data',['Adjusted for ',num2str(data.rabi_envelope_time),...
-    ' ns Rabi Envelope'],...
+leg = legend(h,'Raw Data',...
+    'Adjusted for Identity Infidelity',...
     ['Raw Mean = (',num2str(data.seq_fid_mean),'\pm',num2str(data.seq_fid_std),')%'],...
     ['Adjusted Mean = (',num2str(data.adj_seq_fid_mean),'\pm',num2str(data.adj_seq_fid_std),')%']);
 set(leg,'Location','best');
 
 createFigure; hold on;
 nbins = 13;
-histfit(data.seq_fids(:,3),nbins)
+histfit(data.seq_fids(:,2),nbins)
 xlabel('Adjusted Sequence Fidelity')
 ylabel('Counts')
-data.hist_info = fitdist(data.seq_fids(:,3),'Normal');
+data.hist_info = fitdist(data.seq_fids(:,2),'Normal');
 
 end
