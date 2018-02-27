@@ -146,7 +146,7 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     phase = zeros(size(a));
     Twhite = zeros(size(a));
     fitted = zeros(length(a),length(indep_vals2));
-    for k = 1:length(indep_vals1)
+    parfor k = 1:length(indep_vals1)
         f = RamseyFit(indep_vals2, dep_vals(k, :)');
         ci = confint(f);
         a(k, :) = [f.a, f.a - ci(2, 1), ci(1, 1) - f.a];
@@ -244,13 +244,13 @@ function f = RamseyFit(x, y)
         x(1) = [];
         y(1) = [];
     end
-    opts.Lower = [-max(abs(y)), -max(abs(y)), max(x) / 100, 0, -2 * pi,...
-                   max(x) / 100];
-    opts.StartPoint = [y(1), max(y) - y(1), max(x) / 2, max(x) / 10,...
-                       0, 10 * max(x)];
-%     opts.StartPoint = [mean(y), max(y) - min(y), max(x) / 2, max(x) / 10,...
+    opts.Lower = [-max(abs(y)), -max(abs(y)), max(x) / 1000, 0, -pi,...
+                   max(x) / 1000];
+%     opts.StartPoint = [y(1), max(y) - y(1), max(x) / 2, max(x) / 20,...
 %                        0, 10 * max(x)];
-    opts.Upper = [max(abs(y)), max(abs(y)), 100 * max(x), 100 * max(x),...
-                   2 * pi, 10 * max(x)];
+    opts.StartPoint = [mean(y), max(y) - min(y), max(x) / 2, max(x) / 20,...
+                       0, 10 * max(x)];
+    opts.Upper = [max(abs(y)), max(abs(y)), 1000 * max(x), 100 * max(x),...
+                   pi, 1000 * max(x)];
     f = fit(x, y, ft, opts);
 end
