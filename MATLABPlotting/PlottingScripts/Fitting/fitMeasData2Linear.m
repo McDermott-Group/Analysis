@@ -97,8 +97,7 @@ if length(dep_rels) == 1
         '_linearfit_simple']));
 
 elseif length(dep_rels) == 2 % Plot 2D data.
-%     if ~isempty(strfind(dep_rels{1}, 'Time')) ||...
-%             ~isempty(strfind(dep_rels{1}, 'Duration')) ||...
+     % if ~isempty(strfind(dep_rels{1}, 'Delay')) ||...
      if ~isempty(strfind(dep_rels{1}, 'Qubit_Drive_to_Readout'))
         indep_name1 = dep_rels{2};
         indep_name2 = dep_rels{1};
@@ -106,9 +105,8 @@ elseif length(dep_rels) == 2 % Plot 2D data.
         indep_vals2 = data.(dep_rels{1});
         dep_vals = dep_vals';
         flip_fit = true;
-%     elseif ~isempty(strfind(dep_rels{2}, 'Time')) ||...
-%             ~isempty(strfind(dep_rels{2}, 'Duration')) ||...
-     elseif ~isempty(strfind(dep_rels{2}, 'Qubit_Drive_to_Readout'))
+     % elseif ~isempty(strfind(dep_rels{2}, 'Delay')) ||...
+     elseif      ~isempty(strfind(dep_rels{2}, 'Qubit_Drive_to_Readout'))
         indep_name1 = dep_rels{1};
         indep_name2 = dep_rels{2};
         indep_vals1 = data.(dep_rels{1});
@@ -128,7 +126,7 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     offset = zeros(size(time_const));
     fitted = zeros(size(dep_vals));
     for k = 1:length(indep_vals1)
-        f = ExpLinFit(indep_vals2, dep_vals(k, :));
+        f = LinFit(indep_vals2, dep_vals(k, :));
         ci = confint(f);
         time_const(k, :) = [-1/f.p1, 1 / (ci(1, 1)) - 1/f.p1,...
                                    1 / (f.p1) - 1/(ci(2, 1))];
@@ -147,7 +145,7 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     data.units.(name) = indep2_units;
     data.rels.(name){1} = indep_name1;
     data.dep{length(data.dep) + 1} = name;
-    plotDataVar(data, name, 'errorbar')
+    % plotDataVar(data, name, 'errorbar')
     
     name = 'Extracted_Rate_Constant';
     data.(name) = rate_const(:, 1);
@@ -163,7 +161,7 @@ elseif length(dep_rels) == 2 % Plot 2D data.
     data.units.(name) = indep2_units;
     data.rels.(name){1} = indep_name1;
     data.dep{length(data.dep) + 1} = name;
-    plotDataVar(data, name, 'errorbar')
+%     plotDataVar(data, name, 'errorbar')
     
     name = ['Fitted_', data_variable];
     data.(name) = fitted;
@@ -176,10 +174,10 @@ elseif length(dep_rels) == 2 % Plot 2D data.
 end
 end
 
-function f = ExpLinFit(x, y)
+function f = LinFit(x, y)
 %     opts = fitoptions('Method', 'NonlinearLeastSquares');
     opts = fitoptions('Method', 'LinearLeastSquares',...
-                      'Robust', 'Bisquare');
+                      'Robust', 'LAR');
     f = fit(x(:), y(:), 'poly1', opts);
     
 end

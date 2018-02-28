@@ -1,5 +1,5 @@
-function plotMultiFileAvg2DMeasData(data_variable)
-% plotMultiFileAvg2DMeasData(DATA_VARIABLE) Plots a pixel-by-pixel mean of
+function plotMultiFileAvgMeasData(data_variable)
+% plotMultiFileAvgMeasData(DATA_VARIABLE) Plots a pixel-by-pixel mean of
 %   several 2D sweep data files
 
 % Select files to plot.
@@ -34,7 +34,7 @@ else
     dep_vars = data_variable;
 end
 shapes=size(data{1}.(dep_vars{1}));
-dep_vals = zeros(length(filenames),shapes(1),shapes(2));
+dep_vals = zeros(length(filenames),shapes(1));
 for k = 1:length(dep_vars)
     data_variable = dep_vars{k};
     
@@ -45,7 +45,7 @@ for k = 1:length(dep_vars)
     for q = 1:length(filenames)
         % Check that the data variable exists (compute it if necessary).
         [data{q}, data_variable] = checkDataVar(data{q}, data_variable);
-        dep_vals(q,:,:) = data{q}.(data_variable);
+        dep_vals(q,:) = data{q}.(data_variable);
         dep_rels = data{q}.rels.(data_variable);
         
         if ~isequal(dep_rels,dep_rels1)
@@ -53,6 +53,7 @@ for k = 1:length(dep_vars)
         end
        
     end
+    
     avg_data = squeeze(mean(dep_vals,1));
 
     processed_data_var = ['Average_', data_variable];
