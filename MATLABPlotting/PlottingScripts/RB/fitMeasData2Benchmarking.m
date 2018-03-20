@@ -63,10 +63,10 @@ if length(dep_rels) == 1
     
     ax=gca;
     ax.ColorOrderIndex=1;
-    plotSimple(data.Number_of_Cliffords,...
-        out.fr_No_Interleave(data.Number_of_Cliffords),'-');
-    plotSimple(data.Number_of_Cliffords,...
-        out.fr_Interleave(data.Number_of_Cliffords),'-');
+    plotSimple(out.no_int_x,...
+        out.fr_No_Interleave(out.no_int_x),'-');
+    plotSimple(out.int_x,...
+        out.fr_Interleave(out.int_x),'-');
     
     [~,filename,ext] = fileparts(data.Filename);
     filename=strrep(filename,'_','\_');
