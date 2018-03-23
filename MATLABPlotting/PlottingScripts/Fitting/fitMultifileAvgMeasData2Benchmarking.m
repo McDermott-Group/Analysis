@@ -1,4 +1,6 @@
 function fitMultifileAvgMeasData2Benchmarking()
+% Select multiple RB 1D sweeps for input. This script averages them and fit
+% them to find gate fidelity. Error bars will be shown 
 
 % Select files to plot.
 [filenames, pathnames, status] = selectMeasurementDataFile;
@@ -36,8 +38,10 @@ TempData = [];
 for k = 1:length(filenames)
     No_Int_Probability_TempData(k,:) = data{k}.No_Interleaved_Probability;
     Int_Probability_TempData(k,:) = data{k}.Interleaved_Probability;
-    No_Int_probabilities_TempData(k,:,:) = data{k}.No_Interleaved_Probabilities;    
-    Int_probabilities_TempData(k,:,:) = data{k}.Interleaved_Probabilities;    
+    if errors ==1 
+        No_Int_probabilities_TempData(k,:,:) = data{k}.No_Interleaved_Probabilities;    
+        Int_probabilities_TempData(k,:,:) = data{k}.Interleaved_Probabilities;
+    end
 end
 
 AvgData.No_Interleaved_Probability = mean(No_Int_Probability_TempData,1);
