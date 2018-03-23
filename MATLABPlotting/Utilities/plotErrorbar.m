@@ -5,7 +5,7 @@ function plotErrorbar(indep, dep, dep_error)
 %   an indepedent variable (x coordinate), DEP is a dependent variable
 %   (y coordinate). DEP_ERROR is the error on DEP variable.
 
-errorbar(indep, dep, 1.96 * dep_error, '.', 'LineWidth', 1,...
+errorbar(indep, dep, dep_error, '.', 'LineWidth', 1,...
     'MarkerSize', 15)
 axis tight
 grid on
