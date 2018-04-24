@@ -278,4 +278,7 @@ opts.StartPoint = [.5 * (max_y - min_y) * width^2 / 4,...
 
 f = fit(x(:), y(:), '(a / ((x - b)^2 + (c / 2)^2)) + d * (x - b) + e', opts);
 
+format long
+f.b
+
 end

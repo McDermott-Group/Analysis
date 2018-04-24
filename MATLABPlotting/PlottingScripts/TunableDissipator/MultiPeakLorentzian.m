@@ -1,9 +1,11 @@
 function [fitresult, gof] = MultiPeakLorentzian(CutNum, n, InitialPt)
 %By Naveen
+% Fits multipeak lorentzian data
 if CutNum == 0 
     data = loadMeasurementData;
-    Freq = data.Qubit_Frequency;
-    Occ1 = data.Occupation;
+    Freq = data.Cavity_Frequency;
+    Occ1 = data.Average_Amplitude;
+    Occ1 = Occ1.^2;
     [xData, yData] = prepareCurveData(Freq, Occ1);
 else
     data = loadMeasurementData;
@@ -14,7 +16,8 @@ end
 
 
 if nargin < 1
-    InitialPt = [0.001,0.001,0.001,0.001,0.001,4.949,4.946]; CutNum = 1; n = 2;
+%     InitialPt = [0.001,0.001,0.001,0.001,0.001,6.632,6.629]; CutNum = 1; n = 2;
+    InitialPt = [1e-11,1e-11,1e-11,0.001,0.001,6.632,6.629]; CutNum = 1; n = 2;
     fprintf('FirstCut_doubleLorentzianFit_if2Ddata')
 elseif nargin < 2
     InitialPt = [0.001,0.001,0.001,0.001,0.001,4.949,4.946]; CutNum = 1; n = 2;

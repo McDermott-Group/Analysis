@@ -1,8 +1,6 @@
 function plotMultiFileAvg1DMeasData(data_variable)
 % plotMultiFileAvg2DMeasData(
-% DATA_VARIABLE) Plots a mean of several 2D data files along first variable
-% that you swept in those files. You can use this file to plot average of
-% 1D plots
+% DATA_VARIABLE) Plots a mean of several 1D data files 
 
 
 
@@ -39,6 +37,8 @@ else
     dep_vars = data_variable;
 end
 
+
+
 for k = 1:length(dep_vars)
     data_variable = dep_vars{k};
    
@@ -57,22 +57,36 @@ for k = 1:length(dep_vars)
                       strrep(data_variable, '_', ' '),...
                       ''' are not specified.'])
         end
-        avg_data = mean(dep_vals, 1);
+    end
+    avg_data = mean(dep_vals, 2);
+
 
     processed_data_var = ['Average_', data_variable];
-    data2plot = data{q};
+%     data2plot = data{q};
     data2plot.(processed_data_var) = avg_data;
-    data2plot.units.(processed_data_var) = data{q}.units.(data_variable);
-    data2plot.rels.(processed_data_var) = {dep_rels{2}};
-    data2plot.dep{length(data{q}.dep) + 1} = processed_data_var;
-    data2plot.plotting.(processed_data_var).plot_title =...
-            {[strrep(filenames{q}, '_', '\_'), ' - ',...
+    data2plot.units.(processed_data_var) = data{1}.units.(data_variable);
+    data2plot.rels.(processed_data_var) = {dep_rels{1}};
+    data2plot.dep{length(data{1}.dep) + 1} = processed_data_var;
+%     data2plot.plotting.(processed_data_var).plot_title =...
+%             {[strrep(filenames{1}, '_', '\_'), ' - ',...
+%               strrep(filenames{end}, '_', '\_')],...
+%              ['[', data{1}.Timestamp, ' - ',...
+%               data{end}.Timestamp, ']']};
+    figure
+    p = plot(data{1}.Qubit_Frequency, avg_data);
+    xlabel([data{1}.rels.(data_variable)],'interpreter','latex','FontSize',16)   
+    ylabel('Occupation','FontSize',16);
+    title({[strrep(filenames{1}, '_', '\_'), ' - ',...
               strrep(filenames{end}, '_', '\_')],...
              ['[', data{1}.Timestamp, ' - ',...
-              data{end}.Timestamp, ']']};
-
-    plotDataVar(data2plot, processed_data_var);
-[~, filename, ~] = fileparts(filenames{q});
+              data{end}.Timestamp, ']']})
+    
+    p.Marker = '.'; 
+    p.MarkerSize = 12;
+    p.MarkerFaceColor = [0, 0.447 , 0.741];
+    grid on
+    axis tight
+[~, filename, ~] = fileparts(filenames{end});
     saveMeasData(data2plot, [filename, '_avg'])
 
     end

@@ -1,4 +1,4 @@
-function plotMultiFileAvg1DMeasData_from2Ddataset(data_variable)
+function plotMultiFileAvg1DMeasDataFrom2Ddataset(data_variable)
 % plotMultiFileAvg2DMeasData(
 % DATA_VARIABLE) Plots a mean of 2D data file along first variable
 % that you swept in those files. You can use this file to plot average of
