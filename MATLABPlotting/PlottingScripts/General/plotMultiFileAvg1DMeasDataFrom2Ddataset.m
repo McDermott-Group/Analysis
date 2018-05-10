@@ -4,8 +4,10 @@ function plotMultiFileAvg1DMeasDataFrom2Ddataset(data_variable)
 % that you swept in those files. You can use this file to plot average of
 % 1D plots
 
-cutEx = 0;
-cutsExcluded = [];
+CTC = 1;
+CutsToConsider = [];
+% CutsToConsider = [1, 8];
+% CutsToConsider = [1, 2, 3, 4, 7, 8];
 % Select files to plot.
 [filenames, pathnames, status] = selectMeasurementDataFile;
 if ~status
@@ -57,8 +59,14 @@ for k = 1:length(dep_vars)
                       strrep(data_variable, '_', ' '),...
                       ''' are not specified.'])
         end
-
-        avg_data = mean(dep_vals, 1);
+        if CTC == 0
+            CTC
+            avg_data = mean(dep_vals, 1);
+        else
+            CTC
+            avg_data1 = dep_vals(CutsToConsider,:);
+            avg_data = mean(avg_data1, 1);
+        end
 
     processed_data_var = ['Average_', data_variable];
     data2plot = data{q};
