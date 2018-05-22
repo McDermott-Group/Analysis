@@ -12,7 +12,7 @@ rDiode = sort(rDiode1);
 rNormal = sort(rNormal1);
 
 Rn = spline(rDiode,rNormal,Rmeasured);
-Ic = pi*3.4e-4./(2*Rn*1000)*1e9;
+Ic = pi*3.4e-4./(4*Rn*1000)*1e9;
 Rn = {Rn, 'kOhm'};
 Ic = {Ic, 'nA'};
 valsRn = [''];
