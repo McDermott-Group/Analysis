@@ -5,9 +5,10 @@ function plotMultiFileAvg1DMeasDataFrom2Ddataset(data_variable)
 % 1D plots
 
 CTC = 1;
-CutsToConsider = [];
+% CutsToConsider = [];
 % CutsToConsider = [1, 8];
-% CutsToConsider = [1, 2, 3, 4, 7, 8];
+CutsToConsider = [1, 2, 5, 6, 7, 8, 9, 10];
+% CutsToConsider = [1, 2, 3, 4, 6, 7, 8, 9, 10];
 % Select files to plot.
 [filenames, pathnames, status] = selectMeasurementDataFile;
 if ~status
