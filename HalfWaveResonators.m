@@ -75,14 +75,13 @@ for k = 1:length(data)
     opts = optimoptions(@lsqcurvefit,'Display','off');
 %     objfcn = @(v,x)v(1)*x + v(2) + 1./(1 + v(3)/v(4)*exp(j*v(5))./(2*j*v(3)*(x-v(6))/v(6)));
 % 'm*x + b + ( 1 - (Q0/Qc-2i*Q0*df/f0)/(1+2i*Q0*(f-f0)/f0) )*exp(1i*tau*2*pi*f'
-    objfcn = @(v,x)[real(v(6)*x + v(2) + ( 1 - (v(1)/v(3)-2j*v(1)*v(4)/v(5))./(1+2j*v(1).*(x-v(5))/v(5)) ).*exp(1j*v(6)*2*pi*x)), ...
-                    imag(v(6)*x + v(2) + ( 1 - (v(1)/v(3)-2j*v(1)*v(4)/v(5))./(1+2j*v(1).*(x-v(5))/v(5)) ).*exp(1j*v(6)*2*pi*x))];
+    objfcn = @(v,x)[v(2) + real(v(6)*x + ( 1 - (v(1)/v(3)-2j*v(1)*v(4)/v(5))./(1+2j*v(1).*(x-v(5))/v(5)) ).*exp(1j*v(6)*2*pi*(x-v(5)))), ...
+                    v(7) + imag(v(6)*x + ( 1 - (v(1)/v(3)-2j*v(1)*v(4)/v(5))./(1+2j*v(1).*(x-v(5))/v(5)) ).*exp(1j*v(6)*2*pi*(x-v(5))))];
 %     objfcn = @(v,x)[real(v(1)*x + v(2) + 1./(1 + v(3)/v(4)*exp(j*v(5))./(2*j*v(3)*(x-v(6))/v(6)))), ... 
 %                     imag(j*v(7)*x + j*v(8) + 1./(1 + j*v(9)/j/v(10)*exp(-v(11))./(2*j*v(9)*(x-j*v(12))/v(12))))];
 %     v0 = [0; 0.95; 100000; 50000; -45; 5.53446; 1e-9; 1e-9; 1e-9; 1e-9; 1e-9; 1e-9];
-    % Q0, b, Qc, df, f0, tau, m
-    v0 = [50000; 0.6+0.25j; 50000; 0; 5.53446; 80e-9; 0];
-    v0 = [6400; 2+5j; 10000; 0.00018; 6.7607; -80; 0];
+    % Q0, b_re, Qc, df, f0, tau, m. b_im
+    v0 = [50000; .1; 50000; 0.0; 5.53446; 80e-9; 0; 0.5];
 %     [vestimated,resnorm] = lsqcurvefit(objfcn,v0,f.',ss.',[],[],opts)
     [vestimated,resnorm] = lsqcurvefit(objfcn,v0,f,[i,-1j*q],[],[],opts)
 %     ft = objfcn(vestimated,f.');
