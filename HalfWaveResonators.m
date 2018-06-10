@@ -45,10 +45,10 @@ for k = 1:length(data)
 %         nwashers(k) = 0;
 %     end
     f = data{k}.RF_Frequency;
-    s_dB = data{k}.S43;
+    s_dB = data{k}.S21;
     s_dB = s_dB - mean(s_dB);
     s = 10.^(s_dB/20);
-    p = pi/180.*data{k}.S43_Phase;
+    p = pi/180.*data{k}.S21_Phase;
     p = p - mean(p);
     i = s.*cos(p); 
     q = 1j*s.*sin(p);
@@ -72,17 +72,18 @@ for k = 1:length(data)
 %     hold on;
 %     plot(ft{k}(f).'.*cos(p), ft{k}(f).'.*sin(p))
     
-    opts = optimoptions(@lsqcurvefit,'Display','off','MaxIterations',100000,'MaxFunEvals',100000, 'PlotFcn',@optimplotresnorm, 'TolX', 1e-9,'TolFun',1e-9, 'StepTolerance',1e-9);
+    opts = optimoptions(@lsqcurvefit,'Display','off','MaxIterations',10000,'MaxFunEvals',10000, 'TolX', 1e-9,'TolFun',1e-9, 'StepTolerance',1e-9);%, 'PlotFcn',@optimplotresnorm);
 %     objfcn = @(v,x)v(1)*x + v(2) + 1./(1 + v(3)/v(4)*exp(j*v(5))./(2*j*v(3)*(x-v(6))/v(6)));
 % 'm*x + b + ( 1 - (Q0/Qc-2i*Q0*df/f0)/(1+2i*Q0*(f-f0)/f0) )*exp(1i*tau*2*pi*f+1i*phi0 )'
 %     % Q0, Qc, df, f0, tau, b_re, m, b_im, phi
 %     v0 = [370000; 450000; 0.05; 5.53446; -80e-9; 0; .2; 0; 0.5];
 %     [vestimated,resnorm] = lsqcurvefit(objfcn,v0,f.',ss.',[],[],opts)
 %     ft = objfcn(vestimated,f.');
-    objfcn = @(v,x)[real(( 1 - (v(1)/v(2)-2j*v(1)*v(3)/v(4)) ./ (1+2j*v(1).*(x-v(4))/v(4)) ).* exp(1j*(2*pi*v(5)*(x-v(4))+v(6))) ) + 0*v(7), ...
-                    imag(( 1 - (v(1)/v(2)-2j*v(1)*v(3)/v(4)) ./ (1+2j*v(1).*(x-v(4))/v(4)) ).* exp(1j*(2*pi*v(5)*(x-v(4))+v(6))) ) + 0*v(8)];
-    % Q0, Qc, df, f0, tau, phi, b_re, b_im, m
-    v0 = [350000; 450000; 0.05; 5.53446; -80e-9; 0; mean(i); mean(q); 0.5];
+    objfcn = @(v,x)[real(v(10)*( 1 - (v(1)/v(2)-2j*v(1)*v(3)/v(4)) ./ (1+2j*v(1).*(x-v(4))/v(4)) ).* exp(1j*(2*pi*v(5)*(x-v(4))+v(6))) ) + 1*v(7), ...
+                    imag(v(10)*( 1 - (v(1)/v(2)-2j*v(1)*v(3)/v(4)) ./ (1+2j*v(1).*(x-v(4))/v(4)) ).* exp(1j*(2*pi*v(5)*(x-v(4))+v(6))) ) + 1*v(8)];
+    % Q0, Qc, df, f0, tau, phi, b_re, b_im, m, scale factor
+%     v0 = [350000; 450000; 0.05; 5.53446; -80e-9; 0; mean(i); mean(q); 0.5; 1];
+    v0 = [2000; 3000; 0.05; 7.5466; -80e-9; 0; mean(i); mean(q); 0.5; 1];
     [vestimated,resnorm] = lsqcurvefit(objfcn,v0,f.',[i.',-1j*q.'],[],[],opts)
     1/(1/vestimated(1) - 1/vestimated(2))
     temp = objfcn(vestimated,f.');
