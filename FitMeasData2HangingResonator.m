@@ -1,5 +1,7 @@
 % Copyright Chris Wilen 2018
 % 
+% do we want to be able to fit to just mag?
+
 function fitMeasData2HangingResonator(data_variable1)
 
 % Select a file.
@@ -69,6 +71,7 @@ end
 if length(dep_rels1) == 1
     indep_name = dep_rels1{1};
     indep_vals = data.(indep_name);
+    xunits = getUnits(data, indep_name);
     
     f = indep_vals;
     if data_is_magphase
@@ -89,12 +92,18 @@ if length(dep_rels1) == 1
     figure()
     
     subplot(2,2,1);
-    plot(f, s_dB)
-    title('S21 in dB');
+    plot(f, s_dB, '.')
+    axis tight;
+    title('Transmission');
+    xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
+    ylabel('dB');
     
     subplot(2,2,3);
-    plot(f, 180/pi*p)
-    title('S21 Phase');
+    plot(f, 180/pi*p, '.')
+    axis tight;
+    title('Transmission (Phase)');
+    xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14)
+    ylabel('Deg');
     
     subplot(2,2,2);
     plot(i, -1j*q);
@@ -103,7 +112,7 @@ if length(dep_rels1) == 1
     
     subplot(2,2,4);
     plot(real(1./s),imag(1./s));
-    % axis equal;
+    axis equal;
     title('1/S21 IQ');
     
     
@@ -117,9 +126,14 @@ if length(dep_rels1) == 1
      v0 = [350000; 450000; 0.05; 5.53446; -80e-9; 0; mean(i); mean(q); 0.5; 1];
     % v0 = [2000; 3000; 0.05; 7.5466; -80e-9; 0; mean(i); mean(q); 0.5; 1];
     [vestimated,resnorm] = lsqcurvefit(objfcn,v0,f.',[i.',-1j*q.'],[],[],opts)
-    1/(1/vestimated(1) - 1/vestimated(2))
     temp = objfcn(vestimated,f.');
     ft = temp(:,1) + 1j*temp(:,2);
+    
+    f_c_txt = ['Resonance Frequency = ', num2str(vestimated(4)),  xunits];
+    Q_txt = ['Q_i = ', num2str(1/(1/vestimated(1) - 1/vestimated(2))), ...
+             ', Q_c = ', num2str(vestimated(2))];
+    full_title = {[strrep(filename, '_', '\_'), ext,...
+        ' [', data.Timestamp, ']'], f_c_txt, Q_txt};
     
     subplot(2,2,1); hold on;
     plot(f, 20*log10(abs(ft)))
@@ -129,6 +143,7 @@ if length(dep_rels1) == 1
     plot(real(ft),imag(ft))
     subplot(2,2,4); hold on;
     plot(real(1./ft),imag(1./ft))
+    suptitle(full_title, 'FontSize', 10)
 
 elseif length(dep_rels1) == 2 % Plot 2D data.
     error(['2D data not yet implemented.'])
