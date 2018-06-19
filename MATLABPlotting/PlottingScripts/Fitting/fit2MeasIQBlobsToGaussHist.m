@@ -69,6 +69,7 @@ end
 fitI = fit(xValuesI, Icounts', 'gauss1');
 fitX = fit(xValuesX, Xcounts', 'gauss1');
 
+
 if fitI.b1 > 0
     rotInfo.ZeroStateLoc = 1;
 else
@@ -101,18 +102,38 @@ intX_interp = interp1(xValuesX,intX,xValuesI);
 [singleShotFidelity, SSFMax_idx] = max(abs(intX_interp'/max(intX) - ...
                                            intI/max(intI)));
 
+set1 =(data.allIQsRot(1:end/2,1));
+set2 = (data.allIQsRot(end/2+1:end,1));
+fulldata = [set1;set2];
+
+[fullcounts, fulledges] = histcounts(fulldata, Nbins);
+fullValues = zeros(length(fulledges)-1,1);
+size(fullValues)
+size(fullcounts')
+for i=1:length(fulledges)-1
+   fullValues(i) = mean([fulledges(i) fulledges(i+1)]);
+end
+fitfull = fit(fullValues, fullcounts', 'gauss2');
+
+histogram(fulldata,Nbins)
+hold on
+plot(fitfull)
 
 if plotHist
     createFigure([.9, .1, .88, .8]);
     histogram(data.allIQsRot(1:end/2,1), Nbins); 
     hold on
     histogram(data.allIQsRot(end/2:end,1), Nbins);
-
+    hold on
+    histogram(fulldata,Nbins)
+    
     h = plot(fitI, '-b');
     set(h, 'LineWidth',2);
     h = plot(fitX, '-r');
     set(h, 'LineWidth',2);
-
+    h = plot(fitfull, '-g');
+    set(h, 'LineWidth',2);
+    
     ylabel('Counts', 'FontSize', 14)
     % Note: yyaxis not available before 2016a
     try
