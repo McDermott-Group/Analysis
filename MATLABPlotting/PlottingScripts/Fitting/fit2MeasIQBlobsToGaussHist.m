@@ -108,16 +108,43 @@ fulldata = [set1;set2];
 
 [fullcounts, fulledges] = histcounts(fulldata, Nbins);
 fullValues = zeros(length(fulledges)-1,1);
-size(fullValues)
-size(fullcounts')
+
 for i=1:length(fulledges)-1
    fullValues(i) = mean([fulledges(i) fulledges(i+1)]);
 end
-fitfull = fit(fullValues, fullcounts', 'gauss2');
 
-histogram(fulldata,Nbins)
-hold on
-plot(fitfull)
+fitfull = fit(fullValues, fullcounts',  'gauss2');
+formula(fitfull)
+
+
+size(fitfull.a1)
+fitfull.a1
+size(fitfull.b1)
+fitfull.b1
+size(fitfull.c1)
+fitfull.c1
+
+A1=fitfull.a1;
+B1=fitfull.b1;
+C1=fitfull.c1;
+
+x = linspace(-8,8,300);
+guassian1 = (x-B1)/C1;
+(x-B1)/C1
+plot(x,guassian1)
+%gaussian2 = fitfull.a2*exp(-((x-fitfull.b2)/fitfull.c2)^2)
+
+
+histogram(fulldata,Nbins);
+hold on;
+plot(fitfull);
+hold on;
+
+
+%size(exp(((x-B1)*(x-B1)/C1^2)))
+%plot(x,A1*exp(((x-B1)/C1)*(x-B1)/C1))
+%hold on
+%plot(gaussian2)
 
 if plotHist
     createFigure([.9, .1, .88, .8]);
