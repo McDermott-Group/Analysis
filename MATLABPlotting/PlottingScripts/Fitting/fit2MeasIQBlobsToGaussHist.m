@@ -58,49 +58,13 @@ data.allIQs = [data.allIs data.allQs];
 % Histogram the data and create requisite arrays for fitting
 [Icounts, Iedges] = histcounts(data.allIQsRot(1:end/2,1), Nbins);
 [Xcounts, Xedges] = histcounts(data.allIQsRot(end/2:end,1), Nbins);
+
 xValuesI = zeros(length(Iedges)-1,1);
 xValuesX = zeros(length(Xedges)-1,1);
 for i=1:length(Iedges)-1
    xValuesI(i) = mean([Iedges(i) Iedges(i+1)]);
    xValuesX(i) = mean([Xedges(i) Xedges(i+1)]);
 end
-
-% Fit the data and determine the location of the "1" state
-fitI = fit(xValuesI, Icounts', 'gauss1');
-fitX = fit(xValuesX, Xcounts', 'gauss1');
-
-
-if fitI.b1 > 0
-    rotInfo.ZeroStateLoc = 1;
-else
-    rotInfo.ZeroStateLoc = -1;
-end
-
-% Integrate over the histograms to learn the cumulative probatility of each
-% given outcome. 
-intX = cumtrapz(xValuesX, Xcounts);
-intI = cumtrapz(xValuesI, Icounts);
-funX = @(x) fitX(x);
-probOne = integral(funX, -inf, xValuesX(end/2), 'ArrayValued', true) /...
-    integral(funX, -inf, inf, 'ArrayValued', true);
-
-% Use the fitted values of the gaussian histograms to find the maximum 
-% measurement fidelity (separation fidelity)
-fidelity =  @(x) 0.5 * abs((erf((x-fitI.b1)/(fitI.c1))) - (erf((x-fitX.b1)/(fitX.c1))));
-allX = [xValuesX xValuesI];
-fids = zeros(size(allX));
-for n = 1:length(allX)
-    fids(n) = fidelity(allX(n));
-end
-maxFidelity = max(fids(:));
-
-% Interpolate one of the cumtrapz so the indicies match up with the other
-% for a fair comparison. This will ensure that doing simple subtraction via
-% indicies actually compares like X values
-intX_interp = interp1(xValuesX,intX,xValuesI);
-
-[singleShotFidelity, SSFMax_idx] = max(abs(intX_interp'/max(intX) - ...
-                                           intI/max(intI)));
 
 set1 =(data.allIQsRot(1:end/2,1));
 set2 = (data.allIQsRot(end/2+1:end,1));
@@ -114,37 +78,62 @@ for i=1:length(fulledges)-1
 end
 
 fitfull = fit(fullValues, fullcounts',  'gauss2');
-formula(fitfull)
+
+a1=fitfull.a1;
+b1=fitfull.b1;
+c1=fitfull.c1;
+
+a2=fitfull.a2;
+b2=fitfull.b2;
+c2=fitfull.c2;
+
+% Fit the data and determine the location of the "1" state
+
+fitI = fit(xValuesI,Icounts','gauss1');
+fitX = fit(xValuesX,Xcounts','gauss1');
 
 
-size(fitfull.a1)
-fitfull.a1
-size(fitfull.b1)
-fitfull.b1
-size(fitfull.c1)
-fitfull.c1
-
-A1=fitfull.a1;
-B1=fitfull.b1;
-C1=fitfull.c1;
-
-x = linspace(-8,8,300);
-guassian1 = (x-B1)/C1;
-(x-B1)/C1
-plot(x,guassian1)
-%gaussian2 = fitfull.a2*exp(-((x-fitfull.b2)/fitfull.c2)^2)
+fittwogaussianX = a1*exp(-((xValuesX-b1)/c1).^2);
+fittwogaussianI = a2*exp(-((xValuesI-b2)/c2).^2);
 
 
-histogram(fulldata,Nbins);
-hold on;
-plot(fitfull);
-hold on;
+if fitfull.b1 > 0
+    rotInfo.ZeroStateLoc = 1;
+else
+    rotInfo.ZeroStateLoc = -1;
+end
+
+% Integrate over the histograms to learn the cumulative probatility of each
+% given outcome. 
+
+intX = cumtrapz(fittwogaussianX);
+intI = cumtrapz(fittwogaussianI);
+
+funX = @(x) fitX(x);
+
+probOne = integral(funX, -inf, xValuesX(end/2), 'ArrayValued', true) /...
+    integral(funX, -inf, inf, 'ArrayValued', true);
+
+% Use the fitted values of the gaussian histograms to find the maximum 
+% measurement fidelity (separation fidelity)
+fidelity =  @(x) 0.5 * abs((erf((x-fitfull.b1)/(fitfull.c1))) - (erf((x-fitfull.b2)/(fitfull.c2))));
+allX = [xValuesX xValuesI];
+fids = zeros(size(allX));
+for n = 1:length(allX)
+    fids(n) = fidelity(allX(n));
+end
+maxFidelity = max(fids(:));
+
+% Interpolate one of the cumtrapz so the indicies match up with the other
+% for a fair comparison. This will ensure that doing simple subtraction via
+% indicies actually compares like X values
+
+intX_interp = interp1(xValuesX,intX,xValuesI);
 
 
-%size(exp(((x-B1)*(x-B1)/C1^2)))
-%plot(x,A1*exp(((x-B1)/C1)*(x-B1)/C1))
-%hold on
-%plot(gaussian2)
+[singleShotFidelity, SSFMax_idx] = max(abs(intX_interp/max(intX) - ...
+                                           intI/max(intI)));
+
 
 if plotHist
     createFigure([.9, .1, .88, .8]);
@@ -153,13 +142,16 @@ if plotHist
     histogram(data.allIQsRot(end/2:end,1), Nbins);
     hold on
     histogram(fulldata,Nbins)
+
     
-    h = plot(fitI, '-b');
-    set(h, 'LineWidth',2);
-    h = plot(fitX, '-r');
-    set(h, 'LineWidth',2);
-    h = plot(fitfull, '-g');
-    set(h, 'LineWidth',2);
+
+    h = plot(xValuesI,fittwogaussianI);
+    set(h, 'LineWidth',2);   
+    h = plot(xValuesX,fittwogaussianX);
+    set(h, 'LineWidth',2);     
+    
+
+
     
     ylabel('Counts', 'FontSize', 14)
     % Note: yyaxis not available before 2016a
@@ -196,7 +188,6 @@ if plotHist
          'gaussian fit to A', 'gaussian fit to B',...
          'integrated dataset A', 'integrated dataset B',...
          'Location', 'NorthWest')
-
 end
 end
 
