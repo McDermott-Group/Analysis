@@ -148,10 +148,12 @@ function data = importHdf5_v0p1(filename)
     data.Filename = filename;
     [~, fn, ~] = fileparts(filename);
     data.Experiment_Name = char(fn);
+    %{
     timestamp = h5readatt(filename, '/', 'Date Created');
     data.Timestamp = strrep(timestamp, 'T', ' ');
     parts = strsplit(char(data.Timestamp), '.');
     data.Timestamp = parts{1};
+    %}
     
     indeps = h5readatt(filename, '/independents', 'names');
     data.indep = {};
@@ -194,6 +196,7 @@ function data = importHdf5_v0p1(filename)
         elseif length(param_name) > 13 &&...
                     strcmp(param_name(end-11:end), 'Distribution')
             data.distr.(param_name(1:end-13)) = char(value);
+        %{
         elseif length(param_name) > 13 &&...
                     strcmp(param_name(end-11:end), 'Dependencies')
             deps_line = char(value);
@@ -210,14 +213,25 @@ function data = importHdf5_v0p1(filename)
                     ' ', '_');
             end
             data.rels.(param_name(1:end-13)) = relationships;
+          %}
         elseif length(param_name) > 5 &&...
                     strcmp(param_name(end-3:end), 'Size')
             sizes.(param_name(1:end-5)) = value;
         else
+            
+            param_name = matlab.lang.makeValidName(param_name);
             data.(param_name) = value;
         end
     end
 
+    for b = 1:length(data.dep)
+        for k = 1:length(data.indep)
+            relationship = {data.indep{k}};
+           data.rels.(data.dep{b})= relationship;
+        end
+    end
+
+        
     for k = 1:length(data.dep)
         dep = data.dep{k};
         if length(data.rels.(dep)) == 2
