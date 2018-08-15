@@ -148,13 +148,17 @@ function data = importHdf5_v0p1(filename)
     data.Filename = filename;
     [~, fn, ~] = fileparts(filename);
     data.Experiment_Name = char(fn);
-    %{
-    timestamp = h5readatt(filename, '/', 'Date Created');
+    
+    try
+        timestamp = h5readatt(filename, '/', 'Date Measured');
+    catch 
+        timestamp = datestr(datetime('now'));
+    end
+    
     data.Timestamp = strrep(timestamp, 'T', ' ');
     parts = strsplit(char(data.Timestamp), '.');
     data.Timestamp = parts{1};
-    %}
-    
+   
     indeps = h5readatt(filename, '/independents', 'names');
     data.indep = {};
     for k = 1:length(indeps)
@@ -185,6 +189,7 @@ function data = importHdf5_v0p1(filename)
 
     params = h5info(filename, '/parameters');
     for k = 1:length(params.Groups)
+        dependencies_found = 0
         full_param_name = params.Groups(k).Name;
         pos = strfind(full_param_name, '/');
         param_name = full_param_name(pos(end)+1:end);
@@ -196,7 +201,6 @@ function data = importHdf5_v0p1(filename)
         elseif length(param_name) > 13 &&...
                     strcmp(param_name(end-11:end), 'Distribution')
             data.distr.(param_name(1:end-13)) = char(value);
-        %{
         elseif length(param_name) > 13 &&...
                     strcmp(param_name(end-11:end), 'Dependencies')
             deps_line = char(value);
@@ -213,7 +217,7 @@ function data = importHdf5_v0p1(filename)
                     ' ', '_');
             end
             data.rels.(param_name(1:end-13)) = relationships;
-          %}
+            dependencies_found = 1
         elseif length(param_name) > 5 &&...
                     strcmp(param_name(end-3:end), 'Size')
             sizes.(param_name(1:end-5)) = value;
@@ -224,10 +228,12 @@ function data = importHdf5_v0p1(filename)
         end
     end
 
-    for b = 1:length(data.dep)
-        for k = 1:length(data.indep)
-            relationship = {data.indep{k}};
-           data.rels.(data.dep{b})= relationship;
+    if dependencies_found == 0
+        for b = 1:length(data.dep)
+            for k = 1:length(data.indep)
+                relationship = {data.indep{k}};
+               data.rels.(data.dep{b})= relationship;
+            end
         end
     end
 
