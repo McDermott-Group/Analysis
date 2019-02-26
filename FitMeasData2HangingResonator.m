@@ -1,8 +1,17 @@
 % Copyright Chris Wilen 2018
 % 
-% do we want to be able to fit to just mag?
+% simultaneously fits I and Q (or mag and phase).  Guess for minimum comes
+% from lowest point in S21.  Fit based on forumula in paper by Geerlings et
+% al "?Improving the quality factor of microwave compact resonators by
+% optimizing their geometrical parameters."  Constant offset included in
+% fit as well.
+%
+% Things to do:
+%     - Force constants to be real
+%     - Unwrap phase properly so the 1/S21 plot in the bottom right looks
+%     fine
 
-function fitMeasData2HangingResonator(data_variable1)
+function vesatimated = fitMeasData2HangingResonator(data_variable1)
 
 % Select a file.
 data = loadMeasurementData;
@@ -89,6 +98,10 @@ if length(dep_rels1) == 1
     q = 1j*s_mag.*sin(p);
     s = (i+q);
     
+    % find frequency of minimum
+    [m, min_index] = min(s_dB);
+    f_min = f(min_index);
+    
     figure()
     
     subplot(2,2,1);
@@ -123,7 +136,7 @@ if length(dep_rels1) == 1
     objfcn = @(v,x)[real(v(10)*( 1 - (v(1)/v(2)-2j*v(1)*v(3)/v(4)) ./ (1+2j*v(1).*(x-v(4))/v(4)) ).* exp(1j*(2*pi*v(5)*(x-v(4))+v(6))) ) + 1*v(7), ...
                     imag(v(10)*( 1 - (v(1)/v(2)-2j*v(1)*v(3)/v(4)) ./ (1+2j*v(1).*(x-v(4))/v(4)) ).* exp(1j*(2*pi*v(5)*(x-v(4))+v(6))) ) + 1*v(8)];
     % Q0, Qc, df, f0, tau, phi, b_re, b_im, m, scale factor
-     v0 = [350000; 450000; 0.05; 5.53446; -80e-9; 0; mean(i); mean(q); 0.5; 1];
+     v0 = [50000; 10000; 0.05; f_min; -80e-9; 0; mean(i); mean(q); 0.; 1];
     % v0 = [2000; 3000; 0.05; 7.5466; -80e-9; 0; mean(i); mean(q); 0.5; 1];
     [vestimated,resnorm] = lsqcurvefit(objfcn,v0,f.',[i.',-1j*q.'],[],[],opts)
     temp = objfcn(vestimated,f.');
@@ -143,7 +156,7 @@ if length(dep_rels1) == 1
     plot(real(ft),imag(ft))
     subplot(2,2,4); hold on;
     plot(real(1./ft),imag(1./ft))
-    suptitle(full_title, 'FontSize', 10)
+    suptitle(full_title);%, 'FontSize', 10)
 
 elseif length(dep_rels1) == 2 % Plot 2D data.
     error(['2D data not yet implemented.'])
