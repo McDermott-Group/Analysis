@@ -32,7 +32,7 @@ class WaferMap(object):
                 else:
                     self.dieMapData[y][x] = np.nan
     def __setitem__(self, key, value):
-        colIndex = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ'.find(key.upper()[0])
+        colIndex = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.find(key.upper()[0])
         rowIndex = int(key[1:]) - 1
         self.dieMapData[rowIndex+1][colIndex] = value
         return
@@ -41,7 +41,7 @@ class WaferMap(object):
         else: 
             raise KeyError('die not on wafer: '+key)
     def __getitem__(self, key):
-        colIndex = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ'.find(key.upper()[0])
+        colIndex = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.find(key.upper()[0])
         rowIndex = int(key[1:]) - 1
         if self.dieMapMask[colIndex][rowIndex+1]:
             return self.dieMapData[rowIndex+1][colIndex]
@@ -55,7 +55,7 @@ class WaferMap(object):
         sputter_diameter = self.sputter_diameter
         trace = go.Heatmap(
                 z = self.dieMapData,
-                x = [c for c in ' ABCDEFGHIJKLMNOPQRSTUVWXYZ'],
+                x = [c for c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'],
                 # y = [str(self.ndie-i)+'a' for i in range(self.ndie)]
             )
         if self.title is None: 

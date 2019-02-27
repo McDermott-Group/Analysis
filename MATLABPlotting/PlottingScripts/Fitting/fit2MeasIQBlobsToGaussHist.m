@@ -106,9 +106,8 @@ end
 % Integrate over the histograms to learn the cumulative probatility of each
 % given outcome. 
 
-intX = cumtrapz(fittwogaussianX);
-intI = cumtrapz(fittwogaussianI);
-
+intX = cumtrapz(xValuesX, Xcounts);
+intI = cumtrapz(xValuesI, Icounts);
 funX = @(x) fitX(x);
 
 probOne = integral(funX, -inf, xValuesX(end/2), 'ArrayValued', true) /...
@@ -131,7 +130,7 @@ maxFidelity = max(fids(:));
 intX_interp = interp1(xValuesX,intX,xValuesI);
 
 
-[singleShotFidelity, SSFMax_idx] = max(abs(intX_interp/max(intX) - ...
+[singleShotFidelity, SSFMax_idx] = max(abs(intX_interp'/max(intX) - ...
                                            intI/max(intI)));
 
 
