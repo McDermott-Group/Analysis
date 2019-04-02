@@ -109,24 +109,28 @@ if length(dep_rels1) == 1
     axis tight;
     title('Transmission');
     xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-    ylabel('dB');
+    ylabel('dB', 'FontSize', 14);
     
     subplot(2,2,3);
     plot(f, 180/pi*p, '.')
     axis tight;
     title('Transmission (Phase)');
     xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14)
-    ylabel('Deg');
+    ylabel('Deg', 'FontSize', 14);
     
     subplot(2,2,2);
     plot(i, -1j*q);
     axis equal;
-    title('IQ')
+    title('IQ');
+    xlabel('I', 'FontSize', 14);
+    ylabel('Q', 'FontSize', 14);
     
     subplot(2,2,4);
     plot(real(1./s),imag(1./s));
     axis equal;
     title('1/S21 IQ');
+    xlabel('Re[1/S21]', 'FontSize', 14)
+    ylabel('Im[1/S21]', 'FontSize', 14)
     
     
     opts = optimoptions(@lsqcurvefit,'Display','off','MaxIterations',10000,...
