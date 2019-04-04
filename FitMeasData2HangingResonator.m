@@ -136,9 +136,8 @@ if length(dep_rels1) == 1
     opts = optimoptions(@lsqcurvefit,'Display','off','MaxIterations',10000,...
                         'MaxFunEvals',10000, 'TolX', 1e-9,'TolFun',1e-9, ...
                         'StepTolerance',1e-9);%, 'PlotFcn',@optimplotresnorm);
-    
     % Q0, Qc, df, f0, tau, phi, b_re, b_im, m, scale factor
-     v0 = [50000; 10000; 0.05; f_min; -80e-9; 0; mean(i); mean(q); 0.; 1];
+     v0 = [50000; 100000; 0.05; f_min; -80e-9; 0; mean(i); 1j*mean(q); 0.; 1];
     % v0 = [2000; 3000; 0.05; 7.5466; -80e-9; 0; mean(i); mean(q); 0.5; 1];
     [vestimated,resnorm] = lsqcurvefit(@fitFn,v0,f.',[i.',-1j*q.'],[],[],opts)
     temp = fitFn(vestimated,f.');
@@ -151,13 +150,13 @@ if length(dep_rels1) == 1
         ' [', data.Timestamp, ']'], f_c_txt, Q_txt};
     
     subplot(2,2,1); hold on;
-    plot(f, 20*log10(abs(ft)))
+    plot(f, 20*log10(abs(ft)),'LineWidth',1)
     subplot(2,2,3); hold on;
-    plot(f, 180/pi*atan(imag(ft)./real(ft)))
+    plot(f, 180/pi*atan(imag(ft)./real(ft)),'LineWidth',1)
     subplot(2,2,2); hold on;
-    plot(real(ft),imag(ft))
+    plot(real(ft),imag(ft),'LineWidth',1)
     subplot(2,2,4); hold on;
-    plot(real(1./ft),imag(1./ft))
+    plot(real(1./ft),imag(1./ft),'LineWidth',1)
     suptitle(full_title);%, 'FontSize', 10)
 
 elseif length(dep_rels1) == 2 % Plot 2D data.
