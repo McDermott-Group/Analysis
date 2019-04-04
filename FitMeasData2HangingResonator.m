@@ -34,7 +34,7 @@ plts_path = makeDirPlots(pathname);
 
 % Check that the data variable exists (compute it if necessary).
 data_is_magphase = 0;
-if strcmp(data_variable1, 'S21') || strcmp(data_variable1, 'S43')
+if strcmp(data_variable1, 'S21') || strcmp(data_variable1, 'S43') || strcmp(data_variable1, 'S34')
     data_variable2 = [data_variable1,'_Phase'];
     data_is_magphase = 1;
 elseif strcmp(data_variable1,'I')
@@ -137,13 +137,11 @@ if length(dep_rels1) == 1
                         'MaxFunEvals',10000, 'TolX', 1e-9,'TolFun',1e-9, ...
                         'StepTolerance',1e-9);%, 'PlotFcn',@optimplotresnorm);
     
-    objfcn = @(v,x)[real(v(10)*( 1 - (v(1)/v(2)-2j*v(1)*v(3)/v(4)) ./ (1+2j*v(1).*(x-v(4))/v(4)) ).* exp(1j*(2*pi*v(5)*(x-v(4))+v(6))) ) + 1*v(7), ...
-                    imag(v(10)*( 1 - (v(1)/v(2)-2j*v(1)*v(3)/v(4)) ./ (1+2j*v(1).*(x-v(4))/v(4)) ).* exp(1j*(2*pi*v(5)*(x-v(4))+v(6))) ) + 1*v(8)];
     % Q0, Qc, df, f0, tau, phi, b_re, b_im, m, scale factor
      v0 = [50000; 10000; 0.05; f_min; -80e-9; 0; mean(i); mean(q); 0.; 1];
     % v0 = [2000; 3000; 0.05; 7.5466; -80e-9; 0; mean(i); mean(q); 0.5; 1];
-    [vestimated,resnorm] = lsqcurvefit(objfcn,v0,f.',[i.',-1j*q.'],[],[],opts)
-    temp = objfcn(vestimated,f.');
+    [vestimated,resnorm] = lsqcurvefit(@fitFn,v0,f.',[i.',-1j*q.'],[],[],opts)
+    temp = fitFn(vestimated,f.');
     ft = temp(:,1) + 1j*temp(:,2);
     
     f_c_txt = ['Resonance Frequency = ', num2str(vestimated(4)),  xunits];
@@ -165,4 +163,17 @@ if length(dep_rels1) == 1
 elseif length(dep_rels1) == 2 % Plot 2D data.
     error(['2D data not yet implemented.'])
 
+end
+
+end
+
+
+function IQ = fitFn(v,x)
+    % input: v is a vector of constants, x is the current value
+    cell_v = num2cell(v);
+    [Q0, Qc, df, f0, tau, phi, offsetI, offsetQ, m, scale] = deal(cell_v{:});
+    S21 = (1 - (Q0/Qc - 2*1j*Q0*df/f0) ./ (1 + 2*1j*Q0.*(x-f0)/f0) ).* exp(1j*(2*pi*tau*(x-f0)+phi));
+    I = real(scale*S21) + offsetI;
+    Q = imag(scale*S21) + offsetQ;
+    IQ = [I, Q];
 end
