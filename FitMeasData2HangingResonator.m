@@ -139,7 +139,10 @@ if length(dep_rels1) == 1
     % Q0, Qc, df, f0, tau, phi, b_re, b_im, m, scale factor
      v0 = [50000; 100000; 0.05; f_min; -80e-9; 0; mean(i); 1j*mean(q); 0.; 1];
     % v0 = [2000; 3000; 0.05; 7.5466; -80e-9; 0; mean(i); mean(q); 0.5; 1];
-    [vestimated,resnorm] = lsqcurvefit(@fitFn,v0,f.',[i.',-1j*q.'],[],[],opts)
+    [vestimated,resnorm,resid,exitflag,output,lambda,J] = lsqcurvefit(@fitFn,v0,f.',[i.',-1j*q.'],[],[],opts);
+    vestimated
+    resnorm
+    ci = nlparci(vestimated,resid,'jacobian',J)
     temp = fitFn(vestimated,f.');
     ft = temp(:,1) + 1j*temp(:,2);
     
@@ -172,7 +175,7 @@ function IQ = fitFn(v,x)
     cell_v = num2cell(v);
     [Q0, Qc, df, f0, tau, phi, offsetI, offsetQ, m, scale] = deal(cell_v{:});
     S21 = (1 - (Q0/Qc - 2*1j*Q0*df/f0) ./ (1 + 2*1j*Q0.*(x-f0)/f0) ).* exp(1j*(2*pi*tau*(x-f0)+phi));
-    I = real(scale*S21) + offsetI;
-    Q = imag(scale*S21) + offsetQ;
+    I = real(S21) + offsetI;
+    Q = imag(S21) + offsetQ;
     IQ = [I, Q];
 end
