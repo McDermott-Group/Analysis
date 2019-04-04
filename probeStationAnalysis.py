@@ -71,9 +71,21 @@ class probeTest(object):
         self.calibration_data = [dict(zip(dataOrder,row)) for row in chest.getData()]
         cal_dict = {row['index']:row['resistance'] for row in self.calibration_data}
         for row in self.data:
-            row['resistance'] = 1./( 1./row['resistance'] + 1./cal_dict[row['index']] )
+            row['resistance_cal_file'] = 1./( 1./row['resistance'] - 1./cal_dict[row['index']] )
+    
+    def addSubstrateCalibrationFromFit(self):
+        m, b = self.fitData()
+        R_sub = 1/b
+        for row in self.data:
+            row['resistance_cal_fit'] = 1./( 1./row['resistance'] - 1./R_sub )
+    
+    def fitData(self):
+        x = [float(line['area']) for line in self.data]
+        y = [1/float(line['resistance']) for line in self.data]
+        m, b = np.polyfit(x, y, 1)
+        return m, b
         
-    def calcMean(self):
+    def meanR(self):
         """Returns a dictionary of {area:average}"""
         areas = []
         for row in self.data:
@@ -86,6 +98,15 @@ class probeTest(object):
             avg[a]['n'] += 1
         for a in avg:
             avg[a] = avg[a]['sum']/avg[a]['n']
+        return avg
+        
+    def meanJc(self, gap=380):
+        """Returns a dictionary of {area:average Jc}.  Uses gap 2\Delta/e (in uV),
+        and returns critical current density (in A/cm^2)."""
+        avg = self.meanR()
+        for a in avg.keys():
+            r = avg[a]
+            avg[a] = np.pi/4*gap*1e-6/r/(a*1e-12) /1e4
         return avg
     
     def theoreticalR(self, Jc, gap=380):
@@ -109,7 +130,7 @@ class probeTest(object):
                 name = 'Data'
             )
         xfit = np.unique(x)
-        m, b = np.polyfit(x, y, 1)
+        m, b = self.fitData()
         yfit = [m*xi+b for xi in xfit]
         fit = go.Scatter(
                 x = xfit,
@@ -137,9 +158,10 @@ class probeTest(object):
         # linear fit based on all data
         x = [float(line['area']) for line in self.data]
         y = [1/float(line['resistance']) for line in self.data]
-        xfit = np.unique(x)
-        m, b = np.polyfit(x, y, 1)
+        xfit = np.unique([0]+x)
+        m, b = self.fitData()
         yfit = [m*xi+b for xi in xfit]
+        print("m = {}  b = {}  R_sub = {}".format(m,b,1/b))
         fit = go.Scatter(
                 x = xfit,
                 y = yfit,
@@ -156,11 +178,17 @@ class probeTest(object):
     
     def displayDataTable(self):
         colors = ['rgba(153,{},255,100)'.format( 153+50*(ord(row['die'][0])%2) ) for row in self.data]
+        h = ['Die', 'Area', 'Resistance']
+        c = [[row['die'] for row in self.data],
+               [row['area'] for row in self.data],
+               ['{:.2f}k'.format(row['resistance']/1000) for row in self.data]]
+        for cal in ['resistance_cal_fit','resistance_cal_file']:
+            if cal in self.data[0]:
+                h += [cal]
+                c += [['{:.2f}k'.format(row[cal]/1000) for row in self.data]]
         table = go.Table(
-            header=dict(values=['Die', 'Area', 'Resistance']),
-            cells=dict(values=[[row['die'] for row in self.data],
-                               [row['area'] for row in self.data],
-                               ['{:.2f}k'.format(row['resistance']/1000) for row in self.data]],
+            header=dict(values=h),
+            cells=dict(values=c,
                        fill = dict(color = [colors, colors, colors])
                       ))
         iplot([table], filename = 'basic_table')
