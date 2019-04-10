@@ -7,9 +7,9 @@
 % fit as well.
 %
 % Things to do:
-%     - Force constants to be real
 %     - Unwrap phase properly so the 1/S21 plot in the bottom right looks
 %     fine
+%     - 2D fit, holding Qc same for all
 
 function vesatimated = fitMeasData2HangingResonator(data_variable1)
 
@@ -90,6 +90,13 @@ if length(dep_rels1) == 1
         s_mag = sqrt(dep_vals1.^2 + dep_vals2.^2);
         p = atan(dep_vals2./dep_vals1);
     end
+    
+%     % narrow the points to fit to if you want
+%     nCutPoints = 1000;
+%     s_mag = s_mag(nCutPoints:end-nCutPoints);
+%     p = p(nCutPoints:end-nCutPoints);
+%     f = f(nCutPoints:end-nCutPoints);
+    
     s_dB = 20*log10(s_mag);
     s_dB = s_dB - mean(s_dB);
     s_mag = 10.^(s_dB/20);
@@ -105,11 +112,13 @@ if length(dep_rels1) == 1
     figure()
     
     subplot(2,2,1);
-    plot(f, s_dB, '.')
+%     plot(f, s_dB, '.')
+    plot(f, s_mag, '.')
     axis tight;
     title('Transmission');
     xlabel([strrep(indep_name, '_', ' '), xunits], 'FontSize', 14);
-    ylabel('dB', 'FontSize', 14);
+%     ylabel('dB', 'FontSize', 14);
+    ylabel('mag', 'FontSize', 14);
     
     subplot(2,2,3);
     plot(f, 180/pi*p, '.')
@@ -137,23 +146,26 @@ if length(dep_rels1) == 1
                         'MaxFunEvals',10000, 'TolX', 1e-9,'TolFun',1e-9, ...
                         'StepTolerance',1e-9);%, 'PlotFcn',@optimplotresnorm);
     % Q0, Qc, df, f0, tau, phi, b_re, b_im, m, scale factor
-     v0 = [50000; 100000; 0.05; f_min; -80e-9; 0; mean(i); 1j*mean(q); 0.; 1];
-    % v0 = [2000; 3000; 0.05; 7.5466; -80e-9; 0; mean(i); mean(q); 0.5; 1];
+     v0 = [100000; 100000; 0.05; f_min; -80e-9; 0; mean(i); 1j*mean(q)];
     [vestimated,resnorm,resid,exitflag,output,lambda,J] = lsqcurvefit(@fitFn,v0,f.',[i.',-1j*q.'],[],[],opts);
     vestimated
     resnorm
     ci = nlparci(vestimated,resid,'jacobian',J)
+    pm = max(abs(ci-vestimated), [],2);
     temp = fitFn(vestimated,f.');
     ft = temp(:,1) + 1j*temp(:,2);
     
     f_c_txt = ['Resonance Frequency = ', num2str(vestimated(4)),  xunits];
-    Q_txt = ['Q_i = ', num2str(1/(1/vestimated(1) - 1/vestimated(2))), ...
-             ', Q_c = ', num2str(vestimated(2))];
+    Q_txt = ['Q_i = ', num2str(vestimated(1)), ...
+                ' ± ', num2str(pm(1)), ...
+             ', Q_c = ', num2str(vestimated(2)), ...
+                ' ± ', num2str(pm(2))];
     full_title = {[strrep(filename, '_', '\_'), ext,...
         ' [', data.Timestamp, ']'], f_c_txt, Q_txt};
     
     subplot(2,2,1); hold on;
-    plot(f, 20*log10(abs(ft)),'LineWidth',1)
+%     plot(f, 20*log10(abs(ft)),'LineWidth',1)
+    plot(f, abs(ft),'LineWidth',1)
     subplot(2,2,3); hold on;
     plot(f, 180/pi*atan(imag(ft)./real(ft)),'LineWidth',1)
     subplot(2,2,2); hold on;
@@ -173,7 +185,8 @@ end
 function IQ = fitFn(v,x)
     % input: v is a vector of constants, x is the current value
     cell_v = num2cell(v);
-    [Q0, Qc, df, f0, tau, phi, offsetI, offsetQ, m, scale] = deal(cell_v{:});
+    [Qi, Qc, df, f0, tau, phi, offsetI, offsetQ] = deal(cell_v{:});
+    Q0 = 1/(1/Qc+1/Qi);
     S21 = (1 - (Q0/Qc - 2*1j*Q0*df/f0) ./ (1 + 2*1j*Q0.*(x-f0)/f0) ).* exp(1j*(2*pi*tau*(x-f0)+phi));
     I = real(S21) + offsetI;
     Q = imag(S21) + offsetQ;
