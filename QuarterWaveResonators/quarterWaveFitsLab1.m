@@ -2,16 +2,16 @@ function [nPhotons, Qi0, Qc0] = quarterWaveFitsLab1(data)
 
 warning('off','all');
 pause on;
-att = 80;
+att = 120;
 gain = 70;
 
 % data = loadMeasurementData
 f = data.RF_Frequency;
-logMagData = data.S34;
+logMagData = data.S21;
 [m, index1] = min(logMagData);
 fres = f(index1)
 span = (max(f)-min(f))*1e3
-thru = logMagData(1)+0.2;
+thru = logMagData(1);
 power = -att+data.NA_Source_Power
 
 
@@ -25,9 +25,9 @@ options = optimset('MaxFunEval',200000,'MaxIter',200000);
 
 
 %        f0                  qi          qc          L      thru      alpha
-start = [fres,               3.5e4,      4e4,      0,     thru,    0,      0];
-lower = [start(1)-span/2,    2.0e3,      1.0e3,     -50,    thru-50,     -50,    -100];
-upper = [start(1)+span/2,    1.0e8,      1.0e6,      50,    10,      50,     100];
+start = [fres,               5e3,      5e3,      0,     thru,    0,      0];
+lower = [fres-span/4e3,    2.0e3,      1.0e3,     -50,    thru-50,     -50,    -100];
+upper = [fres+span/4e3,    1.0e8,      1.0e6,      50,    10,      50,     100];
 
 % Handle for fitting function mazinQuarter
 mazinModel = @mazinQuarter;
