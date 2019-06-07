@@ -192,3 +192,12 @@ function IQ = fitFn(v,x)
     Q = imag(S21) + offsetQ;
     IQ = [I, Q];
 end
+
+
+
+%     [vestimated,resnorm,resid,exitflag,output,lambda,J] = lsqnonlin(@weightedFit,v0,[],[],opts,f.',[i.',-1j*q.']);
+% function dif = weightedFit(v, x, y)
+%     furthest_point = max(abs(v(4) - x));
+%     weights = 1 - abs(v(4) - x)/furthest_point;
+%     dif = (fitFn(v, x) - y) .* weights.^2;
+% end

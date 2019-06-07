@@ -212,7 +212,9 @@ class probeTest(object):
         ) for a in areaList]
         iplot(hist)
         
-    def dieMap(self, area, fn=np.mean):
+    def dieMap(self, area=None, fn=np.mean):
+        if not area:
+            area = self.data[0]['area']
         w = WaferMap(inner_diameter=self.inner_diameter, pitch=self.pitchX, odd=self.odd, title=None)
         dies = np.unique([row['die'] for row in self.data])
         for die in dies:
