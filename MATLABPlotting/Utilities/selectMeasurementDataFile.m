@@ -54,3 +54,6 @@ if fid ~= -1
     fprintf(fid, '%s', pathname);
     fclose(fid);
 end
+
+status = true;
+end
