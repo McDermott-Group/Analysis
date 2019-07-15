@@ -30,10 +30,10 @@ classdef chargeScan
             
             if (stop==0)
                 o.time = charge_file.Time(start:end);
-                o.raw_voltage = charge_file.Offset_Voltage(start:end);
+                o.raw_voltage = charge_file.Offset_Voltage(start:end) - charge_file.Offset_Voltage(1);
             else
                 o.time = charge_file.Time(start:stop);
-                o.raw_voltage = charge_file.Offset_Voltage(start:stop);
+                o.raw_voltage = charge_file.Offset_Voltage(start:stop) - charge_file.Offset_Voltage(1);
             end
             
             o.dedv = 2/o.dedv_list(qubit);%e/V
@@ -51,6 +51,9 @@ classdef chargeScan
             T = o.time(2:end) - o.time(1:end-1);
             breaks = find(T>5*o.measurement_time)
             nBreaksForFill = (o.time(breaks+1)-o.time(breaks))/o.measurement_time
+        end
+        function o = scan_length(o)
+            scan_length = (o.time(end)-o.time(1))/60/60
         end
         function o = plot_psd(o)
             figure(150); hold on;
