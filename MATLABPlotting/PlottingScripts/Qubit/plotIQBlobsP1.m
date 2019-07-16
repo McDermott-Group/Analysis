@@ -14,6 +14,8 @@ if ~exist('CAL_I', 'var')
     calFileX = fullfile(pathnames{2}, filenames{2});
     calI = processMeasurementData(importMeasurementData(calFileI));
     calX = processMeasurementData(importMeasurementData(calFileX));
+
+    
 else
     calI = CAL_I;
     calX = CAL_X;
@@ -35,6 +37,29 @@ end
 % Call external function to find the threshold bisector and offset from the
 % calibration files for |0> and |1>. rotInfo contains a shift and rotation
 % matrix to threshold the data in the same fashion as the calibration files
+
+
+
+%This patch allows us to plot .mat files, .mat files have [1x4000]
+%matrices, instead of the 4000 x 1 matrices that txt and hdf5 data sets
+%provide, this patch simply transposes the data that needs to be altered.
+
+if size(calX.Qs,1) == 1
+
+    calX.Qs = calX.Qs';
+    calX.Repetition_Index = calX.Repetition_Index';
+    calX.Amplitudes = calX.Amplitudes';
+    calX.Is = calX.Is';
+    calX.Phases = calX.Phases';
+
+    calI.Qs = calI.Qs';
+    calI.Amplitudes = calI.Amplitudes';
+    calI.Is = calI.Is';
+    calI.Phases = calI.Phases';
+
+end
+
+
 [~, ~, ~, ~, rotInfo] = fit2MeasIQBlobsToGaussHist(calI, calX, makePlots);
 
 if isempty(fields(data))
