@@ -8,14 +8,19 @@ classdef chargeScan
         psd
         f
         time
+        raw_time
         raw_voltage
         unwrapped_voltage
         dedv
         wrapping_voltage
         unwrap_mult
         % properties for each of the four species of qubits:
-        dedv_list = [0.3844, 0.411, nan, 0.5754];
-        wrapping_voltage_list = [0.3844, 0.411, nan, 0.5754];
+        % device 1
+        % dedv_list = [0.3844, 0.411, nan, 0.5754];
+        % wrapping_voltage_list = [0.3844, 0.411, nan, 0.5754];
+        % device 2
+        dedv_list = [0.37, 0.411, nan, 0.5754];
+        wrapping_voltage_list = [0.37, 0.411, nan, 0.5754];
     end
     methods
         function o = chargeScan(file_tag, qubit, start, stop)
@@ -23,17 +28,17 @@ classdef chargeScan
             o.qubit = qubit;
             o.start = start;
             o.stop = stop;
-            fileName = strcat(['Z:\mcdermott-group\data\fluxNoise\DR1 - 2019-06-10\Circ1\Q', ...
+            fileName = strcat(['Z:\mcdermott-group\data\fluxNoise\DR1 - 2019-06-10\Circ2\Q', ...
                                 num2str(qubit), '\General\Parameter\', ...
                                 file_tag, '_parameters.hdf5']);
             charge_file = loadMeasurementData(fileName);
             
             if (stop==0)
-                o.time = charge_file.Time(start:end);
-                o.raw_voltage = charge_file.Offset_Voltage(start:end) - charge_file.Offset_Voltage(1);
+                o.raw_time = charge_file.Time(start:end);
+                o.raw_voltage = charge_file.Offset_Voltage(start:end)-0.6;
             else
-                o.time = charge_file.Time(start:stop);
-                o.raw_voltage = charge_file.Offset_Voltage(start:stop) - charge_file.Offset_Voltage(1);
+                o.raw_time = charge_file.Time(start:stop);
+                o.raw_voltage = charge_file.Offset_Voltage(start:stop)-0.6;
             end
             
             o.dedv = 2/o.dedv_list(qubit);%e/V
@@ -41,19 +46,28 @@ classdef chargeScan
             o.unwrap_mult = 1;%If we unwrap at 5 V, then we are dropping 2e.  dedv converts
             %voltage to 1e, so we need a multiplier for the unwrapping.
             
-            o.measurement_time = (o.time(end) - o.time(1))/length(o.time);
+            o.measurement_time = (o.raw_time(end) - o.raw_time(1))/length(o.raw_time);
             l = length(o.raw_voltage);
             voltages = o.raw_voltage(1:l - mod(l,2));
-            [o.psd,o.f,o.unwrapped_voltage,t1] = Wrapper_AnalyzeChargeTracePSD(voltages,o.wrapping_voltage,o.unwrap_mult,...
+            [o.psd,o.f,o.unwrapped_voltage,o.time] = Wrapper_AnalyzeChargeTracePSD(voltages,o.wrapping_voltage,o.unwrap_mult,...
                             o.dedv,o.measurement_time);
+            o.unwrapped_voltage = o.unwrapped_voltage - o.unwrapped_voltage(1);
         end
         function o = find_breaks(o)
-            T = o.time(2:end) - o.time(1:end-1);
+            T = o.raw_time(2:end) - o.raw_time(1:end-1);
             breaks = find(T>5*o.measurement_time)
-            nBreaksForFill = (o.time(breaks+1)-o.time(breaks))/o.measurement_time
+            nBreaksForFill = (o.raw_time(breaks+1)-o.raw_time(breaks))/o.measurement_time
         end
         function o = scan_length(o)
-            scan_length = (o.time(end)-o.time(1))/60/60
+            scan_length = (o.raw_time(end)-o.raw_time(1))/60/60
+        end
+        function o = plot_unwrapped_voltages(o)
+            figure(140); hold on;
+            title('Voltages')
+            plot(o.time - o.time(1),o.unwrapped_voltage, 'DisplayName', strcat(['Q',num2str(o.qubit)]))
+            xlabel('Time (s)')
+            ylabel('Voltage (e)')
+            grid on
         end
         function o = plot_psd(o)
             figure(150); hold on;
