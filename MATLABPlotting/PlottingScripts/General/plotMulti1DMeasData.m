@@ -5,7 +5,7 @@ function plotMulti1DMeasData(data_variable)
 %   generated if DATA_VARIABLE is omitted.
 
 % Select files to plot.
-[filenames, pathname, status] = selectMeasurementDataFile;
+[filenames, pathnames, status] = selectMeasurementDataFile;
 if ~status
     return
 end
@@ -13,20 +13,23 @@ end
 if ~iscell(filenames)
     filenames = {filenames};
 end
-
-% Read the data file, convert the variable names, and specify the units.
-
-data = cell(0);
-for k = 1:length(filenames)
-    file = fullfile(pathname, filenames{k});
-    data{k} = processMeasurementData(importMeasurementData(file));
+if ~iscell(pathnames)
+    pathnames = {pathnames};
 end
 
-
-
+% Read the data file, convert the variable names, and specify the units.
+try
+    data = cell(0);
+    for k = 1:length(filenames)
+        file = fullfile(pathnames{k}, filenames{k});
+        data{k} = processMeasurementData(importMeasurementData(file));
+    end
+catch
+    error('The selected files contain unmatched data.')
+end
 
 % Create folder Plots if necessary.
-plts_path = makeDirPlots(pathname);
+plts_path = makeDirPlots(pathnames{1});
 
 if ~exist('data_variable', 'var')
     dep_vars = selectDepDataVars(data);
