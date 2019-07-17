@@ -17,8 +17,6 @@ function [filenames, pathnames, status] =...
 %   button. If FILENAMES and PATHNAMES are cells containg only one string
 %   each they will be converted to a simple string.
 
-
-% Retrive the path that was used last time.
 pathname = '';
 fid = fopen(fullfile(tempdir, 'plotMeasurementData_last_pathname.txt'),...
     'r');
@@ -27,20 +25,19 @@ if fid ~= -1
     fclose(fid);
 end
 
-% If the path hasn't be retrieved or does not exist, predefine it with
-% one of the potentially existing path values.
-% if strcmp(pathname, '') || ~exist(pathname, 'dir')
-%     if exist('Z:\mcdermott-group\Data\Matched JPM Photon Counting', 'dir')
-%         pathname = 'Z:\mcdermott-group\Data\Matched JPM Photon Counting';
-%     elseif exist('Z:\Data\Matched JPM Photon Counting', 'dir')
-%         pathname = 'Z:\Data\Matched JPM Photon Counting';
-%     end
-% end
+if strcmp(pathname, '') || ~exist(pathname, 'dir')
+    if exist('Z:\mcdermott-group\Data\Matched JPM Photon Counting', 'dir')
+        pathname = 'Z:\mcdermott-group\Data\Matched JPM Photon Counting';
+    elseif exist('Z:\Data\Matched JPM Photon Counting', 'dir')
+        pathname = 'Z:\Data\Matched JPM Photon Counting';
+    end
+end
 
 % Open the user interface to select a file.
 window_title = 'Select a data file...';
+disp("path: ", pathname)
 window_filename = fullfile(pathname, ['MeasurementData_',...
-    num2str(1, '%03d')]);
+    num2str(0, '%03d')]);
 [filenames, pathnames] = uigetfile({'*.txt;*.mat;*.hdf5', 'Data Files';
           '*.txt', 'Text Files';
           '*.mat', 'MATLAB Files';
