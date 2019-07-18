@@ -53,6 +53,7 @@ end
 filenames = cell(number_of_files, 1);
 pathnames = cell(number_of_files, 1);
 
+p = 1
 for k = 1:number_of_files
     % Open the user interface to select a file.
     if ~exist('window_titles', 'var')
@@ -78,13 +79,14 @@ for k = 1:number_of_files
     else 
         if(iscell(filename) && length(filename) > 1)
             for f = 1:length(filename)
-                filenames{k-1+f} = filename{f};
-                pathnames{k-1+f} = pathname;
+                filenames{p-1+f} = filename{f};
+                pathnames{p-1+f} = pathname;
             end
-            k = k + length(filename) - 1
+            p = p + length(filename)
         else
-            filenames{k} = filename;
-            pathnames{k} = pathname;
+            filenames{p} = filename;
+            pathnames{p} = pathname;
+            p = p + 1
         end
     end
 
