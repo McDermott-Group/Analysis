@@ -66,7 +66,7 @@ for k = 1:number_of_files
               '*.txt', 'Text Files';
               '*.mat', 'MATLAB Files';
               '*.hdf5', 'HDF5 Files';
-              '*.*', 'All Files' }, window_title, window_filename);
+              '*.*', 'All Files' }, window_title, window_filename, 'MultiSelect', 'on');
 
     % Check whether the file selection process should be interrupted.
     if isnumeric(filename)
@@ -75,9 +75,17 @@ for k = 1:number_of_files
             return
         end
         break
-    else
-        filenames{k} = filename;
-        pathnames{k} = pathname;
+    else 
+        if(iscell(filename) && length(filename) > 1)
+            for f = 1:length(filename)
+                filenames{k-1+f} = filename{f};
+                pathnames{k-1+f} = pathname;
+            end
+            k = k + length(filename) - 1
+        else
+            filenames{k} = filename;
+            pathnames{k} = pathname;
+        end
     end
 
     % Save the last path used.
