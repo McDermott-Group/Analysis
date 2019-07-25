@@ -16,11 +16,11 @@ classdef chargeScan
         unwrap_mult
         % properties for each of the four species of qubits:
         % device 1
-        % dedv_list = [0.3844, 0.411, nan, 0.5754];
-        % wrapping_voltage_list = [0.3844, 0.411, nan, 0.5754];
+%         dedv_list = [0.3844, 0.411, nan, 0.5754];
+%         wrapping_voltage_list = [0.3844, 0.411, nan, 0.5754];
         % device 2
-        dedv_list = [0.37, 0.411, nan, 0.5754];
-        wrapping_voltage_list = [0.37, 0.411, nan, 0.5754];
+        dedv_list = [0.3746, 0.411, nan, 0.4095];
+        wrapping_voltage_list = [0.3746, 0.411, nan, 0.4095];
     end
     methods
         function o = chargeScan(file_tag, qubit, start, stop)
@@ -33,12 +33,14 @@ classdef chargeScan
                                 file_tag, '_parameters.hdf5']);
             charge_file = loadMeasurementData(fileName);
             
+            offset = 0.;
+            
             if (stop==0)
                 o.raw_time = charge_file.Time(start:end);
-                o.raw_voltage = charge_file.Offset_Voltage(start:end)-0.6;
+                o.raw_voltage = charge_file.Offset_Voltage(start:end)-offset;
             else
                 o.raw_time = charge_file.Time(start:stop);
-                o.raw_voltage = charge_file.Offset_Voltage(start:stop)-0.6;
+                o.raw_voltage = charge_file.Offset_Voltage(start:stop)-offset;
             end
             
             o.dedv = 2/o.dedv_list(qubit);%e/V
