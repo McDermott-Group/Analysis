@@ -14,13 +14,6 @@ classdef chargeScan
         dedv
         wrapping_voltage
         unwrap_mult
-        % properties for each of the four species of qubits:
-        % device 1
-%         dedv_list = [0.3844, 0.411, nan, 0.5754];
-%         wrapping_voltage_list = [0.3844, 0.411, nan, 0.5754];
-        % device 2
-        dedv_list = [0.3746, 0.411, nan, 0.4095];
-        wrapping_voltage_list = [0.3746, 0.411, nan, 0.4095];
     end
     methods
         function o = chargeScan(file_tag, qubit, start, stop)
@@ -28,7 +21,7 @@ classdef chargeScan
             o.qubit = qubit;
             o.start = start;
             o.stop = stop;
-            fileName = strcat(['Z:\mcdermott-group\data\fluxNoise\DR1 - 2019-06-10\Circ2\Q', ...
+            fileName = strcat(['Z:\mcdermott-group\data\fluxNoise\DR1 - 2019-06-10\Circ1\Q', ...
                                 num2str(qubit), '\General\Parameter\', ...
                                 file_tag, '_parameters.hdf5']);
             charge_file = loadMeasurementData(fileName);
@@ -43,8 +36,8 @@ classdef chargeScan
                 o.raw_voltage = charge_file.Offset_Voltage(start:stop)-offset;
             end
             
-            o.dedv = 2/o.dedv_list(qubit);%e/V
-            o.wrapping_voltage = o.wrapping_voltage_list(qubit)/2;%V
+            o.dedv = 2/charge_file.x2e_Period; %e/V
+            o.wrapping_voltage = charge_file.x2e_Period/2;%V
             o.unwrap_mult = 1;%If we unwrap at 5 V, then we are dropping 2e.  dedv converts
             %voltage to 1e, so we need a multiplier for the unwrapping.
             
