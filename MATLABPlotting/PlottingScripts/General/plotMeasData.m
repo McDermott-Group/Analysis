@@ -30,7 +30,7 @@ if ~exist('data_variable', 'var')
             continue
         end
         if contains(dep_name, 'Phase')
-            data.(dep_name) = unwrap(data.(dep_name));
+            data.(dep_name) = data.(dep_name); %unwrap(data.(dep_name));
         end
         plotDataVar(data, dep_name);
     end
