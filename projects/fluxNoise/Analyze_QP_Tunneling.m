@@ -35,21 +35,21 @@ for i = minFileIndex:maxFileIndex
     ldata = load(strcat([ext,num2str(i,'%03d'),'.mat']));
     data = reshape(eval(strcat(['ldata.',dataType,'.Data.Single_Shot_Occupations']))',[reps*trials,1]);
     
-    [data_even, data_odd] = chop_data(data);
+    [data_even, data_odd] = noiselib.chop_data(data);
     
-    [seg_psd_chopped] = crosspsd(data_even,data_odd,Fs/2);
+    [seg_psd_chopped] = noiselib.crosspsd(data_even,data_odd,Fs/2);
     
     fileApsd_chopped = fileApsd_chopped + seg_psd_chopped(1:(NumP/4+1));
 end
 fileApsd_chopped = fileApsd_chopped * transfer / totFiles;
 
-[windowApsd_chopped] = window_averaging(fileApsd_chopped);
+[windowApsd_chopped] = noiselib.window_averaging(fileApsd_chopped);
 
 %Fit to find QP tunneling rate:
 % x = psd_freq_chopped(2:end);
 % y = abs(windowApsd_chopped(2:end));
 % [x, y] = prepareCurveData(x, y);
-% [fr,~] = fitLorenzian(x,y);
+% [fr,~] = noiselib.fit_lorenzian(x,y);
 
 % f = 0.01:0.01:5e3; gamma = 1056;lor = 3.8e2./(4*pi^2*f.^2+gamma^2);
 % figure(12);hold on;plot(f,lor)
@@ -65,41 +65,4 @@ xlabel('Frequency (Hz)')
 ylabel('S_\eta (\eta^2/Hz)')
 grid on
 
-end
-
-function [psd] = crosspsd(z1,z2,Fs)
-%Cross PSD
-NumP = length(z1);
-fft_seq1 = fft(z1);
-fft_seq2 = conj(fft(z2));
-psd = (1/(Fs*NumP))*(fft_seq1.*fft_seq2);
-psd(2:(NumP/2)) = 2*psd(2:(NumP/2));
-end
-
-function [apsd] = window_averaging(psd)
-% apsd = psd;
-%Averaging with f window
-apsd = zeros(size(psd));
-for i = 1:size(psd,1)
-    filter_fl = max(1,round(i - i/4));
-    filter_fh = min(size(psd,1),round(i + i/4));
-    apsd(i) = mean(psd(filter_fl:filter_fh));
-end
-end
-
-function [seg_even, seg_odd] = chop_data(seg)
-%Partition data into even and odd for CPSD on single data set
-seg_even = seg(1:2:end);
-seg_odd = seg(2:2:end);
-end
-
-function [fitresult, gof] = fitLorenzian(x, y)
-% Set up fittype and options.
-ft = fittype( 'a/(4*pi^2*x.^2+gamma^2)', 'independent', 'x', 'dependent', 'y' );
-opts = fitoptions( 'Method', 'NonlinearLeastSquares' );
-opts.Display = 'Off';
-opts.StartPoint = [380 1056];
-
-% Fit model to data.
-[fitresult, gof] = fit( x, y, ft, opts );
 end

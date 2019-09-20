@@ -14,8 +14,8 @@ M2b = data.Single_Shot_Occupations_4;
 tau = data.Delay_Between_Readouts_2;
 n = length(data.Repetition_Index);
 
-P1 = mod(M1a + M1b, 2);
-P2 = mod(M2a + M2b, 2);
+P1 = M1a == M1b;
+P2 = M2a == M2b;
 dP = abs(P1-P2);
 
 n11eo = zeros(length(tau),1);

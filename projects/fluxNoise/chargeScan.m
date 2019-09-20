@@ -132,17 +132,6 @@ psd(2:(NumP/2)) = 2*psd(2:(NumP/2));
 psd_cut = psd(1:(NumP/2+1));
 end
 
-function [apsd] = window_averaging(psd)
-% apsd = psd;
-%Averaging with f window
-apsd = zeros(size(psd));
-for i = 1:size(psd,1)
-    filter_fl = max(1,round(i - i/4));
-    filter_fh = min(size(psd,1),round(i + i/4));
-    apsd(i) = mean(psd(filter_fl:filter_fh));
-end
-end
-
 function [fitresult, gof] = fit_psd(f,psd)
 [xData, yData] = prepareCurveData(f, psd');
 
