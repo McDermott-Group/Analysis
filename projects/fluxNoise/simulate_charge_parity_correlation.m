@@ -37,6 +37,8 @@ sum10ee = zeros(N,1);
 sum10eo = zeros(N,1);
 sum01ee = zeros(N,1);
 sum01eo = zeros(N,1);
+sum00ee = zeros(N,1);
+sum00eo = zeros(N,1);
 t = (1:N)*100e-6;
 for i = 1:nFiles
     
@@ -51,7 +53,10 @@ for i = 1:nFiles
         sum10eo(j) = sum10eo(j) + sum((M1a==1) + (M1b==0) + (dP==0) == 3)/j/nFiles;
         sum01ee(j) = sum01ee(j) + sum((M1a==0) + (M1b==1) + (dP==1) == 3)/j/nFiles;
         sum01eo(j) = sum01eo(j) + sum((M1a==0) + (M1b==1) + (dP==0) == 3)/j/nFiles;
+        sum00ee(j) = sum00ee(j) + sum((M1a==0) + (M1b==0) + (dP==1) == 3)/j/nFiles;
+        sum00eo(j) = sum00eo(j) + sum((M1a==0) + (M1b==0) + (dP==0) == 3)/j/nFiles;
     end
 end
 
-figure; plot(t,sum11ee,t,sum11eo,t,sum10ee,t,sum10eo,t,sum01ee,t,sum01eo); grid on;
+figure; plot(t,[sum11ee,sum11eo,sum10ee,sum10eo,sum01ee,sum01eo,sum00ee,sum00eo]); grid on;
+legend('R_{11}^{ee}','R_{11}^{eo}','R_{10}^{ee}','R_{10}^{eo}','R_{01}^{ee}','R_{01}^{eo}','R_{00}^{ee}','R_{00}^{eo}');

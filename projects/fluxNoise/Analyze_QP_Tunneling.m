@@ -20,7 +20,7 @@ refreshTime = 100e-6;
 % qubit = 'Q2\';
 dataType = 'QP_Tunneling_PSD';
 % CDdate = 'DR1 - 2019-06-10\';
-CDdate = 'DR1 - 2019-08-12\';
+CDdate = 'DR1 - 2019-09-24\';
 ext = strcat(['Z:\mcdermott-group\data\fluxNoise\',CDdate,samples,qubit,'General\',date,dataType,'\MATLABData\',dataType,'_']);
 
 totFiles = maxFileIndex - minFileIndex + 1;
