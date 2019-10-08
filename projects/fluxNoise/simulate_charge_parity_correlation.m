@@ -26,12 +26,14 @@ t = (1:N)*dt;
 
 % Plot autocorrelation of Parity P
 tot = zeros(N,1);
+ac = zeros(N,1);
 for i = 1:nFiles
     for j = 1:N
         tot(j) = tot(j) + sum( P(1:end-j,i)==P(j+1:end,i) )/(N-j)/nFiles;
     end
+    ac = ac + autocorr(P(:,i),'NumLags',N-1)/nFiles;
 end
-figure; plot(t,tot); grid on;
+figure; plot(t,2*tot-1,t,ac); grid on;
 
 
 % Plot autocorrelation between charge parity and qubit state
