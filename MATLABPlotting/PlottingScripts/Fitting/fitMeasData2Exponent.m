@@ -133,8 +133,8 @@ elseif length(dep_rels) == 2 % Plot 2D data.
         f = ExpFit(indep_vals2, dep_vals(k, :));
         ci = confint(f);
         amplitude(k, :) = [f.a, f.a - ci(2, 1), ci(1, 1) - f.a];
-        time_const(k, :) = [1/f.b, 1 / (ci(1, 2) - f.b),...
-                                   1 / (f.b - ci(2, 2))];
+        time_const(k, :) = [1/f.b, 1 / ci(1, 2) - 1/f.b,...
+                                   1 / f.b - 1/ci(2, 2)];
         offset(k, :) = [f.c, f.c - ci(2, 3), ci(1, 3) - f.c];
         fitted(k, :) = f(indep_vals2);
     end

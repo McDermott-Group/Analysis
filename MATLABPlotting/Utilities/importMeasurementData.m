@@ -188,8 +188,9 @@ function data = importHdf5_v0p1(filename)
     sizes = {};
 
     params = h5info(filename, '/parameters');
+    dependencies_found = 0;
     for k = 1:length(params.Groups)
-        dependencies_found = 0
+        dependencies_found = 0;
         full_param_name = params.Groups(k).Name;
         pos = strfind(full_param_name, '/');
         param_name = full_param_name(pos(end)+1:end);
@@ -217,7 +218,7 @@ function data = importHdf5_v0p1(filename)
                     ' ', '_');
             end
             data.rels.(param_name(1:end-13)) = relationships;
-            dependencies_found = 1
+            dependencies_found = 1;
         elseif length(param_name) > 5 &&...
                     strcmp(param_name(end-3:end), 'Size')
             sizes.(param_name(1:end-5)) = value;
