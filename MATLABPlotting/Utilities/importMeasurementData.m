@@ -188,6 +188,7 @@ function data = importHdf5_v0p1(filename)
     sizes = {};
 
     params = h5info(filename, '/parameters');
+    dependencies_found = 0;
     for k = 1:length(params.Groups)
         dependencies_found = 0;
         full_param_name = params.Groups(k).Name;

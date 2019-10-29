@@ -21,7 +21,7 @@ classdef chargeScan
             o.qubit = qubit;
             o.start = start;
             o.stop = stop;
-            fileName = strcat(['Z:\mcdermott-group\data\fluxNoise\DR1 - 2019-06-10\Circ1\Q', ...
+            fileName = strcat(['Z:\mcdermott-group\data\fluxNoise\DR1 - 2019-08-12\Circ1\Q', ...
                                 num2str(qubit), '\General\Parameter\', ...
                                 file_tag, '_parameters.hdf5']);
             charge_file = loadMeasurementData(fileName);
@@ -130,17 +130,6 @@ psd = (1/(Fs*NumP))*(fft_seq1.*fft_seq2);
 psd(2:(NumP/2)) = 2*psd(2:(NumP/2));
 %End PSD
 psd_cut = psd(1:(NumP/2+1));
-end
-
-function [apsd] = window_averaging(psd)
-% apsd = psd;
-%Averaging with f window
-apsd = zeros(size(psd));
-for i = 1:size(psd,1)
-    filter_fl = max(1,round(i - i/4));
-    filter_fh = min(size(psd,1),round(i + i/4));
-    apsd(i) = mean(psd(filter_fl:filter_fh));
-end
 end
 
 function [fitresult, gof] = fit_psd(f,psd)
