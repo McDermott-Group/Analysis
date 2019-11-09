@@ -7,7 +7,7 @@ nPhotons0 = zeros(1,n);  Qi0 = zeros(1,n);  Qc0 = zeros(1,n);
         data(i) = loadMeasurementData;
     end 
     for  i=1:n
-        [nPhotons0(1,i), Qi0(1,i), Qc0(1,i)] = quarterWaveFitsLab1(data(i));
+        [nPhotons0(1,i), Qi0(1,i), Qc0(1,i), freq] = quarterWaveFitsLab1(data(i));
     end
         plti1 = figure;
         plti = axes('Parent',plti1);
