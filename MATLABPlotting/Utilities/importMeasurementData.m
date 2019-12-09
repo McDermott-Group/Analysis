@@ -164,6 +164,9 @@ function data = importHdf5_v0p1(filename)
     for k = 1:length(indeps)
         indep_name = strrep(strtrim(indeps{k}), char(0), '');
         indep_field = strrep(indep_name, ' ', '_');
+        if ~isstrprop(indep_field(1),'alpha')
+            indep_field = ['x' indep_field];
+        end
         indep_location = strcat('/independents/', indep_name);
         data.indep{k} = indep_field;
         data.(indep_field) = h5read(filename, indep_location);
@@ -176,6 +179,9 @@ function data = importHdf5_v0p1(filename)
     for k = 1:length(deps)
         dep_name =  strrep(strtrim(deps{k}), char(0), '');
         dep_field = strrep(dep_name, ' ', '_');
+        if ~isstrprop(dep_field(1),'alpha')
+            dep_field = ['x' dep_field];
+        end
         dep_location = strcat('/dependents/', dep_name);
         data.dep{k} = dep_field;
         data.(dep_field) = h5read(filename, dep_location);
@@ -195,6 +201,9 @@ function data = importHdf5_v0p1(filename)
         pos = strfind(full_param_name, '/');
         param_name = full_param_name(pos(end)+1:end);
         param_name = strrep(param_name, ' ', '_');
+        if ~isstrprop(param_name(1),'alpha')
+            param_name = ['x' param_name];
+        end
         value = h5readatt(filename, full_param_name, 'value');
         if length(param_name) > 6 &&...
                     strcmp(param_name(end-4:end), 'Units')
