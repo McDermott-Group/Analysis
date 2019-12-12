@@ -34,8 +34,8 @@ plts_path = makeDirPlots(pathname);
 
 % Check that the data variable exists (compute it if necessary).
 data_is_magphase = 0;
-if strcmp(data_variable1, 'S21') || strcmp(data_variable1, 'S43') || strcmp(data_variable1, 'S34')
-    data_variable2 = [data_variable1,'_Phase'];
+if strcmp(data_variable1, 'S21') || strcmp(data_variable1, 'S34') || strcmp(data_variable1, 'S34') || strcmp(data_variable1, 'S32')
+    data_variable2 = [data_variable1,'_uPhase'];
     data_is_magphase = 1;
 elseif strcmp(data_variable1,'I')
     data_variable2 = 'Q'

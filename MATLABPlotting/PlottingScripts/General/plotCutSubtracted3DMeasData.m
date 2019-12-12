@@ -40,6 +40,7 @@ if isempty(dep_rels)
           strrep(data_variable, '_', ' '), ''' are not specified.'])
 end
 
+
 % Plot 2D extracted frequency from 3D data
 if length(dep_rels) == 3
     if strcmp(normalization_direction, 'along_y')
@@ -60,7 +61,7 @@ if length(dep_rels) == 3
 %                 min_dep_vals(i,j) = 6.36;
 %                 min_dep_valsS21(i,j) = -0.05;
 %             else 
-                min_dep_vals(i,j) = data.RF_Frequency(k);
+                min_dep_vals(i,j) = data.RF_Frequency(k)
                 min_dep_valsS21(i,j) = t;
 %             end
         end 
@@ -82,7 +83,19 @@ if length(dep_rels) == 3
         ['_', normalization_direction];
 
     plotDataVar(data, processed_data_var);
-    colormap(winter)
+    %colormap(winter)
+  
+    
+    
+    %For looking at cuts from 3D dataset
+%     figure;
+%     h = plot(data.(dep_rels{3}), squeeze(dep_vals(:,1,:)), '-', 'LineWidth',2);
+%     xlabel('RF Frequency(GHz)');
+%     ylabel('S21(dB)');
+%     title('Cuts from 3D dataset', 'FontSize', 10);
+%     grid on;
+%     axis tight;
+  
     
     saveMeasData(data, [filename, '_', data_variable, 'min_cut_subtr'])
 end

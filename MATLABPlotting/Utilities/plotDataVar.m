@@ -192,6 +192,7 @@ end
 
 
 
+
 if length(dep_rels) == 3
 %     freqIndexArray = size(dep_vals(1,1,:));
 %     freqIndexArray = freqIndexArray(3);
@@ -297,6 +298,8 @@ if length(dep_rels) == 3
 %     
 %     saveMeasData(data, [filename, '_', data_variable, '_cut_subtr'])
 end
+
+
 
 
 if length(dep_rels) > 3 && strcmp(type, '')
