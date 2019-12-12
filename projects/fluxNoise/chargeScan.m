@@ -118,20 +118,6 @@ for i = 1:length(delta)
 end
 end
 
-function [psd_cut,freqs] = crosspsd(z1,z2,ts)
-Fs = length(ts)/(ts(end) - ts(1));
-NumP = length(z1);
-freqs = 0:Fs/NumP:(Fs/2);
-%Cross PSD
-NumP = length(z1);
-fft_seq1 = fft(z1);
-fft_seq2 = conj(fft(z2));
-psd = (1/(Fs*NumP))*(fft_seq1.*fft_seq2);
-psd(2:(NumP/2)) = 2*psd(2:(NumP/2));
-%End PSD
-psd_cut = psd(1:(NumP/2+1));
-end
-
 function [fitresult, gof] = fit_psd(f,psd)
 [xData, yData] = prepareCurveData(f, psd');
 
