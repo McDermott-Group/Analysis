@@ -1,4 +1,4 @@
-function [nPhotons, Qi0, Qc0] = quarterWaveFitsLab1(data)
+function [nPhotons, Qi0, Qc0, freq] = quarterWaveFitsLab1(data)
 
 warning('off','all');
 pause on;
@@ -9,7 +9,8 @@ gain = 70;
 f = data.RF_Frequency;
 logMagData = data.S34;
 [m, index1] = min(logMagData);
-fres = f(index1)
+fres = f(index1);
+%fres = f(index1/2)
 span = (max(f)-min(f))*1e3
 thru = logMagData(1);
 power = -att+data.NA_Source_Power
@@ -28,6 +29,8 @@ options = optimset('MaxFunEval',200000,'MaxIter',200000);
 start = [fres,               1.5e5,      4e5,      0,     thru,    0,      0];
 lower = [start(1)-span/2,    2.0e3,      1.0e3,     -50,    thru-50,     -50,    -100];
 upper = [start(1)+span/2,    1.0e8,      1.0e8,      50,    10,      50,     100];
+lower = [fres-span/1e3,    1.0e2,      1.0e2,     -50,    thru-50,     -50,    -100];
+upper = [fres+span/1e3,    1.0e8,      1.0e6,      50,    10,      50,     100];
 
 % Handle for fitting function mazinQuarter
 mazinModel = @mazinQuarter;
@@ -81,6 +84,7 @@ hPlanck = 6.626e-34; % J*s
 nPhotons = powerWatts*(totalQ^2/qcFit/hPlanck/(fFit*1e9)^2);
 Qc0 = qcFit;
 Qi0 = qiFit;
+freq = f;
 
 % Save fits from loop iterations to array
 dataFitResults(:) = [nPhotons,fFit,errorF,qiFit,errorQi,qcFit,errorQc];

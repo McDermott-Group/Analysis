@@ -307,8 +307,46 @@ if length(dep_rels) > 3 && strcmp(type, '')
           ''' depends on more than three sweep variables. ',...
           'This data will not be plotted.'])
 end
+end 
 
 
 
+
+
+
+function f = BiasedLorentzian(x, y)
+
+median_y = median(y);
+max_y = max(y);
+min_y = min(y);
+if max_y - median_y >= median_y - min_y
+    background = min_y;
+    idx = find(y == max_y, 1, 'first');
+else
+    background = max_y;
+    idx = find(y == min_y, 1, 'first');
+end
+
+start = x(idx);
+half_y = (median_y + y(idx)) / 2;
+idx1 = find(y < half_y, 1, 'first');
+idx2 = find(y < half_y, 1, 'last');
+if ~isempty(idx1) && ~isempty(idx2) && x(idx1) ~= x(idx2)
+    width = .05 * abs(x(idx2) - x(idx1));
+else
+    width = 0.01;
+end
+
+opts = fitoptions('Method', 'NonlinearLeastSquares');
+opts.Display = 'Off';
+opts.TolX = 1e-20;
+opts.TolFun = 1e-20;
+opts.StartPoint = [.5 * (max_y - min_y) * width^2 / 4,...
+    start, width, 0, background];
+
+f = fit(x(:), y(:), '(a / ((x - b)^2 + (c / 2)^2)) + d * (x - b) + e', opts);
+
+format long
+f.b
 
 end

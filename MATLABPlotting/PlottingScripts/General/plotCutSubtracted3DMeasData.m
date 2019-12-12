@@ -1,4 +1,4 @@
-function plotCutSubtracted3DMeasData(normalization_direction,...
+function min_dep_vals = plotCutSubtracted3DMeasData(normalization_direction,...
     data_variable)
 %plotCutSubtracted2DMeasData(NORMALIZATION_DIRECTION, DATA_VARIABLE) Plot
 %a 2D data subtracting a median cut from each slice.
@@ -82,7 +82,6 @@ if length(dep_rels) == 3
     data.plotting.(processed_data_var).extra_filename =...
         ['_', normalization_direction];
 
-    %Uncomment if you want to plot extracted minimum from 3D dataset
     plotDataVar(data, processed_data_var);
     %colormap(winter)
   

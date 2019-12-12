@@ -1,50 +1,50 @@
 % DEVICE 1
 % take scans as they are, only split to avoid fills, bad data
-scans_all = {...
-    % chargeScan('ckv0334jpp', 2, 1, 865), ... % longer measurement time
-    % chargeScan('ckv0334jpp', 2, 866, 0), ...
-    % chargeScan('cla0423hwf', 1, 1, 1770), ... % bad fits throughout
-    % chargeScan('cla0423hwf', 1, 1771, 0), ...
-    % chargeScan('clf2154lqz', 1, 1, 0), ... % maybe bad fits?
-    chargeScan('ckx2109xfx', 4, 182, 2402), ...%17.7h 
-    chargeScan('ckx2109xfx', 4, 2403, 0), ...  %5.0h
-    chargeScan('cky2155mll', 1, 1, 1674), ...  %8.8h cut off before fill before bad data
-    chargeScan('clb0821qqz', 4, 1, 1048), ...  %8.2h
-    chargeScan('clb0821qqz', 4, 1049, 0), ...  %13.81h
-    chargeScan('clc0632vzv', 2, 1, 5033), ...  %33.9h cut off end when power outage happened
-    chargeScan('cle0301xnh', 2, 1, 0), ...     %9.1h
-    chargeScan('clg1638iiy', 2, 1, 0), ...     %5.4h
-    chargeScan('clh2255qso', 4, 1, 0), ...     %17.0h
-    chargeScan('cli1847ppc', 4, 1, 0), ...     %9.7h
-    chargeScan('clm2340vve', 2, 1, 0), ...     %18.1h
-    };
-% split into sections to maximize data (mostly lots of 5h scans)
-scans_cut = {...
-    % chargeScan('ckv0334jpp', 2, 1, 865), ... % longer measurement time
-    % chargeScan('ckv0334jpp', 2, 866, 0), ...
-    % chargeScan('cla0423hwf', 1, 1, 1770), ... % bad fits throughout
-    % chargeScan('cla0423hwf', 1, 1771, 0), ...
-    % chargeScan('clf2154lqz', 1, 1, 0), ... % maybe bad fits?
-    chargeScan('ckx2109xfx', 4, 182, 922), ...%17.7h 
-    chargeScan('ckx2109xfx', 4, 923, 1662), ...%17.7h 
-    chargeScan('ckx2109xfx', 4, 1663, 2402), ...%17.7h 
-    chargeScan('ckx2109xfx', 4, 2403, 0), ...  %5.0h
-    chargeScan('cky2155mll', 1, 1, 1674), ...  %8.8h cut off before fill before bad data
-    chargeScan('clb0821qqz', 4, 1, 1048), ...  %8.2h
-    chargeScan('clb0821qqz', 4, 1048/2, 0), ...  %13.81h
-    chargeScan('clb0821qqz', 4, 1048/2, 0), ...  %13.81h
-    chargeScan('clc0632vzv', 2, 1, 5033), ...  %33.9h cut off end when power outage happened
-    chargeScan('cle0301xnh', 2, 1, 0), ...     %9.1h
-    chargeScan('clg1638iiy', 2, 1, 0), ...     %5.4h
-    chargeScan('clh2255qso', 4, 1, 750), ...     %17.0h
-    chargeScan('clh2255qso', 4, 751, 1500), ...     %17.0h
-    chargeScan('cli1847ppc', 4, 1, 0), ...     %9.7h
-    chargeScan('clm2340vve', 2, 1, 800), ...     %18.1h
-    chargeScan('clm2340vve', 2, 801, 1600), ...     %18.1h
-    chargeScan('clm2340vve', 2, 1601, 0), ...     %18.1h
-    };
+% scans_all = {...
+%     % chargeScan('ckv0334jpp', 2, 1, 865), ... % longer measurement time
+%     % chargeScan('ckv0334jpp', 2, 866, 0), ...
+%     % chargeScan('cla0423hwf', 1, 1, 1770), ... % bad fits throughout
+%     % chargeScan('cla0423hwf', 1, 1771, 0), ...
+%     % chargeScan('clf2154lqz', 1, 1, 0), ... % maybe bad fits?
+%     chargeScan('ckx2109xfx', 4, 182, 2402), ...%17.7h 
+%     chargeScan('ckx2109xfx', 4, 2403, 0), ...  %5.0h
+%     chargeScan('cky2155mll', 1, 1, 1674), ...  %8.8h cut off before fill before bad data
+%     chargeScan('clb0821qqz', 4, 1, 1048), ...  %8.2h
+%     chargeScan('clb0821qqz', 4, 1049, 0), ...  %13.81h
+%     chargeScan('clc0632vzv', 2, 1, 5033), ...  %33.9h cut off end when power outage happened
+%     chargeScan('cle0301xnh', 2, 1, 0), ...     %9.1h
+%     chargeScan('clg1638iiy', 2, 1, 0), ...     %5.4h
+%     chargeScan('clh2255qso', 4, 1, 0), ...     %17.0h
+%     chargeScan('cli1847ppc', 4, 1, 0), ...     %9.7h
+%     chargeScan('clm2340vve', 2, 1, 0), ...     %18.1h
+%     };
+% % split into sections to maximize data (mostly lots of 5h scans)
+% scans_cut = {...
+%     % chargeScan('ckv0334jpp', 2, 1, 865), ... % longer measurement time
+%     % chargeScan('ckv0334jpp', 2, 866, 0), ...
+%     % chargeScan('cla0423hwf', 1, 1, 1770), ... % bad fits throughout
+%     % chargeScan('cla0423hwf', 1, 1771, 0), ...
+%     % chargeScan('clf2154lqz', 1, 1, 0), ... % maybe bad fits?
+%     chargeScan('ckx2109xfx', 4, 182, 922), ...%17.7h 
+%     chargeScan('ckx2109xfx', 4, 923, 1662), ...%17.7h 
+%     chargeScan('ckx2109xfx', 4, 1663, 2402), ...%17.7h 
+%     chargeScan('ckx2109xfx', 4, 2403, 0), ...  %5.0h
+%     chargeScan('cky2155mll', 1, 1, 1674), ...  %8.8h cut off before fill before bad data
+%     chargeScan('clb0821qqz', 4, 1, 1048), ...  %8.2h
+%     chargeScan('clb0821qqz', 4, 1048/2, 0), ...  %13.81h
+%     chargeScan('clb0821qqz', 4, 1048/2, 0), ...  %13.81h
+%     chargeScan('clc0632vzv', 2, 1, 5033), ...  %33.9h cut off end when power outage happened
+%     chargeScan('cle0301xnh', 2, 1, 0), ...     %9.1h
+%     chargeScan('clg1638iiy', 2, 1, 0), ...     %5.4h
+%     chargeScan('clh2255qso', 4, 1, 750), ...     %17.0h
+%     chargeScan('clh2255qso', 4, 751, 1500), ...     %17.0h
+%     chargeScan('cli1847ppc', 4, 1, 0), ...     %9.7h
+%     chargeScan('clm2340vve', 2, 1, 800), ...     %18.1h
+%     chargeScan('clm2340vve', 2, 801, 1600), ...     %18.1h
+%     chargeScan('clm2340vve', 2, 1601, 0), ...     %18.1h
+%     };
 
-% % DEVICE 2
+% % % DEVICE 2
 % scans_all = {...
 % %     chargeScan('clu0612urb', 1, 1, 0), ...%9.5h, bias=0.6
 %     chargeScan('cls2352csh', 1, 1, 0), ...%16.5h 
@@ -53,6 +53,7 @@ scans_cut = {...
 %     chargeScan('clw0354tka', 4, 1, 0), ...%7.5h 
 %     chargeScan('clx0005ymv', 4, 1, 0), ...%14.5h, 2484
 %     chargeScan('cmc2246wzk', 1, 1, 0), ...%18h
+%     chargeScan('cme0648mai', 4, 1, 0), ...%12h
 %     };
 % scans_cut = {...
 % %     chargeScan('clu0612urb', 1, 1, 0), ...%9.5h, bias=0.6
@@ -63,7 +64,18 @@ scans_cut = {...
 %     chargeScan('clx0005ymv', 4, 1, 1242), ...%14.5h, 2484
 %     chargeScan('clx0005ymv', 4, 1243, 0), ...%14.5h, 2484
 %     chargeScan('cmc2246wzk', 1, 1, 0), ...%18h
+%     chargeScan('cme0648mai', 4, 1, 0), ...%12h
 %     };
+
+% % DEVICE 1 CD2
+scans_all = {...
+    chargeScan('cnd2245jxi', 3, 1, 0), ...%16.5h 
+    chargeScan('cnf0553tei', 3, 1, 0), ...%15.5h 
+    };
+scans_cut = {...
+    chargeScan('cnd2245jxi', 3, 1, 0), ...%16.5h 
+    chargeScan('cnf0553tei', 3, 1, 0), ...%15.5h 
+    };
 
 % scans{6}.find_breaks()
 % for i = 1:length(scans)

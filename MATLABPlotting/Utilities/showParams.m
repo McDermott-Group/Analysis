@@ -41,6 +41,10 @@ for k = 1:length(flds)
 end
 temp_struct.Interpreter = 'tex';
 temp_struct.WindowStyle = 'non-modal';
+neg=~cellfun(@isempty,params);
+[~,ix] = sort(params(neg));   % sort the first column from 2nd row onwards and get the indices
+temp=params(neg);
+params(neg) = temp(ix);       % do not forget to add a 1 :)
 msgbox(params(~cellfun('isempty', params)), 'Parameters', temp_struct)
 
 end
