@@ -62,76 +62,16 @@ grid on
 %Find All Exponents\
 expons = zeros(1,1);
 ampls = zeros(1,1);
-[fr,~] = fit_psd(log(F1),log(Aqpsd1));
+[fr,~] = noiselib.fit_psd(log(F1),log(Aqpsd1));
 expons(1) = fr.b;
 ampls(1) = fr.a;
 
 %Plot histogram
-[delta_1] = calc_delta(combined_vs{qubit},1);
+[delta_1] = noiselib.calc_delta(combined_vs{qubit},1);
 delta_1 = mod(0.5 + delta_1, 1) - 0.5;
 figure(130+qubit);h=histogram(delta_1,50);
 xlabel('Jump size (e)')
 ylabel('N')
 set(gca,'yscale','log')
 
-end
-
-function [delta] = calc_delta(es,stepsize)
-delta = zeros(length(es)-stepsize,1);
-for i = 1:length(delta)
-    delta(i) = es(i+stepsize) - es(i);
-end
-end
-
-function [es_jump, es_smooth] = filterJumps(es,delta)
-thresh = 0.07;%0.001;
-es_jump = zeros(length(es),1) + es(1);
-es_smooth = zeros(length(es),1) + es(1);
-for i = 1:length(delta)
-    if abs(delta(i)) < thresh
-        es_smooth(i+1) = es_smooth(i) + delta(i);
-        es_jump(i+1) = es_jump(i);
-    else
-        es_jump(i+1) = es_jump(i) + delta(i);
-        es_smooth(i+1) = es_smooth(i);
-    end
-end
-end
-
-function [psd_cut,freqs] = crosspsd(z1,z2,ts)
-Fs = length(ts)/(ts(end) - ts(1));
-NumP = length(z1);
-freqs = 0:Fs/NumP:(Fs/2);
-%Cross PSD
-NumP = length(z1);
-fft_seq1 = fft(z1);
-fft_seq2 = conj(fft(z2));
-psd = (1/(Fs*NumP))*(fft_seq1.*fft_seq2);
-psd(2:(NumP/2)) = 2*psd(2:(NumP/2));
-%End PSD
-psd_cut = psd(1:(NumP/2+1));
-end
-
-function [apsd] = window_averaging(psd)
-% apsd = psd;
-%Averaging with f window
-apsd = zeros(size(psd));
-for i = 1:size(psd,1)
-    filter_fl = max(1,round(i - i/4));
-    filter_fh = min(size(psd,1),round(i + i/4));
-    apsd(i) = mean(psd(filter_fl:filter_fh));
-end
-end
-
-function [fitresult, gof] = fit_psd(f,psd)
-[xData, yData] = prepareCurveData(f, psd');
-
-ft = fittype( 'a + b*x', 'independent', 'x', 'dependent', 'y' );
-opts = fitoptions( 'Method', 'NonlinearLeastSquares' );
-opts.Display = 'Off';
-opts.StartPoint = [-7 -1.5];
-
-[fitresult, gof] = fit( xData, yData, ft, opts );
-
-% figure;plot( fitresult, xData, yData );
 end

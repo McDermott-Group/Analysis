@@ -79,7 +79,7 @@ classdef chargeScan
                             o.dedv,measurement_time);
         end
         function o = show_histogram(o)
-            [delta_1] = calc_delta(o.unwrapped_voltage,1);
+            [delta_1] = noiselib.calc_delta(o.unwrapped_voltage,1);
             delta_1 = mod(0.5 + delta_1, 1) - 0.5;
             figure(130+o.qubit); hold on;
             h=histogram(delta_1,50);
@@ -92,41 +92,4 @@ classdef chargeScan
             set(gca,'yscale','log')
         end
     end
-end
-
-
-
-function [delta] = calc_delta(es,stepsize)
-    delta = zeros(length(es)-stepsize,1);
-    for i = 1:length(delta)
-        delta(i) = es(i+stepsize) - es(i);
-    end
-end
-
-function [es_jump, es_smooth] = filterJumps(es,delta)
-thresh = 0.07;%0.001;
-es_jump = zeros(length(es),1) + es(1);
-es_smooth = zeros(length(es),1) + es(1);
-for i = 1:length(delta)
-    if abs(delta(i)) < thresh
-        es_smooth(i+1) = es_smooth(i) + delta(i);
-        es_jump(i+1) = es_jump(i);
-    else
-        es_jump(i+1) = es_jump(i) + delta(i);
-        es_smooth(i+1) = es_smooth(i);
-    end
-end
-end
-
-function [fitresult, gof] = fit_psd(f,psd)
-[xData, yData] = prepareCurveData(f, psd');
-
-ft = fittype( 'a + b*x', 'independent', 'x', 'dependent', 'y' );
-opts = fitoptions( 'Method', 'NonlinearLeastSquares' );
-opts.Display = 'Off';
-opts.StartPoint = [-7 -1.5];
-
-[fitresult, gof] = fit( xData, yData, ft, opts );
-
-% figure;plot( fitresult, xData, yData );
 end
