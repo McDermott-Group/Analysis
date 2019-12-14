@@ -8,11 +8,17 @@ idle_time = 200e-9;
 cycle_time = 100e-6;
 T_qp = 0.01e-3; % QP tunneling rate
 
+% general methods:
+%   calc rand ng
+%   choose odd or even parity
+%   calc detuning due to ng
+%   calc rotation in stationary frame
+%   project
+
 Fs = 1/cycle_time;
 ng = rand(n, N);
 dP = rand(n, N) < 1/T_qp*cycle_time;
 parity = mod(cumsum(dP,2),2);
-% parity = ones(n, N); % &&& this needs to be random, changing on the ms timescale
 detuning = offset + charge_dispersion/2*parity.*abs(sin(pi*ng)); % this is just using a sin instead of the actual fn for parity bands
 rotation = 2*pi*detuning*idle_time;
 M = rand(n, N) < 0.5+0.5*sin(rotation);
@@ -29,9 +35,3 @@ set(gca,'yscale','log')
 xlabel('Frequency (Hz)')
 ylabel('S_\eta (\eta^2/Hz)')
 grid on
-
-% calc rand ng
-% choose odd or even parity
-% calc detuning due to ng
-% calc rotation in stationary frame
-% project

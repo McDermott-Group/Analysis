@@ -44,7 +44,7 @@ classdef chargeScan
             o.measurement_time = (o.raw_time(end) - o.raw_time(1))/length(o.raw_time);
             l = length(o.raw_voltage);
             voltages = o.raw_voltage(1:l - mod(l,2));
-            [o.psd,o.f,o.unwrapped_voltage,o.time] = Wrapper_AnalyzeChargeTracePSD(voltages,o.wrapping_voltage,o.unwrap_mult,...
+            [o.psd,o.f,o.unwrapped_voltage,o.time] = o.analyze_voltage_trace(voltages,o.wrapping_voltage,o.unwrap_mult,...
                             o.dedv,o.measurement_time);
             o.unwrapped_voltage = o.unwrapped_voltage - o.unwrapped_voltage(1);
         end
@@ -75,8 +75,21 @@ classdef chargeScan
             grid on
         end
         function [f, psd] = calc_psd(o, l, measurement_time)
-            [psd,f,unwrapped_voltage,t1] = Wrapper_AnalyzeChargeTracePSD(o.raw_voltage(1:l),o.wrapping_voltage,o.unwrap_mult,...
+            [psd,f,unwrapped_voltage,t1] = o.analyze_voltage_trace(o.raw_voltage(1:l),o.wrapping_voltage,o.unwrap_mult,...
                             o.dedv,measurement_time);
+        end
+        function [aqpsd,f,es,t] = analyze_voltage_trace(vs,wrapping_voltage,...
+                                        unwrap_mult, dedv, measurement_time)
+            Fs = 1/measurement_time;%samples per second
+            NumP = length(vs);
+            f = 0:Fs/NumP:(Fs/2);
+
+            [es] = noiselib.unwrap_charge(vs, wrapping_voltage, dedv, unwrap_mult);
+            t = (0:(length(vs)-1))*(measurement_time);
+
+            [Qpsd] = noiselib.crosspsd(es,es,Fs/2);
+            [aqpsd] = noiselib.window_averaging(Qpsd);
+            aqpsd = aqpsd(1:(NumP/2+1));
         end
         function o = show_histogram(o)
             [delta_1] = noiselib.calc_delta(o.unwrapped_voltage,1);
