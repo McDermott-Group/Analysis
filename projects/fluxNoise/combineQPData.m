@@ -32,9 +32,9 @@
 % Plot_QP_Tunneling('Circ1\', 'Q2\', '10-10-19\', 0, 999);
 % Plot_QP_Tunneling('Circ1\', 'Q3\', '10-10-19\', 0, 999);
 
-Plot_QP_Tunneling('DR1 - 2019-11-12\', 'AlQPAntenna\', 'Q1\', '11-19-19\', 0, 806);
-Plot_QP_Tunneling('DR1 - 2019-11-12\', 'AlQPAntenna\', 'Q2\', '11-20-19\', 0, 999);
-Plot_QP_Tunneling('DR1 - 2019-11-12\', 'AlQPAntenna\', 'Q3\', '11-20-19\', 0, 999);
+% Plot_QP_Tunneling('DR1 - 2019-11-12\', 'AlQPAntenna\', 'Q1\', '11-19-19\', 0, 806);
+% Plot_QP_Tunneling('DR1 - 2019-11-12\', 'AlQPAntenna\', 'Q2\', '11-20-19\', 0, 999);
+% Plot_QP_Tunneling('DR1 - 2019-11-12\', 'AlQPAntenna\', 'Q3\', '11-20-19\', 0, 999);
 % Plot_QP_Tunneling('NbQPAntenna\', 'Q1\', '11-22-19\', 0, 999);
 % Plot_QP_Tunneling('NbQPAntenna\', 'Q3\', '11-22-19\', 0, 999);
 % Plot_QP_Tunneling('NbQPAntenna\', 'Q1\', '11-22-19\', 1000, 1741);
@@ -50,6 +50,14 @@ Plot_QP_Tunneling('DR1 - 2019-11-12\', 'AlQPAntenna\', 'Q3\', '11-20-19\', 0, 99
 
 % Plot_QP_Tunneling('DR1 - 2019-11-12\', 'NbQPAntenna\', 'Q1\', '12-11-19\', 0, 999);
 
+% Plot_QP_Tunneling('DR1 - 2019-12-17\', 'AlQPAntenna\', 'Q3\', '12-20-19\', 0, 499);
+% Plot_QP_Tunneling('DR1 - 2019-12-17\', 'AlQPAntenna\', 'Q2\', '12-20-19\', 0, 499);
+% Plot_QP_Tunneling('DR1 - 2019-12-17\', 'AlQPAntenna\', 'Q1\', '12-20-19\', 0, 999);
+% Plot_QP_Tunneling('DR1 - 2019-12-17\', 'AlQPAntenna\', 'Q2\', '12-21-19\', 0, 638);
+% Plot_QP_Tunneling('DR1 - 2019-12-17\', 'AlQPAntenna\', 'Q3\', '12-21-19\', 0, 999);
+Plot_QP_Tunneling('DR1 - 2019-12-17\', 'AlQPAntenna\', 'Q3\', '12-21-19\', 0, 199);
+Plot_QP_Tunneling('DR1 - 2019-12-17\', 'AlQPAntenna\', 'Q3\', '12-21-19\', 0, 499);
+
 % plotFit(1/0.28e-3, 2e-5);
 % plotFit(1/13e-3, 9e-4);
 % plotFit(1/1e-3, 5e-5);
@@ -63,7 +71,8 @@ function [] = plotFit(gamma, A0)
     plot(f,theoryplot, 'DisplayName', ['fit ',num2str(1e3/gamma),'ms'])
 end
 
-function [window_avg_psd, psd_freq] = Plot_QP_Tunneling(CDdate, samples, qubit, date, minFileIndex, maxFileIndex)
+function [window_avg_psd, psd_freq] = Plot_QP_Tunneling(CDdate, samples, ...
+                                    qubit, date, minFileIndex, maxFileIndex)
 
     %PARAMETERS
     reps = 8192;
@@ -72,7 +81,8 @@ function [window_avg_psd, psd_freq] = Plot_QP_Tunneling(CDdate, samples, qubit, 
 %     CDdate = 'DR1 - 2019-11-12\';
 
     dataType = 'QP_Tunneling_PSD';
-    ext = strcat(['Z:\mcdermott-group\data\fluxNoise\',CDdate,samples,qubit,'General\',date,dataType,'\MATLABData\',dataType,'_']);
+    ext = strcat(['Z:\mcdermott-group\data\fluxNoise\',CDdate,samples, ...
+              qubit,'General\',date,dataType,'\MATLABData\',dataType,'_']);
 
     Fs = 1/refreshTime;%samples per second
     N = reps * trials;
@@ -84,8 +94,10 @@ function [window_avg_psd, psd_freq] = Plot_QP_Tunneling(CDdate, samples, qubit, 
     data = zeros(5*(maxFileIndex-minFileIndex), reps);
     for i = minFileIndex:maxFileIndex
         ldata = load(strcat([ext,num2str(i,'%03d'),'.mat']));
-%         data(i-minFileIndex+1,:) = reshape(eval(strcat(['ldata.',dataType,'.Data.Single_Shot_Occupations']))',[N,1]);
-        data(5*(i-minFileIndex+1)-4:5*(i-minFileIndex+1),:) = eval(strcat(['ldata.',dataType,'.Data.Single_Shot_Occupations']));
+%         data(i-minFileIndex+1,:) = reshape(eval(strcat( ...
+%             ['ldata.',dataType,'.Data.Single_Shot_Occupations']))',[N,1]);
+        data(5*(i-minFileIndex+1)-4:5*(i-minFileIndex+1),:) = ...
+            eval(strcat(['ldata.',dataType,'.Data.Single_Shot_Occupations']));
     end
     
     [avg_cpsd, psd_freq] = noiselib.partition_and_avg_psd(data, Fs);
