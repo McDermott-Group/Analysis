@@ -55,8 +55,9 @@
 % Plot_QP_Tunneling('DR1 - 2019-12-17\', 'AlQPAntenna\', 'Q1\', '12-20-19\', 0, 999);
 % Plot_QP_Tunneling('DR1 - 2019-12-17\', 'AlQPAntenna\', 'Q2\', '12-21-19\', 0, 638);
 % Plot_QP_Tunneling('DR1 - 2019-12-17\', 'AlQPAntenna\', 'Q3\', '12-21-19\', 0, 999);
-Plot_QP_Tunneling('DR1 - 2019-12-17\', 'AlQPAntenna\', 'Q3\', '12-21-19\', 0, 199);
-Plot_QP_Tunneling('DR1 - 2019-12-17\', 'AlQPAntenna\', 'Q3\', '12-21-19\', 0, 499);
+Plot_QP_Tunneling('DR1 - 2019-12-17\', 'AlQPAntenna\', 'Q1\', '12-22-19\', 0, 999); % calibrate every 10 runs
+Plot_QP_Tunneling('DR1 - 2019-12-17\', 'AlQPAntenna\', 'Q2\', '12-22-19\', 0, 999); % calibrate every 10 runs
+Plot_QP_Tunneling('DR1 - 2019-12-17\', 'AlQPAntenna\', 'Q3\', '12-22-19\', 0, 999); % calibrate every 10 runs
 
 % plotFit(1/0.28e-3, 2e-5);
 % plotFit(1/13e-3, 9e-4);

@@ -93,7 +93,7 @@ classdef chargeScan
         end
         function o = show_histogram(o)
             [delta_1] = noiselib.calc_delta(o.unwrapped_voltage,1);
-            delta_1 = mod(0.5 + delta_1, 1) - 0.5;
+            delta_1 = noiselib.alias(delta_1, 0.5);
             figure(130+o.qubit); hold on;
             h=histogram(delta_1,50);
             edges = h.BinEdges;

@@ -56,7 +56,7 @@ for zi = 1:num_z
     end
 end
 %Alias the data
-charge_mat = abs(mod(charge_mat + 0.5,1) - 0.5);%NOTE: Abs is not necessary
+charge_mat = abs(noiselib.alias(charge_mat, 0.5));%NOTE: Abs is not necessary
 
 figure();imagesc(r,z,charge_mat)
 title(strcat(['r_{in}: ',num2str(r_inner),', r_{out}: ',num2str(r_outer)]))

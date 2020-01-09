@@ -110,7 +110,7 @@ function [] = build_combined_hist(scans)
             % plot histogram
             figure(210); hold on;
             [delta_1] = noiselib.calc_delta(combined_voltages,1);
-            delta_1 = mod(0.5 + delta_1, 1) - 0.5;
+            delta_1 = noiselib.alias(delta_1, 0.5);
             h=histogram(delta_1,50, 'DisplayName', strcat(['Q',num2str(q)]));
             xlabel('Jump size (e)')
             ylabel('N')
