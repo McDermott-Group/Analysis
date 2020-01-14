@@ -27,7 +27,7 @@ delta_QB = (unwrapped_qs_QB(2:end) - unwrapped_qs_QB(1:end-1));
 jumps_QA = abs(delta_QA) > 0.1;
 jumps_QB = abs(delta_QB) > 0.1;
 correlated = jumps_QA + jumps_QB > 1.5;
-correlatedOffset = jumps_QA + [[0];jumps_QB(1:end-1)] > 1.5;
+correlatedOffset = jumps_QB + [jumps_QA(2:end); [0]] > 1.5;
 
 figure; hold on;
 plot(t, unwrapped_qs_QA, 'Color', [0 0.4470 0.7410], 'DisplayName', 'A')
@@ -51,10 +51,10 @@ plot(t, qs_corrA, 'Color', [0.8500 0.3250 0.0980], 'LineWidth', 2)
 plot(t, qs_corrB, 'Color', [0.8500 0.3250 0.0980], 'LineWidth', 2);
 % offset correlation
 jump_points = [correlatedOffset; [0]] | [[0]; correlatedOffset];
-qs_corrA = unwrapped_qs_QA.*jump_points;
-qs_corrB = unwrapped_qs_QB(1:end-1).*jump_points(2:end);
-qs_corrA(~jump_points) = NaN;
-qs_corrB(~[jump_points(2:end); [0]]) = NaN;
+qs_corrA = unwrapped_qs_QA.*[[0]; jump_points(1:end-1)];
+qs_corrB = unwrapped_qs_QB.*jump_points;
+qs_corrA(~[[0]; jump_points(1:end-1)]) = NaN;
+qs_corrB(~jump_points) = NaN;
 plot(t, qs_corrA, 'Color', [0.9290 0.6940 0.1250], 'LineWidth', 2)
 plot(t, qs_corrB, 'Color', [0.9290 0.6940 0.1250], 'LineWidth', 2);
 
@@ -76,12 +76,24 @@ plot(t, qs_corrB, 'Color', [0.9290 0.6940 0.1250], 'LineWidth', 2);
  sum( eitherjumps.*(delta_QA.*delta_QB)./sum(eitherjumps) )
  sum( eitherjumps.*abs(delta_QA.*delta_QB)./sum(eitherjumps) )
  
-figure(1121); hold on; 
-plot(~correlated.*delta_QA, ~correlated.*delta_QB, '.', 'MarkerSize', 10, ...
+figure(1131); hold on; 
+corrSelect = correlated; %corrSelect(~correlated) = NaN;
+corrOffsetSelectB = correlatedOffset; %corrOffsetSelectB(~corrOffsetSelectB) = NaN;
+corrOffsetSelectA = [[0]; correlatedOffset(1:end-1)]; %corrOffsetSelectA(~corrOffsetSelectA) = NaN;
+noCorrSelect = ones(size(correlated)); noCorrSelect(corrSelect|corrOffsetSelectA|corrOffsetSelectB) = 0;
+
+plot(noCorrSelect.*delta_QA, noCorrSelect.*delta_QB, '.', 'MarkerSize', 10, ...
     'MarkerEdgeColor', [0 0.4470 0.7410], 'DisplayName', 'Uncorrelated'); 
-plot(correlated.*delta_QA, correlated.*delta_QB, '.', 'MarkerSize', 10, ...
+plot(corrSelect.*delta_QA, corrSelect.*delta_QB, '.', 'MarkerSize', 10, ...
     'MarkerEdgeColor', [0.8500 0.3250 0.0980], 'DisplayName', 'Correlated');
-plot(correlatedOffset(2:end).*delta_QA(2:end), correlatedOffset(2:end).*delta_QB(1:end-1), '.', 'MarkerSize', 10, ...
+plot(corrOffsetSelectA.*delta_QA, corrOffsetSelectB.*delta_QB, '.', 'MarkerSize', 10, ...
     'MarkerEdgeColor', [0.9290 0.6940 0.1250], 'DisplayName', 'Correlated (Offset)');
+
+% plot(~correlated.*delta_QA, ~correlated.*delta_QB, '.', 'MarkerSize', 10, ...
+%     'MarkerEdgeColor', [0 0.4470 0.7410], 'DisplayName', 'Uncorrelated'); 
+% plot(correlated.*delta_QA, correlated.*delta_QB, '.', 'MarkerSize', 10, ...
+%     'MarkerEdgeColor', [0.8500 0.3250 0.0980], 'DisplayName', 'Correlated');
+% plot(correlatedOffset(2:end).*delta_QA(2:end), correlatedOffset(2:end).*delta_QB(1:end-1), '.', 'MarkerSize', 10, ...
+%     'MarkerEdgeColor', [0.9290 0.6940 0.1250], 'DisplayName', 'Correlated (Offset)');
 xlabel('\Deltan_A [e]'); ylabel('\Deltan_B [e]'); title('Charge Jump Size'); 
 legend; axis square; grid on; box on;
