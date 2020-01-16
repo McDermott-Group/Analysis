@@ -1,17 +1,24 @@
-data = loadMeasurementData;
+function [N, nA, nB, nCorrAB, nCorrBA, nCorrExpected] = AnalyzeChargeJumpCorrelations(file_path, qA, qB, fignum)
 
-%period_2e_QA = data.x2e_Period_Q3;
-%period_2e_QB = data.x2e_Period_Q4;
-period_2e_QA = 0.4126;
-period_2e_QB = 0.418;
-vs_QA = data.Offset_Voltage_Q3;
-vs_QB = data.Offset_Voltage_Q4;
+data = loadMeasurementData(file_path);
+
+period_2e_QA = eval(['data.x2e_Period_' qA]);
+period_2e_QB = eval(['data.x2e_Period_' qB]);
+%period_2e_QA = 0.4126;
+%period_2e_QB = 0.418;
+vs_QA = eval(['data.Offset_Voltage_' qA]);
+vs_QB = eval(['data.Offset_Voltage_' qB]);
+
+colorCorrAB = 'Red'; [0.8500 0.3250 0.0980];
+colorCorrBA = [1 0.6 0]; [0.9290 0.6940 0.1250];
+colorNoCorr = 'Blue'; [0 0.4470 0.7410];
 
 % figure; plot(t, vs_QA(1:end-1), t, vs_QB(1:end-1));
 % xlabel('time [s]'); ylabel('voltage [V]'); title('Measured (Wrapped) Voltage');
 
 t = data.Time - data.Time(1);
 T = t(end)/length(t);
+N = length(t) - 1;
 unwrapped_qs_QA = noiselib.unwrap_voltage_to_charge(vs_QA, period_2e_QA/2, 2/period_2e_QA);
 unwrapped_qs_QB = noiselib.unwrap_voltage_to_charge(vs_QB, period_2e_QB/2, 2/period_2e_QB);
 
@@ -32,6 +39,9 @@ correlatedOffset = jumps_QB + [jumps_QA(2:end); [0]] > 1.5;
 figure; hold on;
 plot(t, unwrapped_qs_QA, 'Color', [0 0.4470 0.7410], 'DisplayName', 'A')
 plot(t, unwrapped_qs_QB, 'Color', [0.4940 0.1840 0.5560], 'DisplayName', 'B');
+xlabel('time [s]'); ylabel('Offset Charge [e]'); title('Unwrapped Charge');
+set(findall(gcf,'-property','FontSize'),'FontSize',16)
+
 % all jumps
 jump_pointsA = [jumps_QA; [0]] | [[0]; jumps_QA];
 jump_pointsB = [jumps_QB; [0]] | [[0]; jumps_QB];
@@ -47,16 +57,16 @@ qs_corrA = unwrapped_qs_QA.*jump_points;
 qs_corrB = unwrapped_qs_QB.*jump_points;
 qs_corrA(~jump_points) = NaN;
 qs_corrB(~jump_points) = NaN;
-plot(t, qs_corrA, 'Color', [0.8500 0.3250 0.0980], 'LineWidth', 2)
-plot(t, qs_corrB, 'Color', [0.8500 0.3250 0.0980], 'LineWidth', 2);
+plot(t, qs_corrA, 'Color', colorCorrAB, 'LineWidth', 2)
+plot(t, qs_corrB, 'Color', colorCorrAB, 'LineWidth', 2);
 % offset correlation
 jump_points = [correlatedOffset; [0]] | [[0]; correlatedOffset];
 qs_corrA = unwrapped_qs_QA.*[[0]; jump_points(1:end-1)];
 qs_corrB = unwrapped_qs_QB.*jump_points;
 qs_corrA(~[[0]; jump_points(1:end-1)]) = NaN;
 qs_corrB(~jump_points) = NaN;
-plot(t, qs_corrA, 'Color', [0.9290 0.6940 0.1250], 'LineWidth', 2)
-plot(t, qs_corrB, 'Color', [0.9290 0.6940 0.1250], 'LineWidth', 2);
+plot(t, qs_corrA, 'Color', colorCorrBA, 'LineWidth', 2)
+plot(t, qs_corrB, 'Color', colorCorrBA, 'LineWidth', 2);
 
 % figure;
 % plot(t, jumps_QA, ...
@@ -64,19 +74,21 @@ plot(t, qs_corrB, 'Color', [0.9290 0.6940 0.1250], 'LineWidth', 2);
 %      t, jumps_QA + jumps_QB, ...
 %      t, jumps_QA + [[0];jumps_QB(1:end-1)])
  
- n_jumps_QA = sum(jumps_QA)
- n_jumps_QB = sum(jumps_QB)
- nPerT_QA = n_jumps_QA/t(end)
- nPerT_QB = n_jumps_QB/t(end)
- correlations = sum(correlated)
- correlationsOffset = sum(correlatedOffset)
- expectedCorrelations = (nPerT_QA*T)*(nPerT_QB*T)*t(end)/T
+nA = sum(jumps_QA);
+nB = sum(jumps_QB);
+nPerT_QA = nA/t(end);
+nPerT_QB = nB/t(end);
+P_jump_QA = nA/length(t);
+P_jump_QB = nB/length(t);
+nCorrAB = sum(correlated);
+nCorrBA = sum(correlatedOffset);
+nCorrExpected = 2*(nPerT_QA*T)*(nPerT_QB*T)*t(end)/T;
+
+eitherjumps = (jumps_QA | jumps_QB);
+sum( eitherjumps.*(delta_QA.*delta_QB)./sum(eitherjumps) );
+sum( eitherjumps.*abs(delta_QA.*delta_QB)./sum(eitherjumps) );
  
- eitherjumps = (jumps_QA | jumps_QB);
- sum( eitherjumps.*(delta_QA.*delta_QB)./sum(eitherjumps) )
- sum( eitherjumps.*abs(delta_QA.*delta_QB)./sum(eitherjumps) )
- 
-figure(1131); hold on; 
+figure(fignum); hold on; 
 corrOffsetSelectB = correlatedOffset; 
 corrOffsetSelectA = [[0]; correlatedOffset(1:end-1)]; 
 noCorrSelect = ones(size(correlated)); noCorrSelect(correlated|corrOffsetSelectA|corrOffsetSelectB) = 0;
@@ -87,10 +99,14 @@ corrA(~corrA) = NaN; corrB(~corrB) = NaN;
 noCorrA(~noCorrA) = NaN; noCorrB(~noCorrB) = NaN;
 corrOffsetA(~corrOffsetA) = NaN; corrOffsetB(~corrOffsetB) = NaN;
 plot(noCorrA, noCorrB, '.', 'MarkerSize', 10, ...
-    'MarkerEdgeColor', [0 0.4470 0.7410], 'DisplayName', 'Uncorrelated'); 
+    'MarkerEdgeColor', colorNoCorr, 'DisplayName', 'Uncorrelated');
 plot(corrA, corrB, '.', 'MarkerSize', 10, ...
-    'MarkerEdgeColor', [0.8500 0.3250 0.0980], 'DisplayName', 'Correlated');
+    'MarkerEdgeColor', colorCorrAB, 'DisplayName', 'Correlated AB');
 plot(corrOffsetA, corrOffsetB, '.', 'MarkerSize', 10, ...
-    'MarkerEdgeColor', [0.9290 0.6940 0.1250], 'DisplayName', 'Correlated (Offset)');
+    'MarkerEdgeColor', colorCorrBA, 'DisplayName', 'Correlated BA');
 xlabel('\Deltan_A [e]'); ylabel('\Deltan_B [e]'); title('Charge Jump Size'); 
-legend; axis square; grid on; box on;
+axis square; grid on; box on;
+xticks([-.5 -.25 0 .25 .5]); yticks([-.5 -.25 0 .25 .5]);
+set(findall(gcf,'-property','FontSize'),'FontSize',16)
+
+end
