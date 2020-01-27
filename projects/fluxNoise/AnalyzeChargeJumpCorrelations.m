@@ -9,9 +9,9 @@ period_2e_QB = eval(['data.x2e_Period_' qB]);
 vs_QA = eval(['data.Offset_Voltage_' qA]);
 vs_QB = eval(['data.Offset_Voltage_' qB]);
 
-colorCorrAB = 'Red'; [0.8500 0.3250 0.0980];
-colorCorrBA = [1 0.6 0]; [0.9290 0.6940 0.1250];
-colorNoCorr = 'Blue'; [0 0.4470 0.7410];
+colorCorrAB = 'Red'; [0.8500 0.3250 0.0980];  
+colorCorrBA = [1 0.6 0]; [0.9290 0.6940 0.1250]; 
+colorNoCorr = 'Blue'; [0 0.4470 0.7410];  
 
 % figure; plot(t, vs_QA(1:end-1), t, vs_QB(1:end-1));
 % xlabel('time [s]'); ylabel('voltage [V]'); title('Measured (Wrapped) Voltage');
@@ -98,15 +98,15 @@ corrOffsetA = correlatedOffset.*[delta_QA(2:end); [0]]; corrOffsetB = correlated
 corrA(~corrA) = NaN; corrB(~corrB) = NaN;
 noCorrA(~noCorrA) = NaN; noCorrB(~noCorrB) = NaN;
 corrOffsetA(~corrOffsetA) = NaN; corrOffsetB(~corrOffsetB) = NaN;
-plot(noCorrA, noCorrB, '.', 'MarkerSize', 10, ...
+plot(noCorrA, noCorrB, '.', 'MarkerSize', 20, ...
     'MarkerEdgeColor', colorNoCorr, 'DisplayName', 'Uncorrelated');
-plot(corrA, corrB, '.', 'MarkerSize', 10, ...
+plot(corrA, corrB, '.', 'MarkerSize', 20, ...
     'MarkerEdgeColor', colorCorrAB, 'DisplayName', 'Correlated AB');
-plot(corrOffsetA, corrOffsetB, '.', 'MarkerSize', 10, ...
+plot(corrOffsetA, corrOffsetB, '.', 'MarkerSize', 20, ...
     'MarkerEdgeColor', colorCorrBA, 'DisplayName', 'Correlated BA');
 xlabel('\Deltan_A [e]'); ylabel('\Deltan_B [e]'); title('Charge Jump Size'); 
 axis square; grid on; box on;
 xticks([-.5 -.25 0 .25 .5]); yticks([-.5 -.25 0 .25 .5]);
-set(findall(gcf,'-property','FontSize'),'FontSize',16)
+set(findall(gcf,'-property','FontSize'),'FontSize',20)
 
 end
