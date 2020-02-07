@@ -138,8 +138,8 @@ for data_index = 1:length(data.dep)
         continue
     end 
     if strcmp(data.distr.(dep_name), 'binomial')
-        data.error.(dep_name) = sqrt(data.(dep_name) .*...
-            (1 - data.(dep_name)) / N);
+        data.error.(dep_name) = sqrt(double(data.(dep_name) .*...
+            (1 - data.(dep_name)) / N));
     elseif strcmp(data.distr.(dep_name), 'normal')
         std_name = [dep_name, '_Std_Dev'];
         if isfield(data, std_name)
