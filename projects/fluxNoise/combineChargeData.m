@@ -109,8 +109,8 @@ function [] = build_combined_hist(scans)
 
             % plot histogram
             figure(210); hold on;
-            [delta_1] = calc_delta(combined_voltages,1);
-            delta_1 = mod(0.5 + delta_1, 1) - 0.5;
+            [delta_1] = noiselib.calc_delta(combined_voltages,1);
+            delta_1 = noiselib.alias(delta_1, 0.5);
             h=histogram(delta_1,50, 'DisplayName', strcat(['Q',num2str(q)]));
             xlabel('Jump size (e)')
             ylabel('N')
@@ -184,24 +184,4 @@ function [] = average_PSDs(scans)
             plot(fVals, exp(A + log(fVals)*alpha), 'r', 'DisplayName', strcat(['Q',num2str(q), ' Fit']))
         end
     end
-end
-
-function [delta] = calc_delta(es,stepsize)
-    delta = zeros(length(es)-stepsize,1);
-    for i = 1:length(delta)
-        delta(i) = es(i+stepsize) - es(i);
-    end
-end
-
-function [fitresult, gof] = fit_psd(f,psd)
-[xData, yData] = prepareCurveData(f, psd');
-
-ft = fittype( 'a + b*x', 'independent', 'x', 'dependent', 'y' );
-opts = fitoptions( 'Method', 'NonlinearLeastSquares' );
-opts.Display = 'Off';
-opts.StartPoint = [-7 -1.5];
-
-[fitresult, gof] = fit( xData, yData, ft, opts );
-
-% figure;plot( fitresult, xData, yData );
 end

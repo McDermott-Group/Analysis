@@ -1,3 +1,5 @@
+% check QP tunneling rates 
+
 
 %PARAMETERS
 reps = 8192;

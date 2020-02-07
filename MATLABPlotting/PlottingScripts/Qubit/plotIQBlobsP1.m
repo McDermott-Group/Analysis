@@ -12,8 +12,8 @@ if ~exist('CAL_I', 'var')
     
     calFileI = fullfile(pathnames{1}, filenames{1});
     calFileX = fullfile(pathnames{2}, filenames{2});
-    calI = processMeasurementData(importMeasurementData(calFileI));
-    calX = processMeasurementData(importMeasurementData(calFileX));
+    calI = loadMeasurementData(calFileI);
+    calX = loadMeasurementData(calFileX);
 
     
 else
