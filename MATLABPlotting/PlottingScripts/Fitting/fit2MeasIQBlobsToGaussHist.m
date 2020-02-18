@@ -140,13 +140,13 @@ if plotHist
     hold on
     histogram(data.allIQsRot(end/2:end,1), Nbins, 'DisplayName', 'dataset B');
     hold on
-    histogram(fulldata,Nbins, 'DisplayName', 'Combined Data')
+    histogram(fulldata,Nbins, 'FaceAlpha', 0.25, 'DisplayName', 'Combined Data')
 
     
 
     h = plot(xValuesI,fittwogaussianI, 'DisplayName', 'gaussian fit to A');
     set(h, 'LineWidth',2);   
-    h = plot(xValuesX,fittwogaussianX, 'DisplayName', 'gaussian fit to A');
+    h = plot(xValuesX,fittwogaussianX, 'DisplayName', 'gaussian fit to B');
     set(h, 'LineWidth',2);     
     
 
