@@ -16,10 +16,11 @@
 % figure; plot([es,data.Offset_Voltage_R2])
 
 
-index = 19;
-start_index = 741;   % cuk1058ibk 2/26 741
+index = 289;
+start_index = 1748;   % cuk2242kfj 2/26 1748
+% start_index = 741;    % cuk1058ibk 2/26 741
 % start_index = -524;   % cuk0242cvg 2/25-2/26 30 -524
-% start_index = 1262;   % cuc1833nzp
+% start_index = 1263;   % cuc1833nzp
 % start_index = 1672;   % cud0112txh
 
 % set(gcf, 'Position', get(0, 'Screensize'));
