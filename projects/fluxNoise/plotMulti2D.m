@@ -10,15 +10,24 @@
 %     pathnames = {pathnames};
 % end
 
-index = 142;
-% subtract_index = 1262; % cuc1833nzp
-subtract_index = 1672; % cud0112txh
-pathname = 'Z:\mcdermott-group\data\fluxNoise\DR1 - 2019-12-17\CorrFar\Q1Q2Corr\General\02-18-20\Charge_resetting\MATLABData';
-pathnames = {};
+% data = loadMeasurementData;
+% dvde = data.x2e_Period/2;
+% es = noiselib.unwrap_voltage_to_charge(data.Offset_Voltage, dvde, 1/dvde);
+% figure; plot([es,data.Offset_Voltage_R2])
+
+
+index = 19;
+start_index = 741;   % cuk1058ibk 2/26 741
+% start_index = -524;   % cuk0242cvg 2/25-2/26 30 -524
+% start_index = 1262;   % cuc1833nzp
+% start_index = 1672;   % cud0112txh
+
+% set(gcf, 'Position', get(0, 'Screensize'));
+
+pathname = 'Z:\mcdermott-group\data\fluxNoise\DR1 - 2019-12-17\CorrFar\Q1Q2Corr\General\02-26-20\Charge_resetting\MATLABData';
 filenames = {};
 for i=1:6
-    pathnames{i} = pathname;
-    filenames{i} = ['Charge_resetting_',num2str(subtract_index+index-3+i,'%03d'),'.mat'];
+    filenames{i} = ['Charge_resetting_',num2str(start_index+index-3+i,'%03d'),'.mat'];
 end
 
 n = length(filenames);
@@ -27,7 +36,7 @@ n = length(filenames);
 try
     data = cell(0);
     for k = 1:n
-        file = fullfile(pathnames{k}, filenames{k});
+        file = fullfile(pathname, filenames{k});
         data{k} = processMeasurementData(importMeasurementData(file));
     end
 catch
@@ -44,19 +53,15 @@ for i = 1:length(filenames)
 end
 
 
-
-% x=40;
 figure;
+set(gcf, 'Position', get(0, 'Screensize'));
 for i = 1:length(filenames)
     j = floor((i-1)/ceil(n/2));
-%     figure(111+x);
-%     subplot(2,ceil(n/2),i);
     subplot(4,ceil(n/2),j*ceil(n/2)+i);
-    imagesc(movmean(data{i}.Single_Shot_Occupations_SB2',20));
-    caxis([mino maxo]);
+    imagesc(movmean(data{i}.Single_Shot_Occupations_SB2',20)');
+    caxis([0 0.4]);
+%     colorbar
     title(num2str(index-3+i));
-%     figure(112+x);
-%     subplot(2,ceil(n/2),i);
     subplot(4,ceil(n/2),(j+1)*ceil(n/2)+i);
     plot(data{i}.Single_Shot_Occupation_SB2);
     title(num2str(index-3+i));
@@ -65,6 +70,7 @@ for i = 1:length(filenames)
     plot(data{i}.Single_Shot_Occupation_SB1);
     yyaxis left;
 end
+
 
 % figure(1122); hold on;
 % imagesc(autocorrelate(data{3}.Single_Shot_Occupations_SB2))
