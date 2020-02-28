@@ -1,6 +1,12 @@
 % jump_indicies()'
 % return
 
+start_index = 15;   % cuk2242kfj 2/26 15
+date = '02-27-20';
+charge_jump_indicies = [];
+trial_indicies       = [];
+rep_indicies         = [];
+
 start_index = 1748;   % cuk2242kfj 2/26 741
 date = '02-26-20';
 charge_jump_indicies = [49,119,136,157,164,213,216,266,273,289,315,359,420,424,433,470,496,515,552,578,628,635,641,645,647,669,714,764];
@@ -16,7 +22,7 @@ rep_indicies         = [1454,1965,1547,0,0,0,1907,1851,2933,0,753,629,0,0,2567,0
 start_index = 30;   % cuk0242cvg 2/25-2/26 30 -524
 date = '02-25-20';
 start_index = -524;   % cuk0242cvg 2/25-2/26 30 -524
-date2 = '02-26-20';
+date = '02-26-20';
 charge_jump_indicies = [8,45,46,114,275,292,294,318,381,413,472,474,552,632,647,776,784,788,800,824,832,860,875,880,886,906,1005,1058,1063,1077,1079,1157,1170];
 trial_indicies       = [8, 0, 1,  0,  1,  0,  3,  1, 10,  1,  3,  0,  8,  0,  0,  0,  0,  0,  9,  9,  3,  0,  4,  7,  7,  0,   0,   0,   0,   1,   0,   0,   0];
 rep_indicies         = [3600,0,3422, 591,0,2268,374,3491,3820,66,0,1232,  0,  0,  0,  0,0,881,3870,2633,0,842,2115,2546,  0,   0,   0,   0,2329,   0,   0,   0,   0];
@@ -43,7 +49,8 @@ n = length(charge_jump_indicies);
 acf = zeros(1,2*50+1);
 acf_baseline = zeros(1,2*50+1);
 
-for i = 1:n  %find(charge_jump_indicies==539)
+for i = 1:n
+    
     filename = ['Charge_resetting_',num2str(start_index+charge_jump_indicies(i),'%03d'),'.mat'];
     % Read the data file, convert the variable names, and specify the units.
     try
@@ -67,19 +74,20 @@ for i = 1:n  %find(charge_jump_indicies==539)
             oi = o(ti,:);
 
     %         (2) Plot Trial to find rep_indicies
-            figure(113); hold on;
-            area(movmean(oi',20), 'DisplayName',num2str(charge_jump_indicies(i)))
+            figure(115); hold on;
+            area(movmean(oi',10), 'DisplayName',num2str(charge_jump_indicies(i)))
             area(oi', 'DisplayName',num2str(charge_jump_indicies(i)))
 
-%             (3) Plot autocorr, etc around that specific rep
-            if i <= length(rep_indicies)
-                ri = rep_indicies(i);
-                oi_at_rep = oi( max(1,ri-100):min(4000,ri+100) );
-                acf = acf + 1/n * noiselib.crosscorrelate( oi_at_rep, oi_at_rep, 50 );
-                for j = [1:ti-1 ti+1:10]
-                    acf_baseline = acf_baseline + 1/n/9 * noiselib.crosscorrelate( o(j,:), o(j,:), 50 );
-                end
-            end
+% %             (3) Plot autocorr, etc around that specific rep
+%             if i <= length(rep_indicies)
+%                 ri = rep_indicies(i);
+% %                 oi_at_rep = oi( max(1,ri-100):min(4000,ri+100) );
+%                 oi_at_rep = oi;
+%                 acf = acf + 1/n * noiselib.crosscorrelate( oi_at_rep, oi_at_rep, 50 );
+%                 for j = [1:ti-1 ti+1:10]
+%                     acf_baseline = acf_baseline + 1/n/9 * noiselib.crosscorrelate( o(j,:), o(j,:), 50 );
+%                 end
+%             end
 
         end
     end
