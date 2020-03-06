@@ -1,6 +1,6 @@
-date = '02-27-20';
+date = '02-28-20';
 start_file = 0;
-end_file = 829;
+end_file = 847;
 
 pathname = ['Z:\mcdermott-group\data\fluxNoise\DR1 - 2019-12-17\CorrFar\Q1Q2Q3Q4Corr\General\' date '\QP_correlation100\MATLABData'];
 % pathname = '/Volumes/smb/mcdermott-group/data/fluxNoise/DR1 - 2019-12-17/CorrFar/Q1Q2Corr/General/02-18-20/Charge_resetting/MATLABData';

@@ -16,8 +16,13 @@ function [acf] = ccorr(x, y, n)
 
 acf = zeros(n+1,1);
 for i = 0:n
-%     acf(i+1) = sum( x(1:end-i).*y(1+i:end) ) / (length(x)-i);
-    acf(i+1) = sum( x(1:end-i).*y(1+i:end) ) / sum(x(1:end-i));
+    if sum(x(1:end-i)) == 0
+        acf(i+1) = 0;
+    else
+        % we divide by the sum (not length) so that it is normalized to the
+        % number of 1's and we get 100% corr if the 1s are correlated
+        acf(i+1) = sum( x(1:end-i).*y(1+i:end) ) / sum(x(1:end-i));
+    end
 end
 
 end
