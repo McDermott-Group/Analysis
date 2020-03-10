@@ -86,11 +86,8 @@ for i = 1:n
     filename = ['Charge_resetting_',num2str(start_index+charge_jump_indicies(i),'%03d'),'.mat'];
     % Read the data file, convert the variable names, and specify the units.
     try
-        data = cell(0);
-        for k = 1:n
-            file = fullfile(pathname, filename);
-            data = loadMeasurementData(file);
-        end
+        file = fullfile(pathname, filename);
+        data = loadMeasurementData(file);
     catch
         error('The selected files contain unmatched data.')
     end

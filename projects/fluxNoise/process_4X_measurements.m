@@ -1,10 +1,14 @@
 dates = {'02-28-20','02-29-20','03-02-20','03-02-20','03-03-20','03-05-20'};
 start_files = [0,  0,     0,  0*638, 0,  0];
-end_files   = [847,0*1044,637,0*1559,770,207];
+end_files   = [847,0*1044,637,0*1559,770,0*207];
 
 % dates = {'03-05-20'};
 % start_files = [297];
 % end_files   = [1168];
+
+% dates = {'03-08-20'};
+% start_files = [0];
+% end_files   = [162];
 
 n_files = sum(end_files - start_files) + length(start_files);
 n_trials = 10;
@@ -16,7 +20,7 @@ X4_event_file = [];
 X4_event_trial = [];
 X4_event_rep = [];
 n_4X_events = 0;
-buffer_radius = 5000;
+buffer_radius = 500;
 
 qubit_list = {'q1','q2','q3','q4','q12','q34','q123','q234','q341','q412','q1234'};
 
@@ -48,7 +52,7 @@ for i = 1:length(dates)
         
         nf = nf + 1;
         filename = ['QP_correlation100_',num2str(j,'%03d'),'.mat'];
-        data = load_file(pathname, filename);
+        data = noiselib.load_file(pathname, filename);
         o1 = data.Single_Shot_Occupations_SB1;
         o2 = data.Single_Shot_Occupations_SB2;
         o3 = data.Single_Shot_Occupations_SB3;
@@ -70,29 +74,29 @@ for i = 1:length(dates)
                 X4_event_rep(end+1) = rep;
                 n_4X_events = n_4X_events + 1;
 
-                autocorr_struct.q1 = add_to_autocorr(o1, autocorr_struct.q1, trial, rep, buffer_radius);
-                autocorr_struct.q2 = add_to_autocorr(o2, autocorr_struct.q2, trial, rep, buffer_radius);
-                autocorr_struct.q3 = add_to_autocorr(o3, autocorr_struct.q3, trial, rep, buffer_radius);
-                autocorr_struct.q4 = add_to_autocorr(o4, autocorr_struct.q4, trial, rep, buffer_radius);
-                autocorr_struct.q12 = add_to_autocorr(o1&o2, autocorr_struct.q12, trial, rep, buffer_radius);
-                autocorr_struct.q34 = add_to_autocorr(o3&o4, autocorr_struct.q34, trial, rep, buffer_radius);
-                autocorr_struct.q123 = add_to_autocorr(o1&o2&o3, autocorr_struct.q123, trial, rep, buffer_radius);
-                autocorr_struct.q234 = add_to_autocorr(o2&o3&o4, autocorr_struct.q234, trial, rep, buffer_radius);
-                autocorr_struct.q341 = add_to_autocorr(o3&o4&o1, autocorr_struct.q341, trial, rep, buffer_radius);
-                autocorr_struct.q412 = add_to_autocorr(o4&o1&o2, autocorr_struct.q412, trial, rep, buffer_radius);
-
-                trial = randi(n_trials);
-                rep = randi(n_reps);
-                autocorr_struct.q1_baseline = add_to_autocorr(o1, autocorr_struct.q1_baseline, trial, rep, buffer_radius);
-                autocorr_struct.q2_baseline = add_to_autocorr(o2, autocorr_struct.q2_baseline, trial, rep, buffer_radius);
-                autocorr_struct.q3_baseline = add_to_autocorr(o3, autocorr_struct.q3_baseline, trial, rep, buffer_radius);
-                autocorr_struct.q4_baseline = add_to_autocorr(o4, autocorr_struct.q4_baseline, trial, rep, buffer_radius);
-                autocorr_struct.q12_baseline = add_to_autocorr(o1&o2, autocorr_struct.q12_baseline, trial, rep, buffer_radius);
-                autocorr_struct.q34_baseline = add_to_autocorr(o3&o4, autocorr_struct.q34_baseline, trial, rep, buffer_radius);
-                autocorr_struct.q123_baseline = add_to_autocorr(o1&o2&o3, autocorr_struct.q123_baseline, trial, rep, buffer_radius);
-                autocorr_struct.q234_baseline = add_to_autocorr(o2&o3&o4, autocorr_struct.q234_baseline, trial, rep, buffer_radius);
-                autocorr_struct.q341_baseline = add_to_autocorr(o3&o4&o1, autocorr_struct.q341_baseline, trial, rep, buffer_radius);
-                autocorr_struct.q412_baseline = add_to_autocorr(o4&o1&o2, autocorr_struct.q412_baseline, trial, rep, buffer_radius);
+%                 autocorr_struct.q1 = add_to_autocorr(o1, autocorr_struct.q1, trial, rep, buffer_radius);
+%                 autocorr_struct.q2 = add_to_autocorr(o2, autocorr_struct.q2, trial, rep, buffer_radius);
+%                 autocorr_struct.q3 = add_to_autocorr(o3, autocorr_struct.q3, trial, rep, buffer_radius);
+%                 autocorr_struct.q4 = add_to_autocorr(o4, autocorr_struct.q4, trial, rep, buffer_radius);
+%                 autocorr_struct.q12 = add_to_autocorr(o1&o2, autocorr_struct.q12, trial, rep, buffer_radius);
+%                 autocorr_struct.q34 = add_to_autocorr(o3&o4, autocorr_struct.q34, trial, rep, buffer_radius);
+%                 autocorr_struct.q123 = add_to_autocorr(o1&o2&o3, autocorr_struct.q123, trial, rep, buffer_radius);
+%                 autocorr_struct.q234 = add_to_autocorr(o2&o3&o4, autocorr_struct.q234, trial, rep, buffer_radius);
+%                 autocorr_struct.q341 = add_to_autocorr(o3&o4&o1, autocorr_struct.q341, trial, rep, buffer_radius);
+%                 autocorr_struct.q412 = add_to_autocorr(o4&o1&o2, autocorr_struct.q412, trial, rep, buffer_radius);
+% 
+%                 trial = randi(n_trials);
+%                 rep = randi(n_reps);
+%                 autocorr_struct.q1_baseline = add_to_autocorr(o1, autocorr_struct.q1_baseline, trial, rep, buffer_radius);
+%                 autocorr_struct.q2_baseline = add_to_autocorr(o2, autocorr_struct.q2_baseline, trial, rep, buffer_radius);
+%                 autocorr_struct.q3_baseline = add_to_autocorr(o3, autocorr_struct.q3_baseline, trial, rep, buffer_radius);
+%                 autocorr_struct.q4_baseline = add_to_autocorr(o4, autocorr_struct.q4_baseline, trial, rep, buffer_radius);
+%                 autocorr_struct.q12_baseline = add_to_autocorr(o1&o2, autocorr_struct.q12_baseline, trial, rep, buffer_radius);
+%                 autocorr_struct.q34_baseline = add_to_autocorr(o3&o4, autocorr_struct.q34_baseline, trial, rep, buffer_radius);
+%                 autocorr_struct.q123_baseline = add_to_autocorr(o1&o2&o3, autocorr_struct.q123_baseline, trial, rep, buffer_radius);
+%                 autocorr_struct.q234_baseline = add_to_autocorr(o2&o3&o4, autocorr_struct.q234_baseline, trial, rep, buffer_radius);
+%                 autocorr_struct.q341_baseline = add_to_autocorr(o3&o4&o1, autocorr_struct.q341_baseline, trial, rep, buffer_radius);
+%                 autocorr_struct.q412_baseline = add_to_autocorr(o4&o1&o2, autocorr_struct.q412_baseline, trial, rep, buffer_radius);
             end
         end
         
@@ -119,49 +123,54 @@ close(f);
 figure; plot(avg_1_state')
 xlabel('file'); ylabel('Average Excess 1 state');
 
-figure; hold on;
-plot(-50:50, autocorr_struct.q1/n_4X_events, 'DisplayName', 'Q1')
-plot(-50:50, autocorr_struct.q2/n_4X_events, 'DisplayName', 'Q2')
-plot(-50:50, autocorr_struct.q3/n_4X_events, 'DisplayName', 'Q3')
-plot(-50:50, autocorr_struct.q4/n_4X_events, 'DisplayName', 'Q4')
-plot(-50:50, autocorr_struct.q12/n_4X_events, 'DisplayName', 'Q12')
-plot(-50:50, autocorr_struct.q34/n_4X_events, 'DisplayName', 'Q34')
-plot(-50:50, (autocorr_struct.q123+autocorr_struct.q234 ...
-            +autocorr_struct.q341+autocorr_struct.q412)/4/n_4X_events, 'DisplayName', 'Q_xyz')
-plot(-50:50, autocorr_struct.q1234/n_4X_events, 'DisplayName', 'Q1234')
-xlabel('Lag [100us]'); ylabel('Autocorrelation');
-plot(-50:50, autocorr_struct.q1_baseline/n_4X_events, 'DisplayName', 'Q1_baseline')
-plot(-50:50, autocorr_struct.q2_baseline/n_4X_events, 'DisplayName', 'Q2_baseline')
-plot(-50:50, autocorr_struct.q3_baseline/n_4X_events, 'DisplayName', 'Q3_baseline')
-plot(-50:50, autocorr_struct.q4_baseline/n_4X_events, 'DisplayName', 'Q4_baseline')
-plot(-50:50, autocorr_struct.q12_baseline/n_4X_events, 'DisplayName', 'Q12_baseline')
-plot(-50:50, autocorr_struct.q34_baseline/n_4X_events, 'DisplayName', 'Q34_baseline')
-plot(-50:50, (autocorr_struct.q123_baseline+autocorr_struct.q234_baseline ...
-            +autocorr_struct.q341_baseline+autocorr_struct.q412_baseline)/4/n_4X_events, 'DisplayName', 'Q_xyz_baseline')
-plot(-50:50, autocorr_struct.q1234_baseline/n_4X_events, 'DisplayName', 'Q1234_baseline')
-xlabel('Lag [100us]'); ylabel('Autocorrelation');
-
-% for n_reps_per_chunk = chunk_sizes
-%     rNum = ['r' num2str(n_reps_per_chunk)];
-%     figure; hold on;
-%     plot_poiss_hist(bin_edges, hist_struct.q1.(rNum), 'Q1')
-%     plot_poiss_hist(bin_edges, hist_struct.q2.(rNum), 'Q2')
-%     plot_poiss_hist(bin_edges, hist_struct.q3.(rNum), 'Q3')
-%     plot_poiss_hist(bin_edges, hist_struct.q4.(rNum), 'Q4')
-%     plot_poiss_hist(bin_edges, hist_struct.q12.(rNum), 'Q12')
-%     plot_poiss_hist(bin_edges, hist_struct.q34.(rNum), 'Q34')
-%     X3hist = hist_struct.q123.(rNum)+hist_struct.q234.(rNum)+hist_struct.q341.(rNum)+hist_struct.q412.(rNum);
-%     plot_poiss_hist(bin_edges, X3hist, 'Q_xyz')
-%     plot_poiss_hist(bin_edges, hist_struct.q1234.(rNum), 'Q1234')
-%     xlabel(['1 states in ' num2str(n_reps_per_chunk/10) 'ms chunk']); ylabel('Counts');
-% end
-% 
 % figure; hold on;
-% for n_reps_per_chunk = chunk_sizes
-%     rNum = ['r' num2str(n_reps_per_chunk)];
-%     plot_poiss_hist(bin_edges, hist_struct.q341.(rNum), ['Q341 ' num2str(n_reps_per_chunk)])
-%     xlabel(['1 states in chunk']); ylabel('Counts');
-% end
+% x_vals = -buffer_radius:buffer_radius;
+% plot(x_vals, autocorr_struct.q1/n_4X_events, 'DisplayName', 'Q1')
+% plot(x_vals, autocorr_struct.q2/n_4X_events, 'DisplayName', 'Q2')
+% plot(x_vals, autocorr_struct.q3/n_4X_events, 'DisplayName', 'Q3')
+% plot(x_vals, autocorr_struct.q4/n_4X_events, 'DisplayName', 'Q4')
+% plot(x_vals, autocorr_struct.q12/n_4X_events, 'DisplayName', 'Q12')
+% plot(x_vals, autocorr_struct.q34/n_4X_events, 'DisplayName', 'Q34')
+% plot(x_vals, (autocorr_struct.q123+autocorr_struct.q234 ...
+%             +autocorr_struct.q341+autocorr_struct.q412)/4/n_4X_events, 'DisplayName', 'Q_xyz')
+% plot(x_vals, autocorr_struct.q1234/n_4X_events, 'DisplayName', 'Q1234')
+% xlabel('Lag [100us]'); ylabel('Autocorrelation');
+% plot(x_vals, autocorr_struct.q1_baseline/n_4X_events, 'DisplayName', 'Q1_baseline')
+% plot(x_vals, autocorr_struct.q2_baseline/n_4X_events, 'DisplayName', 'Q2_baseline')
+% plot(x_vals, autocorr_struct.q3_baseline/n_4X_events, 'DisplayName', 'Q3_baseline')
+% plot(x_vals, autocorr_struct.q4_baseline/n_4X_events, 'DisplayName', 'Q4_baseline')
+% plot(x_vals, autocorr_struct.q12_baseline/n_4X_events, 'DisplayName', 'Q12_baseline')
+% plot(x_vals, autocorr_struct.q34_baseline/n_4X_events, 'DisplayName', 'Q34_baseline')
+% plot(x_vals, (autocorr_struct.q123_baseline+autocorr_struct.q234_baseline ...
+%             +autocorr_struct.q341_baseline+autocorr_struct.q412_baseline)/4/n_4X_events, 'DisplayName', 'Q_xyz_baseline')
+% plot(x_vals, autocorr_struct.q1234_baseline/n_4X_events, 'DisplayName', 'Q1234_baseline')
+% xlabel('Lag [100us]'); ylabel('Autocorrelation');
+
+for n_reps_per_chunk = chunk_sizes
+    rNum = ['r' num2str(n_reps_per_chunk)];
+    figure; hold on;
+    plot_poiss_hist(bin_edges, hist_struct.q1.(rNum), 'Q1')
+    plot_poiss_hist(bin_edges, hist_struct.q2.(rNum), 'Q2')
+    plot_poiss_hist(bin_edges, hist_struct.q3.(rNum), 'Q3')
+    plot_poiss_hist(bin_edges, hist_struct.q4.(rNum), 'Q4')
+    plot_poiss_hist(bin_edges, hist_struct.q12.(rNum), 'Q12')
+    plot_poiss_hist(bin_edges, hist_struct.q34.(rNum), 'Q34')
+    X3hist = hist_struct.q123.(rNum)+hist_struct.q234.(rNum)+hist_struct.q341.(rNum)+hist_struct.q412.(rNum);
+    plot_poiss_hist(bin_edges, X3hist, 'Q_xyz')
+    plot_poiss_hist(bin_edges, hist_struct.q1234.(rNum), 'Q1234')
+    xlabel(['1 states in ' num2str(n_reps_per_chunk/10) 'ms chunk']); ylabel('Counts');
+    set(gca, 'YScale', 'log');
+    ylim([10^-1 inf]);
+end
+
+figure; hold on;
+for n_reps_per_chunk = chunk_sizes
+    rNum = ['r' num2str(n_reps_per_chunk)];
+    plot_poiss_hist(bin_edges, hist_struct.q341.(rNum), ['Q341 ' num2str(n_reps_per_chunk)])
+    xlabel(['1 states in chunk']); ylabel('Counts');
+    set(gca, 'YScale', 'log');
+    ylim([10^-1 inf]);
+end
 
 
 function [] = plot_poiss_hist(bin_edges, hist_bins, label)
@@ -200,16 +209,3 @@ s = s + noiselib.crosscorrelate(o_ac,o_ac,buffer_radius);
 
 end
 
-
-function [data] = load_file(pathname, filename)
-% Read the data file, convert the variable names, and specify the units.
-
-try
-    data = cell(0);
-    file = fullfile(pathname, filename);
-    data = loadMeasurementData(file);
-catch
-    error('The selected files contain unmatched data.')
-end
-
-end
