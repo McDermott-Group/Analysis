@@ -2,8 +2,8 @@ function [window_avg_psd, psd_freq] = Plot_QP_Tunneling(CDdate, samples, ...
                                     qubit, date, fileIndicies)
 
     %PARAMETERS
-    reps = 8192;
-    trials = 5;
+%     reps = 8192;
+%     trials = 5;
     refreshTime = 100e-6;
 
     dataType = 'QP_Tunneling_PSD';
@@ -15,11 +15,17 @@ function [window_avg_psd, psd_freq] = Plot_QP_Tunneling(CDdate, samples, ...
     transfer = 1/vis^2;%1.485e-5/0.0002957;
     
     % load the data into the needed matrix
-    data = zeros(trials*length(fileIndicies), reps);
+    reps = 1; trials = 1; data = 0;
     j = 0;
     for i = fileIndicies
         ldata = noiselib.load_file(path, [dataType '_' num2str(i,'%03d') '.mat']);
-        data(j*trials + (1:5), :) = ldata.Single_Shot_Occupations;
+        o = ldata.Single_Shot_Occupations;
+        if j == 0
+            trials = size(o,1);
+            reps = size(o,2);
+            data = zeros(trials*length(fileIndicies), reps);
+        end
+        data(j*trials + (1:trials), :) = o;
         j = j + 1;
     end
     
