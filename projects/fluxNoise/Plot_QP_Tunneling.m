@@ -19,7 +19,7 @@ function [window_avg_psd, psd_freq] = Plot_QP_Tunneling(CDdate, samples, ...
     j = 0;
     for i = fileIndicies
         ldata = noiselib.load_file(path, [dataType '_' num2str(i,'%03d') '.mat']);
-        o = ldata.Single_Shot_Occupations;
+        o = ldata.Single_Shot_Occupations_SB1;
         if j == 0
             trials = size(o,1);
             reps = size(o,2);

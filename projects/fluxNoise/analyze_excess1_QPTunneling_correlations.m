@@ -11,9 +11,13 @@
 % filesE1 = 1212:1388;
 % filesQP = 479:654;
 % QPFilesPerE1 = 1;
-date = '03-11-20\';
-filesE1 = 1389:2381;
-filesQP = 655:1646;
+% date = '03-11-20\';
+% filesE1 = 1389:2381;
+% filesQP = 655:1646;
+% QPFilesPerE1 = 1;
+date = '03-17-20\';
+filesE1 = 0:917;
+filesQP = 0:917;
 QPFilesPerE1 = 1;
 
 % % Charge offset and excess 1 state
@@ -35,11 +39,11 @@ e1 = [];
 acf = zeros(1,2*1000+1);
 acf_baseline = zeros(1,2*1000+1);
 n_high = 0; n_low = 0;
-path = ['Z:\mcdermott-group\data\fluxNoise\DR1 - 2019-12-17\CorrFar\Q4\General\' date 'Excess_1_state\MATLABData'];
+path = ['Z:\mcdermott-group\data\fluxNoise\DR1 - 2019-12-17\CorrFar\Q1\General\' date 'Excess_1_state\MATLABData'];
 for f = filesE1
     try
         data = noiselib.load_file(path, ['Excess_1_state_',num2str(f,'%03d'),'.mat']);
-        o = data.Single_Shot_Occupations;
+        o = data.Single_Shot_Occupations_SB1;
         e1_mean = mean(o);
         if e1_mean > 0.05
             n_high = n_high + 1;
@@ -55,7 +59,7 @@ for f = filesE1
 end
 
 highThresh = 0.04;
-lowThresh = 0.06;
+lowThresh = 0.05;
 
 figure; hold on; 
 plot(e1); 
@@ -75,5 +79,5 @@ lowE1  = e1 <= lowThresh;
 highFileIndicies = filesQP(repelem(highE1,QPFilesPerE1));
 lowFileIndicies  = filesQP(repelem(lowE1,QPFilesPerE1));
 
-Plot_QP_Tunneling('DR1 - 2019-12-17\', 'CorrFar\', 'Q4\', date, highFileIndicies);
-Plot_QP_Tunneling('DR1 - 2019-12-17\', 'CorrFar\', 'Q4\', date, lowFileIndicies);
+Plot_QP_Tunneling('DR1 - 2019-12-17\', 'CorrFar\', 'Q1\', date, highFileIndicies);
+Plot_QP_Tunneling('DR1 - 2019-12-17\', 'CorrFar\', 'Q1\', date, lowFileIndicies);

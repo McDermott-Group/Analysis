@@ -14,9 +14,9 @@
 % end_files   = [162];
 
 % optimized readout, fit each frame to calibrate
-dates = {'03-12-20'};
-start_files = [0];
-end_files   = [392];
+dates = {'03-12-20','03-14-20'};
+start_files = [0,0];
+end_files   = [392,366];
 
 n_files = sum(end_files - start_files) + length(start_files);
 n_trials = 10;
