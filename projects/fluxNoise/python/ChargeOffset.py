@@ -4,6 +4,8 @@ import noiselib
 reload(noiselib)
 from dataChest import *
 import matplotlib.pyplot as plt
+from scipy import asarray as ar,exp
+from scipy.optimize import curve_fit
 
 class ChargeOffset(object):
 
@@ -44,6 +46,23 @@ class ChargeOffset(object):
         self.labels[ftag] = labels
         self.time[ftag] = time
         self.unwrapped_charge[ftag] = unwrapped_charge
+        self._last_dataset_added = ftag
+        return self
+    
+    def limit_dataset(self, label, dataset=None, start=None, end=None):
+        """limits the data for label by setting the values in [start,end) to nan"""
+        if dataset is None:
+            dataset = self._last_dataset_added
+        self.unwrapped_charge[dataset][label][start:end] = np.nan
+        return self
+        
+    def _above(self, array, threshold=0.1):
+        """Equivilent to array > threshold, but deals with nans"""
+        array = array.copy()
+        jump_size = np.abs(array, array, where=~np.isnan(array))
+        is_above = np.greater( jump_size, threshold, jump_size, where=~np.isnan(array) )
+        is_above[np.isnan(is_above)] = False
+        return is_above.astype(bool)
     
     def get_charge_offset(self, datasets = None):
         if datasets is None:
@@ -59,19 +78,33 @@ class ChargeOffset(object):
                 new_charge = self.unwrapped_charge[ftag][l]
                 if l not in offset:
                     offset[l] = np.append( np.full(n_old-1, np.nan), [0] )
-                offset[l] = np.append( offset[l], offset[l][-1] + new_charge )
+                lastValIndex = np.argwhere(~np.isnan(offset[l]))[-1][0]
+                offset[l] = np.append( offset[l], offset[l][lastValIndex] + new_charge )
             for l in set(offset.keys()) - set(self.labels[ftag]):
                 offset[ftag] = np.append( offset[ftag], np.full(n_new, np.nan) )
         return time, offset
     
     def get_jump_sizes(self, datasets = None):
         time, offset = self.get_charge_offset(datasets)
-        return {l: offset[l][1:] - offset[l][:-1] for l in offset.keys()}
+        jumps = {l: offset[l][1:] - offset[l][:-1] for l in offset.keys()}
+        
+        # find 2*sigma jump size for each label
+        def gaus(x, b, A, mu, sigma):
+            return b + A * exp(-(x-mu)**2/(2*sigma**2))
+        sigma = {}
+        for l in jumps.keys():
+            h, bins = np.histogram(jumps[l][~np.isnan(jumps[l])], bins=300)
+            x = (bins[1:]+bins[:-1])/2
+            popt, pcov = curve_fit(gaus, x, h, p0=[0,h.max(),0,0.1])
+            sigma[l] = popt[-1]
+        
+        return jumps, sigma
         
     def plot_charge_offset(self, datasets = None):
         time, offset = self.get_charge_offset(datasets)
-        jumps = self.get_jump_sizes(datasets)
-        largeJumps = {l: np.append(abs(jumps[l]) > 0.1, True) | np.append(True, abs(jumps[l]) > 0.1)
+        jumps, sigma = self.get_jump_sizes(datasets)
+        largeJumps = {l: np.append(self._above(jumps[l], 2*sigma[l]), True) | 
+                         np.append(True, self._above(jumps[l], 2*sigma[l]))
                         for l in jumps.keys()}
         
         fig = plt.figure()
@@ -87,12 +120,14 @@ class ChargeOffset(object):
         plt.pause(0.05)
         
     def plot_jump_sizes(self, datasets = None):
-        jumps = self.get_jump_sizes(datasets)
+        jumps, sigma = self.get_jump_sizes(datasets)
+        
         for l in jumps.keys():
-            n_tot = jumps[l].size
-            n_big = np.sum(abs(jumps[l]) > 0.1)
+            n_tot = np.sum(~np.isnan(jumps[l]))
+            n_big = np.sum(self._above(jumps[l], 2*sigma[l]))
             print('{}: {} / {} = {:.2f}% = {:.2f}*T between jumps'.format(
                     l, n_big, n_tot, 100.*n_big/n_tot, 1.*n_tot/n_big))
+        print( {l: '{:.3f}'.format(2*s) for l,s in sigma.items()} )
         
         fig = plt.figure()
         ax = fig.add_subplot(111)
@@ -100,23 +135,23 @@ class ChargeOffset(object):
         ax.set_xlabel('N')
         ax.set_ylabel('Jump Size [e]')
         for l in jumps.keys():
-            ax.plot(np.abs(jumps[l]), label=l)
+            ax.plot(np.abs(jumps[l], jumps[l], where=~np.isnan(jumps[l])), label=l)
         ax.legend()
         plt.draw()
         plt.pause(0.05)
         
     def plot_charge_correlation(self, label1, label2, datasets=None):
-        jumps = self.get_jump_sizes(datasets)
+        jumps, sigma = self.get_jump_sizes(datasets)
         jumps1 = jumps[label1]
         jumps2 = jumps[label2]
-        corrJumps = (abs(jumps1) > 0.1) & (abs(jumps2) > 0.1)
+        corrJumps = self._above(jumps1, 2*sigma[label1]) & self._above(jumps2, 2*sigma[label2])
         
         print( 'Correlated Jumps: {}-{}'.format(label1,label2) )
-        for j in [jumps1,jumps2]:
+        for l,j in [(label1,jumps1),(label2,jumps2)]:
             print( '    {} / {} = {:.2f}%'.format( 
                     np.sum(corrJumps), 
-                    np.sum(abs(j) > 0.1),
-                    100.*np.sum(corrJumps)/np.sum(abs(j) > 0.1) ) )
+                    np.sum(self._above(j,2*sigma[l])),
+                    100.*np.sum(corrJumps)/np.sum(self._above(j,2*sigma[l])) ) )
                 
         fig = plt.figure()
         ax = fig.add_subplot(111)
@@ -151,9 +186,9 @@ class ChargeOffset(object):
         
 base_path = 'fluxNoise\DR1 - 2019-12-17\CorrFar\Q1Q2Q3Q4Corr\General\Parameter\\'
 CO = ChargeOffset()
-# CO.add_dataset(base_path + 'cvc0232imo_correlation.hdf5') # bad Q2
-# CO.add_dataset(base_path + 'cvd0430bxy_correlation.hdf5') # bad Q4
-# CO.add_dataset(base_path + 'cvd0802ltu_correlation.hdf5') # bad Q4
+CO.add_dataset(base_path + 'cvc0232imo_correlation.hdf5').limit_dataset('Q2')
+CO.add_dataset(base_path + 'cvd0430bxy_correlation.hdf5').limit_dataset('Q4')
+CO.add_dataset(base_path + 'cvd0802ltu_correlation.hdf5').limit_dataset('Q4')
 CO.add_dataset(base_path + 'cvd1745asc_correlation.hdf5')
 CO.add_dataset(base_path + 'cve0104ppt_correlation.hdf5')
 CO.add_dataset(base_path + 'cvf0542fei_correlation.hdf5')
