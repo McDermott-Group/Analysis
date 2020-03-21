@@ -35,6 +35,7 @@ plt.show()
 # CO.add_dataset(base_path + 'csu0052mrt_correlation.hdf5')
 # CO.add_dataset(base_path + 'csv0034shs_correlation.hdf5')
 # CO.add_dataset(base_path + 'csv0824hxv_correlation.hdf5')
+# # CO.add_dataset(base_path + 'cvh0508hpk_correlation.hdf5') # dif timing, etc?  good data though
 # CO.plot_charge_offset()
 # CO.plot_jump_sizes()
 # CO.plot_charge_correlation('Q1','Q2')

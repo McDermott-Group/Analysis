@@ -24,39 +24,6 @@ def plot_data(data, xlabel='', ylabel='', title=''):
     return ax
 
 
-date, Q = '03-19-20', 'Q1'
-P1_files = (3,1069+1)
-path = ('Z:/mcdermott-group/data/fluxNoise/DR1 - 2019-12-17/CorrFar/'
-        '{}/General/{}/Charge_resetting/MATLABData/'.format(Q,date))
-filenames = [path+'Charge_resetting_{:03d}.mat'.format(i) 
-             for i in range(*P1_files)]
-P1_avg = get_averaged_P1(filenames, '_SB2')
-ax = plot_data(P1_avg, 'File', '{} Avg Excess 1 State'.format(Q))
-CO = ChargeOffset()
-CO.add_dataset('fluxNoise\DR1 - 2019-12-17\CorrFar\Q1Q2Corr\General'
-                '\Parameter\cvg0848kgb_correlation.hdf5')
-jumps, sigma = CO.get_jump_sizes()
-ax.plot(np.abs(jumps['Q1']))
-
-date, Q = '03-19-20', 'Q2'
-P1_files = (3,1069+1)
-path = ('Z:/mcdermott-group/data/fluxNoise/DR1 - 2019-12-17/CorrFar/'
-        '{}/General/{}/Charge_resetting/MATLABData/'.format(Q,date))
-filenames = [path+'Charge_resetting_{:03d}.mat'.format(i) 
-             for i in range(*P1_files)]
-P1_avg = get_averaged_P1(filenames, '_SB1')
-ax = plot_data(P1_avg, 'File', '{} Avg Excess 1 State'.format(Q))
-CO = ChargeOffset()
-CO.add_dataset('fluxNoise\DR1 - 2019-12-17\CorrFar\Q1Q2Corr\General'
-                '\Parameter\cvg0848kgb_correlation.hdf5')
-jumps, sigma = CO.get_jump_sizes()
-ax.plot(np.abs(jumps['Q2']))
-plt.show()
-
-
-raise
-
-
 
 # date, Q = '03-17-20', 'Q1'
 # P1_files = (0,1003+1)
@@ -75,6 +42,7 @@ P1_files = (0,999+1)
 QP_files = (0,999+1)
 filter_levels = (0.15, 0.2) # low, high
 
+# plot P1
 path = ('Z:/mcdermott-group/data/fluxNoise/DR1 - 2019-12-17/CorrFar/'
         '{}/General/{}/Excess_1_state/MATLABData/'.format(Q,date))
 filenames = [path+'Excess_1_state_{:03d}.mat'.format(i) 
@@ -100,10 +68,3 @@ filenames = [path+'QP_Tunneling_PSD_{:03d}.mat'.format(i)
 QPT = QPTunneling()
 QPT.add_datasets(filenames)
 QPT.plot_psd(figNum=figN, label=Q+' low')
-
-# path = ('Z:/mcdermott-group/data/fluxNoise/DR1 - 2019-12-17/CorrFar/'
-        # 'Q1/General/03-17-20/QP_Tunneling_PSD/MATLABData/')
-# QPT = QPTunneling()
-# filenames = [path+'QP_Tunneling_PSD_{:03d}.mat'.format(i) for i in range(100)]
-# QPT.add_datasets(filenames)
-# QPT.plot_psd()
