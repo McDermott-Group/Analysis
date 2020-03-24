@@ -67,10 +67,10 @@ for i = 1:length(filenames)
     end
     meanI = [meanI mean(I)];
     meanQ = [meanQ mean(Q)];
-    center0I = [center0I data.Center_of_0_State_I];
-    center0Q = [center0Q data.Center_of_0_State_Q];
-    center1I = [center1I data.Center_of_1_State_I];
-    center1Q = [center1Q data.Center_of_1_State_Q];
+%     center0I = [center0I data.Center_of_0_State_I];
+%     center0Q = [center0Q data.Center_of_0_State_Q];
+%     center1I = [center1I data.Center_of_1_State_I];
+%     center1Q = [center1Q data.Center_of_1_State_Q];
     
     if i == 1
         % Create folder Plots if necessary.
@@ -104,10 +104,10 @@ for i = 1:length(filenames)
         hold on
         plot(meanI(1:j), meanQ(1:j), 'r-', 'LineWidth', 2)
         plot(meanI(j), meanQ(j), 'k+', 'MarkerSize', 10)
-        plot(center0I(1:j), center0Q(1:j), 'g-', 'LineWidth', 2)
-        plot(center0I(j), center0Q(j), 'k+', 'MarkerSize', 10)
-        plot(center1I(1:j), center1Q(1:j), 'c-', 'LineWidth', 2)
-        plot(center1I(j), center1Q(j), 'k+', 'MarkerSize', 10)
+%         plot(center0I(1:j), center0Q(1:j), 'g-', 'LineWidth', 2)
+%         plot(center0I(j), center0Q(j), 'k+', 'MarkerSize', 10)
+%         plot(center1I(1:j), center1Q(1:j), 'c-', 'LineWidth', 2)
+%         plot(center1I(j), center1Q(j), 'k+', 'MarkerSize', 10)
         hold off
         axis(axs);
         grid on
