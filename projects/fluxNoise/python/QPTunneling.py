@@ -12,16 +12,22 @@ class QPTunneling(object):
         vis = 1
         self.transfer = 1/vis**2
     
-    def add_datasets(self, file_path):
+    def add_datasets(self, file_path, data_str='Single_Shot_Occupations_SB1'):
         if type(file_path) == str:
             file_path = [file_path]
         for f in file_path:
             data = noiselib.loadmat(f)
-            o = np.array(data['Single_Shot_Occupations_SB1'])
+            o = np.array(data[data_str])
             trials, reps = o.shape
             if not hasattr(self, 'data'):
                 self.data = np.empty((0,reps))
             self.data = np.concatenate([self.data, o])
+    
+    def add_data(self, o):
+        trials, reps = o.shape
+        if not hasattr(self, 'data'):
+            self.data = np.empty((0,reps))
+        self.data = np.concatenate([self.data, o])
     
     def get_psd(self, window_averaging = True):
         cpsd, f = noiselib.partition_and_avg_psd(self.data, self.fs)

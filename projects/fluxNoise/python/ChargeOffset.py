@@ -6,6 +6,9 @@ from dataChest import *
 import matplotlib.pyplot as plt
 from scipy import asarray as ar,exp
 from scipy.optimize import curve_fit
+from scipy.stats import norm
+from dateStamp import dateStamp
+import glob
 
 class ChargeOffset(object):
 
@@ -13,7 +16,9 @@ class ChargeOffset(object):
         self.file_tags = []
         self.labels = {}
         self.time = {}
+        self.abs_time = {} #actual utc time, not relative to t0 like ^
         self.unwrapped_charge = {}
+        self.fit_R2 = {}
     
     def analyze_charge_jump_correlations(self, file_path):
         pass
@@ -28,24 +33,28 @@ class ChargeOffset(object):
         varsList = dc.getVariables()
         timeVar = varsList[0][0][0]
         offsetVars = [var[0] for var in varsList[1] if 'R2' not in var[0]]
-        data = dc.getData( variablesList=[timeVar]+offsetVars )
+        data = dc.getData()
         data = data.transpose()
         labels = [l[-2:] for l in offsetVars]
         
-        time = data[0][1:] - data[0][0]
+        abs_time = data[0]
+        time = data[0] - data[0][0]
         period2e = {l: dc.getParameter('2e Period {}'.format(l)) for l in labels}
         unwrapped_charge = { l: noiselib.unwrap_voltage_to_charge(
-                                data[i+1], period2e[l]/2, 2/period2e[l] )
+                                data[2*i+1], period2e[l]/2, 2/period2e[l] )
                                 for i,l in enumerate(labels) }
         unwrapped_charge = { l: unwrapped_charge[l] - unwrapped_charge[l][0] 
                                 for l in labels } # zero the trace
+        fit_R2 = { l: data[2*i+2] for i,l in enumerate(labels) }
         # charge_jump_sizes = {l: unwrapped_charge[l][1:] - unwrapped_charge[l][:-1]
                                 # for l in labels}
         # large_jump[ftag]s = {l:charge_jump_sizes[l] > 0.1 for l in labels}
         
         self.labels[ftag] = labels
         self.time[ftag] = time
+        self.abs_time[ftag] = abs_time
         self.unwrapped_charge[ftag] = unwrapped_charge
+        self.fit_R2[ftag] = fit_R2
         self._last_dataset_added = ftag
         return self
     
@@ -84,7 +93,7 @@ class ChargeOffset(object):
                 offset[ftag] = np.append( offset[ftag], np.full(n_new, np.nan) )
         return time, offset
     
-    def get_jump_sizes(self, datasets = None):
+    def get_jump_sizes(self, datasets = None, plot=False):
         time, offset = self.get_charge_offset(datasets)
         jumps = {l: offset[l][1:] - offset[l][:-1] for l in offset.keys()}
         
@@ -93,10 +102,26 @@ class ChargeOffset(object):
             return b + A * exp(-(x-mu)**2/(2*sigma**2))
         sigma = {}
         for l in jumps.keys():
-            h, bins = np.histogram(jumps[l][~np.isnan(jumps[l])], bins=300)
+            h, bins = np.histogram(jumps[l][~np.isnan(jumps[l])], bins=500)
             x = (bins[1:]+bins[:-1])/2
             popt, pcov = curve_fit(gaus, x, h, p0=[0,h.max(),0,0.1])
             sigma[l] = popt[-1]
+            
+            if plot:
+                fig = plt.figure()
+                ax = fig.add_subplot(111)
+                ax.set_title('Charge Jumps {}'.format(l))
+                ax.set_xlabel('Jump Size {} [e]'.format(l))
+                ax.set_ylabel('')
+                center = (bins[:-1] + bins[1:])/2
+                center2 = center**2 * np.sign(center)
+                widths = np.diff(bins**2)
+                ax.bar(center2, h, width=widths)
+                ax.plot(center2, gaus(center, *popt), 'r-' )
+                ax.set_yscale('log')
+                ax.set_ylim([10e-1, 1.5*h.max()])
+                plt.draw()
+                plt.pause(0.05)
         
         return jumps, sigma
         
@@ -146,6 +171,8 @@ class ChargeOffset(object):
         jumps2 = jumps[label2]
         corrJumps = self._above(jumps1, 2*sigma[label1]) & self._above(jumps2, 2*sigma[label2])
         
+        jumps1[np.isnan(jumps2)] = np.nan
+        jumps2[np.isnan(jumps1)] = np.nan
         print( 'Correlated Jumps: {}-{}'.format(label1,label2) )
         for l,j in [(label1,jumps1),(label2,jumps2)]:
             print( '    {} / {} = {:.2f}%'.format( 
@@ -183,4 +210,29 @@ class ChargeOffset(object):
         plt.draw()
         plt.pause(0.05)
         
+    def get_files_triggered_on_bad_fit(self, dataset, label, path):
+        """Takes in a specific dataset tag and the path to the folder holding the
+        files that were fit to get each individual offset curve."""
+        large_err_indicies = np.argwhere(self.fit_R2[dataset][label] < 0.9)
+        times = self.abs_time[dataset][large_err_indicies]
+        return self._files_closest_to_times_mat(path, times)
         
+    
+    def _files_closest_to_times_mat(self, path, times):
+        all_files = glob.glob(path+'*.mat')
+        all_files.sort()
+        all_times = [os.path.getctime(f) for f in all_files]
+        closest_time_index = np.searchsorted(all_times, times)
+        return [all_files[i] for i in closest_time_index.transpose()[0]]
+        
+    
+    def _files_closest_to_times_hdf5(self, path, times):
+        dc = dataChest(path.split('\\'))
+        all_files,_ = dc.ls()
+        all_files.sort()
+        all_tags = [fname[:10] for fname in all_files]
+        DS = dateStamp()
+        all_times = [DS.utcDateStrToFloat(DS.invertDateStamp(tag)[:26])
+                        for tag in all_tags]
+        closest_time_index = np.searchsorted(all_times, times)
+        return [all_files[i] for i in closest_time_index.transpose()[0]]

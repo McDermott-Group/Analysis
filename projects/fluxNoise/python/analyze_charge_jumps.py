@@ -1,3 +1,10 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import noiselib
+from QPTunneling import *
+from ChargeOffset import *
+
+
 base_path = 'fluxNoise\DR1 - 2019-12-17\CorrFar\Q1Q2Q3Q4Corr\General\Parameter\\'
 CO = ChargeOffset()
 CO.add_dataset(base_path + 'cvc0232imo_correlation.hdf5').limit_dataset('Q2')
@@ -6,8 +13,13 @@ CO.add_dataset(base_path + 'cvd0802ltu_correlation.hdf5').limit_dataset('Q4')
 CO.add_dataset(base_path + 'cvd1745asc_correlation.hdf5')
 CO.add_dataset(base_path + 'cve0104ppt_correlation.hdf5')
 CO.add_dataset(base_path + 'cvf0542fei_correlation.hdf5')
+base_path = 'fluxNoise2\DR1 - 2019-12-17\CorrFar\Q1Q2Q3Q4Corr\General\Parameter\\'
+CO.add_dataset(base_path + 'cvj0203nun_correlation.hdf5')
+CO.add_dataset(base_path + 'cvj1806ywn_correlation.hdf5')
+CO.add_dataset(base_path + 'cvk0412mns_correlation.hdf5')
 CO.plot_charge_offset()
 CO.plot_jump_sizes()
+CO.get_jump_sizes(plot=True)
 CO.plot_charge_correlation('Q1','Q2')
 CO.plot_charge_correlation('Q3','Q4')
 CO.plot_charge_correlation('Q1','Q3')

@@ -65,8 +65,8 @@ date, Q = '03-20-20', 'Q1'
 P1_files = (4,511+1)
 filenames = [P1_path.format(Q,date) + 'Charge_resetting_{:03d}.mat'.format(i) 
              for i in range(*P1_files)]
-P1_avg_Q1 = get_averaged_P1(filenames, '_SB2')
-ax = plot_data(P1_avg_Q1, 'File', title=Q, label='Avg Excess 1 State')
+P1_avg_Q2 = get_averaged_P1(filenames, '_SB2')
+ax = plot_data(P1_avg_Q2, 'File', title=Q, label='Avg Excess 1 State')
 ax.plot(np.abs(jumps['Q1']), label='Jump Magnitude')
 ax.legend()
 
@@ -74,12 +74,20 @@ date, Q = '03-20-20', 'Q2'
 P1_files = (4,511+1)
 filenames = [P1_path.format(Q,date) + 'Charge_resetting_{:03d}.mat'.format(i) 
              for i in range(*P1_files)]
-P1_avg_Q2 = get_averaged_P1(filenames, '_SB1')
-ax = plot_data(P1_avg_Q2, 'File', title=Q, label='Avg Excess 1 State')
+P1_avg_Q1 = get_averaged_P1(filenames, '_SB1')
+ax = plot_data(P1_avg_Q1, 'File', title=Q, label='Avg Excess 1 State')
 ax.plot(np.abs(jumps['Q2']), label='Jump Magnitude')
 ax.legend()
 
 ax = plot_data(P1_avg_Q1, 'File', 'Avg Excess 1 State', label='Q1')
 ax.plot(P1_avg_Q2, label='Q2')
+
+ax = plot_data(P1_avg_Q1, 'File', title=Q, label='Avg Excess 1 State')
+ax.plot(np.abs(jumps['Q1']), label='Jump Magnitude')
+ax.legend()
+
+ax = plot_data(P1_avg_Q2, 'File', title=Q, label='Avg Excess 1 State')
+ax.plot(np.abs(jumps['Q2']), label='Jump Magnitude')
+ax.legend()
 
 plt.show()

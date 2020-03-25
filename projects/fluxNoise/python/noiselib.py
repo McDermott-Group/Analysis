@@ -73,7 +73,7 @@ def unwrap_voltage_to_charge(vs, wrap_voltage, dedv):
     delta_q = unwrap_es[1:] - unwrap_es[:-1]
     delta_q = alias(delta_q, 0.5)
     first_point = alias(unwrap_es[0], 0.5)
-    return [first_point] + first_point+np.cumsum(delta_q)
+    return np.append(first_point, first_point+np.cumsum(delta_q))
 
 def alias(x0, bound):
     """Takes a value or array x0 and aliases it into the range (-bound,bound)"""
@@ -111,3 +111,26 @@ def partition_and_avg_psd(data, fs):
     cpsd_avg = cpsd_avg/n
     cpsd_freq = np.arange(0, fs/4.+0.0001, fs/N)
     return cpsd_avg, cpsd_freq
+
+def crosscorrelate(x, y, n):
+    """Finds the cross correlation between the ones in two binary strings x and
+    y of the same length.  n is the number of lags.  ccf is the cross
+    correlated result, and lags is the lags=-n:n.  normalized to number of
+    ones in x."""
+    def ccorr(x, y, n):
+        acf = np.zeros(n+1)
+        for i in range(n):
+            if np.sum(x[:-1]) == 0:
+                acf[i] = 0
+            else:
+                # we divide by the sum (not length) so that it is normalized to the
+                # number of 1's and we get 100% corr if the 1s are correlated
+                xx = x[:-i] if i > 0 else x
+                acf[i] = np.sum( xx*y[i:] ) / np.sum(xx)
+        return acf
+        
+    ccf = np.zeros(2*n+1)
+    ccf[n:] = ccorr(x, y, n)
+    ccf[:n+1] = np.flipud(ccorr(y, x, n))
+    lags = np.arange(-n,n)
+    return ccf, lags
