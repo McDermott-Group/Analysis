@@ -28,66 +28,33 @@ def plot_data(data, xlabel='', ylabel='', title='', label=None):
                 # '\Parameter\cvg0848kgb_correlation.hdf5')
 # P1_path = ('Z:/mcdermott-group/data/fluxNoise/DR1 - 2019-12-17/CorrFar/'
             # '{}/General/{}/Charge_resetting/MATLABData/')
-            
-# CO = ChargeOffset()
-# CO.add_dataset(charge_path)
-# jumps, sigma = CO.get_jump_sizes()
-
-# date, Q = '03-19-20', 'Q1'
-# P1_files = (3,1069+1)
-# filenames = [P1_path.format(Q,date) + 'Charge_resetting_{:03d}.mat'.format(i) 
-             # for i in range(*P1_files)]
-# P1_avg = get_averaged_P1(filenames, '_SB2')
-# ax = plot_data(P1_avg, 'File', '{} Avg Excess 1 State'.format(Q))
-# ax.plot(np.abs(jumps['Q1']))
-
-# date, Q = '03-19-20', 'Q2'
-# P1_files = (3,1069+1)
-# filenames = [P1_path.format(Q,date) + 'Charge_resetting_{:03d}.mat'.format(i) 
-             # for i in range(*P1_files)]
-# P1_avg = get_averaged_P1(filenames, '_SB1')
-# ax = plot_data(P1_avg, 'File', '{} Avg Excess 1 State'.format(Q))
-# ax.plot(np.abs(jumps['Q2']))
-
-# plt.show()
+# date = '03-19-20'
+# P1_files = {'Q1':(3,1069+1), 'Q2':(3,1069+1)}
 
 
 charge_path = ('fluxNoise\DR1 - 2019-12-17\CorrFar\Q1Q2Corr\General'
                 '\Parameter\cvh0508hpk_correlation.hdf5')
 P1_path = ('Z:/mcdermott-group/data/fluxNoise/DR1 - 2019-12-17/CorrFar/'
             '{}/General/{}/Charge_resetting/MATLABData/')
+date = '03-20-20'
+P1_files = {'Q1':(4,511+1), 'Q2':(4,511+1)}
+            
             
 CO = ChargeOffset()
 CO.add_dataset(charge_path)
 jumps, sigma = CO.get_jump_sizes()
+P1_avg = {}
+for QA,QB in [('Q1','Q2'), ('Q2','Q1')]:
+    filenames = [P1_path.format(QA,date) + 'Charge_resetting_{:03d}.mat'.format(i) 
+                 for i in range(*P1_files[QA])]
+    P1_avg[QB] = get_averaged_P1(filenames, '_SB{}'.format(QB[-1]))
+    ax = plot_data(P1_avg[QB], 'File', title=QB, label='Avg Excess 1 State')
+    ax.plot(np.abs(jumps[QB]), label='Jump Magnitude')
+    ax.legend()
+    plt.draw()
+    plt.pause(0.05)
 
-date, Q = '03-20-20', 'Q1'
-P1_files = (4,511+1)
-filenames = [P1_path.format(Q,date) + 'Charge_resetting_{:03d}.mat'.format(i) 
-             for i in range(*P1_files)]
-P1_avg_Q2 = get_averaged_P1(filenames, '_SB2')
-ax = plot_data(P1_avg_Q2, 'File', title=Q, label='Avg Excess 1 State')
-ax.plot(np.abs(jumps['Q1']), label='Jump Magnitude')
-ax.legend()
-
-date, Q = '03-20-20', 'Q2'
-P1_files = (4,511+1)
-filenames = [P1_path.format(Q,date) + 'Charge_resetting_{:03d}.mat'.format(i) 
-             for i in range(*P1_files)]
-P1_avg_Q1 = get_averaged_P1(filenames, '_SB1')
-ax = plot_data(P1_avg_Q1, 'File', title=Q, label='Avg Excess 1 State')
-ax.plot(np.abs(jumps['Q2']), label='Jump Magnitude')
-ax.legend()
-
-ax = plot_data(P1_avg_Q1, 'File', 'Avg Excess 1 State', label='Q1')
-ax.plot(P1_avg_Q2, label='Q2')
-
-ax = plot_data(P1_avg_Q1, 'File', title=Q, label='Avg Excess 1 State')
-ax.plot(np.abs(jumps['Q1']), label='Jump Magnitude')
-ax.legend()
-
-ax = plot_data(P1_avg_Q2, 'File', title=Q, label='Avg Excess 1 State')
-ax.plot(np.abs(jumps['Q2']), label='Jump Magnitude')
-ax.legend()
-
-plt.show()
+ax = plot_data(P1_avg['Q1'], 'File', 'Avg Excess 1 State', label='Q1')
+ax.plot(P1_avg['Q2'], label='Q2')
+plt.draw()
+plt.pause(0.05)

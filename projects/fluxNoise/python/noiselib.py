@@ -134,3 +134,22 @@ def crosscorrelate(x, y, n):
     ccf[:n+1] = np.flipud(ccorr(y, x, n))
     lags = np.arange(-n,n)
     return ccf, lags
+    
+    
+    
+    
+    
+def movingmean(a, n):
+    """Should be equivilent to matlabs movmean"""
+    a_new = np.zeros(len(a))
+    for i in range(len(a)):
+        i_0 = max(0,i-int(np.floor(n/2.)))
+        i_end = min(len(a), i+int(np.ceil(n/2.)))
+        a_new[i] = np.mean(a[ i_0:i_end ])
+    return a_new
+
+def path_to_num(path):
+    beginning, end = path.rsplit('_',1)
+    num, ext = end.split('.',1)
+    path = beginning + '_{:03d}.' + ext
+    return path, int(num)

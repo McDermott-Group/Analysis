@@ -215,15 +215,22 @@ class ChargeOffset(object):
         files that were fit to get each individual offset curve."""
         large_err_indicies = np.argwhere(self.fit_R2[dataset][label] < 0.9)
         times = self.abs_time[dataset][large_err_indicies]
+        times = times.transpose()[0]
         return self._files_closest_to_times_mat(path, times)
         
     
-    def _files_closest_to_times_mat(self, path, times):
-        all_files = glob.glob(path+'*.mat')
-        all_files.sort()
+    def _files_closest_to_times_mat(self, paths, times):
+        if not isinstance(paths, list):
+            paths = [paths]
+        all_files = []
+        for path in paths:
+            all_files += glob.glob(path+'*.mat')
         all_times = [os.path.getctime(f) for f in all_files]
+        all = zip(all_times, all_files)
+        all.sort()
+        all_times, all_files = zip(*all) # undoes zip, now sorted
         closest_time_index = np.searchsorted(all_times, times)
-        return [all_files[i] for i in closest_time_index.transpose()[0]]
+        return [all_files[i] for i in closest_time_index]
         
     
     def _files_closest_to_times_hdf5(self, path, times):
