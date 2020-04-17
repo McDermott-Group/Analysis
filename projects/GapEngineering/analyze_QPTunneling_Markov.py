@@ -17,24 +17,25 @@ qb_state = np.zeros(len(t))
 qb_meas = np.zeros(len(t))
 qb_recover = np.zeros(len(t))
 
-t_QP_ = 20000
-t_meas_ = 100
-p_QP_ = 1 - np.exp(-t_meas_ / t_QP_)
+
+t_QP_ = 10000.0
+t_meas_ = 100.0
+p_QP_ = 1.0 - np.exp(-t_meas_/t_QP_)
 # Transition matrix
-p_ee_ = 1 - p_QP_
+p_ee_ = 1.0 - p_QP_
 p_eg_ = p_QP_
 p_ge_ = p_QP_
-p_gg_ = 1 - p_QP_
+p_gg_ = 1.0 - p_QP_
 
 # Initial Probabilities, also known as the prior probability, calculated from Transition matrix
-p_e_ = 1 / 2
-p_g_ = 1 / 2
+p_e_ = 0.5
+p_g_ = 1.0-p_e_
 
 # Emission Probabilities, or measurement fidelities
 p_e1_ = 0.75
-p_e0_ = 1 - p_e1_
+p_e0_ = 1.0 - p_e1_
 p_g0_ = 0.95
-p_g1_ = 1 - p_g0_
+p_g1_ = 1.0 - p_g0_
 qb_state[0] = 1
 for i in range(1, len(qb_state)):
     qb_state[i] = np.random.choice([qb_state[i - 1], 1 - qb_state[i - 1]], p=[1 - p_QP_, p_QP_])
@@ -44,25 +45,25 @@ for i in range(len(qb_meas)):
     if qb_state[i] == 1:
         qb_meas[i] = np.random.choice([0, 1], p=[p_e0_, p_e1_])
 
-
-t_QP = 10000
-t_meas = 100
-p_QP = 1 - np.exp(-t_meas / (t_QP))
+t_QP = 10000.0
+t_meas = 100.0
+p_QP = 1.0 - np.exp(-t_meas / (t_QP))
+# p_QP = p_QP_
 # Transition matrix
-p_ee = 1 - p_QP
+p_ee = 1.0 - p_QP
 p_eg = p_QP
 p_ge = p_QP
-p_gg = 1 - p_QP
+p_gg = 1.0 - p_QP
 
 # Initial Probabilities, also known as the prior probability, calculated from Transition matrix
-p_e = 1 / 2
-p_g = 1 / 2
+p_e = 0.5
+p_g = 1.0-p_e
 
 # Emission Probabilities, or measurement fidelities
-p_e1 = 0.75
-p_e0 = 1 - p_e1
+p_e1 = 0.7
+p_e0 = 1.0 - p_e1
 p_g0 = 0.6
-p_g1 = 1 - p_g0
+p_g1 = 1.0 - p_g0
 
 
 qb_recover = np.zeros(len(t))
@@ -92,19 +93,16 @@ for chunck in range(n_1000):
             qb_recover[1000 * chunck + p_index] = 1
 
 fig = plt.figure(figsize=(20, 10))
+ax = fig.add_subplot(1, 1, 1)
 font = {'family': 'normal',
         'weight': 'bold',
         'size': 30}
-ax = fig.add_subplot(1, 1, 1)
 plt.rc('font', **font)
-ax.tick_params(axis='x', colors='white')
-ax.tick_params(axis='y', colors='white')
 plt.plot(t, qb_state + 1.5, 'o-', label=r"Hidden State")
 plt.plot(t, qb_meas, 'o-', label=r"Meas")
 plt.plot(t, qb_recover - 1.5, 'o-', label=r"Recover")
-# plt.plot(t, qb_recover-qb_state-3.5, 'o-', label=r"Recover-state")
 plt.legend(prop={'size': 20})
+plt.show()
 
-# %%
 
 
