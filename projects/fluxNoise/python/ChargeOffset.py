@@ -98,13 +98,14 @@ class ChargeOffset(object):
         jumps = {l: offset[l][1:] - offset[l][:-1] for l in offset.keys()}
         
         # find 2*sigma jump size for each label
-        def gaus(x, b, A, mu, sigma):
-            return b + A * exp(-(x-mu)**2/(2*sigma**2))
+        def gaus(x, b, A, mu, sigma):#, A2, mu2, sigma2):
+            return b + A * exp(-(x-mu)**2/(2*sigma**2))# + A2 * exp(-(x-mu2)**2/(2*sigma2**2))
         sigma = {}
         for l in jumps.keys():
             h, bins = np.histogram(jumps[l][~np.isnan(jumps[l])], bins=500)
             x = (bins[1:]+bins[:-1])/2
             popt, pcov = curve_fit(gaus, x, h, p0=[0,h.max(),0,0.1])
+            # popt, pcov = curve_fit(gaus, x, h, p0=[0,h.max(),0,0.1,h.max(),0.005,0.3])
             sigma[l] = popt[-1]
             
             if plot:

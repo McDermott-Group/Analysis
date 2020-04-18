@@ -82,38 +82,50 @@ for i = 1:length(dates)
                 X4_event_rep(end+1) = rep;
                 n_4X_events = n_4X_events + 1;
 
-                autocorr_struct.q1 = add_to_autocorr(o1, autocorr_struct.q1, trial, rep, buffer_radius);
-                autocorr_struct.q2 = add_to_autocorr(o2, autocorr_struct.q2, trial, rep, buffer_radius);
-                autocorr_struct.q3 = add_to_autocorr(o3, autocorr_struct.q3, trial, rep, buffer_radius);
-                autocorr_struct.q4 = add_to_autocorr(o4, autocorr_struct.q4, trial, rep, buffer_radius);
-                autocorr_struct.q12 = add_to_autocorr(o1&o2, autocorr_struct.q12, trial, rep, buffer_radius);
-                autocorr_struct.q34 = add_to_autocorr(o3&o4, autocorr_struct.q34, trial, rep, buffer_radius);
-                autocorr_struct.q123 = add_to_autocorr(o1&o2&o3, autocorr_struct.q123, trial, rep, buffer_radius);
-                autocorr_struct.q234 = add_to_autocorr(o2&o3&o4, autocorr_struct.q234, trial, rep, buffer_radius);
-                autocorr_struct.q341 = add_to_autocorr(o3&o4&o1, autocorr_struct.q341, trial, rep, buffer_radius);
-                autocorr_struct.q412 = add_to_autocorr(o4&o1&o2, autocorr_struct.q412, trial, rep, buffer_radius);
-
-                trial = randi(n_trials);
-                rep = randi(n_reps);
-                autocorr_struct.q1_baseline = add_to_autocorr(o1, autocorr_struct.q1_baseline, trial, rep, buffer_radius);
-                autocorr_struct.q2_baseline = add_to_autocorr(o2, autocorr_struct.q2_baseline, trial, rep, buffer_radius);
-                autocorr_struct.q3_baseline = add_to_autocorr(o3, autocorr_struct.q3_baseline, trial, rep, buffer_radius);
-                autocorr_struct.q4_baseline = add_to_autocorr(o4, autocorr_struct.q4_baseline, trial, rep, buffer_radius);
-                autocorr_struct.q12_baseline = add_to_autocorr(o1&o2, autocorr_struct.q12_baseline, trial, rep, buffer_radius);
-                autocorr_struct.q34_baseline = add_to_autocorr(o3&o4, autocorr_struct.q34_baseline, trial, rep, buffer_radius);
-                autocorr_struct.q123_baseline = add_to_autocorr(o1&o2&o3, autocorr_struct.q123_baseline, trial, rep, buffer_radius);
-                autocorr_struct.q234_baseline = add_to_autocorr(o2&o3&o4, autocorr_struct.q234_baseline, trial, rep, buffer_radius);
-                autocorr_struct.q341_baseline = add_to_autocorr(o3&o4&o1, autocorr_struct.q341_baseline, trial, rep, buffer_radius);
-                autocorr_struct.q412_baseline = add_to_autocorr(o4&o1&o2, autocorr_struct.q412_baseline, trial, rep, buffer_radius);
+%                 autocorr_struct.q1 = add_to_autocorr(o1, autocorr_struct.q1, trial, rep, buffer_radius);
+%                 autocorr_struct.q2 = add_to_autocorr(o2, autocorr_struct.q2, trial, rep, buffer_radius);
+%                 autocorr_struct.q3 = add_to_autocorr(o3, autocorr_struct.q3, trial, rep, buffer_radius);
+%                 autocorr_struct.q4 = add_to_autocorr(o4, autocorr_struct.q4, trial, rep, buffer_radius);
+%                 autocorr_struct.q12 = add_to_autocorr(o1&o2, autocorr_struct.q12, trial, rep, buffer_radius);
+%                 autocorr_struct.q34 = add_to_autocorr(o3&o4, autocorr_struct.q34, trial, rep, buffer_radius);
+%                 autocorr_struct.q123 = add_to_autocorr(o1&o2&o3, autocorr_struct.q123, trial, rep, buffer_radius);
+%                 autocorr_struct.q234 = add_to_autocorr(o2&o3&o4, autocorr_struct.q234, trial, rep, buffer_radius);
+%                 autocorr_struct.q341 = add_to_autocorr(o3&o4&o1, autocorr_struct.q341, trial, rep, buffer_radius);
+%                 autocorr_struct.q412 = add_to_autocorr(o4&o1&o2, autocorr_struct.q412, trial, rep, buffer_radius);
+% 
+%                 trial = randi(n_trials);
+%                 rep = randi(n_reps);
+%                 autocorr_struct.q1_baseline = add_to_autocorr(o1, autocorr_struct.q1_baseline, trial, rep, buffer_radius);
+%                 autocorr_struct.q2_baseline = add_to_autocorr(o2, autocorr_struct.q2_baseline, trial, rep, buffer_radius);
+%                 autocorr_struct.q3_baseline = add_to_autocorr(o3, autocorr_struct.q3_baseline, trial, rep, buffer_radius);
+%                 autocorr_struct.q4_baseline = add_to_autocorr(o4, autocorr_struct.q4_baseline, trial, rep, buffer_radius);
+%                 autocorr_struct.q12_baseline = add_to_autocorr(o1&o2, autocorr_struct.q12_baseline, trial, rep, buffer_radius);
+%                 autocorr_struct.q34_baseline = add_to_autocorr(o3&o4, autocorr_struct.q34_baseline, trial, rep, buffer_radius);
+%                 autocorr_struct.q123_baseline = add_to_autocorr(o1&o2&o3, autocorr_struct.q123_baseline, trial, rep, buffer_radius);
+%                 autocorr_struct.q234_baseline = add_to_autocorr(o2&o3&o4, autocorr_struct.q234_baseline, trial, rep, buffer_radius);
+%                 autocorr_struct.q341_baseline = add_to_autocorr(o3&o4&o1, autocorr_struct.q341_baseline, trial, rep, buffer_radius);
+%                 autocorr_struct.q412_baseline = add_to_autocorr(o4&o1&o2, autocorr_struct.q412_baseline, trial, rep, buffer_radius);
             end
         end
         
-        hist_struct.q1 = add_to_hists(o1, hist_struct.q1, chunk_sizes);
-        hist_struct.q2 = add_to_hists(o2, hist_struct.q2, chunk_sizes);
-        hist_struct.q3 = add_to_hists(o3, hist_struct.q3, chunk_sizes);
-        hist_struct.q4 = add_to_hists(o4, hist_struct.q4, chunk_sizes);
-        hist_struct.q12 = add_to_hists(o1&o2, hist_struct.q12, chunk_sizes);
-        hist_struct.q34 = add_to_hists(o3&o4, hist_struct.q34, chunk_sizes);
+        if mean(o1(:)) > 0.033
+            hist_struct.q1 = add_to_hists(o1, hist_struct.q1, chunk_sizes);
+        end
+        if mean(o2(:)) > 0.06
+            hist_struct.q2 = add_to_hists(o2, hist_struct.q2, chunk_sizes);
+        end
+        if mean(o3(:)) > 0.03
+            hist_struct.q3 = add_to_hists(o3, hist_struct.q3, chunk_sizes);
+        end
+        if mean(o4(:)) > 0.046
+            hist_struct.q4 = add_to_hists(o4, hist_struct.q4, chunk_sizes);
+        end
+        if (mean(o1(:)) > 0.033) && (mean(o2(:)) > 0.06)
+            hist_struct.q12 = add_to_hists(o1&o2, hist_struct.q12, chunk_sizes);
+        end
+        if (mean(o3(:)) > 0.03) && (mean(o4(:)) > 0.046)
+            hist_struct.q34 = add_to_hists(o3&o4, hist_struct.q34, chunk_sizes);
+        end
         hist_struct.q123 = add_to_hists(o1&o2&o3, hist_struct.q123, chunk_sizes);
         hist_struct.q234 = add_to_hists(o2&o3&o4, hist_struct.q234, chunk_sizes);
         hist_struct.q341 = add_to_hists(o3&o4&o1, hist_struct.q341, chunk_sizes);
