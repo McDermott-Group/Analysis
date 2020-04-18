@@ -1,6 +1,6 @@
 """
 This is to extract QP tunneling rate from limited data points without high readout fidelities.
-Date: 2020A April
+Date: VBT_lenVBT_lenA April
 Author: Chuanhong Liu
 """
 
@@ -8,8 +8,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Simulation data
-n_20 = 100
-t = np.arange(0, 20 * n_20, 1)
+VBT_len = 50
+n_VBT_len = 100 # multiple of VBT_len
+t = np.arange(0, VBT_len * n_VBT_len, 1)
 state_trace = np.zeros(len(t))
 meas_trace = np.zeros(len(t))
 recover_trace = np.zeros(len(t))
@@ -87,15 +88,15 @@ def meas_trace_recover(meas_trace, readout_fidelity, t_QP):
     p_g0_VBT = 0.95
     p_g1_VBT = 1.0 - p_g0_VBT
 
-    n_20 = len(meas_trace)/20
-    for chunck in range(n_20):
+    n_VBT_len = len(meas_trace)/VBT_len
+    for chunck in range(n_VBT_len):
         probabilities = []
-        if meas_trace[20 * chunck] == 0:
+        if meas_trace[VBT_len * chunck] == 0:
             probabilities.append((p_e_VBT * p_e1_VBT, p_g_VBT * p_g1_VBT))
         else:
             probabilities.append((p_e_VBT * p_e0_VBT, p_g_VBT * p_g0_VBT))
 
-        for i in range(20 * chunck + 1, 20 * chunck + 20):
+        for i in range(VBT_len * chunck + 1, VBT_len * chunck + VBT_len):
             prev_e, prev_g = probabilities[-1]
             if meas_trace[i] == 0:
                 curr_e = max(prev_e * p_ee_VBT * p_e1_VBT, prev_g * p_ge_VBT * p_e1_VBT)
@@ -109,9 +110,9 @@ def meas_trace_recover(meas_trace, readout_fidelity, t_QP):
         for p_index in range(len(probabilities)):
             p = probabilities[p_index]
             if p[0] > p[1]:
-                recover_trace[20 * chunck + p_index] = 0
+                recover_trace[VBT_len * chunck + p_index] = 0
             else:
-                recover_trace[20 * chunck + p_index] = 1
+                recover_trace[VBT_len * chunck + p_index] = 1
 
     return recover_trace
 
@@ -120,7 +121,7 @@ def state_recover_diff(state_trace, recover_trace):
 
     :param state_trace: The hidden state behind the measurement, [0,1,1,1...]
     :param recover_trace: The recovered state, [0, 1, 1, 1]
-    :return: miscounts per 20 points (20 ms)
+    :return: miscounts per VBT_len points (VBT_len ms)
     """
     state_transitions = 0
     recover_transitions = 0
@@ -136,7 +137,7 @@ state_recover_diff(state_trace, recover_trace)
 
 
 # plot the result
-fig = plt.figure(figsize=(20, 10))
+fig = plt.figure(figsize=(VBT_len, 10))
 plt.plot(t, state_trace + 1.5, 'o-', label=r"State Trace")
 plt.plot(t, meas_trace, 'o-', label=r"Meas Trace")
 plt.plot(t, recover_trace - 1.5, 'o-', label=r"Recover Trace")
@@ -146,7 +147,7 @@ plt.show()
 
 #TO DO
 # 1. Map readout fidelity to viberti fidelity
-# 2. Non-20 multiple length
+# 2. Non-VBT_len multiple length
 # 3. Find a good metric to compare the state_transitions and recover_transitions
 # 4. Target: find the suitable parameters to make the error < 10%, currently is around 15-25% for close readout, but <10% for 0.65e, 0.5g
 
