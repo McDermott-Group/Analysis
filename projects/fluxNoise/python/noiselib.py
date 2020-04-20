@@ -106,7 +106,8 @@ def partition_and_avg_psd(data, fs):
     cpsd_avg = np.zeros(N/4+1)
     for i in range(n):
         seg_even, seg_odd = partition_data(data[i])
-        seg_cpsd = crosspsd(seg_even, seg_odd, fs/2)
+        L = min(len(seg_even), len(seg_odd))
+        seg_cpsd = crosspsd(seg_even[:L], seg_odd[:L], fs/2)
         cpsd_avg = cpsd_avg + seg_cpsd[:N/4+1]
     cpsd_avg = cpsd_avg/n
     cpsd_freq = np.arange(0, fs/4.+0.0001, fs/N)
@@ -136,20 +137,31 @@ def crosscorrelate(x, y, n):
     return ccf, lags
     
     
-    
-    
-    
-def movingmean(a, n):
+def movingmean(a, n, axis=-1):
     """Should be equivilent to matlabs movmean"""
-    a_new = np.zeros(len(a))
-    for i in range(len(a)):
-        i_0 = max(0,i-int(np.floor(n/2.)))
-        i_end = min(len(a), i+int(np.ceil(n/2.)))
-        a_new[i] = np.mean(a[ i_0:i_end ])
-    return a_new
+    def _movingmean(a, n):
+        a_new = np.zeros(len(a), dtype=np.float)
+        for i in range(len(a)):
+            i_0 = max(0,i-int(np.floor(n/2.)))
+            i_end = min(len(a), i+int(np.ceil(n/2.)))
+            a_new[i] = np.mean(a[ i_0:i_end ])
+        return a_new
+    return np.apply_along_axis(_movingmean, axis, a, n)
 
 def path_to_num(path):
     beginning, end = path.rsplit('_',1)
     num, ext = end.split('.',1)
     path = beginning + '_{:03d}.' + ext
     return path, int(num)
+    
+    
+def apply_infidelity_correction(o, n_bins=9, thresh=0.5):
+    o = o.astype(np.float)
+    for trial in o:
+        # trial[...] = movingmean(trial, n_bins) > thresh
+        a = trial.astype(np.float)
+        for i in range(trial.size):
+            i_0 = max(0,i-int(np.floor(n_bins/2.)))
+            i_end = min(trial.size, i+int(np.ceil(n_bins/2.)))
+            trial[i] = np.mean(trial[ i_0:i_end ]) > thresh
+    return o

@@ -11,6 +11,7 @@ class QPTunneling(object):
         self.fs = fs
         vis = 1
         self.transfer = 1/vis**2
+        self.n_rows = 0
     
     def add_datasets(self, file_path, data_str='Single_Shot_Occupations_SB1'):
         if type(file_path) == str:
@@ -18,23 +19,21 @@ class QPTunneling(object):
         for f in file_path:
             data = noiselib.loadmat(f)
             o = np.array(data[data_str])
-            trials, reps = o.shape
-            if not hasattr(self, 'data'):
-                self.data = np.empty((0,reps))
-            self.data = np.concatenate([self.data, o])
+            self.add_data(o)
     
     def add_data(self, o):
-        trials, reps = o.shape
-        if not hasattr(self, 'data'):
-            self.data = np.empty((0,reps))
-        self.data = np.concatenate([self.data, o])
+        self.n_rows += 1 # don't divide by number of rows because these are already averaged in partition_and_avg_psd
+        cpsd, f = noiselib.partition_and_avg_psd(o, self.fs)
+        if not hasattr(self, 'cpsd'):
+            self.cpsd, self.f = cpsd, f
+        else:
+            self.cpsd += cpsd
     
     def get_psd(self, window_averaging = True):
-        cpsd, f = noiselib.partition_and_avg_psd(self.data, self.fs)
-        cpsd = self.transfer * cpsd
+        cpsd = self.transfer * self.cpsd / self.n_rows
         if window_averaging:
             cpsd = noiselib.window_averaging(cpsd)
-        return cpsd, f
+        return cpsd, self.f
         
     def plot_psd(self, window_averaging = True, figNum=None, label=None):
         psd, f = self.get_psd(window_averaging)
