@@ -8,8 +8,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Simulation data
-VBT_len = 50
-n_VBT_len = 100 # multiple of VBT_len
+VBT_len = 100
+n_VBT_len = 10 # multiple of VBT_len
 t = np.arange(0, VBT_len * n_VBT_len, 1)
 state_trace = np.zeros(len(t))
 meas_trace = np.zeros(len(t))
@@ -73,20 +73,20 @@ def meas_trace_recover(meas_trace, readout_fidelity, t_QP):
     t_meas_VBT = 0.1
     p_QP_VBT = 1.0 - np.exp(-t_meas_VBT/t_QP_VBT)
     # Transition matrix
-    p_ee_VBT = 1.0 - p_QP_VBT
-    p_eg_VBT = p_QP_VBT
-    p_ge_VBT = p_QP_VBT
-    p_gg_VBT = 1.0 - p_QP_VBT
+    p_ee_VBT = (1.0 - p_QP_VBT)*5
+    p_eg_VBT = (p_QP_VBT)*5
+    p_ge_VBT = (p_QP_VBT)*5
+    p_gg_VBT = (1.0 - p_QP_VBT)*5
 
     # Initial Probabilities, also known as the prior probability, calculated from Transition matrix
     p_e_VBT = 0.5
     p_g_VBT = 1.0-p_e_VBT
 
     # Emission Probabilities, this is the human choice and needs to be optimized, the p_g0_VBT is the most important one
-    p_e1_VBT = 0.75
-    p_e0_VBT = 1.0 - p_e1_VBT
-    p_g0_VBT = 0.95
-    p_g1_VBT = 1.0 - p_g0_VBT
+    p_e1_VBT = 0.75*5
+    p_e0_VBT = (1.0 - p_e1_VBT)*5
+    p_g0_VBT = 0.95*(5)
+    p_g1_VBT = (1.0 - p_g0_VBT)*5
 
     n_VBT_len = len(meas_trace)/VBT_len
     for chunck in range(n_VBT_len):
