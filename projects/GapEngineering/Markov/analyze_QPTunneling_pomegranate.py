@@ -3,7 +3,7 @@ from numpy import *
 import string
 import matplotlib.pyplot as plt
 
-n = 5000
+n = 100
 Time = arange(0, n, 1)
 Hidden_Signal = [0]*n
 Observed_Signal = [0]*n
@@ -16,7 +16,7 @@ p_g1 = 1-p_g0
 
 # Measurement setup
 t_QP_before = 10.0     # units ms
-t_QP_after = 15.0     # units ms
+t_QP_after = 10.0     # units ms
 t_meas = 0.1    # units ms
 p_QP_before = 1.0 - exp(-t_meas/t_QP_before)
 p_QP_after = 1.0 - exp(-t_meas/t_QP_after)

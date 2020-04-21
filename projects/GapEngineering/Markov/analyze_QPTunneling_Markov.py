@@ -7,10 +7,8 @@ Author: Chuanhong Liu
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Simulation data
-VBT_len = 100
-n_VBT_len = 10 # multiple of VBT_len
-t = np.arange(0, VBT_len * n_VBT_len, 1)
+n = 5000
+t = np.arange(0, n, 1)
 state_trace = np.zeros(len(t))
 meas_trace = np.zeros(len(t))
 recover_trace = np.zeros(len(t))
@@ -73,46 +71,46 @@ def meas_trace_recover(meas_trace, readout_fidelity, t_QP):
     t_meas_VBT = 0.1
     p_QP_VBT = 1.0 - np.exp(-t_meas_VBT/t_QP_VBT)
     # Transition matrix
-    p_ee_VBT = (1.0 - p_QP_VBT)*5
-    p_eg_VBT = (p_QP_VBT)*5
-    p_ge_VBT = (p_QP_VBT)*5
-    p_gg_VBT = (1.0 - p_QP_VBT)*5
+    p_ee_VBT = np.log(1.0 - p_QP_VBT)
+    p_eg_VBT = np.log(p_QP_VBT)
+    p_ge_VBT = np.log(p_QP_VBT)
+    p_gg_VBT = np.log(1.0 - p_QP_VBT)
 
     # Initial Probabilities, also known as the prior probability, calculated from Transition matrix
-    p_e_VBT = 0.5
-    p_g_VBT = 1.0-p_e_VBT
+    p_e_VBT = np.log(0.5)
+    p_g_VBT = np.log(1.0-p_e_VBT)
 
     # Emission Probabilities, this is the human choice and needs to be optimized, the p_g0_VBT is the most important one
-    p_e1_VBT = 0.75*5
-    p_e0_VBT = (1.0 - p_e1_VBT)*5
-    p_g0_VBT = 0.95*(5)
-    p_g1_VBT = (1.0 - p_g0_VBT)*5
+    p_e1_VBT = np.log(0.75)
+    p_e0_VBT = np.log(1.0 - p_e1_VBT)
+    p_g0_VBT = np.log(0.95)
+    p_g1_VBT = np.log(1.0 - p_g0_VBT)
 
-    n_VBT_len = len(meas_trace)/VBT_len
-    for chunck in range(n_VBT_len):
-        probabilities = []
-        if meas_trace[VBT_len * chunck] == 0:
-            probabilities.append((p_e_VBT * p_e1_VBT, p_g_VBT * p_g1_VBT))
+
+
+    probabilities = []
+    if meas_trace[0] == 0:
+        probabilities.append((p_e_VBT + p_e1_VBT, p_g_VBT + p_g1_VBT))
+    else:
+        probabilities.append((p_e_VBT + p_e0_VBT, p_g_VBT + p_g0_VBT))
+
+    for i in range(len(t)):
+        prev_e, prev_g = probabilities[-1]
+        if meas_trace[i] == 0:
+            curr_e = max(prev_e + p_ee_VBT + p_e1_VBT, prev_g + p_ge_VBT + p_e1_VBT)
+            curr_g = max(prev_e + p_eg_VBT + p_g1_VBT, prev_g + p_gg_VBT + p_g1_VBT)
+            probabilities.append((curr_e, curr_g))
         else:
-            probabilities.append((p_e_VBT * p_e0_VBT, p_g_VBT * p_g0_VBT))
+            curr_e = max(prev_e + p_ee_VBT + p_e0_VBT, prev_g + p_ge_VBT + p_e0_VBT)
+            curr_g = max(prev_e + p_eg_VBT + p_g0_VBT, prev_g + p_gg_VBT + p_g0_VBT)
+            probabilities.append((curr_e, curr_g))
 
-        for i in range(VBT_len * chunck + 1, VBT_len * chunck + VBT_len):
-            prev_e, prev_g = probabilities[-1]
-            if meas_trace[i] == 0:
-                curr_e = max(prev_e * p_ee_VBT * p_e1_VBT, prev_g * p_ge_VBT * p_e1_VBT)
-                curr_g = max(prev_e * p_eg_VBT * p_g1_VBT, prev_g * p_gg_VBT * p_g1_VBT)
-                probabilities.append((curr_e, curr_g))
-            else:
-                curr_e = max(prev_e * p_ee_VBT * p_e0_VBT, prev_g * p_ge_VBT * p_e0_VBT)
-                curr_g = max(prev_e * p_eg_VBT * p_g0_VBT, prev_g * p_gg_VBT * p_g0_VBT)
-                probabilities.append((curr_e, curr_g))
-
-        for p_index in range(len(probabilities)):
-            p = probabilities[p_index]
-            if p[0] > p[1]:
-                recover_trace[VBT_len * chunck + p_index] = 0
-            else:
-                recover_trace[VBT_len * chunck + p_index] = 1
+    for p_index in range(len(probabilities)-1):
+        p = probabilities[p_index]
+        if p[0] < p[1]:
+            recover_trace[p_index] = 0
+        else:
+            recover_trace[p_index] = 1
 
     return recover_trace
 
@@ -137,17 +135,16 @@ state_recover_diff(state_trace, recover_trace)
 
 
 # plot the result
-fig = plt.figure(figsize=(VBT_len, 10))
+fig = plt.figure(figsize=(20, 10))
 plt.plot(t, state_trace + 1.5, 'o-', label=r"State Trace")
 plt.plot(t, meas_trace, 'o-', label=r"Meas Trace")
 plt.plot(t, recover_trace - 1.5, 'o-', label=r"Recover Trace")
-plt.plot(t, recover_trace-state_trace - 3, 'o-', label=r"Recover-State Trace")
+# plt.plot(t, recover_trace-state_trace - 3, 'o-', label=r"Recover-State Trace")
 plt.legend(bbox_to_anchor=(0.85, 0.75), loc=2)
 plt.show()
 
 #TO DO
 # 1. Map readout fidelity to viberti fidelity
-# 2. Non-VBT_len multiple length
 # 3. Find a good metric to compare the state_transitions and recover_transitions
 # 4. Target: find the suitable parameters to make the error < 10%, currently is around 15-25% for close readout, but <10% for 0.65e, 0.5g
 

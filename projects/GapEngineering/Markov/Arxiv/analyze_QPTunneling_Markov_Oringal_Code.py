@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-n_1000 = 5
+n_1000 = 0.1
 t = np.arange(0, 1000 * n_1000, 1)
 qb_state = np.zeros(len(t))
 qb_meas = np.zeros(len(t))
@@ -58,9 +58,9 @@ p_e = 0.5
 p_g = 1.0-p_e
 
 # Emission Probabilities, or measurement fidelities
-p_e1 = 0.7
+p_e1 = 0.75
 p_e0 = 1.0 - p_e1
-p_g0 = 0.6
+p_g0 = 0.95
 p_g1 = 1.0 - p_g0
 
 
