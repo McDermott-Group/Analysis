@@ -4,7 +4,7 @@ import string
 import matplotlib.pyplot as plt
 
 
-def generate_hidden_signal(length=5000, charge_burst_time=2500, p_QP=[0.01, 0.01]):
+def generate_hidden_signal(length=8192, charge_burst_time=4000, p_QP=[0.01, 0.01]):
     """
     Generate hidden signal from given parameters
     :param length: the length of the hidden signal, eg. 5000
@@ -121,25 +121,32 @@ def transitions_count(signal):
     return transitions
 
 
-# Measurement setup
-# t_QP_before = 10.0  # units ms
-# t_QP_after = 10.0  # units ms
-# t_meas = 0.1  # units ms
-# p_QP_before = 1.0 - exp(-t_meas / t_QP_before)
-# p_QP_after = 1.0 - exp(-t_meas / t_QP_after)
+"""
+Parameters Setup
+"""
 
-# # Numbers for pomegranate which are fixed
-# p_e1 = 0.75
-# p_g0 = 0.95
+# For Generating Simulation Data
+t_meas = 0.1  # units ms
+t_QP_before = 10.0  # units ms
+t_QP_after = 10.0  # units ms
+p_QP_before = 1.0 - exp(-t_meas / t_QP_before)
+p_QP_after = 1.0 - exp(-t_meas / t_QP_after)
+p_QP = [p_QP_before, p_QP_after]
+p_g0 = 0.95
+p_e1 = 0.75
+readout_fidelity = [p_g0, p_e1]
 
-# t_QP_VBT = 10  # units ms
-# p_QP_VBT = 1.0 - exp(-t_meas / t_QP_VBT)
+# For VBT
+t_QP_VBT = 10  # units ms
+p_QP_VBT = 1.0 - exp(-t_meas / t_QP_VBT)
+p_g0_VBT = 0.95
+p_e1_VBT = 0.75
+readout_fidelity_VBT = [p_g0_VBT, p_e1_VBT]
 
-length = 5000
 
-Hidden_Signal = generate_hidden_signal(length=length, charge_burst_time=length//2)
-Observed_Signal = hidden_to_observed_signal(Hidden_Signal)
-Recovered_Signal = observed_to_recovered_signal(Observed_Signal)
+Hidden_Signal = generate_hidden_signal(length=length, charge_burst_time=charge_burst_time, p_QP=p_QP)
+Observed_Signal = hidden_to_observed_signal(Hidden_Signal, readout_fidelity=readout_fidelity)
+Recovered_Signal = observed_to_recovered_signal(Observed_Signal, readout_fidelity=readout_fidelity_VBT, p_QP=p_QP_VBT)
 
 fig = plt.figure(figsize=(12, 4))
 plt.plot(asarray(Hidden_Signal)+1.5, 'o-', label=r"{} Hidden Transitions".format(transitions_count(Hidden_Signal)))
@@ -150,6 +157,5 @@ plt.show()
 
 """
 TO DO
-1. Make it usable as other analysis function
 2. test its robustness against several fidelity and QP values
 """
