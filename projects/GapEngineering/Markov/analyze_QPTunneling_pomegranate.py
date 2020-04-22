@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 def generate_hidden_signal(length=8192, charge_burst_time=4000, p_QP=[0.01, 0.01]):
     """
     Generate hidden signal from given parameters
-    :param length: the length of the hidden signal, eg. 5000
+    :param length: the length of the hidden signal, eg. 8192
     :param charge_burst_time: the time where we have the charge burst, eg. 2456
     :param p_QP: p_QP = [p_QP_before, p_QP_after], a two element list consists QP tunneling rate before and after the burst
     :return: the hidden signal [0,1,0,0,1,1,1,...]
@@ -147,8 +147,7 @@ p_g0_VBT = 0.95
 p_e1_VBT = 0.75
 readout_fidelity_VBT = [p_g0_VBT, p_e1_VBT]
 
-
-Hidden_Signal = generate_hidden_signal(length=length, charge_burst_time=charge_burst_time, p_QP=p_QP)
+Hidden_Signal = generate_hidden_signal(p_QP=p_QP)
 Observed_Signal = hidden_to_observed_signal(Hidden_Signal, readout_fidelity=readout_fidelity)
 Recovered_Signal = observed_to_recovered_signal(Observed_Signal, readout_fidelity=readout_fidelity_VBT, p_QP=p_QP_VBT)
 
