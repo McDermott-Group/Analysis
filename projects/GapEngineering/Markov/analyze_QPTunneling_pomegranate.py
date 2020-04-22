@@ -1,3 +1,7 @@
+"""Model Pomegranate Author: Jacob Schreiber.
+Author Vincent Liu and Sohair Abdullah."""
+
+
 from pomegranate import *
 from numpy import *
 import string
