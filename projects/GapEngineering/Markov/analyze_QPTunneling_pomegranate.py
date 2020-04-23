@@ -37,21 +37,21 @@ def hidden_to_observed_signal(hidden_signal, readout_fidelity=[0.95, 0.75]):
     """
     Convert the hidden signal to the observed signal
     :param hidden_signal: the hidden signal list [0,1,1,1,0,...]
-    :param readout_fidelity: readout_fidelity = [p_g0, p_e1]
+    :param readout_fidelity: readout_fidelity = [p_0g, p_1e]
     :return: observed signal [0,1,1,1,1, ...]
     """
 
     observed_signal = [0] * len(hidden_signal)
 
     # Readout Fidelity
-    p_g0 = readout_fidelity[0]
-    p_e1 = readout_fidelity[1]
-    p_e0 = 1 - p_e1
-    p_g1 = 1 - p_g0
+    p_0g = readout_fidelity[0]
+    p_1g = 1 - p_0g
+    p_1e = readout_fidelity[1]
+    p_0e = 1 - p_1e
 
     for i in range(len(hidden_signal)):
-        if hidden_signal[i] == 0: observed_signal[i] = random.choice([0, 1], p=[p_g0, p_g1])
-        if hidden_signal[i] == 1: observed_signal[i] = random.choice([0, 1], p=[p_e0, p_e1])
+        if hidden_signal[i] == 0: observed_signal[i] = random.choice([0, 1], p=[p_0g, p_1g])
+        if hidden_signal[i] == 1: observed_signal[i] = random.choice([0, 1], p=[p_0e, p_1e])
 
     return observed_signal
 
@@ -65,12 +65,10 @@ def observed_to_recovered_signal(observed_signal, readout_fidelity=[0.95, 0.75],
     :return: recovered signal
     """
 
-    p_g0 = readout_fidelity[0]
-    p_e1 = readout_fidelity[1]
-    p_e1_VBT = p_e1 + 0.0
-    p_e0_VBT = 1 - p_e1_VBT
-    p_g0_VBT = p_g0 + 0.0
-    p_g1_VBT = 1 - p_g0_VBT
+    p_0g_VBT = readout_fidelity[0]
+    p_1g_VBT = 1 - p_0g_VBT
+    p_1e_VBT = readout_fidelity[1]
+    p_0e_VBT = 1 - p_1e_VBT
 
     p_QP_VBT = p_QP
 
@@ -79,8 +77,8 @@ def observed_to_recovered_signal(observed_signal, readout_fidelity=[0.95, 0.75],
     observed_sequence = observed_sequence.replace(',', '')
     observed_sequence = observed_sequence.translate({ord(c): None for c in string.whitespace})
 
-    d1 = DiscreteDistribution({'0': p_g0_VBT, '1': p_g1_VBT})
-    d2 = DiscreteDistribution({'0': p_e0_VBT, '1': p_e1_VBT})
+    d1 = DiscreteDistribution({'0': p_0g_VBT, '1': p_1g_VBT})
+    d2 = DiscreteDistribution({'0': p_0e_VBT, '1': p_1e_VBT})
 
     g = State(d1, name="g")
     e = State(d2, name="e")
@@ -133,19 +131,19 @@ Parameters Setup
 t_meas = 0.1  # units ms
 t_QP_before = 10.0  # units ms
 t_QP_after = 10.0  # units ms
-p_QP_before = 1.0 - exp(-t_meas / t_QP_before)
-p_QP_after = 1.0 - exp(-t_meas / t_QP_after)
+p_QP_before = 1.0 - exp(-t_meas/t_QP_before)
+p_QP_after = 1.0 - exp(-t_meas/t_QP_after)
 p_QP = [p_QP_before, p_QP_after]
-p_g0 = 0.95
-p_e1 = 0.75
-readout_fidelity = [p_g0, p_e1]
+p_0g = 0.95
+p_1e= 0.75
+readout_fidelity = [p_0g, p_1e]
 
 # For VBT
 t_QP_VBT = 10  # units ms
-p_QP_VBT = 1.0 - exp(-t_meas / t_QP_VBT)
-p_g0_VBT = 0.95
-p_e1_VBT = 0.75
-readout_fidelity_VBT = [p_g0_VBT, p_e1_VBT]
+p_QP_VBT = 1.0 - exp(-t_meas/t_QP_VBT)
+p_0g_VBT = 0.95
+p_1e_VBT = 0.75
+readout_fidelity_VBT = [p_0g_VBT, p_1e_VBT]
 
 Hidden_Signal = generate_hidden_signal(p_QP=p_QP)
 Observed_Signal = hidden_to_observed_signal(Hidden_Signal, readout_fidelity=readout_fidelity)
