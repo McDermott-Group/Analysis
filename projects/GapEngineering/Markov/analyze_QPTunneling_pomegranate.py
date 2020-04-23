@@ -128,33 +128,32 @@ Parameters Setup
 """
 
 # For Generating Simulation Data
-t_meas = 0.1  # units ms
-t_QP_before = 10.0  # units ms
-t_QP_after = 10.0  # units ms
-p_QP_before = 1.0 - exp(-t_meas/t_QP_before)
-p_QP_after = 1.0 - exp(-t_meas/t_QP_after)
-p_QP = [p_QP_before, p_QP_after]
-p_0g = 0.95
-p_1e= 0.75
-readout_fidelity = [p_0g, p_1e]
-
-# For VBT
-t_QP_VBT = 10  # units ms
-p_QP_VBT = 1.0 - exp(-t_meas/t_QP_VBT)
-p_0g_VBT = 0.95
-p_1e_VBT = 0.75
-readout_fidelity_VBT = [p_0g_VBT, p_1e_VBT]
-
-Hidden_Signal = generate_hidden_signal(p_QP=p_QP)
-Observed_Signal = hidden_to_observed_signal(Hidden_Signal, readout_fidelity=readout_fidelity)
-Recovered_Signal = observed_to_recovered_signal(Observed_Signal, readout_fidelity=readout_fidelity_VBT, p_QP=p_QP_VBT)
-
-fig = plt.figure(figsize=(12, 4))
-plt.plot(asarray(Hidden_Signal)+1.5, 'o-', label=r"{} Hidden Transitions".format(transitions_count(Hidden_Signal)))
-plt.plot(asarray(Recovered_Signal), 'o-', label=r"{} Recovered Transitions".format(transitions_count(Recovered_Signal)))
-# plt.plot(asarray(Observed_Signal) - 1.5, 'o-', label=r"Observed")
-plt.legend(bbox_to_anchor=(0.75, 0.58), loc=2)
-plt.show()
+# t_meas = 0.1  # units ms
+# t_QP_before = 10.0  # units ms
+# t_QP_after = 10.0  # units ms
+# p_QP_before = 1.0 - exp(-t_meas/t_QP_before)
+# p_QP_after = 1.0 - exp(-t_meas/t_QP_after)
+# p_QP = [p_QP_before, p_QP_after]
+# p_0g = 0.95
+# p_1e= 0.75
+# readout_fidelity = [p_0g, p_1e]
+#
+# # For VBT
+# t_QP_VBT = 10  # units ms
+# p_QP_VBT = 1.0 - exp(-t_meas/t_QP_VBT)
+# p_0g_VBT = 0.95
+# p_1e_VBT = 0.75
+# readout_fidelity_VBT = [p_0g_VBT, p_1e_VBT]
+#
+# Hidden_Signal = generate_hidden_signal(p_QP=p_QP)
+# Observed_Signal = hidden_to_observed_signal(Hidden_Signal, readout_fidelity=readout_fidelity)
+# Recovered_Signal = observed_to_recovered_signal(Observed_Signal, readout_fidelity=readout_fidelity_VBT, p_QP=p_QP_VBT)
+#
+# fig = plt.figure(figsize=(12, 4))
+# plt.plot(asarray(Hidden_Signal)+1.5, 'o-', label=r"{} Hidden Transitions".format(transitions_count(Hidden_Signal)))
+# plt.plot(asarray(Recovered_Signal), 'o-', label=r"{} Recovered Transitions".format(transitions_count(Recovered_Signal)))
+# plt.legend(bbox_to_anchor=(0.75, 0.58), loc=2)
+# plt.show()
 
 """
 TO DO
