@@ -60,9 +60,9 @@ for k,f in [(i,files[i]) for i in whitelist[:]]:
         data_files[f] = DF
     print k, trigs
     for trial, rep in trigs:
-        # DF.plot(trial, plot='Flips', smoothing=500)
-        # DF.plot_adj_file(path.format(num+Q_A-3), 0)
-        # DF.plot_adj_file(path.format(num+Q_A+1), 'end')
+        DF.plot(trial, plot='Flips', smoothing=500)
+        DF.plot_adj_file(path.format(num+Q_A-3), 0)
+        DF.plot_adj_file(path.format(num+Q_A+1), 'end')
         P1 = DF.get_P1_around_trig((trial,rep))
         nreps = P1.size
         n_trace[10000-rep:10000+nreps-rep] += 1
