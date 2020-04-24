@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="84d2569e-8c60-4380-b499-09e41eda5a32" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/projects.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/projects.iml" afterDir="false" />
+    <list default="true" id="84d2569e-8c60-4380-b499-09e41eda5a32" name="Default" comment="Update- LIU">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GapEngineering/Markov/analyze_QP_rate_stats.py" beforeDir="false" afterPath="$PROJECT_DIR$/GapEngineering/Markov/analyze_QP_rate_stats.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GapEngineering/Markov/analyze_readout_fidelity_stats.py" beforeDir="false" afterPath="$PROJECT_DIR$/GapEngineering/Markov/analyze_readout_fidelity_stats.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -176,8 +172,16 @@
       <option name="presentableId" value="Default" />
       <updated>1586271915372</updated>
       <workItem from="1587676006138" duration="1094000" />
-      <workItem from="1587678402906" duration="13985000" />
+      <workItem from="1587678402906" duration="15886000" />
     </task>
+    <task id="LOCAL-00001" summary="Update- LIU">
+      <created>1587742832457</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1587742832457</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TodoView">
@@ -192,23 +196,39 @@
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="2" />
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Update- LIU" />
+    <option name="LAST_COMMIT_MESSAGE" value="Update- LIU" />
+  </component>
   <component name="WindowStateProjectService">
+    <state x="480" y="3" key="CommitChangelistDialog2" timestamp="1587742831784">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="480" y="3" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1587742831784" />
     <state x="686" y="214" key="FileChooserDialogImpl" timestamp="1587742102388">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="686" y="214" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1587742102388" />
+    <state x="820" y="352" key="MultipleFileMergeDialog" timestamp="1587742851066">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="820" y="352" key="MultipleFileMergeDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1587742851066" />
     <state x="336" y="77" key="SettingsEditor" timestamp="1587678914776">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="336" y="77" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1587678914776" />
+    <state x="452" y="187" key="Vcs.Push.Dialog.v2" timestamp="1587742870846">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="452" y="187" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1587742870846" />
     <state x="602" y="0" width="716" height="1040" key="find.popup" timestamp="1587696290378">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="602" y="0" width="716" height="1040" key="find.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1587696290378" />
-    <state x="584" y="258" key="git4idea.merge.GitPullDialog" timestamp="1587742806339">
+    <state x="584" y="258" key="git4idea.merge.GitPullDialog" timestamp="1587742843243">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="584" y="258" key="git4idea.merge.GitPullDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1587742806339" />
+    <state x="584" y="258" key="git4idea.merge.GitPullDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1587742843243" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
