@@ -8,8 +8,8 @@ t_meas = 0.1  # units ms
 t_QP = 10.0  # units ms
 p_QP = 1.0 - exp(-t_meas/t_QP)
 
-p_0g_pool = np.linspace(100, 80, 2)/100
-p_1e_pool = np.linspace(60, 100, 2)/100
+p_0g_pool = np.linspace(100, 80, 11)/100
+p_1e_pool = np.linspace(60, 100, 11)/100
 error = np.zeros((len(p_0g_pool), len(p_1e_pool)))
 
 for r in range(len(p_0g_pool)):
@@ -17,7 +17,7 @@ for r in range(len(p_0g_pool)):
         error_1D = []
         readout_fidelity = [p_0g_pool[r], p_1e_pool[c]]
         print('read_fidelity=', readout_fidelity)
-        for i in range(2):
+        for i in range(100):
             Hidden_Signal = generate_hidden_signal(p_QP=[p_QP, p_QP])
             Observed_Signal = hidden_to_observed_signal(Hidden_Signal, readout_fidelity=readout_fidelity)
             Recovered_Signal = observed_to_recovered_signal(Observed_Signal)
