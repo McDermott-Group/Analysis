@@ -1,6 +1,6 @@
 """
 This is to extract QP tunneling rate from limited data points without high readout fidelities.
-Date: VBT_lenVBT_lenA April
+Date: VTB_lenVTB_lenA April
 Author: Chuanhong Liu
 """
 
@@ -66,43 +66,43 @@ def meas_trace_recover(meas_trace, readout_fidelity, t_QP):
     # Get the optimized parameters from the readout_fidelity
     # viberti_param = {[0.95, 0.75]: [0.6, 0.75]}
 
-    t_QP_VBT = 10  # _VBT means this variable is for Viberti algorithm
-    # t_QP_VBT = t_QP   # _VBT means this variable is for Viberti algorithm
-    t_meas_VBT = 0.1
-    p_QP_VBT = 1.0 - np.exp(-t_meas_VBT/t_QP_VBT)
+    t_QP_VTB = 10  # _VTB means this variable is for Viberti algorithm
+    # t_QP_VTB = t_QP   # _VTB means this variable is for Viberti algorithm
+    t_meas_VTB = 0.1
+    p_QP_VTB = 1.0 - np.exp(-t_meas_VTB/t_QP_VTB)
     # Transition matrix
-    p_ee_VBT = np.log(1.0 - p_QP_VBT)
-    p_eg_VBT = np.log(p_QP_VBT)
-    p_ge_VBT = np.log(p_QP_VBT)
-    p_gg_VBT = np.log(1.0 - p_QP_VBT)
+    p_ee_VTB = np.log(1.0 - p_QP_VTB)
+    p_eg_VTB = np.log(p_QP_VTB)
+    p_ge_VTB = np.log(p_QP_VTB)
+    p_gg_VTB = np.log(1.0 - p_QP_VTB)
 
     # Initial Probabilities, also known as the prior probability, calculated from Transition matrix
-    p_e_VBT = np.log(0.5)
-    p_g_VBT = np.log(1.0-p_e_VBT)
+    p_e_VTB = np.log(0.5)
+    p_g_VTB = np.log(1.0-p_e_VTB)
 
-    # Emission Probabilities, this is the human choice and needs to be optimized, the p_g0_VBT is the most important one
-    p_e1_VBT = np.log(0.75)
-    p_e0_VBT = np.log(1.0 - p_e1_VBT)
-    p_g0_VBT = np.log(0.95)
-    p_g1_VBT = np.log(1.0 - p_g0_VBT)
+    # Emission Probabilities, this is the human choice and needs to be optimized, the p_g0_VTB is the most important one
+    p_e1_VTB = np.log(0.75)
+    p_e0_VTB = np.log(1.0 - p_e1_VTB)
+    p_g0_VTB = np.log(0.95)
+    p_g1_VTB = np.log(1.0 - p_g0_VTB)
 
 
 
     probabilities = []
     if meas_trace[0] == 0:
-        probabilities.append((p_e_VBT + p_e1_VBT, p_g_VBT + p_g1_VBT))
+        probabilities.append((p_e_VTB + p_e1_VTB, p_g_VTB + p_g1_VTB))
     else:
-        probabilities.append((p_e_VBT + p_e0_VBT, p_g_VBT + p_g0_VBT))
+        probabilities.append((p_e_VTB + p_e0_VTB, p_g_VTB + p_g0_VTB))
 
     for i in range(len(t)):
         prev_e, prev_g = probabilities[-1]
         if meas_trace[i] == 0:
-            curr_e = max(prev_e + p_ee_VBT + p_e1_VBT, prev_g + p_ge_VBT + p_e1_VBT)
-            curr_g = max(prev_e + p_eg_VBT + p_g1_VBT, prev_g + p_gg_VBT + p_g1_VBT)
+            curr_e = max(prev_e + p_ee_VTB + p_e1_VTB, prev_g + p_ge_VTB + p_e1_VTB)
+            curr_g = max(prev_e + p_eg_VTB + p_g1_VTB, prev_g + p_gg_VTB + p_g1_VTB)
             probabilities.append((curr_e, curr_g))
         else:
-            curr_e = max(prev_e + p_ee_VBT + p_e0_VBT, prev_g + p_ge_VBT + p_e0_VBT)
-            curr_g = max(prev_e + p_eg_VBT + p_g0_VBT, prev_g + p_gg_VBT + p_g0_VBT)
+            curr_e = max(prev_e + p_ee_VTB + p_e0_VTB, prev_g + p_ge_VTB + p_e0_VTB)
+            curr_g = max(prev_e + p_eg_VTB + p_g0_VTB, prev_g + p_gg_VTB + p_g0_VTB)
             probabilities.append((curr_e, curr_g))
 
     for p_index in range(len(probabilities)-1):
@@ -119,7 +119,7 @@ def state_recover_diff(state_trace, recover_trace):
 
     :param state_trace: The hidden state behind the measurement, [0,1,1,1...]
     :param recover_trace: The recovered state, [0, 1, 1, 1]
-    :return: miscounts per VBT_len points (VBT_len ms)
+    :return: miscounts per VTB_len points (VTB_len ms)
     """
     state_transitions = 0
     recover_transitions = 0

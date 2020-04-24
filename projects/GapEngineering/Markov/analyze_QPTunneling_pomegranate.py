@@ -65,20 +65,20 @@ def observed_to_recovered_signal(observed_signal, readout_fidelity=[0.95, 0.75],
     :return: recovered signal
     """
 
-    p_0g_VBT = readout_fidelity[0]
-    p_1g_VBT = 1 - p_0g_VBT
-    p_1e_VBT = readout_fidelity[1]
-    p_0e_VBT = 1 - p_1e_VBT
+    p_0g_VTB = readout_fidelity[0]
+    p_1g_VTB = 1 - p_0g_VTB
+    p_1e_VTB = readout_fidelity[1]
+    p_0e_VTB = 1 - p_1e_VTB
 
-    p_QP_VBT = p_QP
+    p_QP_VTB = p_QP
 
     observed_signal = str(observed_signal).strip('[]')
     observed_sequence = ''.join(observed_signal)
     observed_sequence = observed_sequence.replace(',', '')
     observed_sequence = observed_sequence.translate({ord(c): None for c in string.whitespace})
 
-    d1 = DiscreteDistribution({'0': p_0g_VBT, '1': p_1g_VBT})
-    d2 = DiscreteDistribution({'0': p_0e_VBT, '1': p_1e_VBT})
+    d1 = DiscreteDistribution({'0': p_0g_VTB, '1': p_1g_VTB})
+    d2 = DiscreteDistribution({'0': p_0e_VTB, '1': p_1e_VTB})
 
     g = State(d1, name="g")
     e = State(d2, name="e")
@@ -88,10 +88,10 @@ def observed_to_recovered_signal(observed_signal, readout_fidelity=[0.95, 0.75],
 
     model.add_transition(model.start, g, 0.5)
     model.add_transition(model.start, e, 0.5)
-    model.add_transition(g, g, 1 - p_QP_VBT)
-    model.add_transition(g, e, p_QP_VBT)
-    model.add_transition(e, e, 1 - p_QP_VBT)
-    model.add_transition(e, g, p_QP_VBT)
+    model.add_transition(g, g, 1 - p_QP_VTB)
+    model.add_transition(g, e, p_QP_VTB)
+    model.add_transition(e, e, 1 - p_QP_VTB)
+    model.add_transition(e, g, p_QP_VTB)
     model.add_transition(e, model.end, 0.5)
     model.bake()
 
@@ -138,16 +138,16 @@ Parameters Setup
 # p_1e= 0.75
 # readout_fidelity = [p_0g, p_1e]
 #
-# # For VBT
-# t_QP_VBT = 10  # units ms
-# p_QP_VBT = 1.0 - exp(-t_meas/t_QP_VBT)
-# p_0g_VBT = 0.95
-# p_1e_VBT = 0.75
-# readout_fidelity_VBT = [p_0g_VBT, p_1e_VBT]
+# # For VTB
+# t_QP_VTB = 10  # units ms
+# p_QP_VTB = 1.0 - exp(-t_meas/t_QP_VTB)
+# p_0g_VTB = 0.95
+# p_1e_VTB = 0.75
+# readout_fidelity_VTB = [p_0g_VTB, p_1e_VTB]
 #
 # Hidden_Signal = generate_hidden_signal(p_QP=p_QP)
 # Observed_Signal = hidden_to_observed_signal(Hidden_Signal, readout_fidelity=readout_fidelity)
-# Recovered_Signal = observed_to_recovered_signal(Observed_Signal, readout_fidelity=readout_fidelity_VBT, p_QP=p_QP_VBT)
+# Recovered_Signal = observed_to_recovered_signal(Observed_Signal, readout_fidelity=readout_fidelity_VTB, p_QP=p_QP_VTB)
 #
 # fig = plt.figure(figsize=(12, 4))
 # plt.plot(asarray(Hidden_Signal)+1.5, 'o-', label=r"{} Hidden Transitions".format(transitions_count(Hidden_Signal)))
