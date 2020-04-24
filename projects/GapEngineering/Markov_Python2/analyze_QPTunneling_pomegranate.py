@@ -64,7 +64,6 @@ def observed_to_recovered_signal(observed_signal, readout_fidelity=[0.95, 0.75],
     :param p_QP: QP tunneling rate
     :return: recovered signal
     """
-
     p_0g_VTB = readout_fidelity[0]
     p_1g_VTB = 1 - p_0g_VTB
     p_1e_VTB = readout_fidelity[1]
@@ -144,15 +143,15 @@ Parameters Setup
 # p_1e_VTB = 0.75
 # readout_fidelity_VTB = [p_0g_VTB, p_1e_VTB]
 #
-Hidden_Signal = generate_hidden_signal()
-Observed_Signal = hidden_to_observed_signal(Hidden_Signal)
-Recovered_Signal = observed_to_recovered_signal(Observed_Signal)
-#
-fig = plt.figure(figsize=(12, 4))
-plt.plot(asarray(Hidden_Signal)+1.5, 'o-', label=r"{} Hidden Transitions".format(transitions_count(Hidden_Signal)))
-plt.plot(asarray(Recovered_Signal), 'o-', label=r"{} Recovered Transitions".format(transitions_count(Recovered_Signal)))
-plt.legend(bbox_to_anchor=(0.75, 0.58), loc=2)
-plt.show()
+# Hidden_Signal = generate_hidden_signal()
+# Observed_Signal = hidden_to_observed_signal(Hidden_Signal)
+# Recovered_Signal = observed_to_recovered_signal(Observed_Signal)
+# #
+# fig = plt.figure(figsize=(12, 4))
+# plt.plot(asarray(Hidden_Signal)+1.5, 'o-', label=r"{} Hidden Transitions".format(transitions_count(Hidden_Signal)))
+# plt.plot(asarray(Recovered_Signal), 'o-', label=r"{} Recovered Transitions".format(transitions_count(Recovered_Signal)))
+# plt.legend(bbox_to_anchor=(0.75, 0.58), loc=2)
+# plt.show()
 
 """
 TO DO

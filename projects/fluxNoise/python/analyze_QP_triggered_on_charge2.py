@@ -43,6 +43,7 @@ n_trace = np.zeros(2*10000+1)
 add_trial_means = np.zeros(2*10+1)
 n_trials = np.zeros(2*10+1)
 
+# whitelist = [2,3,4]
 whitelist = [2,3,4,12,38,40,45,48,51,52,54,71,74,75,78,79,86]
 blacklist = {40:[7], 34:[4], 27:[7,3], 26:[3,1], 24:[7], 20:[8], 19:[7,5,2,0], 18:[8], 17:[9,3], 13:[7,5], 11:[9,3,1], 9:[3], 8:[4], 6:[5,3], 3:[8,6,3], 0:[6,4]}
 data_files = {}
@@ -52,7 +53,8 @@ for k,f in [(i,files[i]) for i in whitelist[:]]:
     path, num = noiselib.path_to_num(f)
     DF = TwoMeasDataFile(path.format(num+Q_A-1), 1, 2)
     DF.set_trigger_params(1000000., 1000, 0.05)
-    DF.apply_infidelity_correction(9)
+    DF.apply_infidelity_correction_HMM()
+    # DF.apply_infidelity_correction(9)
     trigs = DF.get_triggers()
     trigs = [(t,r) for t,r in trigs if k not in blacklist.keys() 
                                     or t not in blacklist[k]]
