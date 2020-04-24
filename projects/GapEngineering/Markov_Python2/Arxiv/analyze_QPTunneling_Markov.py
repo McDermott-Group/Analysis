@@ -52,7 +52,7 @@ def meas_trace_recover(meas_trace, readout_fidelity, t_QP):
     :param t_QP:
         A number which is the assumed QP tunneling rate in units of ms
     :return: recover_trace, type array
-        A list of integer 0s ands 1s based Markov Chain and smoothed Viberti algorithm
+        A list of integer 0s ands 1s based Markov_Python3 Chain and smoothed Viberti algorithm
     Examples
     meas_trace = [0,1,0,1,1,1,1,0,0,1]
     readout_fidelity = [0.95, 0.75]
