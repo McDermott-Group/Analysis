@@ -49,7 +49,7 @@ class TwoMeasDataFile(object):
         ax.get_xaxis().set_ticks([])
         
         ax = fig.add_subplot(312)
-        ax.plot(0.5*o, linewidth=0.2, label='P1')
+        ax.plot(o, linewidth=0.2, label='P1')
         ax.get_xaxis().set_ticks([])
         
         ax = fig.add_subplot(313)
