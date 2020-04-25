@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="84d2569e-8c60-4380-b499-09e41eda5a32" name="Default" comment="Pomegranate works for the python 2 now- LIU">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+    <list default="true" id="84d2569e-8c60-4380-b499-09e41eda5a32" name="Default" comment="Add the HMM correction model to noiselib.py- LIU">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GapEngineering/Markov_Python2/analyze_QPTunneling_pomegranate.py" beforeDir="false" afterPath="$PROJECT_DIR$/GapEngineering/Markov_Python2/analyze_QPTunneling_pomegranate.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fluxNoise/python/TwoMeasDataFile.py" beforeDir="false" afterPath="$PROJECT_DIR$/fluxNoise/python/TwoMeasDataFile.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fluxNoise/python/analyze_QP_triggered_on_charge2.py" beforeDir="false" afterPath="$PROJECT_DIR$/fluxNoise/python/analyze_QP_triggered_on_charge2.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fluxNoise/python/noiselib.py" beforeDir="false" afterPath="$PROJECT_DIR$/fluxNoise/python/noiselib.py" afterDir="false" />
     </list>
@@ -53,10 +50,10 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/GapEngineering/Markov_Python2" />
+    <property name="last_opened_file_path" value="Z:/mcdermott-group/data/GapEngineer/QP_Simulation" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="PyScientificConfigurable" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -110,6 +107,9 @@
       <module name="projects" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/GapEngineering/Markov_Python2" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -129,6 +129,9 @@
       <module name="projects" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/GapEngineering/Markov_Python2" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -167,6 +170,9 @@
       <module name="projects" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/GapEngineering/Markov_Python2" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -186,6 +192,9 @@
       <module name="projects" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fluxNoise/python" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -227,7 +236,8 @@
       <workItem from="1587758553176" duration="66000" />
       <workItem from="1587759464200" duration="3000" />
       <workItem from="1587760604966" duration="64000" />
-      <workItem from="1587760680728" duration="7589000" />
+      <workItem from="1587760680728" duration="8612000" />
+      <workItem from="1587830347779" duration="2209000" />
     </task>
     <task id="LOCAL-00001" summary="Update- LIU">
       <created>1587742832457</created>
@@ -250,7 +260,14 @@
       <option name="project" value="LOCAL" />
       <updated>1587763512678</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Add the HMM correction model to noiselib.py- LIU">
+      <created>1587768492044</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1587768492044</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TodoView">
@@ -269,37 +286,38 @@
     <MESSAGE value="Update- LIU" />
     <MESSAGE value="Pomegranate summarized- LIU" />
     <MESSAGE value="Pomegranate works for the python 2 now- LIU" />
-    <option name="LAST_COMMIT_MESSAGE" value="Pomegranate works for the python 2 now- LIU" />
+    <MESSAGE value="Add the HMM correction model to noiselib.py- LIU" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add the HMM correction model to noiselib.py- LIU" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="547" y="0" key="CommitChangelistDialog2" timestamp="1587763511744">
+    <state x="894" y="5" key="CommitChangelistDialog2" timestamp="1587768491388">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="547" y="0" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1587763511744" />
-    <state x="686" y="214" key="FileChooserDialogImpl" timestamp="1587765419456">
+    <state x="894" y="5" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1587768491388" />
+    <state x="686" y="214" key="FileChooserDialogImpl" timestamp="1587832398020">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="686" y="214" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1587765419456" />
+    <state x="686" y="214" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1587832398020" />
     <state x="820" y="352" key="MultipleFileMergeDialog" timestamp="1587742851066">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="820" y="352" key="MultipleFileMergeDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1587742851066" />
-    <state x="336" y="77" key="SettingsEditor" timestamp="1587765424712">
+    <state x="336" y="77" key="SettingsEditor" timestamp="1587768979289">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="336" y="77" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1587765424712" />
-    <state x="452" y="187" key="Vcs.Push.Dialog.v2" timestamp="1587763528236">
+    <state x="336" y="77" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1587768979289" />
+    <state x="452" y="187" key="Vcs.Push.Dialog.v2" timestamp="1587768504788">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="452" y="187" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1587763528236" />
+    <state x="452" y="187" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1587768504788" />
     <state x="602" y="0" width="716" height="1040" key="find.popup" timestamp="1587696290378">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="602" y="0" width="716" height="1040" key="find.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1587696290378" />
-    <state x="584" y="258" key="git4idea.merge.GitPullDialog" timestamp="1587763517772">
+    <state x="584" y="258" key="git4idea.merge.GitPullDialog" timestamp="1587768497941">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="584" y="258" key="git4idea.merge.GitPullDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1587763517772" />
+    <state x="584" y="258" key="git4idea.merge.GitPullDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1587768497941" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
