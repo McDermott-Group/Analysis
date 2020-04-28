@@ -1,5 +1,6 @@
 import scipy.io as spio
 import numpy as np
+from analyze_QPTunneling_pomegranate import observed_to_recovered_signal
 
 
 def loadmat(filename):
@@ -10,6 +11,7 @@ def loadmat(filename):
     which are still mat-objects
     Taken from https://stackoverflow.com/questions/7008608/scipy-io-loadmat-nested-structures-i-e-dictionaries
     '''
+
     def _check_keys(d):
         '''
         checks if entries in dictionary are mat-objects. If yes
@@ -50,7 +52,7 @@ def loadmat(filename):
             else:
                 elem_list.append(sub_elem)
         return elem_list
-        
+
     data = spio.loadmat(filename, struct_as_record=False, squeeze_me=True)
     data = _check_keys(data)
     keys = [key for key in data.keys() if key[0] != '_']
@@ -58,68 +60,76 @@ def loadmat(filename):
         data = data[keys[0]]['Data']
     return data
 
+
 def unwrap_voltage_to_charge(vs, wrap_voltage, dedv):
     unwrap_vs = vs[:]
     wrap_value = 0
     for i in range(len(vs)):
-        unwrap_vs[i] = vs[i] + wrap_value/dedv
+        unwrap_vs[i] = vs[i] + wrap_value / dedv
         if vs[i] > wrap_voltage:
             wrap_value = wrap_value + 1
         elif vs[i] < -wrap_voltage:
             wrap_value = wrap_value - 1
     unwrap_es = unwrap_vs * dedv
-    
+
     # take into account aliasing
     delta_q = unwrap_es[1:] - unwrap_es[:-1]
     delta_q = alias(delta_q, 0.5)
     first_point = alias(unwrap_es[0], 0.5)
-    return np.append(first_point, first_point+np.cumsum(delta_q))
+    return np.append(first_point, first_point + np.cumsum(delta_q))
+
 
 def alias(x0, bound):
     """Takes a value or array x0 and aliases it into the range (-bound,bound)"""
-    return np.mod(bound+x0, 2*bound) - bound
+    return np.mod(bound + x0, 2 * bound) - bound
+
 
 def window_averaging(psd):
     psd_avg = np.zeros(psd.size)
     for i in range(psd.size):
-        filter_fl = int(np.max( [0, np.round(i-i/4.)] ))
-        filter_fh = int(np.min( [psd.size, np.round(i+i/4.)] ))
-        psd_avg[i] = np.mean( psd[filter_fl:filter_fh] )
+        filter_fl = int(np.max([0, np.round(i - i / 4.)]))
+        filter_fh = int(np.min([psd.size, np.round(i + i / 4.)]))
+        psd_avg[i] = np.mean(psd[filter_fl:filter_fh])
     return psd_avg
+
 
 def partition_data(data):
     """Partition data into even and odd for CPSD on single data set"""
     return data[0::2], data[1::2]
 
+
 def crosspsd(z1, z2, fs):
     fft1 = np.fft.fft(z1)
     fft2 = np.fft.fft(z2)
-    psd = (2./fs/z1.size)*fft1*np.conj(fft2)
-    psd[0] = psd[0]/2
+    psd = (2. / fs / z1.size) * fft1 * np.conj(fft2)
+    psd[0] = psd[0] / 2
     return psd
+
 
 def partition_and_avg_psd(data, fs):
     """Splits the data into odd and even segments and takes the self cpsd.
     data is input as a matrix, where each line (the second axis) will
     give a cpsd that is then averaged along the first axis."""
     n, N = data.shape
-    cpsd_avg = np.zeros(N/4+1)
+    cpsd_avg = np.zeros(N / 4 + 1)
     for i in range(n):
         seg_even, seg_odd = partition_data(data[i])
         L = min(len(seg_even), len(seg_odd))
-        seg_cpsd = crosspsd(seg_even[:L], seg_odd[:L], fs/2)
-        cpsd_avg = cpsd_avg + seg_cpsd[:N/4+1]
-    cpsd_avg = cpsd_avg/n
-    cpsd_freq = np.arange(0, fs/4.+0.0001, fs/N)
+        seg_cpsd = crosspsd(seg_even[:L], seg_odd[:L], fs / 2)
+        cpsd_avg = cpsd_avg + seg_cpsd[:N / 4 + 1]
+    cpsd_avg = cpsd_avg / n
+    cpsd_freq = np.arange(0, fs / 4. + 0.0001, fs / N)
     return cpsd_avg, cpsd_freq
+
 
 def crosscorrelate(x, y, n):
     """Finds the cross correlation between the ones in two binary strings x and
     y of the same length.  n is the number of lags.  ccf is the cross
     correlated result, and lags is the lags=-n:n.  normalized to number of
     ones in x."""
+
     def ccorr(x, y, n):
-        acf = np.zeros(n+1)
+        acf = np.zeros(n + 1)
         for i in range(n):
             if np.sum(x[:-1]) == 0:
                 acf[i] = 0
@@ -127,41 +137,57 @@ def crosscorrelate(x, y, n):
                 # we divide by the sum (not length) so that it is normalized to the
                 # number of 1's and we get 100% corr if the 1s are correlated
                 xx = x[:-i] if i > 0 else x
-                acf[i] = np.sum( xx*y[i:] ) / np.sum(xx)
+                acf[i] = np.sum(xx * y[i:]) / np.sum(xx)
         return acf
-        
-    ccf = np.zeros(2*n+1)
+
+    ccf = np.zeros(2 * n + 1)
     ccf[n:] = ccorr(x, y, n)
-    ccf[:n+1] = np.flipud(ccorr(y, x, n))
-    lags = np.arange(-n,n)
+    ccf[:n + 1] = np.flipud(ccorr(y, x, n))
+    lags = np.arange(-n, n)
     return ccf, lags
-    
-    
+
+
 def movingmean(a, n, axis=-1):
     """Should be equivilent to matlabs movmean"""
+
     def _movingmean(a, n):
         a_new = np.zeros(len(a), dtype=np.float)
         for i in range(len(a)):
-            i_0 = max(0,i-int(np.floor(n/2.)))
-            i_end = min(len(a), i+int(np.ceil(n/2.)))
-            a_new[i] = np.mean(a[ i_0:i_end ])
+            i_0 = max(0, i - int(np.floor(n / 2.)))
+            i_end = min(len(a), i + int(np.ceil(n / 2.)))
+            a_new[i] = np.mean(a[i_0:i_end])
         return a_new
+
     return np.apply_along_axis(_movingmean, axis, a, n)
 
+
 def path_to_num(path):
-    beginning, end = path.rsplit('_',1)
-    num, ext = end.split('.',1)
+    beginning, end = path.rsplit('_', 1)
+    num, ext = end.split('.', 1)
     path = beginning + '_{:03d}.' + ext
     return path, int(num)
-    
-    
+
+
 def apply_infidelity_correction(o, n_bins=9, thresh=0.5):
     o = o.astype(np.float)
     for trial in o:
         # trial[...] = movingmean(trial, n_bins) > thresh
         a = trial.astype(np.float)
         for i in range(trial.size):
-            i_0 = max(0,i-int(np.floor(n_bins/2.)))
-            i_end = min(trial.size, i+int(np.ceil(n_bins/2.)))
-            trial[i] = np.mean(trial[ i_0:i_end ]) > thresh
+            i_0 = max(0, i - int(np.floor(n_bins / 2.)))
+            i_end = min(trial.size, i + int(np.ceil(n_bins / 2.)))
+            trial[i] = np.mean(trial[i_0:i_end]) > thresh
+    return o
+
+
+def apply_infidelity_correction_HMM(o, fidelity=[0.95, 0.75]):
+    o = o.astype(np.float)
+    for trial in o:
+        observed_signal = list(trial)   # ndarray -> list
+        observed_signal = [int(x) for x in observed_signal] # float -> int
+        recovered_signal = observed_to_recovered_signal(observed_signal, readout_fidelity=fidelity)
+        recovered_signal = list(np.float_(recovered_signal)) # int-> float
+        recovered_signal = np.asarray(recovered_signal)    # list-> ndarray
+        for i in range(trial.size):
+            trial[i] = recovered_signal[i]
     return o

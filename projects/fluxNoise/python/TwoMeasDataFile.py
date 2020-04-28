@@ -15,7 +15,10 @@ class TwoMeasDataFile(object):
     
     def apply_infidelity_correction(self, n_bins=9, thresh=0.5):
         self.o_meas = noiselib.apply_infidelity_correction(self.o_meas, n_bins, thresh)
-    
+
+    def apply_infidelity_correction_HMM(self, fidelity=[0.95, 0.75]):
+        self.o_meas = noiselib.apply_infidelity_correction_HMM(self.o_meas, fidelity=fidelity)
+
     def set_trigger_params(self, amp, span, thresh):
         self.trig = { 'amp': amp,
                       'span': span,
