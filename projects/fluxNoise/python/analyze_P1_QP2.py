@@ -4,24 +4,6 @@ import noiselib
 from QPTunneling import *
 from ChargeOffset import *
 
-def apply_infidelity_correction(o, n_bins=7, thresh=0.5):
-    for trial in o:
-        # trial[...] = movingmean(trial, n_bins) > thresh
-        a = trial.astype(np.float)
-        for i in range(len(a)):
-            i_0 = max(0,i-int(np.floor(n_bins/2.)))
-            i_end = min(len(a), i+int(np.ceil(n_bins/2.)))
-            a[i] = np.mean(a[ i_0:i_end ])
-        trial[...] = a > thresh
-        
-def apply_infidelity_correction2(o, n_bins=7, thresh=0.5):
-    a = o.astype(np.float)
-    for i in range(len(a)):
-        i_0 = max(0,i-int(np.floor(n_bins/2.)))
-        i_end = min(len(a), i+int(np.ceil(n_bins/2.)))
-        a[i] = np.mean(a[ i_0:i_end ])
-    o[:] = a > thresh
-
 def get_averaged_P1(files, label=''):
     P1_avg = np.array([])
     for f in files:
@@ -35,7 +17,7 @@ def get_averaged_flips(files, label=''):
     for f in files:
         data = noiselib.loadmat(f)
         o = np.array(data['Single_Shot_Occupations{}'.format(label)])
-        apply_infidelity_correction(o, 9)
+        o = noiselib.apply_infidelity_correction(o, 9)
         flip_avg = np.append(flip_avg, np.mean(np.abs(np.diff(o, axis=1))))
     return flip_avg
 
