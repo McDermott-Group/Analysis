@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import noiselib
+reload(noiselib)
 from QPTunneling import *
 from ChargeOffset import *
 
@@ -27,7 +28,7 @@ def plot_data(data, xlabel='', ylabel='', title=''):
     ax.set_title(title)
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
-    ax.plot(P1_avg)
+    ax.plot(data)
     plt.draw()
     plt.pause(0.05)
     return ax

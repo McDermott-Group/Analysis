@@ -1,6 +1,7 @@
 import scipy.io as spio
 import numpy as np
-from analyze_QPTunneling_pomegranate import observed_to_recovered_signal
+import os
+# from Markov_Python2.analyze_QPTunneling_pomegranate import observed_to_recovered_signal
 
 
 def loadmat(filename):
@@ -166,6 +167,15 @@ def path_to_num(path):
     num, ext = end.split('.', 1)
     path = beginning + '_{:03d}.' + ext
     return path, int(num)
+    
+    
+def matpaths(q, date, fileName, fileNums, fluxNoise='fluxNoise2'):
+    if not isinstance(fileNums, (list, np.array)):
+        fileNums = [fileNums]
+    dataroot = os.getenv('DATA_ROOT').replace('\\','/')
+    return [dataroot + '/{}/DR1 - 2019-12-17/CorrFar/{}/General/{}/{}/MATLABData'
+              '/{}_{:03d}.mat'.format(fluxNoise, q, date, fileName, fileName, i)
+              for i in fileNums]
 
 
 def apply_infidelity_correction(o, n_bins=9, thresh=0.5):
@@ -180,7 +190,7 @@ def apply_infidelity_correction(o, n_bins=9, thresh=0.5):
     return o
 
 
-def apply_infidelity_correction_HMM(o, fidelity=[0.95, 0.75]):
+def apply_infidelity_correction_HMM(o, fidelity=[0.95, 0.8]):
     o = o.astype(np.float)
     for trial in o:
         observed_signal = list(trial)   # ndarray -> list
