@@ -13,12 +13,13 @@ class QPTunneling(object):
         self.transfer = 1/vis**2
         self.n_rows = 0
     
-    def add_datasets(self, file_path, data_str='Single_Shot_Occupations_SB1'):
+    def add_datasets(self, file_path, data_str='Single_Shot_Occupations'):
         if type(file_path) == str:
             file_path = [file_path]
         for f in file_path:
             data = noiselib.loadmat(f)
             o = np.array(data[data_str])
+            o = noiselib.apply_infidelity_correction(o, 9)
             self.add_data(o)
     
     def add_data(self, o):
