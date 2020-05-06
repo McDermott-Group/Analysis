@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="84d2569e-8c60-4380-b499-09e41eda5a32" name="Default" comment="Add the HMM correction model to noiselib.py- LIU">
+    <list default="true" id="84d2569e-8c60-4380-b499-09e41eda5a32" name="Default" comment="Everything works in the virtual environment. Next make it compatible with lab computers' default environment- LIU">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GapEngineering/Markov_Python2/Arxiv/analyze_QPTunneling_Markov.py" beforeDir="false" afterPath="$PROJECT_DIR$/GapEngineering/Markov_Python2/Arxiv/analyze_QPTunneling_Markov.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GapEngineering/Markov_Python2/analyze_QPTunneling_pomegranate.py" beforeDir="false" afterPath="$PROJECT_DIR$/GapEngineering/Markov_Python2/analyze_QPTunneling_pomegranate.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GapEngineering/Markov_Python2/analyze_QP_rate_stats.py" beforeDir="false" afterPath="$PROJECT_DIR$/GapEngineering/Markov_Python2/analyze_QP_rate_stats.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GapEngineering/Markov_Python2/analyze_readout_fidelity_stats.py" beforeDir="false" afterPath="$PROJECT_DIR$/GapEngineering/Markov_Python2/analyze_readout_fidelity_stats.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GapEngineering/Markov_Python2/heatedmap.py" beforeDir="false" afterPath="$PROJECT_DIR$/GapEngineering/Markov_Python2/heatedmap.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fluxNoise/python/analyze_QP_triggered_on_charge2.py" beforeDir="false" afterPath="$PROJECT_DIR$/fluxNoise/python/analyze_QP_triggered_on_charge2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fluxNoise/python/noiselib.py" beforeDir="false" afterPath="$PROJECT_DIR$/fluxNoise/python/noiselib.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -13,20 +17,6 @@
   </component>
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/projects$projects.coverage" NAME="projects Coverage Results" MODIFIED="1586273060118" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-  </component>
-  <component name="DatabaseView">
-    <option name="SHOW_INTERMEDIATE" value="true" />
-    <option name="GROUP_DATA_SOURCES" value="true" />
-    <option name="GROUP_SCHEMA" value="true" />
-    <option name="GROUP_CONTENTS" value="false" />
-    <option name="SORT_POSITIONED" value="false" />
-    <option name="SHOW_EMPTY_GROUPS" value="false" />
-    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
-    <option name="HIDDEN_KINDS">
-      <set />
-    </option>
-    <expand />
-    <select />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -53,7 +43,7 @@
     <property name="last_opened_file_path" value="Z:/mcdermott-group/data/GapEngineer/QP_Simulation" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="settings.editor.selected.configurable" value="PyScientificConfigurable" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -63,7 +53,7 @@
       <recent name="C:\Repositories\Analysis\projects" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.analyze_QP_triggered_on_charge2">
+  <component name="RunManager" selected="Python.analyze_readout_fidelity_stats (1)">
     <configuration name="projects" type="JupiterNotebook" factoryName="Jupyter Notebook">
       <module name="projects" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -103,6 +93,28 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="analyze_QPTunneling_Markov" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="projects" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/GapEngineering/Markov_Python2/Arxiv" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/GapEngineering/Markov_Python2/Arxiv/analyze_QPTunneling_Markov.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="analyze_QPTunneling_pomegranate" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="projects" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -125,7 +137,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="analyze_QP_rate_stats (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="analyze_QP_rate_stats" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="projects" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -139,25 +151,6 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/GapEngineering/Markov_Python2/analyze_QP_rate_stats.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="analyze_QP_triggered_on_charge2" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="projects" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fluxNoise/python" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/fluxNoise/python/analyze_QP_triggered_on_charge2.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -188,35 +181,32 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="noiselib" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="Doctests in analyze_QPTunneling_Markov" type="tests" factoryName="Doctests" temporary="true" nameIsGenerated="true">
       <module name="projects" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fluxNoise/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/GapEngineering/Markov_Python2/Arxiv" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/fluxNoise/python/noiselib.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/GapEngineering/Markov_Python2/Arxiv/analyze_QPTunneling_Markov.py" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.analyze_QP_triggered_on_charge2" />
-        <item itemvalue="Python.noiselib" />
-        <item itemvalue="Python.analyze_QPTunneling_pomegranate" />
-        <item itemvalue="Python.analyze_QP_rate_stats (1)" />
         <item itemvalue="Python.analyze_readout_fidelity_stats (1)" />
+        <item itemvalue="Python.analyze_QP_rate_stats" />
+        <item itemvalue="Python.analyze_QPTunneling_Markov" />
+        <item itemvalue="Python.analyze_QPTunneling_pomegranate" />
+        <item itemvalue="Python tests.Doctests in analyze_QPTunneling_Markov" />
       </list>
     </recent_temporary>
   </component>
@@ -237,7 +227,11 @@
       <workItem from="1587759464200" duration="3000" />
       <workItem from="1587760604966" duration="64000" />
       <workItem from="1587760680728" duration="8612000" />
-      <workItem from="1587830347779" duration="2209000" />
+      <workItem from="1587830347779" duration="6088000" />
+      <workItem from="1588047133352" duration="13888000" />
+      <workItem from="1588611680859" duration="745000" />
+      <workItem from="1588617982430" duration="179000" />
+      <workItem from="1588778964497" duration="323000" />
     </task>
     <task id="LOCAL-00001" summary="Update- LIU">
       <created>1587742832457</created>
@@ -267,7 +261,14 @@
       <option name="project" value="LOCAL" />
       <updated>1587768492044</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Everything works in the virtual environment. Next make it compatible with lab computers' default environment- LIU">
+      <created>1587833124298</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1587833124298</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TodoView">
@@ -287,37 +288,58 @@
     <MESSAGE value="Pomegranate summarized- LIU" />
     <MESSAGE value="Pomegranate works for the python 2 now- LIU" />
     <MESSAGE value="Add the HMM correction model to noiselib.py- LIU" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add the HMM correction model to noiselib.py- LIU" />
+    <MESSAGE value="Everything works in the virtual environment. Next make it compatible with lab computers' default environment- LIU" />
+    <option name="LAST_COMMIT_MESSAGE" value="Everything works in the virtual environment. Next make it compatible with lab computers' default environment- LIU" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="894" y="5" key="CommitChangelistDialog2" timestamp="1587768491388">
+    <state x="817" y="350" key="#Notifications" timestamp="1588271134142">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="894" y="5" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1587768491388" />
-    <state x="686" y="214" key="FileChooserDialogImpl" timestamp="1587832398020">
+    <state x="817" y="350" key="#Notifications/0.0.1920.1040@0.0.1920.1040" timestamp="1588271134142" />
+    <state x="891" y="5" key="CommitChangelistDialog2" timestamp="1587833123618">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="686" y="214" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1587832398020" />
+    <state x="891" y="5" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1587833123618" />
+    <state x="686" y="214" width="762" height="648" key="FileChooserDialogImpl" timestamp="1588091865897">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="686" y="214" width="762" height="648" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1588091865897" />
+    <state width="1865" height="254" key="GridCell.Tab.0.bottom" timestamp="1588606925554">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1865" height="254" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1588606925554" />
+    <state width="1865" height="254" key="GridCell.Tab.0.center" timestamp="1588606925553">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1865" height="254" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1588606925553" />
+    <state width="1865" height="254" key="GridCell.Tab.0.left" timestamp="1588606925553">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1865" height="254" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1588606925553" />
+    <state width="1865" height="254" key="GridCell.Tab.0.right" timestamp="1588606925553">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1865" height="254" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1588606925553" />
     <state x="820" y="352" key="MultipleFileMergeDialog" timestamp="1587742851066">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="820" y="352" key="MultipleFileMergeDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1587742851066" />
-    <state x="336" y="77" key="SettingsEditor" timestamp="1587768979289">
+    <state x="336" y="77" key="SettingsEditor" timestamp="1588606704944">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="336" y="77" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1587768979289" />
-    <state x="452" y="187" key="Vcs.Push.Dialog.v2" timestamp="1587768504788">
+    <state x="336" y="77" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1588606704944" />
+    <state x="452" y="187" key="Vcs.Push.Dialog.v2" timestamp="1587833140648">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="452" y="187" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1587768504788" />
-    <state x="602" y="0" width="716" height="1040" key="find.popup" timestamp="1587696290378">
+    <state x="452" y="187" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1587833140648" />
+    <state x="931" y="-19" width="716" height="1040" key="find.popup" timestamp="1588087426623">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="602" y="0" width="716" height="1040" key="find.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1587696290378" />
-    <state x="584" y="258" key="git4idea.merge.GitPullDialog" timestamp="1587768497941">
+    <state x="931" y="-19" width="716" height="1040" key="find.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1588087426623" />
+    <state x="584" y="258" key="git4idea.merge.GitPullDialog" timestamp="1587833132701">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="584" y="258" key="git4idea.merge.GitPullDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1587768497941" />
+    <state x="584" y="258" key="git4idea.merge.GitPullDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1587833132701" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -329,5 +351,8 @@
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/projects$Doctests_in_analyze_QPTunneling_Markov.coverage" NAME="Doctests in analyze_QPTunneling_Markov Coverage Results" MODIFIED="1588087641178" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GapEngineering/Markov_Python2/Arxiv" />
   </component>
 </project>

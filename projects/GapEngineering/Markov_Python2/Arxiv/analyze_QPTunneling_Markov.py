@@ -42,7 +42,7 @@ for i in range(len(meas_trace)):
     if state_trace[i] == 1:
         meas_trace[i] = np.random.choice([0, 1], p=[p_e0_, p_e1_])
 
-def meas_trace_recover(meas_trace, readout_fidelity, t_QP):
+def meas_trace_recover(meas_trace, readout_fidelity):
     """
 
     :param meas_trace:
@@ -57,7 +57,7 @@ def meas_trace_recover(meas_trace, readout_fidelity, t_QP):
     meas_trace = [0,1,0,1,1,1,1,0,0,1]
     readout_fidelity = [0.95, 0.75]
     t_QP = 10
-    >>> meas_trace_recover(meas_trace, readout_fidelity, t_QP)
+    # >>> meas_trace_recover(meas_trace, readout_fidelity, t_QP)
     [0,1,1,1,1,1,1,1,1,1]
 
     """
@@ -71,21 +71,21 @@ def meas_trace_recover(meas_trace, readout_fidelity, t_QP):
     t_meas_VTB = 0.1
     p_QP_VTB = 1.0 - np.exp(-t_meas_VTB/t_QP_VTB)
     # Transition matrix
+    # p_QP_VTB = 0.01
     p_ee_VTB = np.log(1.0 - p_QP_VTB)
     p_eg_VTB = np.log(p_QP_VTB)
     p_ge_VTB = np.log(p_QP_VTB)
     p_gg_VTB = np.log(1.0 - p_QP_VTB)
-
     # Initial Probabilities, also known as the prior probability, calculated from Transition matrix
     p_e_VTB = np.log(0.5)
     p_g_VTB = np.log(1.0-p_e_VTB)
 
     # Emission Probabilities, this is the human choice and needs to be optimized, the p_g0_VTB is the most important one
     p_e1_VTB = np.log(0.75)
-    p_e0_VTB = np.log(1.0 - p_e1_VTB)
+    p_e0_VTB = -p_e1_VTB
     p_g0_VTB = np.log(0.95)
-    p_g1_VTB = np.log(1.0 - p_g0_VTB)
-
+    p_g1_VTB = -p_g0_VTB
+    print p_g0_VTB, p_g1_VTB, p_e0_VTB, p_e1_VTB
 
 
     probabilities = []
@@ -130,15 +130,15 @@ def state_recover_diff(state_trace, recover_trace):
             recover_transitions += 1
     print('state:', state_transitions, 'recover:', recover_transitions)
     return state_transitions, recover_transitions
-recover_trace = meas_trace_recover(meas_trace, readout_fidelity, t_QP_)
+recover_trace = meas_trace_recover(meas_trace, readout_fidelity)
 state_recover_diff(state_trace, recover_trace)
 
 
 # plot the result
 fig = plt.figure(figsize=(20, 10))
 plt.plot(t, state_trace + 1.5, 'o-', label=r"State Trace")
-plt.plot(t, meas_trace, 'o-', label=r"Meas Trace")
-plt.plot(t, recover_trace - 1.5, 'o-', label=r"Recover Trace")
+# plt.plot(t, meas_trace, 'o-', label=r"Meas Trace")
+plt.plot(t, recover_trace , 'o-', label=r"Recover Trace")
 # plt.plot(t, recover_trace-state_trace - 3, 'o-', label=r"Recover-State Trace")
 plt.legend(bbox_to_anchor=(0.85, 0.75), loc=2)
 plt.show()

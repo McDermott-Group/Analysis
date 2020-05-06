@@ -123,7 +123,8 @@ ax.plot(n_trials)
 ax.set_xlabel('Trial')
 ax.set_ylabel('Mean Flip Rate')
 plt.draw()
-plt.pause(0.05)
+plt.show()
+# plt.pause(0.05)
 
 
 # def bin_dwell_times(o):
