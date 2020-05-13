@@ -1,7 +1,7 @@
 """Model Pomegranate Author: Jacob Schreiber.
 Author Vincent Liu and Sohair Abdullah."""
 
-
+import numpy as np
 from pomegranate import *
 from numpy import *
 import string
@@ -14,6 +14,7 @@ def generate_hidden_signal(length=8192, charge_burst_time=4000, p_QP=[0.01, 0.01
     :param length: the length of the hidden signal, eg. 8192
     :param charge_burst_time: the time where we have the charge burst, eg. 2456
     :param p_QP: p_QP = [p_QP_before, p_QP_after], a two element list consists QP tunneling rate before and after the burst
+        p_QP = 1.0-np.exp(-t_meas/t_QP), e.g. t_meas = 100 us, t_QP = 10 ms, p_QP=0.01
     :return: the hidden signal [0,1,0,0,1,1,1,...]
     """
 
@@ -108,6 +109,73 @@ def observed_to_recovered_signal(observed_signal, readout_fidelity=[0.95, 0.75],
     return recovered_signal
 
 
+def observed_to_recovered_signal_LIU(observed_signal, readout_fidelity=[0.95, 0.75], p_QP=0.01):
+    """
+
+    :param observed_signal:
+        A list of integer 0s ands 1s
+    :param readout_fidelity:
+        A list of ground and excited state readout fidelity, [f_g, f_e]
+    :param t_QP:
+        A number which is the assumed QP tunneling rate in units of ms
+    :return: recovered_signal, type array
+        A list of integer 0s ands 1s based Markov_Python3 Chain and smoothed Viberti algorithm
+    Examples
+    observed_signal = [0,1,0,1,1,1,1,0,0,1]
+    readout_fidelity = [0.95, 0.75]
+    t_QP = 10
+    # >>> observed_to_recovered_signal_LIU(observed_signal, readout_fidelity, p_QP)
+    [0,1,1,1,1,1,1,1,1,1]
+
+    """
+
+    recovered_signal = np.zeros(len(observed_signal))
+
+    # Transition matrix
+    p_ee_VTB = np.log(1.0 - p_QP)
+    p_eg_VTB = np.log(p_QP)
+    p_ge_VTB = np.log(p_QP)
+    p_gg_VTB = np.log(1.0 - p_QP)
+
+    # Initial Probabilities, also known as the prior probability, calculated from Transition matrix
+    p_e_VTB = np.log(0.5)
+    p_g_VTB = np.log(1.0-p_e_VTB)
+
+    # Emission Probabilities, this is the human choice and needs to be optimized, the p_0g_VTB is the most important one
+    p_0g_VTB = np.log(readout_fidelity[0])
+    p_1g_VTB = np.log(1.0-readout_fidelity[0])
+    p_1e_VTB = np.log(readout_fidelity[1])
+    p_0e_VTB = np.log(1.0-readout_fidelity[1])
+
+    print p_0g_VTB, p_1g_VTB, p_0e_VTB, p_1e_VTB
+
+    probabilities = []
+    if observed_signal[0] == 0:
+        probabilities.append((p_e_VTB + p_1e_VTB, p_g_VTB + p_1g_VTB))
+    else:
+        probabilities.append((p_e_VTB + p_0e_VTB, p_g_VTB + p_0g_VTB))
+
+    for i in range(len(observed_signal)):
+        prev_e, prev_g = probabilities[-1]
+        if observed_signal[i] == 0:
+            curr_e = max(prev_e + p_ee_VTB + p_1e_VTB, prev_g + p_ge_VTB + p_1e_VTB)
+            curr_g = max(prev_e + p_eg_VTB + p_1g_VTB, prev_g + p_gg_VTB + p_1g_VTB)
+            probabilities.append((curr_e, curr_g))
+        else:
+            curr_e = max(prev_e + p_ee_VTB + p_0e_VTB, prev_g + p_ge_VTB + p_0e_VTB)
+            curr_g = max(prev_e + p_eg_VTB + p_0g_VTB, prev_g + p_gg_VTB + p_0g_VTB)
+            probabilities.append((curr_e, curr_g))
+
+    for p_index in range(len(probabilities)-1):
+        p = probabilities[p_index]
+        if p[0] < p[1]:
+            recovered_signal[p_index] = 0
+        else:
+            recovered_signal[p_index] = 1
+
+    return recovered_signal
+
+
 def transitions_count(signal):
     """
 
@@ -143,9 +211,9 @@ Parameters Setup
 # p_1e_VTB = 0.75
 # readout_fidelity_VTB = [p_0g_VTB, p_1e_VTB]
 #
-# Hidden_Signal = generate_hidden_signal()
+# Hidden_Signal = generate_hidden_signal(p_QP=[0.01, 0.01])
 # Observed_Signal = hidden_to_observed_signal(Hidden_Signal)
-# Recovered_Signal = observed_to_recovered_signal(Observed_Signal)
+# Recovered_Signal = observed_to_recovered_signal(Observed_Signal, p_QP=0.01)
 # #
 # fig = plt.figure(figsize=(12, 4))
 # plt.plot(asarray(Hidden_Signal)+1.5, 'o-', label=r"{} Hidden Transitions".format(transitions_count(Hidden_Signal)))
