@@ -4,8 +4,12 @@ import noiselib
 reload(noiselib)
 from noiselib import matpaths
 from dataChest import *
+import general.calibration as cal
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
+import datasets
+reload(datasets)
+from datasets import *
 
 # q, date, files, thresh = 'Q2', '03-24-20', range(251+1)
 # q, date, files, thresh = 'Q2', '04-20-20', range(2,598+1)
@@ -18,30 +22,45 @@ from scipy.optimize import curve_fit
 # q, date, files, thresh = 'Q4', '04-24-20', range(0,357), 0.07
 # q, date, files, thresh = 'Q4', '04-25-20', range(0,641), 0.19 ###
 # q, date, files, thresh = 'Q4', '04-26-20', range(0,835), 0.26
-# q, date, filesP1_I, filesP1_X, filesT1, thresh = 'Q3', '04-29-20', range(112,493), range(112,493), range(0,381), 0.33
-# q, date, filesP1_I, filesP1_X, filesT1, thresh = 'Q3', '04-29-20', range(0,63), range(0,63), range(0,63), 0.25
-q, date, filesP1_I, filesP1_X, filesT1, thresh = 'Q4', '04-30-20', range(0,231), range(0,231), range(0,231), 0.44
+# q, date, filesP1, filesT1, thresh = 'Q3', '04-29-20', range(112,493), range(0,381), 0.33 # really bad
+# q, date, filesP1, filesT1, thresh = 'Q3', '04-29-20', range(0,63), range(0,63), 0.25 # shows nothing
 
-fP1_I = matpaths(q,date,'P1_I',filesP1_I)
-fP1_X = matpaths(q,date,'P1_X',filesP1_X)
-fT1 = matpaths(q,date,'T1',filesT1)
+# ds = q4_0430_T1
+# ds = q3_0501_T1
+# ds = q1_0503_T1
+ds = q2_0505_T1
+
+fP1_I = matpaths(fileName='P1_I', fileNums='files_P1', **ds)
+fP1_X = matpaths(fileName='P1_X', fileNums='files_P1', **ds)
+fT1 = matpaths(fileName='T1', fileNums='files_T1', **ds)
 o = None
 t = None
-P1_I = np.array([])
-P1_X = np.array([])
+P1 = { 'I':np.array([]),
+       'X': np.array([]) }
 
-for f in fP1_I:
-    try:
-        data = noiselib.loadmat( f )
-    except:
-        data = {'Single_Shot_Occupation': np.nan}
-    P1_I = np.append(P1_I, data['Single_Shot_Occupation'])
-for f in fP1_X:
-    try:
-        data = noiselib.loadmat( f )
-    except:
-        data = {'Single_Shot_Occupation': np.nan}
-    P1_X = np.append(P1_X, data['Single_Shot_Occupation'])
+if 'recalibrate' in ds and ds['recalibrate']:
+    print 'recalibrating...'
+    data = noiselib.loadmat( fP1_I[0] )
+    iq0 = np.array((data['Is'],data['Qs']))
+    data = noiselib.loadmat( fP1_X[0] )
+    iq1 = np.array((data['Is'],data['Qs']))
+    c = cal.CalibratedStates( (0,iq0), (1,iq1), plot=False)
+
+for files, gate in [ (fP1_I,'I'), (fP1_X,'X') ]:
+    for f in files:
+        try:
+            data = noiselib.loadmat( f )
+        except:
+            print 'corrupted file:', f
+            data = { 'Single_Shot_Occupations': [np.nan],
+                     'Single_Shot_Occupation': [np.nan]}
+        if 'recalibrate' in ds and ds['recalibrate']:
+            states, SSO, _ = c.get_single_shot_occupation( np.array((data['Is'],
+                                                                     data['Qs'])) )
+            sso = SSO[1]
+        else:
+            sso = data['Single_Shot_Occupation']
+        P1[gate] = np.append(P1[gate], sso)
 for f in fT1:
     data = noiselib.loadmat( f )
     o_new = np.array(data['Single_Shot_Occupation'])
@@ -50,40 +69,47 @@ for f in fT1:
         o = np.empty((0,o_new.size))
     o = np.concatenate([o, [o_new]])
 
+# take a slice of all the T1 curves, filter based on this or on P1
 slice_index = 45
 slice = np.mean(o[:,slice_index-5:slice_index+5], axis=1)
-# filter = slice > thresh
-filter = P1_I > 0.064
+if 'thresh_P1' in ds:
+    filter = P1['I'] > ds['thresh_P1']
+elif 'thresh_T1' in ds:
+    filter = slice > ds['thresh_T1']
 
-fig = plt.figure()
-ax = fig.add_subplot(111)
-ax.plot(filesP1_I, P1_I, linewidth=0.5)
-ax.scatter(filesP1_I, P1_I, c=filter, cmap='bwr', s=4)
-ax.plot(filesP1_X, P1_X, linewidth=0.5)
-ax.scatter(filesP1_X, P1_X, c=filter[:len(P1_X)], cmap='bwr', s=4)
+# plot P1
+fig, ax = plt.subplots()
+x = range(len(fP1_I))
+ax.plot(x, P1['I'], linewidth=0.5)
+ax.scatter(x, P1['I'], c=filter, cmap='bwr', s=4)
+ax.plot(x, P1['X'], linewidth=0.5)
+ax.scatter(x, P1['X'], c=filter[:len(P1['X'])], cmap='bwr', s=4)
 ax.set_xlabel('File')
 ax.set_ylabel('P1')
+fig.suptitle(ds['Q']+'\n'+str(ds['date']))
 plt.draw()
 plt.pause(0.05)
 
-fig = plt.figure()
-ax = fig.add_subplot(111)
+# hist of T1 cut
+fig, ax = plt.subplots()
 h, bins = np.histogram(slice, bins=40)
 ax.hist(slice[filter], bins, color='red')
 ax.hist(slice[~filter], bins, color='blue', alpha=0.6)
 ax.set_xlabel('Single Shot Occupation near {:.2f}us'.format(t[slice_index]/1000))
 ax.set_ylabel('Counts')
+fig.suptitle(ds['Q']+'\n'+str(ds['date']))
 plt.draw()
 plt.pause(0.05)
 
 yfilter = o[filter].mean(axis=0)
 nfilter = o[~filter].mean(axis=0)
 
-fig = plt.figure()
-ax = fig.add_subplot(111)
+# T1 curves
+fig, ax = plt.subplots()
 ax.set_xlabel('Qubit Drive to Readout [ns]')
 ax.set_ylabel('Single Shot Occupation')
 ax.set_yscale('log')
+fig.suptitle(ds['Q']+'\n'+str(ds['date']))
 # ax.plot(t, np.transpose(o), linewidth=0.2)
 ax.plot(t, np.transpose(o[filter]), 'r', linewidth=0.2)
 ax.plot(t, np.transpose(o[~filter]), 'b', linewidth=0.2)
@@ -91,6 +117,8 @@ ax.plot(t, yfilter, linewidth=4)
 ax.plot(t, nfilter, linewidth=4)
 plt.draw()
 plt.pause(0.05)
+
+# fit T1 and plot fits
 
 def exponential(t, b, a, tau):
     return b + a*np.exp(-t/tau)
@@ -103,16 +131,19 @@ def poisoned_exponential_simul(t, a0, a1, tau_r, n_qp0, n_qp1, tau_qp0, tau_qp1)
                      poisoned_exponential(t, 0, a1, tau_r, n_qp1, tau_qp1)])
 
 popt, pcov = curve_fit(poisoned_exponential_simul, 
-                                   t, np.ravel([yfilter,nfilter]), 
-                                   p0=[1.,1.,30.e3,1.,1.,100.e3,100.e3])
+                       t, np.ravel([yfilter,nfilter]), 
+                       p0=[1.,1.,30.e3,1.,1.,100.e3,100.e3])
 
 fits = poisoned_exponential_simul(t, *popt).reshape((2,t.size))
 ax.plot(t, np.transpose(fits), 'k:', linewidth=2)
 plt.draw()
 plt.pause(0.05)
 
-print '{:>10}{:>10}{:>10}'.format('','red','blue')
-print '{:>10}{:10.3f}{:10.3f}'.format('A',*popt[0:2])
-print '{:>10}{:10.3f}{:10}'.format('tau_R',popt[2]*1e-3,'')
-print '{:>10}{:10.3f}{:10.3f}'.format('n_QP',*popt[3:5])
-print '{:>10}{:10.3f}{:10.3f}'.format('tau_QP',popt[5]*1e-3,popt[6]*1e-3)
+text  = '{:>7}{:>10}{:>10}\n'.format('','red','blue')
+# text += '{:>7}{:10.3f}{:10.3f}\n'.format('A',*popt[0:2])
+text += '{:>7}{:>10.3f}{:>10}\n'.format('tau_R',popt[2]*1e-3,'')
+text += '{:>7}{:>10.3f}{:>10.3f}\n'.format('n_QP',*popt[3:5])
+text += '{:>7}{:>10.3f}{:>10.3f}\n'.format('tau_QP',popt[5]*1e-3,popt[6]*1e-3)
+ax.text(0, o[o>0].min(), text, family='monospace')
+plt.draw()
+plt.pause(0.05)
