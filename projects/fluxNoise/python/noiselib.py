@@ -54,7 +54,8 @@ def loadmat(filename):
                 elem_list.append(sub_elem)
         return elem_list
 
-    data = spio.loadmat(filename, struct_as_record=False, squeeze_me=True)
+    data = spio.loadmat(filename, struct_as_record=False, squeeze_me=True, 
+                                  verify_compressed_data_integrity=False)
     data = _check_keys(data)
     keys = [key for key in data.keys() if key[0] != '_']
     if len(keys) == 1:
@@ -162,6 +163,24 @@ def movingmean(a, n, axis=-1):
     return np.apply_along_axis(_movingmean, axis, a, n)
 
 
+def bin_dwell_times(o):
+     last_val = o[0]
+     count = 0
+     x0 = []
+     x1 = []
+     for v in o:
+         if v == last_val:
+             count += 1
+         else:
+             if last_val == 0:
+                 x0 += [count]
+             else:
+                 x1 += [count]
+             count = 1
+         last_val = v
+     return x0,x1
+
+
 def path_to_num(path):
     beginning, end = path.rsplit('_', 1)
     num, ext = end.split('.', 1)
@@ -169,13 +188,26 @@ def path_to_num(path):
     return path, int(num)
     
     
-def matpaths(q, date, fileName, fileNums, fluxNoise='fluxNoise2'):
+def matpaths(Q, date, fileName, fileNums, fluxNoise='fluxNoise2', **kwargs):
+    if type(fileNums) == str:
+        fileNums = kwargs[fileNums]
     if not isinstance(fileNums, (list, np.array)):
+        fileNums = [[fileNums]]
+    if not (type(fileNums[0]) in (list, np.array)):
         fileNums = [fileNums]
+    if not isinstance(date, list):
+        date = [date]
+    if len(date) != len(fileNums):
+        print len(date), len(fileNums)
+        raise Exception('The number of dates must match the number of lists of file numbers')
     dataroot = os.getenv('DATA_ROOT').replace('\\','/')
-    return [dataroot + '/{}/DR1 - 2019-12-17/CorrFar/{}/General/{}/{}/MATLABData'
-              '/{}_{:03d}.mat'.format(fluxNoise, q, date, fileName, fileName, i)
-              for i in fileNums]
+    file_paths = []
+    for j,d in enumerate(date):
+        file_paths += [dataroot + '/{}/DR1 - 2019-12-17/CorrFar/{}/General/{}/'
+                       '{}/MATLABData/{}_{:03d}.mat'.format(fluxNoise, Q, d, 
+                                                          fileName, fileName, i)
+                        for i in fileNums[j]]
+    return file_paths
 
 
 def apply_infidelity_correction(o, n_bins=9, thresh=0.5):

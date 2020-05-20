@@ -67,10 +67,20 @@ for i = 1:length(filenames)
     end
     meanI = [meanI mean(I)];
     meanQ = [meanQ mean(Q)];
-    center0I = [center0I data.Center_of_0_State_I];
-    center0Q = [center0Q data.Center_of_0_State_Q];
-    center1I = [center1I data.Center_of_1_State_I];
-    center1Q = [center1Q data.Center_of_1_State_Q];
+    if isfield(data, 'Center_of_0_State_I')
+        center0I = [center0I data.Center_of_0_State_I];
+        center0Q = [center0Q data.Center_of_0_State_Q];
+    else
+        center0I = [center0I nan];
+        center0Q = [center0Q nan];
+    end
+    if isfield(data, 'Center_of_1_State_I')
+        center1I = [center1I data.Center_of_1_State_I];
+        center1Q = [center1Q data.Center_of_1_State_Q];
+    else
+        center1I = [center1I nan];
+        center1Q = [center1Q nan];
+    end
     
     if i == 1
         % Create folder Plots if necessary.

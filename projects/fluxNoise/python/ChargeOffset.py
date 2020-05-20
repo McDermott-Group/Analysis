@@ -36,6 +36,8 @@ class ChargeOffset(object):
         data = dc.getData()
         data = data.transpose()
         labels = [l[-2:] for l in offsetVars]
+        if labels == ['ge']:
+            labels = [fpath.split('\\')[3]]
         
         abs_time = data[0]
         time = data[0] - data[0][0]
