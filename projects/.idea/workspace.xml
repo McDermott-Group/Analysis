@@ -2,11 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="84d2569e-8c60-4380-b499-09e41eda5a32" name="Default" comment="Compatible with lab computer default setup.- LIU">
+      <change afterPath="$PROJECT_DIR$/GapEngineering/ChargeReset.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/projects.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/projects.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fluxNoise/python/Markov_Python2/analyze_QPTunneling_pomegranate.py" beforeDir="false" afterPath="$PROJECT_DIR$/fluxNoise/python/Markov_Python2/analyze_QPTunneling_pomegranate.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fluxNoise/python/analyze_P1_QP3.py" beforeDir="false" afterPath="$PROJECT_DIR$/fluxNoise/python/analyze_P1_QP3.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fluxNoise/python/analyze_QP_triggered_on_charge2.py" beforeDir="false" afterPath="$PROJECT_DIR$/fluxNoise/python/analyze_QP_triggered_on_charge2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fluxNoise/python/noiselib.py" beforeDir="false" afterPath="$PROJECT_DIR$/fluxNoise/python/noiselib.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -20,6 +19,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Jupyter Notebook" />
+        <option value="Python Script" />
       </list>
     </option>
   </component>
@@ -162,6 +162,9 @@
       <module name="projects" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fluxNoise/python" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -231,7 +234,8 @@
       <workItem from="1588611680859" duration="745000" />
       <workItem from="1588617982430" duration="179000" />
       <workItem from="1588778964497" duration="1264000" />
-      <workItem from="1588780795296" duration="1938000" />
+      <workItem from="1588780795296" duration="2080000" />
+      <workItem from="1590000737299" duration="5407000" />
     </task>
     <task id="LOCAL-00001" summary="Update- LIU">
       <created>1587742832457</created>
@@ -275,7 +279,14 @@
       <option name="project" value="LOCAL" />
       <updated>1588779519375</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Compatible with lab computer default setup.- LIU">
+      <created>1590000485168</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1590000485168</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TodoView">
@@ -304,10 +315,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="817" y="350" key="#Notifications/0.0.1920.1040@0.0.1920.1040" timestamp="1588271134142" />
-    <state x="176" y="5" key="CommitChangelistDialog2" timestamp="1588779890531">
+    <state x="176" y="5" key="CommitChangelistDialog2" timestamp="1590000484495">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="176" y="5" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1588779890531" />
+    <state x="176" y="5" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1590000484495" />
     <state x="686" y="214" width="762" height="648" key="FileChooserDialogImpl" timestamp="1588781268270">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -328,26 +339,26 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1865" height="254" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1588606925553" />
-    <state x="500" y="353" width="1188" height="461" key="MultipleFileMergeDialog" timestamp="1588779607767">
+    <state x="500" y="353" width="1188" height="461" key="MultipleFileMergeDialog" timestamp="1590000494522">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="500" y="353" width="1188" height="461" key="MultipleFileMergeDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1588779607767" />
-    <state x="336" y="77" key="SettingsEditor" timestamp="1588781284325">
+    <state x="500" y="353" width="1188" height="461" key="MultipleFileMergeDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1590000494522" />
+    <state x="336" y="77" key="SettingsEditor" timestamp="1590001582988">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="336" y="77" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1588781284325" />
-    <state x="452" y="187" key="Vcs.Push.Dialog.v2" timestamp="1588779812484">
+    <state x="336" y="77" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1590001582988" />
+    <state x="452" y="187" key="Vcs.Push.Dialog.v2" timestamp="1590000532247">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="452" y="187" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1588779812484" />
+    <state x="452" y="187" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1590000532247" />
     <state x="931" y="-19" width="716" height="1040" key="find.popup" timestamp="1588087426623">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="931" y="-19" width="716" height="1040" key="find.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1588087426623" />
-    <state x="584" y="258" key="git4idea.merge.GitPullDialog" timestamp="1588779819423">
+    <state x="584" y="258" key="git4idea.merge.GitPullDialog" timestamp="1590000491227">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="584" y="258" key="git4idea.merge.GitPullDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1588779819423" />
+    <state x="584" y="258" key="git4idea.merge.GitPullDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1590000491227" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/projects$Doctests_in_analyze_QPTunneling_Markov.coverage" NAME="Doctests in analyze_QPTunneling_Markov Coverage Results" MODIFIED="1588087641178" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GapEngineering/Markov_Python2/Arxiv" />
