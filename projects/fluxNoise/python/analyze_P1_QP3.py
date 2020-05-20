@@ -22,7 +22,8 @@ def get_averaged_flips(files, label=''):
     for f in files:
         data = noiselib.loadmat(f)
         o = np.array(data['Single_Shot_Occupations{}'.format(label)])
-        o = noiselib.apply_infidelity_correction(o, 9)
+        o = noiselib.apply_infidelity_correction_HMM(o, fidelity=[0.95,0.75])
+        # o = noiselib.apply_infidelity_correction(o, 9)
         flip_avg = np.append(flip_avg, np.mean(np.abs(np.diff(o, axis=1))))
     return flip_avg
 
@@ -49,8 +50,10 @@ def plot_data(data, xlabel='', ylabel='', title=''):
 # P1_files = (234,470+1)
 # QP_files = (1,237+1)
 date, Q = '05-01-20', 'Q3'
-P1_files = (0,664+1)
-QP_files = (0,664+1)
+# P1_files = (0,664+1)
+# QP_files = (0,664+1)
+P1_files = (0,6+1)
+QP_files = (0,6+1)
 
 # plot P1
 path = ('Z:/mcdermott-group/data/fluxNoise2/DR1 - 2019-12-17/CorrFar/'
@@ -70,4 +73,5 @@ filenames = [path+'QP_Tunneling_PSD_{:03d}.mat'.format(i)
 flip_avg = get_averaged_flips(filenames, '')
 ax.plot(20*noiselib.movingmean(flip_avg, 50), label='20 x Avg Flip Rate')
 plt.draw()
-plt.pause(0.05)
+# plt.pause(0.05)
+plt.show()
