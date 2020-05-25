@@ -1,13 +1,9 @@
-# First to just follow an example
 from scipy import optimize
 from numpy import pi, sin, cos
 import numpy as np
 import matplotlib.pyplot as plt
 
 
-
-
-# np.random.seed(0)
 n = 50
 x_off = round(np.random.uniform(-0.5, 0.5), 3)
 noise_factor = 0.1
@@ -24,7 +20,6 @@ def test_func(x, a):
 
 for ig in initial_guess:
     params_curr, params_covariance_curr = optimize.curve_fit(test_func, x_data, y_data_noise, p0=[ig], method='trf')
-    # print ig, params_curr, params_covariance_curr
     if params_covariance_curr[0] < covariance:
         params = params_curr
         params_covariance = params_covariance_curr
