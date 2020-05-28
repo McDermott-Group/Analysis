@@ -2,7 +2,7 @@ import scipy.io as spio
 import numpy as np
 import os
 from Markov_Python2.analyze_QPTunneling_pomegranate import observed_to_recovered_signal
-
+from scipy.signal import periodogram
 
 def loadmat(filename):
     '''

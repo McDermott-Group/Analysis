@@ -14,6 +14,7 @@ reload(TwoMeasDataFile)
 from TwoMeasDataFile import *
 from dataChest import dataChest
 from random import randrange
+from random import randrange
 
 
 offset_path = 'fluxNoise2\DR1 - 2019-12-17\CorrFar\Q1Q2Corr\General\Parameter'

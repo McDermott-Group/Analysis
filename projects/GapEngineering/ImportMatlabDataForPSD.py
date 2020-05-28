@@ -1,9 +1,9 @@
-from scipy.signal import periodogram
-from scipy import optimize
-from numpy import random
+from noiselib import loadmat
 import numpy as np
 import matplotlib.pyplot as plt
-
+from scipy.signal import periodogram
+from numpy import random
+from scipy import optimize
 
 def generate_hidden_signal(length=8192, charge_burst_time=4000, p_QP=[0.01, 0.01]):
     """
@@ -31,27 +31,38 @@ def generate_hidden_signal(length=8192, charge_burst_time=4000, p_QP=[0.01, 0.01
     return hidden_signal
 
 
-def fit_PSD(f, f_QP):
-    f_RO = 1
-    return (4 * f_RO ** 2 * f_QP) / ((2 * f_QP) ** 2 + (2 * np.pi * f) ** 2) + (1 - f_RO ** 2) * 100e-6
+parity_string_array = []
+QP_path = ('Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev01/Leiden_2020Feb/LIU/Q1/{}/QP_Tunneling_PSD_4/MATLABData/')
+
+date = '03-16-20'
+QP_files = np.arange(0, 8, 1)
+filenames = [QP_path.format(date) + 'QP_Tunneling_PSD_4_{:03d}.mat'.format(i) for i in QP_files]
+
+for filename in filenames:
+    data = loadmat(filename)
+    o = np.array(data['Single_Shot_Occupations'])
+    for ps in o:
+        parity_string_array.append(ps)
 
 
+fs = 10000
 Spp_avg = []
 f_data = None
-avg = 100
-for i in range(avg):
-    Hidden_Signal = generate_hidden_signal(p_QP=[0.01, 0.01])
-    f, Spp = periodogram(Hidden_Signal, 10000)
+for i in range(len(parity_string_array)):
+    parity_string = parity_string_array[i]
+    # parity_string = generate_hidden_signal(p_QP=[0.01, 0.01])
+    f, Spp = periodogram(parity_string, fs)
     if i == 0:
         Spp_avg = Spp
         f_data = f
     else:
         for j in range(len(Spp_avg)):
             Spp_avg[j] += Spp[j]
-
-# to get rid of the first 0
 f_data = f_data[1:]
 Spp_avg = Spp_avg[1:]
+def fit_PSD(f, f_QP):
+    f_RO = 0.7
+    return (4 * f_RO ** 2 * f_QP) / ((2 * f_QP) ** 2 + (2 * np.pi * f) ** 2) + (1 - f_RO ** 2) * 100e-6
 
 initial_guess = [100, 200]
 covariance = float('inf')
@@ -63,14 +74,11 @@ for ig in initial_guess:
         params_covariance = params_covariance_curr
         covariance = params_covariance_curr[0]
 
-
-# print params
-
-fig = plt.figure(figsize=(12, 4))
-plt.legend(bbox_to_anchor=(0.75, 0.58), loc=2)
-plt.loglog(f_data, Spp_avg / avg, label='Simulated')
-plt.loglog(f_data, fit_PSD(f_data, params[0]), label='Fitted')
+fig = plt.figure()
+plt.loglog(f_data, Spp_avg, label='Test')
+# plt.loglog(f_data, fit_PSD(f_data, params[0]), label='Fitted')
+# axes = plt.gca()
+axes.set_ylim([1e-4, 1e-1])
 plt.xlabel('frequency [Hz]')
 plt.ylabel('PSD [1/Hz]')
 plt.show()
-

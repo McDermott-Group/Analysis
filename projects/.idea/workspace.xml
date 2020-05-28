@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="84d2569e-8c60-4380-b499-09e41eda5a32" name="Default" comment="Fix the initial guess issue by passing 5-10 guesses and choose the best fit. Need to find a way to make deal with the period.- LIU">
-      <change afterPath="$PROJECT_DIR$/GapEngineering/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/GapEngineering/.idea/GapEngineering.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/GapEngineering/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/GapEngineering/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/GapEngineering/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/GapEngineering/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/GapEngineering/PSD.py" afterDir="false" />
+    <list default="true" id="84d2569e-8c60-4380-b499-09e41eda5a32" name="Default" comment="Start playing with PSD fit. The code starts working but the fit looks not optimized.- LIU">
+      <change afterPath="$PROJECT_DIR$/GapEngineering/ImportDataForPSDhdf5.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/GapEngineering/ImportMatlabDataForPSD.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GapEngineering/PSD.py" beforeDir="false" afterPath="$PROJECT_DIR$/GapEngineering/PSD.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fluxNoise/python/analyze_QP_rates_by_trial.py" beforeDir="false" afterPath="$PROJECT_DIR$/fluxNoise/python/analyze_QP_rates_by_trial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fluxNoise/python/noiselib.py" beforeDir="false" afterPath="$PROJECT_DIR$/fluxNoise/python/noiselib.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,7 +42,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/fluxNoise/python/Markov_Python2" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/fluxNoise/python" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
@@ -58,7 +56,7 @@
       <recent name="C:\Repositories\Analysis\projects\GapEngineering" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.analyze_QP_triggered_on_charge2">
+  <component name="RunManager" selected="Python.ImportMatlabDataForPSD">
     <configuration name="projects" type="JupiterNotebook" factoryName="Jupyter Notebook">
       <module name="projects" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -76,6 +74,25 @@
       <option name="ipnbHost" value="127.0.0.1" />
       <option name="ipnbPort" value="8888" />
     </configuration>
+    <configuration name="ImportMatlabDataForPSD" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="projects" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/GapEngineering" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/GapEngineering/ImportMatlabDataForPSD.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="projects" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -90,50 +107,6 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="analyze_QPTunneling_Markov" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="projects" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/GapEngineering/Markov_Python2/Arxiv" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/GapEngineering/Markov_Python2/Arxiv/analyze_QPTunneling_Markov.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="analyze_QPTunneling_pomegranate" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="projects" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/GapEngineering/Markov_Python2" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/GapEngineering/Markov_Python2/analyze_QPTunneling_pomegranate.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -186,6 +159,25 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="analyze_charge_QP" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="projects" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fluxNoise/python" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/fluxNoise/python/analyze_charge_QP.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="analyze_readout_fidelity_stats (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="projects" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -210,11 +202,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.ImportMatlabDataForPSD" />
+        <item itemvalue="Python.analyze_charge_QP" />
         <item itemvalue="Python.analyze_QP_triggered_on_charge2" />
         <item itemvalue="Python.analyze_readout_fidelity_stats (1)" />
         <item itemvalue="Python.analyze_QP_rate_stats" />
-        <item itemvalue="Python.analyze_QPTunneling_Markov" />
-        <item itemvalue="Python.analyze_QPTunneling_pomegranate" />
       </list>
     </recent_temporary>
   </component>
@@ -243,7 +235,9 @@
       <workItem from="1588780795296" duration="2080000" />
       <workItem from="1590000737299" duration="12491000" />
       <workItem from="1590437741007" duration="2350000" />
-      <workItem from="1590440101543" duration="6694000" />
+      <workItem from="1590440101543" duration="7501000" />
+      <workItem from="1590594338914" duration="6549000" />
+      <workItem from="1590692918001" duration="7033000" />
     </task>
     <task id="LOCAL-00001" summary="Update- LIU">
       <created>1587742832457</created>
@@ -308,7 +302,14 @@
       <option name="project" value="LOCAL" />
       <updated>1590077380928</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Start playing with PSD fit. The code starts working but the fit looks not optimized.- LIU">
+      <created>1590447070495</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1590447070495</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TodoView">
@@ -332,21 +333,22 @@
     <MESSAGE value="Compatible with lab computer default setup.- LIU" />
     <MESSAGE value="Start ChargeReset play.- LIU" />
     <MESSAGE value="Fix the initial guess issue by passing 5-10 guesses and choose the best fit. Need to find a way to make deal with the period.- LIU" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fix the initial guess issue by passing 5-10 guesses and choose the best fit. Need to find a way to make deal with the period.- LIU" />
+    <MESSAGE value="Start playing with PSD fit. The code starts working but the fit looks not optimized.- LIU" />
+    <option name="LAST_COMMIT_MESSAGE" value="Start playing with PSD fit. The code starts working but the fit looks not optimized.- LIU" />
   </component>
   <component name="WindowStateProjectService">
     <state x="817" y="350" key="#Notifications" timestamp="1588271134142">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="817" y="350" key="#Notifications/0.0.1920.1040@0.0.1920.1040" timestamp="1588271134142" />
-    <state x="176" y="5" key="CommitChangelistDialog2" timestamp="1590077380308">
+    <state x="130" y="5" key="CommitChangelistDialog2" timestamp="1590447069024">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="176" y="5" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1590077380308" />
-    <state x="686" y="214" width="762" height="648" key="FileChooserDialogImpl" timestamp="1590439695825">
+    <state x="130" y="5" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1590447069024" />
+    <state x="686" y="214" width="762" height="648" key="FileChooserDialogImpl" timestamp="1590694852798">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="686" y="214" width="762" height="648" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1590439695825" />
+    <state x="686" y="214" width="762" height="648" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1590694852798" />
     <state width="1865" height="254" key="GridCell.Tab.0.bottom" timestamp="1588606925554">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -367,22 +369,22 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="500" y="353" width="1188" height="461" key="MultipleFileMergeDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1590000494522" />
-    <state x="336" y="77" key="SettingsEditor" timestamp="1590440386366">
+    <state x="336" y="77" key="SettingsEditor" timestamp="1590695456959">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="336" y="77" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1590440386366" />
-    <state x="452" y="187" key="Vcs.Push.Dialog.v2" timestamp="1590077395907">
+    <state x="336" y="77" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1590695456959" />
+    <state x="452" y="187" key="Vcs.Push.Dialog.v2" timestamp="1590447081942">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="452" y="187" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1590077395907" />
+    <state x="452" y="187" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1590447081942" />
     <state x="931" y="-19" width="716" height="1040" key="find.popup" timestamp="1588087426623">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="931" y="-19" width="716" height="1040" key="find.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1588087426623" />
-    <state x="584" y="258" key="git4idea.merge.GitPullDialog" timestamp="1590077388007">
+    <state x="584" y="258" key="git4idea.merge.GitPullDialog" timestamp="1590447075418">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="584" y="258" key="git4idea.merge.GitPullDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1590077388007" />
+    <state x="584" y="258" key="git4idea.merge.GitPullDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1590447075418" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -391,6 +393,11 @@
           <url>file://$PROJECT_DIR$/fluxNoise/python/Markov_Python2/analyze_QPTunneling_pomegranate.py</url>
           <line>3</line>
           <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fluxNoise/python/analyze_charge_QP.py</url>
+          <line>45</line>
+          <option name="timeStamp" value="3" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
