@@ -35,6 +35,10 @@ qA = 'Q3'; qB = 'Q4'; fignum = 1111;
 %     }
 % qA = 'Q3'; qB = 'Q4'; fignum = 1113; 
 
+% All 4
+% cvc0232imo - only good for 3 of them
+
+
 N_all = [];
 nA_all = [];
 nB_all = [];
