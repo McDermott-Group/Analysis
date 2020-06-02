@@ -4,7 +4,7 @@ function [window_avg_psd, psd_freq] = Plot_QP_Tunneling(CDdate, samples, ...
     %PARAMETERS
 %     reps = 8192;
 %     trials = 5;
-    refreshTime = 100e-6;
+    refreshTime = 1e-3;
 
     dataType = 'QP_Tunneling_PSD';
     path = strcat(['Z:\mcdermott-group\data\fluxNoise\',CDdate,samples, ...
