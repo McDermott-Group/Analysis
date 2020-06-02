@@ -1,14 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="84d2569e-8c60-4380-b499-09e41eda5a32" name="Default" comment="Data has can be imported from matlab scalablly. Fit can be further improved in the future.- LIU">
-      <change afterPath="$PROJECT_DIR$/GapEngineering/Arxiv/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/GapEngineering/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+    <list default="true" id="84d2569e-8c60-4380-b499-09e41eda5a32" name="Default" comment="Make things into a class. Well done!.- LIU">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GapEngineering/ImportDataForPSDhdf5.py" beforeDir="false" afterPath="$PROJECT_DIR$/GapEngineering/Arxiv/ImportDataForPSDhdf5.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GapEngineering/ImportMatlabDataForPSD.py" beforeDir="false" afterPath="$PROJECT_DIR$/GapEngineering/ImportMatlabDataForPSD.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GapEngineering/PSD.py" beforeDir="false" afterPath="$PROJECT_DIR$/GapEngineering/Arxiv/PSD.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,7 +37,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/fluxNoise/python" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/.." />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
@@ -58,7 +52,7 @@
       <recent name="C:\Repositories\Analysis\projects" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.ImportMatlabDataForPSD">
+  <component name="RunManager" selected="Python.QP_PSD">
     <configuration name="projects" type="JupiterNotebook" factoryName="Jupyter Notebook">
       <module name="projects" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -76,7 +70,7 @@
       <option name="ipnbHost" value="127.0.0.1" />
       <option name="ipnbPort" value="8888" />
     </configuration>
-    <configuration name="ImportMatlabDataForPSD" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="QP_PSD" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="projects" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -86,7 +80,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/GapEngineering/ImportMatlabDataForPSD.py" />
+      <option name="SCRIPT_NAME" value="C:\Repositories\Analysis\projects\GapEngineering\QP_PSD.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -204,7 +198,7 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.ImportMatlabDataForPSD" />
+        <item itemvalue="Python.QP_PSD" />
         <item itemvalue="Python.analyze_charge_QP" />
         <item itemvalue="Python.analyze_QP_triggered_on_charge2" />
         <item itemvalue="Python.analyze_readout_fidelity_stats (1)" />
@@ -239,7 +233,7 @@
       <workItem from="1590437741007" duration="2350000" />
       <workItem from="1590440101543" duration="7501000" />
       <workItem from="1590594338914" duration="6549000" />
-      <workItem from="1590692918001" duration="12788000" />
+      <workItem from="1590692918001" duration="13068000" />
     </task>
     <task id="LOCAL-00001" summary="Update- LIU">
       <created>1587742832457</created>
@@ -318,7 +312,21 @@
       <option name="project" value="LOCAL" />
       <updated>1590700012096</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="Make things into a class. Well done!.- LIU">
+      <created>1590717585252</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1590717585252</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Make things into a class. Well done!.- LIU">
+      <created>1590717626432</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1590717626432</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TodoView">
@@ -344,21 +352,22 @@
     <MESSAGE value="Fix the initial guess issue by passing 5-10 guesses and choose the best fit. Need to find a way to make deal with the period.- LIU" />
     <MESSAGE value="Start playing with PSD fit. The code starts working but the fit looks not optimized.- LIU" />
     <MESSAGE value="Data has can be imported from matlab scalablly. Fit can be further improved in the future.- LIU" />
-    <option name="LAST_COMMIT_MESSAGE" value="Data has can be imported from matlab scalablly. Fit can be further improved in the future.- LIU" />
+    <MESSAGE value="Make things into a class. Well done!.- LIU" />
+    <option name="LAST_COMMIT_MESSAGE" value="Make things into a class. Well done!.- LIU" />
   </component>
   <component name="WindowStateProjectService">
     <state x="817" y="350" key="#Notifications" timestamp="1588271134142">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="817" y="350" key="#Notifications/0.0.1920.1040@0.0.1920.1040" timestamp="1588271134142" />
-    <state x="130" y="5" key="CommitChangelistDialog2" timestamp="1590700010471">
+    <state x="130" y="5" key="CommitChangelistDialog2" timestamp="1590717624804">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="130" y="5" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1590700010471" />
-    <state x="686" y="214" width="762" height="648" key="FileChooserDialogImpl" timestamp="1590694852798">
+    <state x="130" y="5" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1590717624804" />
+    <state x="686" y="214" width="762" height="648" key="FileChooserDialogImpl" timestamp="1590717795829">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="686" y="214" width="762" height="648" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1590694852798" />
+    <state x="686" y="214" width="762" height="648" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1590717795829" />
     <state width="1865" height="254" key="GridCell.Tab.0.bottom" timestamp="1588606925554">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -383,18 +392,18 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="336" y="77" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1590695456959" />
-    <state x="452" y="187" key="Vcs.Push.Dialog.v2" timestamp="1590700027093">
+    <state x="452" y="187" key="Vcs.Push.Dialog.v2" timestamp="1590717640524">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="452" y="187" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1590700027093" />
+    <state x="452" y="187" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1590717640524" />
     <state x="931" y="-19" width="716" height="1040" key="find.popup" timestamp="1588087426623">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="931" y="-19" width="716" height="1040" key="find.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1588087426623" />
-    <state x="584" y="258" key="git4idea.merge.GitPullDialog" timestamp="1590700037633">
+    <state x="584" y="258" key="git4idea.merge.GitPullDialog" timestamp="1590717652116">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="584" y="258" key="git4idea.merge.GitPullDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1590700037633" />
+    <state x="584" y="258" key="git4idea.merge.GitPullDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1590717652116" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

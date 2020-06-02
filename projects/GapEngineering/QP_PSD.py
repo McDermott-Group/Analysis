@@ -29,11 +29,16 @@ class QP_PSD(object):
             for ps in ps_list:
                 self.parity_string_array.append(ps)
 
-    def get_PSD(self):
+    def get_PSD(self, yale=True):
         parity_string_array = self.parity_string_array
-        for i in range(len(parity_string_array)):
-            parity_string = parity_string_array[i]
-            # parity_string = generate_hidden_signal(p_QP=[0.01, 0.01])
+        n = len(parity_string_array)
+        for i in range(n):
+            if yale:
+                parity_string = (parity_string_array[i]-0.5)*2
+                # parity_string = [(ps - 0.5) * 2 for ps in generate_hidden_signal(p_QP=[0.01, 0.01])]
+            else:
+                parity_string = parity_string_array[i]
+
             # f, Spp = welch(parity_string, fs) # welch seems to give weird result
             freq, spetral_power_density = periodogram(parity_string, self.fs)
             if i == 0:
@@ -42,24 +47,24 @@ class QP_PSD(object):
             else:
                 for j in range(len(self.Spp_avg)):
                     self.Spp_avg[j] += spetral_power_density[j]
+        for i in range(len(self.Spp_avg)):
+            self.Spp_avg[i] = self.Spp_avg[i]/n
 
     def plot_PSD(self, fit = False):
         self.get_PSD()
         fig = plt.figure()
         if fit:
             self.fit_PSD()
-            plt.loglog(self.f_data, self.fit_PSD_target_function(self.f_data, self.params[0]), label='Fitted')
+            plt.loglog(self.f_data, self.fit_PSD_target_function(self.f_data, self.params[0], self.params[1]), label='Fitted')
         plt.loglog(self.f_data, self.Spp_avg, label='Test')
         axes = plt.gca()
-        axes.set_ylim([1e-4, 1e-1])
+        # axes.set_ylim([1e-5, 1e-1])
         plt.xlabel('frequency [Hz]')
         plt.ylabel('PSD [1/Hz]')
         plt.show()
 
-    def fit_PSD_target_function(self, f, f_QP):
-        f_RO = 0.999
+    def fit_PSD_target_function(self, f, f_QP, f_RO):
         return (4 * f_RO ** 2 * f_QP) / ((2 * f_QP) ** 2 + (2 * np.pi * f) ** 2) + (1 - f_RO ** 2) / self.fs
-
     def fit_PSD(self):
         # f_data = self.f_data
         # Spp_avg = self.Spp_avg
@@ -67,17 +72,16 @@ class QP_PSD(object):
         self.f_data = self.f_data[1:]
         self.Spp_avg = self.Spp_avg[1:]
 
-        initial_guess = [100, 200]
+        initial_guess = [0.99, 0.999, 0.9999]
         covariance = float('inf')
         for ig in initial_guess:
             # print f_data[:10]
-            params_curr, params_covariance_curr = optimize.curve_fit(self.fit_PSD_target_function, self.f_data, self.Spp_avg, p0=[ig], method='trf')
-            if params_covariance_curr[0] < covariance:
+            params_curr, params_covariance_curr = optimize.curve_fit(self.fit_PSD_target_function, self.f_data, self.Spp_avg, p0=[100, ig], method='trf')
+            print params_covariance_curr
+            if params_covariance_curr[0][0] < covariance:
                 self.params = params_curr
                 params_covariance = params_covariance_curr
-                covariance = params_covariance_curr[0]
-        # print self.params
-
+                covariance = params_covariance_curr[0][0]
 
 def generate_hidden_signal(length=8192, charge_burst_time=4000, p_QP=[0.01, 0.01]):
     """
@@ -107,9 +111,10 @@ def generate_hidden_signal(length=8192, charge_burst_time=4000, p_QP=[0.01, 0.01
 
 QP_path = ('Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev01/Leiden_2020Feb/LIU/Q1/{}/QP_Tunneling_PSD_4/MATLABData/')
 date = '03-16-20'
-QP_files = np.arange(0, 8, 1)
+QP_files = np.arange(0, 1, 1)
 filenames = [QP_path.format(date) + 'QP_Tunneling_PSD_4_{:03d}.mat'.format(i) for i in QP_files]
 
 QP_psd = QP_PSD()
 QP_psd.add_data_from_matlab(filenames)
-QP_psd.plot_PSD()
+QP_psd.plot_PSD(fit=False)
+print QP_psd.params
