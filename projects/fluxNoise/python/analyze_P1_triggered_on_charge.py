@@ -72,7 +72,7 @@ data_files = {}
 # for k,f in enumerate(files):
 for k,f in [(i,files[i]) for i in whitelist]:
     path, num = noiselib.path_to_num(f)
-    DF = TwoMeasDataFile(path.format(num+Q_A-1), 1, 2)
+    DF = TwoMeasDataFile(path.format(num+Q_A-1))
     DF.set_trigger_params(100000., 100, 2)
     # DF.apply_infidelity_correction(7)
     trigs = DF.get_triggers()
@@ -81,7 +81,7 @@ for k,f in [(i,files[i]) for i in whitelist]:
     data_files[f] = DF
     print k, trigs
     for trial, rep in trigs:
-        # DF.plot(trial)
+        DF.plot(trial)
         P1 = DF.get_P1_around_trig((trial,rep))
         nreps = P1.size
         n_trace[10000-rep:10000+nreps-rep] += 1

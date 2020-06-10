@@ -33,7 +33,7 @@ def loadmat(filename):
             if isinstance(elem, spio.matlab.mio5_params.mat_struct):
                 d[strg] = _todict(elem)
             elif isinstance(elem, np.ndarray):
-                d[strg] = _tolist(elem)
+                d[strg] = elem #_tolist(elem) # not sure we need to check every elem
             else:
                 d[strg] = elem
         return d

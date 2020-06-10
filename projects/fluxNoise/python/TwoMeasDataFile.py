@@ -6,12 +6,17 @@ from noiselib import movingmean
 
 class TwoMeasDataFile(object):
     
-    def __init__(self, path, charge_SB, meas_SB):
+    def __init__(self, path, charge_var='Single_Shot_Occupations_SB1', meas_var='Single_Shot_Occupations_SB2'):
         self.path = path
-        self.meas_SB = meas_SB
         data = noiselib.loadmat( path )
-        self.o_charge = np.array(data['Single_Shot_Occupations_SB{}'.format(charge_SB)], dtype=np.bool)
-        self.o_meas = np.array(data['Single_Shot_Occupations_SB{}'.format(meas_SB)], dtype=np.bool)
+        self.o_charge = np.array(data[charge_var], dtype=np.bool)
+        if type(meas_var) == str:
+            self.o_meas = np.array(data[meas_var], dtype=np.bool)
+            self.meas_var = meas_var
+        else:
+            self.os_meas = [np.array(data[var], dtype=np.bool) for var in meas_var]
+            self.o_meas = self.os_meas[0]
+            self.meas_var = meas_var[0]
     
     def apply_infidelity_correction(self, n_bins=9, thresh=0.5):
         self.o_meas = noiselib.apply_infidelity_correction(self.o_meas, n_bins, thresh)
@@ -42,20 +47,20 @@ class TwoMeasDataFile(object):
     def plot(self, trial, plot='P1', smoothing=20):
         path, num = noiselib.path_to_num(self.path)
         o = self.o_meas[trial]
-        fig = plt.figure()
+        fig,axs = plt.subplots(3, 1, sharex=True)
         
-        ax = fig.add_subplot(311)
-        ax.set_title(num)
+        ax = axs[0]
+        ax.set_title('{}.{}'.format(num,trial))
         
         ax.plot(self._trigger_trace(trial), label='Trigger Trace')
         ax.plot(movingmean(self.o_charge[trial], 100), linewidth=0.5, label='Smoothed P1 - Charge Qubit')
         ax.get_xaxis().set_ticks([])
         
-        ax = fig.add_subplot(312)
+        ax = axs[1]
         ax.plot(o, linewidth=0.2, label='P1')
         ax.get_xaxis().set_ticks([])
         
-        ax = fig.add_subplot(313)
+        ax = axs[2]
         end = self.o_meas[0].size - 1
         if plot == 'P1':
             ax.plot(movingmean(o, smoothing), label='Smoothed P1')
@@ -92,15 +97,18 @@ class TwoMeasDataFile(object):
         if x == 'end':
             x = self.o_meas[0].size - 1
         data = noiselib.loadmat( path )
-        o_meas = np.array(data['Single_Shot_Occupations_SB{}'.format(self.meas_SB)], dtype=np.bool)
+        o_meas = np.array(data['Single_Shot_Occupations_SB{}'.format(self.meas_var)], dtype=np.bool)
         o_meas = noiselib.apply_infidelity_correction(o_meas, 9, 0.5)
         means = np.mean(np.abs(np.diff(o_meas,axis=1)), axis=1)
         # self.ax.scatter( x, np.mean(means) )
         self.ax.errorbar( x, np.mean(means), np.std(means)/np.sqrt(len(means)), marker='.', mfc='green', mec='green', ecolor='green' )
     
-    def get_P1_around_trig(self, trial_rep, reps_before=1e6, reps_after=1e6):
+    def get_P1_around_trig(self, trial_rep, reps_before=1e6, reps_after=1e6, meas_index=None):
         trial, rep = trial_rep
-        o = self.o_meas[trial]
+        if not meas_index:
+            o = self.o_meas[trial]
+        else:
+            o = self.os_meas[meas_index][trial]
         i_0 = max(0, rep - reps_before)
         i_max = min(o.size, rep + reps_after)
         return o[i_0:i_max]

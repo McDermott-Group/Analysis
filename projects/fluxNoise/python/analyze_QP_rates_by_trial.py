@@ -23,7 +23,7 @@ path = 'Z:\\mcdermott-group\\data\\fluxNoise2\\DR1 - 2019-12-17\\CorrFar\\Q1Q2Co
 flip_rates = np.array([])
 QPT = QPTunneling()
 for i in range(0,588,2): #588
-    DF = TwoMeasDataFile(path.format(i), 1, 2)
+    DF = TwoMeasDataFile(path.format(i))
     # DF.apply_infidelity_correction(9)
     flips = np.abs(np.diff(DF.o_meas, axis=1))
     flips = movingmean(flips,500)
