@@ -214,7 +214,7 @@ Parameters Setup
 # Hidden_Signal = generate_hidden_signal(p_QP=[0.01, 0.01])
 # Observed_Signal = hidden_to_observed_signal(Hidden_Signal)
 # Recovered_Signal = observed_to_recovered_signal(Observed_Signal, p_QP=0.01)
-# #
+
 # fig = plt.figure(figsize=(12, 4))
 # plt.plot(asarray(Hidden_Signal)+1.5, 'o-', label=r"{} Hidden Transitions".format(transitions_count(Hidden_Signal)))
 # plt.plot(asarray(Recovered_Signal), 'o-', label=r"{} Recovered Transitions".format(transitions_count(Recovered_Signal)))
