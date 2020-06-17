@@ -27,6 +27,9 @@ class QP_PSD(object):
             data = loadmat(file)
             ps_list = np.array(data[data_type])
             for ps in ps_list:
+                ps = np.array(generate_hidden_signal(p_QP=[0.1, 0.1]))
+                # print type(ps)
+                # print ps[:10]
                 self.parity_string_array.append(ps)
 
     def get_PSD(self, yale=True):
@@ -111,9 +114,8 @@ def generate_hidden_signal(length=8192, charge_burst_time=4000, p_QP=[0.01, 0.01
 
 QP_path = ('Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev01/Leiden_2020Feb/LIU/Q1/{}/QP_Tunneling_PSD_4/MATLABData/')
 date = '03-16-20'
-QP_files = np.arange(0, 1, 1)
+QP_files = np.arange(0, 9, 1)
 filenames = [QP_path.format(date) + 'QP_Tunneling_PSD_4_{:03d}.mat'.format(i) for i in QP_files]
-
 QP_psd = QP_PSD()
 QP_psd.add_data_from_matlab(filenames)
 QP_psd.plot_PSD(fit=False)
