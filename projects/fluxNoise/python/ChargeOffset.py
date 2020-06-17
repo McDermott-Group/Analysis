@@ -65,6 +65,7 @@ class ChargeOffset(object):
         if dataset is None:
             dataset = self._last_dataset_added
         self.unwrapped_charge[dataset][label][start:end] = np.nan
+        self.fit_R2[dataset][label][start:end] = np.nan
         return self
         
     def _above(self, array, threshold=0.1):
@@ -213,10 +214,10 @@ class ChargeOffset(object):
         plt.draw()
         plt.pause(0.05)
         
-    def get_files_triggered_on_bad_fit(self, dataset, label, path):
+    def get_files_triggered_on_bad_fit(self, dataset, label, path, thresh=0.9):
         """Takes in a specific dataset tag and the path to the folder holding the
         files that were fit to get each individual offset curve."""
-        large_err_indicies = np.argwhere(self.fit_R2[dataset][label] < 0.9)
+        large_err_indicies = np.argwhere(self.fit_R2[dataset][label] < thresh)
         times = self.abs_time[dataset][large_err_indicies]
         times = times.transpose()[0]
         return self._files_closest_to_times_mat(path, times)

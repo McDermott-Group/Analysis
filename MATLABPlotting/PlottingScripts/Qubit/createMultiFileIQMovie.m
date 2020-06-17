@@ -114,10 +114,12 @@ for i = 1:length(filenames)
         hold on
         plot(meanI(1:j), meanQ(1:j), 'r-', 'LineWidth', 2)
         plot(meanI(j), meanQ(j), 'k+', 'MarkerSize', 10)
-        plot(center0I(1:j), center0Q(1:j), 'g-', 'LineWidth', 2)
-        plot(center0I(j), center0Q(j), 'k+', 'MarkerSize', 10)
-        plot(center1I(1:j), center1Q(1:j), 'c-', 'LineWidth', 2)
-        plot(center1I(j), center1Q(j), 'k+', 'MarkerSize', 10)
+        if isfield(data, 'Center_of_0_State_I')
+            plot(center0I(1:j), center0Q(1:j), 'g-', 'LineWidth', 2)
+            plot(center0I(j), center0Q(j), 'k+', 'MarkerSize', 10)
+            plot(center1I(1:j), center1Q(1:j), 'c-', 'LineWidth', 2)
+            plot(center1I(j), center1Q(j), 'k+', 'MarkerSize', 10)
+        end
         hold off
         axis(axs);
         grid on

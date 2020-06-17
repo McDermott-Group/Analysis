@@ -51,7 +51,7 @@ data_files = {}
 # for k,f in enumerate(files):
 for k,f in [(i,files[i]) for i in whitelist[:]]:
     path, num = noiselib.path_to_num(f)
-    DF = TwoMeasDataFile(path.format(num+Q_A-1), 1, 2)
+    DF = TwoMeasDataFile(path.format(num+Q_A-1))
     DF.set_trigger_params(1000000., 1000, 0.05)
     DF.apply_infidelity_correction_HMM(fidelity=[0.95, 0.75])
     # DF.apply_infidelity_correction(9)

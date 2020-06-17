@@ -75,3 +75,13 @@ q1_0504_QP = {
       'thresh_P1': 0.05,
     'path_charge': 'fluxNoise2\DR1 - 2019-12-17\CorrFar\Q1\General\Parameter\cxa1458apn_charge_offset.hdf5'
 }
+
+
+
+template = {
+              'Q': 'Q1Q2Corr',
+           'date': '05-05-20',
+       'files_T1': [],
+      'thresh_charge': 0.8,
+    'path_charge': 'fluxNoise2\DR1 - 2019-12-17\CorrFar\Q1Q2Corr\General\Parameter\cxs2305ngo_correlation.hdf5'
+}
