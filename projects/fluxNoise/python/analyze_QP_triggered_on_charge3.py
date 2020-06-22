@@ -15,20 +15,24 @@ from random import randrange
 
 
 Q_A, Q_B = 1,2
-offset_path = 'fluxNoise2\DR1 - 2019-12-17\CorrFar\Q1Q2Corr\General\Parameter'
+charge_path = ('fluxNoise2\DR1 - 2019-12-17\CorrFar\Q1Q2Corr\General'
+               '\Parameter\{}_correlation.hdf5')
 CO = ChargeOffset()
-CO.add_dataset(offset_path + '\cvi1713bxq_correlation.hdf5')
-CO.add_dataset(offset_path + '\cvo2209zfd_correlation.hdf5')
-CO.add_dataset(offset_path + '\cvp0501ixo_correlation.hdf5')
-CO.add_dataset(offset_path + '\cvt0001lvs_correlation.hdf5')
+# # after T1 measurements, starting 6/13
+# CO.add_dataset(charge_path.format('cyo0514vli'))
+# CO.add_dataset(charge_path.format('cyp0520ynw'))
+CO.add_dataset(charge_path.format('cyw0458jbl')).limit_dataset('Q1',start=77,end=122) \
+                                                .limit_dataset('Q1',start=130,end=153) \
+                                                .limit_dataset('Q1',start=205,end=243) \
+                                                .limit_dataset('Q1',start=287,end=308) \
+                                                .limit_dataset('Q1',start=378) \
 
 files = []
-path = 'Z:\\mcdermott-group\\data\\fluxNoise2\\DR1 - 2019-12-17\\CorrFar\\Q1Q2Corr\\General\\{}\\Charge_resetting_QP\MATLABData\\'
-# # files += CO.get_files_triggered_on_bad_fit('cvi1713bxq', 'Q{}'.format(Q_A), path.format('03-21-20'))
-# files += CO.get_files_triggered_on_bad_fit('cvo2209zfd', 'Q{}'.format(Q_A), path.format('03-27-20'))
-# files += CO.get_files_triggered_on_bad_fit('cvp0501ixo', 'Q{}'.format(Q_A), path.format('03-28-20'))
-# files += CO.get_files_triggered_on_bad_fit('cvt0001lvs', 'Q{}'.format(Q_A), [path.format('03-31-20'), 
-                                                                             # path.format('04-01-20')])
+path = 'Z:\\mcdermott-group\\data\\fluxNoise2\\DR1 - 2019-12-17\\CorrFar\\Q1Q2Corr\\General\\{}\\Charge_resetting\MATLABData\\'
+# # after T1 measurements, starting 6/13
+# files += CO.get_files_triggered_on_bad_fit('cyo0514vli', 'Q{}'.format(Q_A), path.format('06-13-20'))
+# files += CO.get_files_triggered_on_bad_fit('cyp0520ynw', 'Q{}'.format(Q_A), path.format('06-14-20'))
+files += CO.get_files_triggered_on_bad_fit('cyw0458jbl', 'Q{}'.format(Q_A), [path.format('06-20-20'),path.format('06-21-20')])
 
 acfH = np.zeros(2*50+1)
 acfL = np.zeros(2*50+1)
@@ -44,15 +48,22 @@ n_trace = np.zeros(2*10000+1)
 add_trial_means = np.zeros(2*10+1)
 n_trials = np.zeros(2*10+1)
 
-whitelist = [2,3,4,12,38,40,45,48,51,52,54,71,74,75,78,79,86]
-blacklist = {40:[7], 34:[4], 27:[7,3], 26:[3,1], 24:[7], 20:[8], 19:[7,5,2,0], 18:[8], 17:[9,3], 13:[7,5], 11:[9,3,1], 9:[3], 8:[4], 6:[5,3], 3:[8,6,3], 0:[6,4]}
+whitelist = None
+# whitelist = {}
+blacklist = {}
 data_files = {}
 
-# for k,f in enumerate(files):
-for k,f in [(i,files[i]) for i in whitelist[:]]:
+print len(files)
+for k,f in enumerate(files[0:50]):
     path, num = noiselib.path_to_num(f)
-    DF = TwoMeasDataFile(path.format(num+Q_A-1))
-    DF.set_trigger_params(1000000., 1000, 0.05)
+    date = f.split('\\')[-4]
+    if (whitelist is not None 
+        and (date not in whitelist or num not in whitelist[date])):
+        continue
+    DF = TwoMeasDataFile(path.format(num+Q_A), charge_var='Single_Shot_Occupations_RO2_SB1', 
+                                                 meas_var=['Single_Shot_Occupations_RO2_SB2',
+                                                           'Single_Shot_Occupations_RO1_SB2'])
+    DF.set_trigger_params(1000000., 300, 0.5)
     DF.apply_infidelity_correction_HMM(fidelity=[0.95, 0.75])
     # DF.apply_infidelity_correction(9)
     trigs = DF.get_triggers()
@@ -63,8 +74,8 @@ for k,f in [(i,files[i]) for i in whitelist[:]]:
     print k, trigs
     for trial, rep in trigs:
         DF.plot(trial, plot='Flips', smoothing=500)
-        DF.plot_adj_file(path.format(num+Q_A-3), 0)
-        DF.plot_adj_file(path.format(num+Q_A+1), 'end')
+        # DF.plot_adj_file(path.format(num+Q_A-3), 0)
+        # DF.plot_adj_file(path.format(num+Q_A+1), 'end')
         P1 = DF.get_P1_around_trig((trial,rep))
         nreps = P1.size
         n_trace[10000-rep:10000+nreps-rep] += 1
