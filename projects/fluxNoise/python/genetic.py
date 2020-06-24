@@ -1,70 +1,112 @@
 import numpy as np
-import ruptures as rpt
+import matplotlib.pyplot as plt
+import noiselib
+reload(noiselib)
+from noiselib import movingmean
 
-def get_change_point(data, sigma_noise):
+def T1_decay(dt):
+    """dt should always be negative"""
+    return 1.-np.exp(-T_rep*(np.arange(0,N)-dt)/tau)
 
-    n = len(data)
-    crit_value = 1.96 # 95% confidence interval
+def gen_data():
+    T1 = T1_0 * np.ones((n,N))
+    delta_t = np.random.random_sample(n) * dtrigbins
 
-    T = 0  # T will be replaced by new maximum value
-    cp = 0 # CP will be replaced as T is changed
+    for i,dt in enumerate(delta_t):
+        b = int(np.ceil(dt))
+        T1[i,1000+b:] = T1[i,1000+b:] * T1_decay(dt - b)[:N-1000-b]
 
-    cum_sum = np.cumsum(data)
-    total_sum = sum(data)
+    r = np.random.random_sample((n,N))
+    m = r < np.exp(-t_m/T1)
 
-    # drop first and last data points in order to compute mean
-    for k in range(1, n-1):
+    r = np.random.random_sample((n,N))
+    m[r < 0.05] = np.logical_not(m[r < 0.05])
 
-        # compute mean of segment 1 assuming CP at k; mean(data_segment(1:CP))
-        mu1 = cum_sum[k] / k
+    return m
 
-        # compute mean of segment 2 assuming CP at k; mean(data_segment(1+CP:end))
-        mu2 = (total_sum - cum_sum[k])/ (n - k)
+def gen_noise():
+    m = np.zeros((n,N))
+    mu = 0
+    sigma = 0.1
 
-        # compute t-value
-        t = abs((mu2 - mu1)) / sigma_noise / np.sqrt(1/k+1/(n - k));
+    for r in range(n):
+        m[r] = mu + np.random.normal(mu, sigma, N)
 
-        # is the new t value better than the current best T value?
-        if t > T:
-            T = t      # best T value so far
-            cp = n     # location of best T value
+    return m
 
-    return cp
+def get_fitness(m, shifts, fitness_old):
+    y = np.mean(movingmean(m,30), axis=0)
+    idx_min = np.argmin(y)
+    #bound_l = int(idx_min + shifts.min())
+    #bound_u = int(idx_min + shifts.max())
+    bound_l = int(1000 + shifts.min())
+    bound_u = int(1000 + shifts.max())
 
-def get_ideal_origin(all_time_series):
+    #fitness = np.sum(y[bound_l:bound_u])
+    f = max(y) - y
+    fitness = np.trapz(f[bound_l:bound_u])
+    #fitness = abs(min(y) - np.median(y))
 
-    # all_times_series: array w/ one time series per row
+    if fitness <= fitness_old:
+        more_fit = False
+        fitness = fitness_old
+    else:
+        more_fit = True
 
-    n_time_series = len(all_time_series)
-    cp = np.zeros(n_time_series)
+    return y, fitness, more_fit
 
-    # allocate assuming all time series are of the same length
-    n_points = len(all_time_series[0])
-    fitness = np.zeros(n_time_series, n_points)
-    fit_sum_arr = np.zeros(n_points)
+def shift_and_pad_array(arr, shift):
+    ret = np.empty_like(arr)
+    if shift > 0:
+        ret[:shift] = np.nan
+        ret[shift:] = arr[:-shift]
+    elif shift < 0:
+        ret[shift:] = np.nan
+        ret[:shift] = arr[-shift:]
+    else:
+        ret[:] = arr
 
-    for ii in range(n_time_series):
+    return ret
 
-        time_series = all_time_series[ii]
+def shift_rand_rows(m):
+    n_to_shift = 10
 
-        # estimate Gaussian noise by low pass Haar wavelet transform
-        #sorted_wavelet = np.sort(abs(np.diff(time_series) / 1.4))
-        #sigma_noise = sorted_wavelet[round(0.682 * (n_points - 1)) - 1]
+    # get rid of repeated indices
+    rows_to_shift = np.unique(np.random.randint(0, n-1, n_to_shift))
+    n_to_shift = len(rows_to_shift)
 
-        # change point detection
-        algo = rpt.Dynp(model='l1').fit(time_series)
-        cp[ii] = algo.predict(n_bkps=1)
+    shifts = np.zeros(n)
+    shifts[rows_to_shift] = np.random.randint(-30, 30, n_to_shift)
 
-        for jj in range(n_points):
-            # walk time series to find ideal point
-            # fitness of one indicates perfect alignment with change point
-            fitness[ii][jj] = (n_points - abs(jj - cp[ii]))/n_points
+    for r in rows_to_shift:
+        m[r] = shift_and_pad_array(m[r], int(shifts[r]))
 
-    # sum all rows (fitnesses per point) together
-    fit_sum_arr = sum(fit)
+    return m, shifts
 
-    # get index of point that yields the highest overall fitness
-    best = np.argmax(fit_sum_arr)
+T1_0 = 40      # max T1
+tau = 5000     # QP relaxation time
+N = 3000       # number of reps in a trial
+n = 70         # number of trials to average
+t_m = 10       # time between X gate and measurement
+T_rep = 500    # Period of one rep
+dtrigbins = 30 # uncertainty in trigger timing
 
-    return best
+fitness = 0
+m = gen_data()
+#m = gen_noise()
+for i in range(10):
+    print i
+    m, shifts = shift_rand_rows(m)
+    y_tmp, fitness, more_fit = get_fitness(m, shifts, fitness)
+    if more_fit == True:
+        y_best = y_tmp
+
+x = np.arange(0, N)
+
+plt.figure()
+plt.plot(x, y_best)
+#plt.plot(x, np.median(y) * np.ones(N))
+
+plt.draw()
+plt.pause(0.05)
 
