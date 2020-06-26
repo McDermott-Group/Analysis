@@ -1,8 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import pickle
 from noiselib import movingmean
 from scipy.optimize import curve_fit
+
+T1_0 = 40      # max T1
+tau = 5000     # QP relaxation time
+N = 3000       # number of reps in a trial
+n = 70         # number of trials to average
+t_m = 10       # time between X gate and measurement
+T_rep = 500    # Period of one rep
+dtrigbins = 30 # uncertainty in trigger timing
 
 def T1_decay(dt):
     """dt should always be negative"""
@@ -30,7 +37,8 @@ def fit_exp_dropoff(y, domain_length, origin):
 def gen_data(T1_dropoff=True):
     T1 = T1_0 * np.ones((n,N))
 
-    delta_t = np.random.random_sample(n) * dtrigbins
+    # randomize to +/- 1/2 bin
+    delta_t = np.random.random_sample(n) - 0.5
 
     if T1_dropoff:
         for i,dt in enumerate(delta_t):
@@ -52,7 +60,7 @@ def natural_selection(m, m_best, fitness_best):
     f = max(y) - y
 
     # sum +/- some amount around T1 @ 1000
-    fitness = np.sum(f[(1000 - 5):(1000 + 5)])
+    fitness = np.sum(f[(1000 - 2):(1000 + 2)])
     #fitness = np.trapz(f[990:1010])
     #fitness = abs(min(y) - np.median(y))
 
@@ -92,28 +100,16 @@ def shift_rand_rows(m):
 
     return m
 
-T1_0 = 40      # max T1
-tau = 5000     # QP relaxation time
-N = 3000       # number of reps in a trial
-n = 70         # number of trials to average
-t_m = 10       # time between X gate and measurement
-T_rep = 500    # Period of one rep
-dtrigbins = 30 # uncertainty in trigger timing
-
-
-#m_best = gen_data()
+# fix seed for data generation
+np.random.seed(3742373417)
+m_best = gen_data()
 #m_best = gen_data(T1_dropoff=False)
 
-#f = open('T1_data_simulated.pckl', 'wb')
-#pickle.dump(m_best, f)
-#f.close()
-
-f = open('T1_data_simulated.pckl', 'rb')
-m_best = pickle.load(f)
-f.close()
+# reseed
+np.random.seed()
 
 fitness_best = 0
-for i in range(0):
+for i in range(100):
     print i
     m = shift_rand_rows(m_best)
     m_best, fitness_best = natural_selection(m, m_best, fitness_best)
