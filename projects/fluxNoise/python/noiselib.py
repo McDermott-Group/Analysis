@@ -223,13 +223,10 @@ def apply_infidelity_correction(o, n_bins=9, thresh=0.5):
 
 
 def apply_infidelity_correction_HMM(o, fidelity=[0.95, 0.8]):
-    o = o.astype(np.float)
-    for trial in o:
-        observed_signal = list(trial)   # ndarray -> list
-        observed_signal = [int(x) for x in observed_signal] # float -> int
-        recovered_signal = observed_to_recovered_signal(observed_signal, readout_fidelity=fidelity)
-        recovered_signal = list(np.float_(recovered_signal)) # int-> float
-        recovered_signal = np.asarray(recovered_signal)    # list-> ndarray
-        for i in range(trial.size):
-            trial[i] = recovered_signal[i]
+    o = o.astype(np.int)
+    if len(o.shape) > 1:
+        for trial in o:
+            trial[...] = apply_infidelity_correction_HMM(trial, fidelity=fidelity)
+    else:
+        o[...] = observed_to_recovered_signal(list(o), readout_fidelity=fidelity)
     return o
