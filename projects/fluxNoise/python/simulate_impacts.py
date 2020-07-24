@@ -76,41 +76,6 @@ class ImpactEvent(object):
             q.append( np.sum(qs*charge_polarity) )
         return q
     
-    def potential(self, r, zr, p, zp, z_shift):
-        """Calculate the potential at a point (p,0,zp) due to a 
-        ring of charge Q=1 centered at (0,0,zr) with radius r."""
-        z = zr - zp + z_shift
-        rd = r - p
-        m = -4.*r*p/(z**2+rd**2)
-        ellk = 1./np.sqrt(1.-m)*ellipk(-m/(1.-m)) # Imaginary-modulus transformation
-        v = 1./(2*np.pi) * 4./np.sqrt(z**2.+rd**2.)*ellk
-        return v
-    
-    def generate_induced_charge_map(self):
-        r_inner, r_outer = 70, 90.5
-        r_grid, z_grid = np.arange(1,550,80), np.arange(0,375,100)
-        r_rings = np.concatenate([np.arange(1,r_inner), 
-                                  np.arange(r_outer,500,1), [0]])
-                                  
-        z_rings = np.zeros(r_rings.size)
-        v_rings = np.concatenate([ np.zeros(r_rings.size-1), [1] ])
-        q_rings = np.zeros(r_rings.size)
-        C_inv = np.zeros( (r_rings.size,r_rings.size) )
-        for i in range(r_rings.size-1):
-            C_inv[:,i] = self.potential(r_rings[i], z_rings[i], r_rings, z_rings, 0.1)
-        induced_charge = np.zeros( (r_grid.size, z_grid.size) )
-        for i,z in enumerate(z_grid):
-            for j,r in enumerate(r_grid):
-                print i,j
-                r_rings[-1] = r
-                z_rings[-1] = z
-                C_inv[-1,:] = C_inv[:,-1] = self.potential(r_rings[-1], z_rings[-1], r_rings, z_rings, 0.1)
-                # q_rings,_,_,_ = np.linalg.lstsq(C_inv, v_rings)
-                q_rings = np.dot( np.linalg.inv(C_inv), v_rings )
-                induced_charge[j,i] = ( np.sum(q_rings[:np.arange(1,r_inner).size]) /
-                                        np.sum(q_rings) )
-        return induced_charge
-    
     def getPDF(self, z, charge_type='electrons'):
         
         zcuts = self.PDFs['zarray']
@@ -365,8 +330,8 @@ if __name__ == '__main__':
 # xyz, pol = e.get_charge()
 # x,y,z = xyz.T
 # fig, (ax1,ax2) = plt.subplots(1,2)
-# h1 = ax1.hist2d(x[pol<0], y[pol<0], bins=100, norm=mpl.colors.LogNorm());
-# h2 = ax2.hist2d(x[pol>0], y[pol>0], bins=100, norm=mpl.colors.LogNorm());
+# h1 = ax1.hist2d(x[pol<0], y[pol<0], bins=100, range=((-.5,.5),(-.5,.5)), norm=mpl.colors.LogNorm());
+# h2 = ax2.hist2d(x[pol>0], y[pol>0], bins=100, range=((-.5,.5),(-.5,.5)), norm=mpl.colors.LogNorm());
 # ax1.set_aspect(1); ax2.set_aspect(1)
 # ax2.get_yaxis().set_visible(False)
 # ax1.set_title('electrons'); ax2.set_title('holes');
