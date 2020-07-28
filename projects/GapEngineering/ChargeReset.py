@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 n = 50
 x_off = round(np.random.uniform(-0.5, 0.5), 3)
 noise_factor = 0.1
-dispersion = 3.5
+dispersion = 1
 x_data = np.linspace(-0.5, 0.5, num=n)
 y_data = 0.4 + 0.35 * cos(dispersion * pi * sin(2 * pi * (x_data-x_off)))
 y_data_noise = 1.0 * y_data + noise_factor * np.random.normal(size=n)
