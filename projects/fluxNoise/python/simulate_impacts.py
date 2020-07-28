@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.cm as cm
 from pyqtgraph.Qt import QtCore, QtGui
+import pyqtgraph as pg
 import pyqtgraph.opengl as gl
 import sys
 import threading
@@ -56,7 +57,8 @@ class ImpactEvent(object):
             dx,dy,dz = (charge_xyz - (xy_q[0], xy_q[1], 0.375/2.)).T
             r = np.hypot(dx,dy)
             qs = (r < 0.07) & (dz == 0)
-            q.append( np.sum(qs*charge_polarity) )
+            q.append( (np.sum(qs[charge_polarity<0]),
+                       np.sum(qs[charge_polarity>0])) )
         return q
     
     def get_induced_charge_on_qubits(self, charge_xyz, charge_polarity):
@@ -66,13 +68,13 @@ class ImpactEvent(object):
             r = np.hypot(dx,dy)
             qs = self.charge_map(r,-dz)
             # if i == 0:
-                # # plt.hist([qs[charge_polarity<0], qs[charge_polarity>0]],bins=100)
-                # # plt.draw()
-                # # plt.pause(0.05)
-                # plt.figure()
-                # plt.hist2d(charge_xyz[:,0], charge_xyz[:,1], bins=100)
+                # plt.hist([qs[charge_polarity<0], qs[charge_polarity>0]],bins=100)
+                # plt.draw()
                 # plt.pause(0.05)
-                # plt.figure()
+                # # plt.figure()
+                # # plt.hist2d(charge_xyz[:,0], charge_xyz[:,1], bins=100)
+                # # plt.pause(0.05)
+                # # plt.figure()
             q.append( np.sum(qs*charge_polarity) )
         return q
     
@@ -149,6 +151,7 @@ class MainWindow(gl.GLViewWidget):
         ax.setSize(10,10,10)
         self.addItem(ax)
         self.draw_chip_lines()
+        super(MainWindow, self).addItem( pg.TextItem('Hello World') )
         
         self.qubit_xys = [( 1.564,  0.570),
                           ( 1.564, -0.070),
@@ -161,7 +164,7 @@ class MainWindow(gl.GLViewWidget):
         PDFs = PDFs.tolist()
         
         q_map = noiselib.loadmat('sim_data/charge_map.mat')
-        q = q_map['charge_mat550_5000']
+        q = q_map['charge_mat']
         q[~np.isfinite(q)] = -1. # right below qubit
         # charge_map = interp2d( q_map['r']/1000., q_map['z']/1000., q, copy=False)
         # charge_map = np.vectorize(charge_map) # much slower
@@ -187,23 +190,27 @@ class MainWindow(gl.GLViewWidget):
         for event in self.split_data:
             e = ImpactEvent(PDFs, event[:,[2,3,4]], event[:,5] * 1e6,
                             self.qubit_xys, charge_map)
+            # e = ImpactEvent(PDFs, np.array((0,0,0)).reshape(1,3), np.array((.1e6,)),
+                            # self.qubit_xys, charge_map)
             self.events.append(e)
         
         self.i = 0
         self.plot_trace(0)
         
         # e = ImpactEvent(PDFs, 1, 1, self.qubit_xys, charge_map)
-        # ps = []
+        # self.q_induced = []
+        # self.q_direct = []
         # for event in self.split_data:
             # e.set_path(event[:,[2,3,4]], event[:,5] * 1e6)
             # xyz, polarity = e.get_charge()
-            # p = e.get_induced_charge_on_qubits(xyz, polarity)
-            # print p
-            # ps.append(p)
-        # ps = np.array(ps).reshape(-1,4)
-        # plt.hist(ps.T)
-        # plt.draw()
-        # plt.pause(0.05)
+            # qi = e.get_induced_charge_on_qubits(xyz, polarity)
+            # qi = e.get_induced_charge_on_qubits(np.full((1,1),(0,0,0)), [1])
+            # qd = e.get_charge_on_qubits(xyz, polarity)
+            # self.q_induced.append(qi)
+            # self.q_direct.append(qd)
+            # print '#',
+        # self.q_induced = np.array(self.q_induced).reshape(-1,4)
+        # self.q_direct = np.array(self.q_direct).reshape(-1,4,2)
         
         # threads = []
         # for e in self.events:
@@ -299,12 +306,16 @@ class MainWindow(gl.GLViewWidget):
         self.charge.setData(pos=pts,
                             color=cm.PiYG(polarity))
         print event.get_induced_charge_on_qubits(pts, polarity)
+        print event.get_induced_charge_on_qubits(np.full((1,3),(0,0,0)), [1])
         print event.get_charge_on_qubits(pts, polarity)
 
-
+q_induced = None
+q_direct = None
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     w = MainWindow()
+    # q_induced = w.q_induced
+    # q_direct = w.q_direct
     sys.exit(app.exec_())
 
 
@@ -337,3 +348,21 @@ if __name__ == '__main__':
 # ax1.set_title('electrons'); ax2.set_title('holes');
 # fig.colorbar(h1[3], ax=(ax1,ax2)); #plt.colorbar();
 # fig.suptitle('XY'); plt.draw(); plt.pause(0.05)
+
+# import numpy as np
+# import matplotlib.pyplot as plt
+# import matplotlib as mpl
+# import simulate_impacts
+# reload(simulate_impacts)
+# from simulate_impacts import ImpactEvent
+# PDFs = np.load('sim_data/ChargePDFs.npy',allow_pickle=True).tolist()
+# e = ImpactEvent(PDFs, np.array((0,0,0)).reshape(1,3), np.array((.1e6,)), 0, 1)
+# v00 = e.getPDF(0)
+# v10 = e.getPDF(0.1)
+# v17 = e.getPDF(0.17)
+# fig, (ax1,ax2,ax3) = plt.subplots(1,3)
+# ax1.imshow(np.sum(v00.T, axis=1), norm=mpl.colors.LogNorm(), origin='lower')
+# ax2.imshow(np.sum(v10.T, axis=1), norm=mpl.colors.LogNorm(), origin='lower')
+# ax3.imshow(np.sum(v17.T, axis=1), norm=mpl.colors.LogNorm(), origin='lower')
+# ax1.set_title('(0,0,0)'); ax2.set_title('(0,0,0.1)'); ax3.set_title('(0,0,0.17)');
+# plt.draw(); plt.pause(0.05)
