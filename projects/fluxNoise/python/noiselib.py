@@ -81,7 +81,7 @@ def unwrap_voltage_to_charge(vs, wrap_voltage, dedv):
     return np.append(first_point, first_point + np.cumsum(delta_q))
 
 
-def alias(x0, bound):
+def alias(x0, bound=0.5):
     """Takes a value or array x0 and aliases it into the range (-bound,bound)"""
     return np.mod(bound + x0, 2 * bound) - bound
 

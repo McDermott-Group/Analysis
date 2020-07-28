@@ -359,3 +359,48 @@ for _ in [1]:
           'thresh_charge': 0.96,
             'path_charge': 'dab0542etb'
         }
+
+        q1q2_0722_charge_T1_2 = {
+                      'Q': 'Q1Q2',
+                   'date': ['07-22-20','07-23-20','07-24-20'],
+          'thresh_charge': 0.96,
+            'path_charge': 'dab2110niu'
+        }
+
+        q1q2_0724_charge_T1 = {
+                      'Q': 'Q1Q2',
+                   'date': ['07-24-20'],
+          'thresh_charge': 0.96,
+            'path_charge': 'dad0805sah'
+        }
+
+        q1q2_0724_charge_T1_2 = {
+                      'Q': 'Q1Q2',
+                   'date': ['07-24-20','07-25-20'],
+          'thresh_charge': 0.96,
+            'path_charge': 'dae0110ldi'
+        }
+
+        q1q2_0725_charge_T1 = { # no events
+                      'Q': 'Q1Q2',
+                   'date': ['07-25-20','07-26-20'],
+          'thresh_charge': 0.96,
+            'path_charge': 'dae2218buk'
+        }
+
+
+        #### adding a third qubit across the chip ####
+
+        q1q2q4_0726_charge_T1 = {
+                      'Q': 'Q1Q2Q4',
+                   'date': ['07-26-20','07-27-20'],
+          'thresh_charge': 0.96,
+            'path_charge': 'daf2131pel'
+        }
+
+        q1q2q4_0727_charge_T1 = {
+                      'Q': 'Q1Q2Q4',
+                   'date': ['07-27-20','07-28-20'],
+          'thresh_charge': 0.96,
+            'path_charge': 'dag1517jng'
+        }
