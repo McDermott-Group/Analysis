@@ -332,10 +332,11 @@ for _ in [1]:
             'path_charge': 'czt2252myq'
         }
 
-        q1q2_0715_charge_T1 = { # we should maybe exclude some of this data
+        q1q2_0715_charge_T1 = { # might be able to get something out of the bad data?
                       'Q': 'Q1Q2',
                    'date': ['07-15-20','07-16-20'],
           'thresh_charge': 0.96,
+           'exclude_data': [(150,None)],
             'path_charge': 'czu2317rrd'
         }
 
@@ -398,9 +399,84 @@ for _ in [1]:
             'path_charge': 'daf2131pel'
         }
 
-        q1q2q4_0727_charge_T1 = {
+        q1q2q4_0727_charge_T1 = { # no events
                       'Q': 'Q1Q2Q4',
                    'date': ['07-27-20','07-28-20'],
           'thresh_charge': 0.96,
             'path_charge': 'dag1517jng'
+        }
+
+        q1q2q4_0728_charge_T1 = { # no events
+                      'Q': 'Q1Q2Q4',
+                   'date': ['07-28-20','07-29-20'],
+          'thresh_charge': 0.98,
+            'path_charge': 'dah2039nen'
+        }
+
+        q1q2q4_0729_charge_T1 = {
+                      'Q': 'Q1Q2Q4',
+                   'date': ['07-29-20','07-30-20'],
+          'thresh_charge': 0.96,
+            'path_charge': 'dai0722bug'
+        }
+
+        q1q2q4_0730_charge_T1 = {
+                      'Q': 'Q1Q2Q4',
+                   'date': ['07-30-20','07-31-20'],
+          'thresh_charge': 0.96,
+            'path_charge': 'dak0101aiu'
+        }
+
+        q1q2q4_0731_charge_T1 = {
+                      'Q': 'Q1Q2Q4',
+                   'date': ['07-31-20','08-01-20'],
+          'thresh_charge': 0.96,
+            'path_charge': 'dak2054kks'
+        }
+
+        q1q2q4_0801_charge_T1 = {
+                      'Q': 'Q1Q2Q4',
+                   'date': ['08-01-20'],
+          'thresh_charge': 0.96,
+            'path_charge': 'dal1542vaz'
+        }
+
+        q1q2q4_0802_charge_T1 = {
+                      'Q': 'Q1Q2Q4',
+                   'date': ['08-02-20','08-03-20'],
+          'thresh_charge': 0.96,
+            'path_charge': 'dam0513qzu'
+        }
+
+        q1q2q4_0803_charge_T1 = { # no events
+                      'Q': 'Q1Q2Q4',
+                   'date': ['08-03-20'],
+          'thresh_charge': 0.96,
+            'path_charge': 'dan0806bbc'
+        }
+
+
+        #### going back to just two qubits: Q1 - Q4 ####
+
+        q1q4_0803_charge_T1 = {
+                      'Q': 'Q1Q4',
+                   'date': ['08-03-20','08-04-20'],
+          'thresh_charge': 0.96,
+            'path_charge': 'dan2149qxx'
+        }
+
+        q1q4_0805_charge_T1 = {
+                      'Q': 'Q1Q4',
+                   'date': ['08-05-20','08-06-20'],
+          'thresh_charge': 0.96,
+            'path_charge': 'dap0636vpd'
+        }
+        
+        # # # # P1 measurement # # # # #
+
+        q1q2_0806_charge_T1 = {
+                      'Q': 'Q1Q2',
+                   'date': ['08-06-20','08-07-20'],
+          'thresh_charge': 0.96,
+            'path_charge': 'daq2130haq'
         }
