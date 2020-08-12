@@ -54,18 +54,36 @@ def plot_data(data, xlabel='', ylabel='', title=''):
 # QP_files = (0,999+1)
 # filter_levels = (0.15, 0.2) # low, high
 ### fluxNoise2
+# date, Q = '03-17-20', 'Q1'
+# P1_files = (0,1003+1)
+# QP_files = (0,1003+1)
+# filter_levels = (0.05, 0.15) # low, high
+# date, Q = '04-10-20', 'Q2'
+# P1_files = (0,999+1)
+# QP_files = (0,999+1)
+# filter_levels = (0.05, 0.05) # low, high
 date, Q = '04-28-20', 'Q3'
 P1_files = (0,821+1)
 QP_files = (0,821+1)
 filter_levels = (0.028, 0.028) # low, high
 
 # plot P1
-path = ('Z:/mcdermott-group/data/fluxNoise2/DR1 - 2019-12-17/CorrFar/'
-        '{}/General/{}/P1_I/MATLABData/'.format(Q,date)) #Excess_1_state
-filenames = [path+'P1_I_{:03d}.mat'.format(i) 
+path = ('Z:/mcdermott-group/data/fluxNoise{}/DR1 - 2019-12-17/CorrFar/'
+        '{}/General/{}/{}/MATLABData/'.format('2',Q,date,'P1_I')) #Excess_1_state
+filenames = [path+'P1_I_{:03d}.mat'.format(i) #Excess_1_state
              for i in range(*P1_files)]
 P1_avg = get_averaged_P1(filenames, '') #_SB1
 ax = plot_data(P1_avg, 'File', '{} Avg Excess 1 State'.format(Q))
+
+file_indicies = np.arange(*QP_files)
+path = ('Z:/mcdermott-group/data/fluxNoise/DR1 - 2019-12-17/CorrFar/'
+        '{}/General/{}/QP_Tunneling_PSD/MATLABData/'.format(Q,date))
+filenames = [path+'QP_Tunneling_PSD_{:03d}.mat'.format(i) 
+            for i in file_indicies]
+flip_avg = get_averaged_flips(filenames, '_SB1')
+ax.plot(noiselib.movingmean(flip_avg, 50), label='Avg Flip Rate')
+plt.draw()
+plt.pause(0.05)
 
 # plot QP tunneling curves
 filter_high = P1_avg > filter_levels[1]

@@ -55,7 +55,7 @@ class ImpactEvent(object):
         polarity = np.concatenate(polarity)
         if cache:
             self.charge = xyz, polarity
-            print xyz.nbytes/1e6
+            print( xyz.nbytes/1e6 )
         return xyz, polarity
     
     def get_charge_on_qubits(self, charge_xyz, charge_polarity):
@@ -285,10 +285,11 @@ class Controller(QtGui.QApplication):
                                                q_map['z']/1000., 
                                                q, rp, zp )
         
-        data1 = np.loadtxt('sim_data/Muons.txt', skiprows=1)
-        data2 = np.loadtxt('sim_data/Muons2.txt', skiprows=1)
+        # data1 = np.loadtxt('sim_data/Muons.txt', skiprows=1)
+        # data2 = np.loadtxt('sim_data/Muons2.txt', skiprows=1)
+        data1 = np.loadtxt('sim_data/Gamma.txt', skiprows=1)
+        data2 = np.loadtxt('sim_data/Gamma_10deg.txt', skiprows=1)
         data = np.concatenate([data1, data2])
-        # data = np.loadtxt('sim_data/Gamma.txt', skiprows=1)
         self.split_data = np.split(data, np.where(np.diff(data[:,0]))[0]+1)
         self.events = []
         for event in self.split_data:
@@ -399,13 +400,52 @@ class Controller(QtGui.QApplication):
         ax.legend(['electrons','holes'])
         plt.draw()
         plt.pause(0.05)
+    
+    def count(self, q1, q2, quadrant, thresh=0.1):
+        
+        e1 = noiselib.alias(self.q_induced[:,q1-1])
+        e2 = noiselib.alias(self.q_induced[:,q2-1])
+        
+        if quadrant == 1:
+            return np.sum( (e1 > thresh) & (e2 > thresh) )
+        elif quadrant == 2:
+            return np.sum( (e1 > thresh) & (e2 < -thresh) )
+        elif quadrant == 3:
+            return np.sum( (e1 < -thresh) & (e2 < -thresh) )
+        elif quadrant == 4:
+            return np.sum( (e1 < -thresh) & (e2 > thresh) )
+    
+    def get_correlation(self, q1, q2, thresh=0.1):
+        
+        e1 = noiselib.alias(self.q_induced[:,q1-1])
+        e2 = noiselib.alias(self.q_induced[:,q2-1])
+        return 1.*np.sum( (np.abs(e1) > thresh) & (np.abs(e2) > thresh) ) / \
+                  np.sum( (np.abs(e1) > thresh) | (np.abs(e2) > thresh) )
         
 
 if __name__ == '__main__':
     app = Controller(sys.argv)
-    # sys.exit(app.exec_())
+    if hasattr(app, 'view'):
+        sys.exit(app.exec_())
 
 
+
+
+# run -i simulate_impacts.py
+# print( 'total events: {}'.format(app.q_induced.shape[0]) )
+# for q1,q2 in ((1,2), (3,4), (1,3)):
+    # app.plot_qq(q1,q2)
+    # qq1 = app.count(q1,q2,1)
+    # qq2 = app.count(q1,q2,2)
+    # qq3 = app.count(q1,q2,3)
+    # qq4 = app.count(q1,q2,4)
+    # print( 'Q{} - Q{}'.format(q1,q2) )
+    # print( '    13/24 asymmetry: {:.2f}'.format( 1.*(qq1+qq3) / (qq2+qq4) ) )
+    # print( '    quadrants 1,2,3,4: {}, {}, {}, {}'.format( qq1, qq2, qq3, qq4 ) )
+    # print( '    correlation: {:.2f}'.format( app.get_correlation(q1,q2,0.1) ) )
+# for q in (1,2,3,4):
+    # e = noiselib.alias(app.q_induced[:,q-1])
+    # print( 'Q{} charge asymmetry: {:.2f}'.format( q, 1.*np.sum(e>0)/np.sum(e<0) ) )
 
 # print event.get_induced_charge_on_qubits(np.full((1,3),(0,0,0)), [1])
 
