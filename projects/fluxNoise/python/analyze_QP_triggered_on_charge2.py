@@ -24,12 +24,12 @@ CO.add_dataset(offset_path + '\cvt0001lvs_correlation.hdf5')
 
 files = []
 path = 'Z:\\mcdermott-group\\data\\fluxNoise2\\DR1 - 2019-12-17\\CorrFar\\Q1Q2Corr\\General\\{}\\Charge_resetting_QP\MATLABData\\'
-# files += CO.get_files_triggered_on_bad_fit('cvi1713bxq', 'Q{}'.format(Q_A), path.format('03-21-20'))
-files += CO.get_files_triggered_on_bad_fit('cvo2209zfd', 'Q{}'.format(Q_A), path.format('03-27-20'))
-files += CO.get_files_triggered_on_bad_fit('cvp0501ixo', 'Q{}'.format(Q_A), path.format('03-28-20'))
-files += CO.get_files_triggered_on_bad_fit('cvt0001lvs', 'Q{}'.format(Q_A), [path.format('03-31-20'), 
-                                                                             path.format('04-01-20')])
-    
+# # files += CO.get_files_triggered_on_bad_fit('cvi1713bxq', 'Q{}'.format(Q_A), path.format('03-21-20'))
+# files += CO.get_files_triggered_on_bad_fit('cvo2209zfd', 'Q{}'.format(Q_A), path.format('03-27-20'))
+# files += CO.get_files_triggered_on_bad_fit('cvp0501ixo', 'Q{}'.format(Q_A), path.format('03-28-20'))
+# files += CO.get_files_triggered_on_bad_fit('cvt0001lvs', 'Q{}'.format(Q_A), [path.format('03-31-20'), 
+                                                                             # path.format('04-01-20')])
+
 acfH = np.zeros(2*50+1)
 acfL = np.zeros(2*50+1)
 acf  = np.zeros(2*50+1)
@@ -51,7 +51,7 @@ data_files = {}
 # for k,f in enumerate(files):
 for k,f in [(i,files[i]) for i in whitelist[:]]:
     path, num = noiselib.path_to_num(f)
-    DF = TwoMeasDataFile(path.format(num+Q_A-1), 1, 2)
+    DF = TwoMeasDataFile(path.format(num+Q_A-1))
     DF.set_trigger_params(1000000., 1000, 0.05)
     DF.apply_infidelity_correction_HMM(fidelity=[0.95, 0.75])
     # DF.apply_infidelity_correction(9)

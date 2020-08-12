@@ -1,7 +1,7 @@
 import scipy.io as spio
 import numpy as np
 import os
-# from Markov_Python2.analyze_QPTunneling_pomegranate import observed_to_recovered_signal
+from Markov_Python2.analyze_QPTunneling_pomegranate import observed_to_recovered_signal
 from scipy.signal import periodogram
 
 def loadmat(filename):
@@ -33,7 +33,7 @@ def loadmat(filename):
             if isinstance(elem, spio.matlab.mio5_params.mat_struct):
                 d[strg] = _todict(elem)
             elif isinstance(elem, np.ndarray):
-                d[strg] = _tolist(elem)
+                d[strg] = elem #_tolist(elem) # not sure we need to check every elem
             else:
                 d[strg] = elem
         return d
@@ -81,7 +81,7 @@ def unwrap_voltage_to_charge(vs, wrap_voltage, dedv):
     return np.append(first_point, first_point + np.cumsum(delta_q))
 
 
-def alias(x0, bound):
+def alias(x0, bound=0.5):
     """Takes a value or array x0 and aliases it into the range (-bound,bound)"""
     return np.mod(bound + x0, 2 * bound) - bound
 
@@ -222,14 +222,11 @@ def apply_infidelity_correction(o, n_bins=9, thresh=0.5):
     return o
 
 
-# def apply_infidelity_correction_HMM(o, fidelity=[0.95, 0.8]):
-#     o = o.astype(np.float)
-#     for trial in o:
-#         observed_signal = list(trial)   # ndarray -> list
-#         observed_signal = [int(x) for x in observed_signal] # float -> int
-#         recovered_signal = observed_to_recovered_signal(observed_signal, readout_fidelity=fidelity)
-#         recovered_signal = list(np.float_(recovered_signal)) # int-> float
-#         recovered_signal = np.asarray(recovered_signal)    # list-> ndarray
-#         for i in range(trial.size):
-#             trial[i] = recovered_signal[i]
-#     return o
+def apply_infidelity_correction_HMM(o, fidelity=[0.95, 0.8]):
+    o = o.astype(np.int)
+    if len(o.shape) > 1:
+        for trial in o:
+            trial[...] = apply_infidelity_correction_HMM(trial, fidelity=fidelity)
+    else:
+        o[...] = observed_to_recovered_signal(list(o), readout_fidelity=fidelity)
+    return o

@@ -5,23 +5,26 @@ function [r,z,charge_mat,int_val] = simulate_InducedChargeRings()
 z_step = 1;
 z_max = 375;%375 um
 r_step = 3;
-r_max = 550;
+r_max = 5000;
 z = 0:z_step:z_max;
 r = 1:r_step:r_max;
 num_r = length(r);
 num_z = length(z);
 charge_mat = zeros(num_z,num_r);
+progressbar('Progress');
+progress = 0;
 
 %Parameters for the device rings
 r_inner_step = 1;
-r_inner = 108;
-r_outer = 500;
+r_inner = 70;
+r_outer = 90.5;
 r_outer_step = 1;
 r_outer_max = 550;
 z_shift = 0.1;%To avoid Infs
 
 %Initialize vectors
-r_coord_vec = [r_inner_step:r_inner_step:r_inner, r_outer:r_outer_step:r_outer_max,0]';
+%r_coord_vec = [r_inner_step:r_inner_step:r_inner, r_outer:r_outer_step:r_outer_max,0]';
+r_coord_vec = [r_inner_step:r_inner_step:r_inner, r_outer:1:499, 500:3:1999, 2000:7:5000, 0]';
 z_coord_vec = zeros(size(r_coord_vec));
 r_coord_num = length(r_coord_vec);
 r_inner_num = length(r_inner_step:r_inner_step:r_inner);
@@ -53,10 +56,13 @@ for zi = 1:num_z
         charge = q_vec(end);
         
         charge_mat(zi,ri) = charge_inner/charge;
+        
+        progress = progress + 1;
+        progressbar(progress/num_z/num_r);
     end
 end
 %Alias the data
-charge_mat = abs(noiselib.alias(charge_mat, 0.5));%NOTE: Abs is not necessary
+% charge_mat = abs(noiselib.alias(charge_mat, 0.5));%NOTE: Abs is not necessary
 
 figure();imagesc(r,z,charge_mat)
 title(strcat(['r_{in}: ',num2str(r_inner),', r_{out}: ',num2str(r_outer)]))
@@ -72,6 +78,8 @@ figure(10);hold on;histogram(h,75)
 axis([0.1 0.5 0 10^4])
 set(gca, 'YScale', 'log')
 int_val = sum(sum(h>0.1));
+
+progress(1)
 
 end
 

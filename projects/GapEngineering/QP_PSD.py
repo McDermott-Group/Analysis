@@ -9,7 +9,7 @@ from scipy import optimize
 class QP_PSD(object):
     ###TO DO:
     #1. Fit
-    def __init__(self, fs=1/240e-6):
+    def __init__(self, fs=1/100e-6):
         self.fs = fs
         self.parity_string_array = []
         self.Spp_avg = []
@@ -58,7 +58,7 @@ class QP_PSD(object):
             plt.loglog(self.f_data, self.fit_PSD_target_function(self.f_data, self.params[0], self.params[1]), label='Fitted')
         plt.loglog(self.f_data, self.Spp_avg, label='Test')
         axes = plt.gca()
-        axes.set_ylim([5e-5, 1e-2])
+        axes.set_ylim([5e-6, 1e-2])
         plt.xlabel('frequency [Hz]')
         plt.ylabel('PSD [1/Hz]')
         plt.show()
@@ -109,29 +109,29 @@ def generate_hidden_signal(length=8192, charge_burst_time=4000, p_QP=[0.01, 0.01
     return hidden_signal
 # good data 07-27-20 On 600-1099, off 100-599
 
-date = '07-28-20'
-# QP_Off_path = ('Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap/Leiden_2020Jul/LIU/Q4_withQ5Poison/{}/QP_Tunneling_PSD_Poison_Off/MATLABData/')
-# QP_Off_files = np.arange(0, 99, 1)
-# QP_Off_filenames = [QP_Off_path.format(date) + 'QP_Tunneling_PSD_Poison_Off_{:03d}.mat'.format(i) for i in QP_Off_files]
-# QP_Off_psd = QP_PSD()
-# QP_Off_psd.add_data_from_matlab(QP_Off_filenames)
-# QP_Off_psd.plot_PSD(fit=False)
+date = '08-12-20'
+QP_Off_path = ('Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap/Leiden_2020Jul/LIU/Q4_withQ5Poison/{}/QP_Tunneling_PSD_Poison_Off/MATLABData/')
+QP_Off_files = np.arange(0, 199, 1)
+QP_Off_filenames = [QP_Off_path.format(date) + 'QP_Tunneling_PSD_Poison_Off_{:03d}.mat'.format(i) for i in QP_Off_files]
+QP_Off_psd = QP_PSD()
+QP_Off_psd.add_data_from_matlab(QP_Off_filenames)
+QP_Off_psd.plot_PSD(fit=False)
 
 
 QP_On_path = ('Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap/Leiden_2020Jul/LIU/Q4_withQ5Poison/{}/QP_Tunneling_PSD_Poison_On/MATLABData/')
-QP_On_files = np.arange(400, 698, 1) # 299 is good
+QP_On_files = np.arange(0,199, 1) # 299 is good
 QP_On_filenames = [QP_On_path.format(date) + 'QP_Tunneling_PSD_Poison_On_{:03d}.mat'.format(i) for i in QP_On_files]
 QP_On_psd = QP_PSD()
 QP_On_psd.add_data_from_matlab(QP_On_filenames)
 QP_On_psd.plot_PSD(fit=False)
 
-# fig = plt.figure()
-# plt.loglog(QP_Off_psd.f_data, QP_Off_psd.Spp_avg, label='Poison Off')
-# plt.loglog(QP_On_psd.f_data, QP_On_psd.Spp_avg, label='Poison On')
-# axes = plt.gca()
-# axes.set_ylim([5e-5, 1e-2])
-# plt.xlabel('frequency [Hz]')
-# plt.ylabel('PSD [1/Hz]')
-# plt.legend(bbox_to_anchor=(0.75, 0.58), loc=2)
-# plt.show()
+fig = plt.figure()
+plt.loglog(QP_Off_psd.f_data, QP_Off_psd.Spp_avg, label='Poison Off')
+plt.loglog(QP_On_psd.f_data, QP_On_psd.Spp_avg, label='Poison On')
+axes = plt.gca()
+axes.set_ylim([5e-5, 1e-2])
+plt.xlabel('frequency [Hz]')
+plt.ylabel('PSD [1/Hz]')
+plt.legend(bbox_to_anchor=(0.75, 0.58), loc=2)
+plt.show()
 # print QP_Off_psd.params
