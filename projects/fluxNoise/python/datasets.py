@@ -79,6 +79,113 @@ q1_0504_QP = {
 
 
 # # # # # # # # # # # # # # # # # # #
+######### Q1-Q2-Q3-Q4 charge ##########
+# # # # # # # # # # # # # # # # # # #
+for _ in [1]:
+
+    q1q2q3q4_charge_1 = {
+                  'Q': 'Q1Q2Q3Q4',
+               'date': [''],
+       'exclude_data': {'Q2':[(None,None)]},
+          'path_base': 'fluxNoise',
+        'path_charge': 'cvc0232imo'
+    }
+
+    q1q2q3q4_charge_2 = {
+                  'Q': 'Q1Q2Q3Q4',
+               'date': [''],
+       'exclude_data': {'Q4':[(None,None)]},
+          'path_base': 'fluxNoise',
+        'path_charge': 'cvd0430bxy'
+    }
+
+    q1q2q3q4_charge_3 = {
+                  'Q': 'Q1Q2Q3Q4',
+               'date': [''],
+       'exclude_data': {'Q4':[(None,None)]},
+          'path_base': 'fluxNoise',
+        'path_charge': 'cvd0802ltu'
+    }
+
+    q1q2q3q4_charge_4 = {
+                  'Q': 'Q1Q2Q3Q4',
+               'date': [''],
+          'path_base': 'fluxNoise',
+        'path_charge': 'cvd1745asc'
+    }
+
+    q1q2q3q4_charge_5 = {
+                  'Q': 'Q1Q2Q3Q4',
+               'date': [''],
+          'path_base': 'fluxNoise',
+        'path_charge': 'cve0104ppt'
+    }
+
+    q1q2q3q4_charge_6 = {
+                  'Q': 'Q1Q2Q3Q4',
+               'date': [''],
+          'path_base': 'fluxNoise',
+        'path_charge': 'cvf0542fei'
+    }
+
+    q1q2q3q4_charge_7 = {
+                  'Q': 'Q1Q2Q3Q4',
+               'date': [''],
+          'path_base': 'fluxNoise2',
+        'path_charge': 'cvj0203nun'
+    }
+
+    q1q2q3q4_charge_8 = {
+                  'Q': 'Q1Q2Q3Q4',
+               'date': [''],
+          'path_base': 'fluxNoise2',
+        'path_charge': 'cvj1806ywn'
+    }
+
+    q1q2q3q4_charge_9 = {
+                  'Q': 'Q1Q2Q3Q4',
+               'date': [''],
+          'path_base': 'fluxNoise2',
+        'path_charge': 'cvk0412mns'
+    }
+
+    q1q2q3q4_charge_10 = { # maybe remove bad part in Q4?
+                  'Q': 'Q1Q2Q3Q4',
+               'date': [''],
+          'path_base': 'fluxNoise2',
+        'path_charge': 'cvm0651mhe'
+    }
+
+    q1q2q3q4_charge_11 = {
+                  'Q': 'Q1Q2Q3Q4',
+               'date': ['08-23-20','08-24-20'],
+          'path_base': 'fluxNoise2',
+        'path_charge': 'dbh2053vac'
+    }
+
+    q1q2q3q4_charge_12 = {
+                  'Q': 'Q1Q2Q3Q4',
+               'date': ['08-24-20','08-25-20'],
+          'path_base': 'fluxNoise2',
+        'path_charge': 'dbi2358fmz'
+    }
+
+    q1q2q3q4_charge_13 = {
+                  'Q': 'Q1Q2Q3Q4',
+               'date': ['08-25-20','08-26-20'],
+          'path_base': 'fluxNoise2',
+        'path_charge': 'dbj1930bdn'
+    }
+
+    q1q2q3q4_charge_14 = {
+                  'Q': 'Q1Q2Q3Q4',
+               'date': ['08-26-20','08-27-20'],
+          'path_base': 'fluxNoise2',
+       'exclude_data': {'Q4':[(None,None)]},
+        'path_charge': 'dbl0020qwm'
+    }
+
+# # # # # # # # # # # # # # # # # # #
 ######### Q1 Charge, Q2 QP ##########
 # # # # # # # # # # # # # # # # # # #
 for _ in [1]:
@@ -448,11 +555,39 @@ for _ in [1]:
             'path_charge': 'dam0513qzu'
         }
 
-        q1q2q4_0803_charge_T1 = { # no events
+        q1q2q4_0810_charge_T1 = { # no events
                       'Q': 'Q1Q2Q4',
-                   'date': ['08-03-20'],
+                   'date': ['08-10-20'],
           'thresh_charge': 0.96,
-            'path_charge': 'dan0806bbc'
+            'path_charge': 'dau0741dpr'
+        }
+
+        q1q2q4_0811_charge_T1 = {
+                      'Q': 'Q1Q2Q4',
+                   'date': ['08-11-20','08-12-20'],
+          'thresh_charge': 0.96,
+            'path_charge': 'dav2150jrn'
+        }
+
+        q1q2q4_0812_charge_T1 = {
+                      'Q': 'Q1Q2Q4',
+                   'date': ['08-12-20','08-13-20'],
+          'thresh_charge': 0.96,
+            'path_charge': 'dax0031ufg'
+        }
+
+        q1q2q4_0815_charge_T1 = {
+                      'Q': 'Q1Q2Q4',
+                   'date': ['08-15-20'],
+          'thresh_charge': 0.96,
+            'path_charge': 'daz2351ozl'
+        }
+
+        q1q2q4_0816_charge_T1 = {
+                      'Q': 'Q1Q2Q4',
+                   'date': ['08-16-20'],
+          'thresh_charge': 0.96,
+            'path_charge': 'dba1050uzq'
         }
 
 
@@ -474,7 +609,7 @@ for _ in [1]:
         
         # # # # P1 measurement # # # # #
 
-        q1q2_0806_charge_T1 = {
+        q1q2_0806_charge_P1 = {
                       'Q': 'Q1Q2',
                    'date': ['08-06-20','08-07-20'],
           'thresh_charge': 0.96,
