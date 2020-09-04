@@ -267,7 +267,7 @@ class Controller(QtGui.QApplication):
         PDFs = np.load(pdfs_file, allow_pickle=True)
         PDFs = PDFs.tolist()
         
-        q_map = noiselib.loadmat('sim_data/charge_map.mat')
+        q_map = noiselib.loadmat('Z:/mcdermott-group/data/fluxNoise2/sim_data/charge_map.mat')
         q = q_map['charge_mat']
         q[~np.isfinite(q)] = -1. # right below center of qubit
         def map_charge(r, z, q, rp, zp): 
