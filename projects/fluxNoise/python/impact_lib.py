@@ -431,8 +431,17 @@ class Controller(QtGui.QApplication):
         
         e1 = noiselib.alias(q_induced[:,q1-1])
         e2 = noiselib.alias(q_induced[:,q2-1])
-        return 1.*np.sum( (np.abs(e1) > thresh) & (np.abs(e2) > thresh) ) / \
-                  np.sum( (np.abs(e1) > thresh) | (np.abs(e2) > thresh) )
+        both_jump = np.sum( (np.abs(e1) > thresh) & (np.abs(e2) > thresh) )
+        either_jump = np.sum( (np.abs(e1) > thresh) | (np.abs(e2) > thresh) )
+        try:
+            corr = 1.*both_jump / either_jump
+        except ZeroDivisionError:
+            corr = np.nan
+        try:
+            dcorr = 1.*both_jump / either_jump * np.sqrt(1./both_jump + 1./either_jump)
+        except ZeroDivisionError:
+            dcorr = np.nan
+        return corr, dcorr
         
 
 if __name__ == '__main__':

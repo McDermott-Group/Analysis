@@ -183,7 +183,7 @@ reg = re.compile('Q1(Q\d)(Q\d)*')
 with open('dump_T1_files.dat', 'rb') as f:
     files = pickle.load(f)
 print len(files)
-for k,f in enumerate(files[:300]): # 290
+for k,f in enumerate(files[:]): # 290
     Qs = list(reg.findall(f)[0])
     if Qs[-1] == '':
         Qs.pop()

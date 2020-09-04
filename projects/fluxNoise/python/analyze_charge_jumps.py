@@ -13,7 +13,7 @@ import datasets as ds
 charge_path = '{}\DR1 - 2019-12-17\CorrFar\{}Corr\General\Parameter\{}_correlation.hdf5'
 CO = ChargeOffset()
 
-for d in [ds.q1q2q3q4_charge_1, ds.q1q2q3q4_charge_2, ds.q1q2q3q4_charge_3,
+for d in [#ds.q1q2q3q4_charge_1, ds.q1q2q3q4_charge_2, ds.q1q2q3q4_charge_3,
           ds.q1q2q3q4_charge_4, ds.q1q2q3q4_charge_5, ds.q1q2q3q4_charge_6,
           ds.q1q2q3q4_charge_7, ds.q1q2q3q4_charge_8, ds.q1q2q3q4_charge_9,
           ds.q1q2q3q4_charge_10]: 
@@ -50,16 +50,66 @@ for d in [ds.q1q2q3q4_charge_1, ds.q1q2q3q4_charge_2, ds.q1q2q3q4_charge_3,
 # CO.plot_charge_offset()
 # CO.plot_jump_sizes()
 jumps, sigma = CO.get_jump_sizes(plot=True)
-fig,(ax1,ax2,ax3) = plt.subplots(1,3)
-CO.plot_charge_correlation('Q1','Q2',ax=ax1, thresh=(0.1,0.1))
-CO.plot_charge_correlation('Q3','Q4',ax=ax2, thresh=(0.1,0.1))
-CO.plot_charge_correlation('Q1','Q3',ax=ax3, thresh=(0.1,0.1))
+fig,(ax1,ax2,ax3) = plt.subplots(1,3, constrained_layout=True)
+CO.plot_charge_correlation('Q1','Q2',ax=ax1, thresh=(0.2,0.2))
+CO.plot_charge_correlation('Q3','Q4',ax=ax2, thresh=(0.2,0.2))
+CO.plot_charge_correlation('Q1','Q3',ax=ax3, thresh=(0.2,0.2))
 ax1.set_title(''); ax2.set_title(''); ax3.set_title('');
 ax2.get_yaxis().set_visible(False); ax3.get_yaxis().set_visible(False);
 # CO.plot_time_steps()
 print 'jump assymetry:'
 for q in ('Q1','Q2','Q3','Q4'):
-    print '    {}: {:.3f}'.format( q, 1.*np.sum(jumps[q]>0.1)/np.sum(np.abs(jumps[q])>0.1) )
+    print '    {}: {:.3f}'.format( q, 1.*np.sum(jumps[q]>0.2)/np.sum(np.abs(jumps[q])>0.2) )
+plt.draw()
+plt.pause(0.05)
+
+
+thresh_list = np.arange(0.05, 0.2, 0.01)
+n = thresh_list.size
+pC = { 12: np.full((n,n),np.nan),
+       34: np.full((n,n),np.nan),
+       13: np.full((n,n),np.nan) }
+d_pC = { 12: np.full((n,n),np.nan),
+       34: np.full((n,n),np.nan),
+       13: np.full((n,n),np.nan) }
+a1324 = { 12: np.full((n,n),np.nan),
+       34: np.full((n,n),np.nan),
+       13: np.full((n,n),np.nan) }
+d_a1324 = { 12: np.full((n,n),np.nan),
+       34: np.full((n,n),np.nan),
+       13: np.full((n,n),np.nan) }
+for i, thresh1 in enumerate(thresh_list):
+    for j, thresh2 in enumerate(thresh_list):
+        print i,j
+        pC[12][i,j], d_pC[12][i,j], a1324[12][i,j], d_a1324[12][i,j] = \
+            CO.plot_charge_correlation('Q1','Q2',ax=ax1, thresh=(thresh1,thresh2))
+        pC[34][i,j], d_pC[34][i,j], a1324[34][i,j], d_a1324[34][i,j] = \
+            CO.plot_charge_correlation('Q3','Q4',ax=ax1, thresh=(thresh1,thresh2))
+        pC[13][i,j], d_pC[13][i,j], a1324[13][i,j], d_a1324[13][i,j] = \
+            CO.plot_charge_correlation('Q1','Q3',ax=ax1, thresh=(thresh1,thresh2))
+
+
+# for qq in [34,12,13]:
+    # fig,axs = plt.subplots(1, 4, figsize=(15,4.5), constrained_layout=True)
+    # fig.suptitle(str(qq))
+    # for i,(name,var) in enumerate([('pC',pC), ('error pC',d_pC), 
+                                   # ('13/24',a1324), ('error 13/24',d_a1324)]):
+        # m = axs[i].pcolormesh(thresh_list, thresh_list, var[qq])
+        # axs[i].set_aspect( 1 )
+        # axs[i].set_title( name )
+        # plt.colorbar(m, ax=axs[i], location='bottom')
+        # plt.draw(); plt.pause(0.05)
+
+plt.rcParams['errorbar.capsize'] = 2
+fig1, ax1 = plt.subplots(1, 1)
+fig2, ax2 = plt.subplots(1, 1)
+for qq in [34,12,13]:
+    ax1.errorbar( thresh_list, np.diag(pC[qq]), np.diag(d_pC[qq]), fmt='.', label=str(qq))
+    ax2.errorbar( thresh_list, np.diag(a1324[qq]), np.diag(d_a1324[qq]), fmt='.', label=str(qq))
+ax1.legend()
+ax2.legend()
+ax1.set_title('pC')
+ax2.set_title('13/24')
 plt.draw()
 plt.pause(0.05)
 

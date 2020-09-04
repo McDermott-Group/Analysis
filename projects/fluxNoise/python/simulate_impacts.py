@@ -16,23 +16,34 @@ reload(impact_lib)
 from impact_lib import *
 import pickle
 
+path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data'
+calc_all = True
+
+if not calc_all:
+    with open('dump_sim_impacts.dat', 'rb') as f:
+        q_induced,corr,assym = pickle.load(f)
+else:
+    q_induced = {150:{},300:{},750:{}}
+
 corr = {150:{},300:{},750:{}}
 assym = {150:{},300:{},750:{}}
-# q_induced = {150:{},300:{},750:{}}
 
 for L in (150, 300, 750):
     for fq in (1., 0.1, 0.01):
         print('Gammas:  L = {}  fQ = {}'.format(L, fq))
         
-        app = Controller(sys.argv, fQ=fq, calc_all=False,
-                         pdfs_file='sim_data/ChargePDFs_{}.npy'.format(L),
-                         event_files=['sim_data/Gamma.txt', 'sim_data/Gamma_10deg.txt'])
-                         # event_files=['sim_data/Muons.txt', 'sim_data/Muons2.txt'])
+        app = Controller(sys.argv, fQ=fq, calc_all=calc_all,
+                         pdfs_file='{}/ChargePDFs_{}.npy'.format(path,L),
+                         event_files=[path+'/Gamma.txt', 
+                                      path+'/Gamma_10deg.txt',
+                                      path+'/Gamma_10deg_pt2.txt'])
+                         # event_files=[path+'/Muons.txt', path+'sim_data/Muons2.txt'])
         if hasattr(app, 'view'):
             sys.exit(app.exec_())
-        # while app.thread.is_alive():
-            # time.sleep(1)
-        app.q_induced = q_induced[L][fq]
+        while hasattr(app, 'thread') and app.thread.is_alive():
+            time.sleep(1)
+        if not calc_all:
+            app.q_induced = q_induced[L][fq]
         print( 'total events: {}'.format(app.q_induced.shape[0]) )
         fig, axs = plt.subplots(1, 3, figsize=(15,6))
         fig.suptitle('Gammas:  L = {}  fQ = {}'.format(L, fq))
@@ -40,15 +51,20 @@ for L in (150, 300, 750):
         assym[L][fq] = {}
         for i,(q1,q2) in enumerate( ((1,2), (3,4), (1,3)) ):
             app.plot_qq(q1,q2, axs[i])
-            qq1 = app.count(q1,q2,1)
-            qq2 = app.count(q1,q2,2)
-            qq3 = app.count(q1,q2,3)
-            qq4 = app.count(q1,q2,4)
-            corr[L][fq][(q1,q2)] = app.get_correlation(q1,q2,0.1)
+            qq1 = app.count(q1,q2,1,thresh=0.2)
+            qq2 = app.count(q1,q2,2,thresh=0.2)
+            qq3 = app.count(q1,q2,3,thresh=0.2)
+            qq4 = app.count(q1,q2,4,thresh=0.2)
+            corr[L][fq][(q1,q2)] = app.get_correlation(q1,q2,0.2)
             try:
-                assym[L][fq][(q1,q2)] = 1. * (qq1+qq3) / (qq2+qq4)
+                a = 1. * (qq1+qq3) / (qq2+qq4)
             except ZeroDivisionError:
-                assym[L][fq][(q1,q2)] = np.nan
+                a = np.nan
+            try:
+                da = assym[L][fq][(q1,q2)] * np.sqrt( 1./(qq1+qq3) + 1./(qq2+qq4) )
+            except ZeroDivisionError:
+                da = np.nan
+            assym[L][fq][(q1,q2)] = a, da
             q_induced[L][fq] = app.q_induced
             print( 'Q{} - Q{}'.format(q1,q2) )
             print( '    quadrants 1,2,3,4: {}, {}, {}, {}'.format( qq1, qq2, qq3, qq4 ) )
@@ -57,29 +73,36 @@ for L in (150, 300, 750):
                              *np.array((qq1, qq2, qq3, qq4))/float(qq1+qq2+qq3+qq4) ) )
             except ZeroDivisionError:
                 pass
-            print( '    correlation: {:.2f}'.format( corr[L][fq][(q1,q2)] ) )
-            print( '    13/24 asymmetry: {:.2f}'.format( assym[L][fq][(q1,q2)] ) )
+            print( u'    correlation: {:.2f} \u00B1 {:.3f}'.format( 
+                            *corr[L][fq][(q1,q2)] ) )
+            print( u'    13/24 asymmetry: {:.2f} \u00B1 {:.3f}'.format( 
+                            *assym[L][fq][(q1,q2)]  ) )
+            with open('dump_sim_impacts.dat', 'wb') as f:
+                pickle.dump((q_induced,corr,assym), f)
         for q in (1,2,3,4):
             e = noiselib.alias(app.q_induced[:,q-1])
             try:
-                print( 'Q{} charge asymmetry: {:.3f}'.format( q, 1.*np.sum(e>0.1)/np.sum(np.abs(e)>0.1) ) )
+                print( 'Q{} charge asymmetry: {:.3f}'.format( q, 
+                                    1.*np.sum(e>0.1)/np.sum(np.abs(e)>0.1) ) )
             except ZeroDivisionError:
                 pass
-        fig.savefig('sim_data/qq_figs/L{}fq{}.pdf'.format(L,fq))
+        fig.savefig('{}/qq_figs/L{}fq{}.pdf'.format(path,L,fq))
         plt.close(fig)
         
-with open('dump_sim_impacts.dat', 'wb') as f:
-    pickle.dump((q_induced,corr,assym), f)
 
 with open('dump_sim_impacts.dat', 'rb') as f:
     q_induced,corr,assym = pickle.load(f)
 
 def print_dict(d):
-    print('{:6}{:6}{:10}{:10}{:10}'.format('L','fq','(3,4)','(1,2)','(1,3)'))
+    print(u'{:>6}{:>6}{:>15}{:>15}{:>15}'.format('L','fq','(3,4)','(1,2)','(1,3)'))
     for L in (150, 300, 750):
         for fq in (1., 0.1, 0.01):
-            print('{:6}{:6}{:10.2f}{:10.2f}{:10.2f}'.format(
-                L, fq, d[L][fq][(3,4)], d[L][fq][(1,2)], d[L][fq][(1,3)] ))
+            # print('{:6}{:6}{:15.2f}{:15.2f}{:15.2f}'.format(
+                # L, fq, d[L][fq][(3,4)], d[L][fq][(1,2)], d[L][fq][(1,3)] ))
+            print(u'{:>6}{:>6}{:>15}{:>15}{:>15}'.format(L, fq, 
+                u'{:.2f} \u00B1 {:.3f}'.format(d[L][fq][(3,4)][0], d[L][fq][(3,4)][1]),
+                u'{:.2f} \u00B1 {:.3f}'.format(d[L][fq][(1,2)][0], d[L][fq][(1,2)][1]),
+                u'{:.2f} \u00B1 {:.3f}'.format(d[L][fq][(1,3)][0], d[L][fq][(1,2)][1]) ))
         
 
 fig, axi = plt.subplots(1,1)
@@ -97,7 +120,8 @@ for l,q_L in q_induced.items():
             center2 = center**2 * np.sign(center)
             widths = np.diff(bins**2)
             bg = np.sum(np.abs(e)>0.2)
-            axi.step(center2, 2553./bg*noiselib.movingmean(h,30), label='L={} fq={}'.format(l,fq))
+            axi.step(center2, 2553./bg*noiselib.movingmean(h,30),
+                        label='L={} fq={}'.format(l,fq))
 axi.set_yscale('log')
 axi.set_ylim([10e-1, 1.5*h.max()])
 axi.legend()

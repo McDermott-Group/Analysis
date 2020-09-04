@@ -212,33 +212,47 @@ class ChargeOffset(object):
                     self._above(-jumps2,thresh[1],abs=False))
         q4 = np.sum(self._above( jumps1,thresh[0],abs=False) & 
                     self._above(-jumps2,thresh[1],abs=False))
-        print('    13/24 = ({}+{})/({}+{}) = {:.2f}'.format(q1,q3,q2,q4,1.*(q1+q3)/(q2+q4)))
+        a1324 = 1.*(q1+q3)/(q2+q4)
+        d_a1324 = a1324 * np.sqrt( 1./(q1+q3) + 1./(q2+q4) )
+        print(u'    13/24 = ({}+{})/({}+{}) = {:.2f} \u00B1 {:.3f}'.format(
+                    q1, q3, q2, q4, a1324, d_a1324  ))
         
-        pA = 1.*np.sum(self._above( jumps1,thresh[0],abs=True )) / np.sum(np.isfinite(jumps1))
-        pB = 1.*np.sum(self._above( jumps2,thresh[1],abs=True )) / np.sum(np.isfinite(jumps2))
+        nA, nB = np.sum(np.isfinite(jumps1)), np.sum(np.isfinite(jumps2))
+        jA = np.sum( self._above( jumps1,thresh[0],abs=True) )
+        jB = np.sum( self._above( jumps2,thresh[1],abs=True) )
+        pA = 1. * jA / nA
+        d_pA = pA * np.sqrt( 1./jA + 1./nA )
+        pB = 1. * jB / nB
+        d_pB = pB * np.sqrt( 1./jB + 1./nB )
         p_obs = 1.*(q1 + q2 + q3 + q4) / np.sum( bothMeas )
+        d_p_obs = p_obs * np.sqrt( 1./(q1 + q2 + q3 + q4) + 1./np.sum( bothMeas ) )
         pC = 1.*(p_obs-pA*pB) / (1.+p_obs-pA-pB)
-        # print('    pA,pB,p_obs = {:.2f},{:.2f},{:.2f}'.format(pA,pB,p_obs))
-        print('    pA = {}/{} = {:.2f}'.format( np.sum(self._above( jumps1,thresh[0],abs=True )),
-                                                np.sum(np.isfinite(jumps1)), pA ))
-        print('    pB = {}/{} = {:.2f}'.format( np.sum(self._above( jumps2,thresh[1],abs=True )),
-                                                np.sum(np.isfinite(jumps2)), pB ))
-        print('    p_obs = {}/{} = {:.2f}'.format( (q1 + q2 + q3 + q4),
-                                                   np.sum( bothMeas ), p_obs ))
-        print('    pC = {:.2f}'.format(pC))
-        print('    pC/mean(pA,pB) = {:.2f}'.format( 1.*pC/np.mean([pA,pB]) ))
+        d_pC_top = np.sqrt( d_p_obs**2 + (pA*pB)**2*((d_pA/pA)**2+(d_pB/pB)**2) )
+        d_pC_bot = np.sqrt( d_p_obs**2 + d_pA**2 + d_pB**2 )
+        d_pC = pC * np.sqrt( (d_pC_top/(p_obs-pA*pB))**2 + (d_pC_bot/(1+p_obs-pA-pB))**2 )
         
-        if ax is None:
-            fig, ax = plt.subplots(1,1)
-        ax.set_aspect(1)
-        ax.set_xlim(-0.5,0.5)
-        ax.set_ylim(-0.5,0.5)
-        ax.set_title('Charge Jumps')
-        ax.set_xlabel('Jump Size {} [e]'.format(label1))
-        ax.set_ylabel('Jump Size {} [e]'.format(label2))
-        ax.scatter(jumps1, jumps2, c=corrJumps, cmap='rainbow', marker='.')
-        plt.draw()
-        plt.pause(0.05)
+        # print('    pA,pB,p_obs = {:.2f},{:.2f},{:.2f}'.format(pA,pB,p_obs))
+        print(u'    pA = {}/{} = {:.2f} \u00B1 {:.3f}'.format( jA, nA, pA, d_pA ))
+        print(u'    pB = {}/{} = {:.2f} \u00B1 {:.3f}'.format( jB, nB, pB, d_pB ))
+        print(u'    p_obs = {}/{} = {:.2f} \u00B1 {:.3f}'.format( (q1 + q2 + q3 + q4),
+                                             np.sum( bothMeas ), p_obs, d_p_obs ))
+        print(u'    pC = {:.2f} \u00B1 {:.3f}'.format(pC, d_pC))
+        print(u'    pC/mean(pA,pB) = {:.2f} \u00B1 {:.3f}'.format( 
+                        1.*pC/np.mean([pA,pB]),
+                        1.*pC/np.mean([pA,pB])*np.sqrt( (d_pC/pC)**2 + (d_pA**2+d_pB**2)/(pA+pB)**2 )   ))
+        
+        # if ax is None:
+            # fig, ax = plt.subplots(1,1)
+        # ax.set_aspect(1)
+        # ax.set_xlim(-0.5,0.5)
+        # ax.set_ylim(-0.5,0.5)
+        # ax.set_title('Charge Jumps')
+        # ax.set_xlabel('Jump Size {} [e]'.format(label1))
+        # ax.set_ylabel('Jump Size {} [e]'.format(label2))
+        # ax.scatter(jumps1, jumps2, c=corrJumps, cmap='rainbow', marker='.')
+        # plt.draw()
+        # plt.pause(0.05)
+        return 1.*pC/np.mean([pA,pB]), 1.*pC/np.mean([pA,pB])*np.sqrt( (d_pC/pC)**2 + (d_pA**2+d_pB**2)/(pA+pB)**2 ), a1324, d_a1324
         
     def plot_time_steps(self, datasets=None, ax=None):
         if datasets is None:
