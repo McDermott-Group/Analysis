@@ -173,7 +173,7 @@ class ChargeOffset(object):
             fig, ax = plt.subplots(1,1)
         ax.set_title('Jump Sizes')
         ax.set_xlabel('N')
-        ax.set_ylabel('Jump Size [e]')
+        ax.set_ylabel('Jump Size (e)')
         for l in jumps.keys():
             ax.plot(np.abs(jumps[l], jumps[l], where=~np.isnan(jumps[l])), label=l)
         ax.legend()
@@ -181,7 +181,7 @@ class ChargeOffset(object):
         plt.pause(0.05)
         
     def plot_charge_correlation(self, label1, label2, thresh=None, 
-                                      datasets=None, ax=None):
+                                      datasets=None, ax=None, plot=True):
         jumps, sigma = self.get_jump_sizes(datasets)
         jumps1 = jumps[label1]
         jumps2 = jumps[label2]
@@ -241,17 +241,19 @@ class ChargeOffset(object):
                         1.*pC/np.mean([pA,pB]),
                         1.*pC/np.mean([pA,pB])*np.sqrt( (d_pC/pC)**2 + (d_pA**2+d_pB**2)/(pA+pB)**2 )   ))
         
-        # if ax is None:
-            # fig, ax = plt.subplots(1,1)
-        # ax.set_aspect(1)
-        # ax.set_xlim(-0.5,0.5)
-        # ax.set_ylim(-0.5,0.5)
-        # ax.set_title('Charge Jumps')
-        # ax.set_xlabel('Jump Size {} [e]'.format(label1))
-        # ax.set_ylabel('Jump Size {} [e]'.format(label2))
-        # ax.scatter(jumps1, jumps2, c=corrJumps, cmap='rainbow', marker='.')
-        # plt.draw()
-        # plt.pause(0.05)
+        if plot:
+            if ax is None:
+                fig, ax = plt.subplots(1,1)
+            ax.set_aspect(1)
+            ax.set_xlim(-0.5,0.5)
+            ax.set_ylim(-0.5,0.5)
+            ax.set_title('Charge Jumps')
+            ax.set_xlabel('Jump Size {} [e]'.format(label1))
+            ax.set_ylabel('Jump Size {} [e]'.format(label2))
+            # ax.scatter(jumps1, jumps2, c=corrJumps, cmap='rainbow', marker='.')
+            ax.scatter(jumps1, jumps2, marker='.', s=4)
+            plt.draw()
+            plt.pause(0.05)
         return 1.*pC/np.mean([pA,pB]), 1.*pC/np.mean([pA,pB])*np.sqrt( (d_pC/pC)**2 + (d_pA**2+d_pB**2)/(pA+pB)**2 ), a1324, d_a1324
         
     def plot_time_steps(self, datasets=None, ax=None):
@@ -305,3 +307,4 @@ class ChargeOffset(object):
                         for tag in all_tags]
         closest_time_index = np.searchsorted(all_times, times)
         return [all_files[i] for i in closest_time_index.transpose()[0]]
+

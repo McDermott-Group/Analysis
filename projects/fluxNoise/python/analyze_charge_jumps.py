@@ -47,46 +47,74 @@ for d in [#ds.q1q2q3q4_charge_1, ds.q1q2q3q4_charge_2, ds.q1q2q3q4_charge_3,
         except KeyError:
             pass
 
+plt.rcParams['font.family'] = 'Helvetica'
+plt.rcParams['font.size'] = 10
+plt.rcParams['lines.linewidth'] = 1.
+plt.rcParams['xtick.direction'] = 'in'
+plt.rcParams['ytick.direction'] = 'in'
+fig_path = r'Z:\mcdermott-group\users\ChrisWilen\FluxNoise\figs'
 # CO.plot_charge_offset()
 # CO.plot_jump_sizes()
 jumps, sigma = CO.get_jump_sizes(plot=True)
-fig,(ax1,ax2,ax3) = plt.subplots(1,3, constrained_layout=True)
-CO.plot_charge_correlation('Q1','Q2',ax=ax1, thresh=(0.2,0.2))
-CO.plot_charge_correlation('Q3','Q4',ax=ax2, thresh=(0.2,0.2))
-CO.plot_charge_correlation('Q1','Q3',ax=ax3, thresh=(0.2,0.2))
-ax1.set_title(''); ax2.set_title(''); ax3.set_title('');
-ax2.get_yaxis().set_visible(False); ax3.get_yaxis().set_visible(False);
+fig,(ax1,ax2,ax3) = plt.subplots(1,3, constrained_layout=True, figsize=(7.2,2.5))
+CO.plot_charge_correlation('Q3','Q4',ax=ax1, thresh=(0.12,0.12))
+CO.plot_charge_correlation('Q1','Q2',ax=ax2, thresh=(0.12,0.12))
+CO.plot_charge_correlation('Q1','Q3',ax=ax3, thresh=(0.12,0.12))
+ax1.set_title(u'340 \u00B5m')
+ax2.set_title(u'640 \u00B5m')
+ax3.set_title(u'3195 \u00B5m');
+# ax2.get_yaxis().set_visible(False); ax3.get_yaxis().set_visible(False);
+for i,ax in enumerate([ax1,ax2,ax3]):
+    ax.set_xticks([-0.5,-0.25,0,0.25,0.5])
+    ax.set_yticks([-0.5,-0.25,0,0.25,0.5])
+    ax.set_xticklabels([u'\u22120.5','',0,'',0.5])
+    ax.set_yticklabels(['','','','',''])
+    ax.set_xlabel('')
+    ax.set_ylabel('')
+    line_x = [-0.5,-0.12,np.nan,0.12,0.5]
+    line_y = np.full(5,0.12)
+    ax.plot( line_x,  line_y, 'k:' )
+    ax.plot( line_x, -line_y, 'k:' )
+    ax.plot(-line_y,  line_x, 'k:' )
+    ax.plot( line_y,  line_x, 'k:' )
+    ax.spines['bottom'].set_linewidth(2)
+    ax.spines['left'].set_linewidth(2)
+    q1,q2 = [(3,4),(1,2),(1,3)][i]
+    ax.spines['bottom'].set_color('C{}'.format(q1-1))
+    ax.spines['left'].set_color('C{}'.format(q2-1))
+ax1.set_yticklabels([u'\u22120.5','',0,'',0.5])
+fig.savefig(fig_path+'\qq.pdf')
 # CO.plot_time_steps()
 print 'jump assymetry:'
 for q in ('Q1','Q2','Q3','Q4'):
-    print '    {}: {:.3f}'.format( q, 1.*np.sum(jumps[q]>0.2)/np.sum(np.abs(jumps[q])>0.2) )
+    print '    {}: {:.3f}'.format( q, 1.*np.sum(jumps[q]>0.12)/np.sum(np.abs(jumps[q])>0.12) )
 plt.draw()
 plt.pause(0.05)
 
 
-thresh_list = np.arange(0.05, 0.2, 0.01)
-n = thresh_list.size
-pC = { 12: np.full((n,n),np.nan),
-       34: np.full((n,n),np.nan),
-       13: np.full((n,n),np.nan) }
-d_pC = { 12: np.full((n,n),np.nan),
-       34: np.full((n,n),np.nan),
-       13: np.full((n,n),np.nan) }
-a1324 = { 12: np.full((n,n),np.nan),
-       34: np.full((n,n),np.nan),
-       13: np.full((n,n),np.nan) }
-d_a1324 = { 12: np.full((n,n),np.nan),
-       34: np.full((n,n),np.nan),
-       13: np.full((n,n),np.nan) }
-for i, thresh1 in enumerate(thresh_list):
-    for j, thresh2 in enumerate(thresh_list):
-        print i,j
-        pC[12][i,j], d_pC[12][i,j], a1324[12][i,j], d_a1324[12][i,j] = \
-            CO.plot_charge_correlation('Q1','Q2',ax=ax1, thresh=(thresh1,thresh2))
-        pC[34][i,j], d_pC[34][i,j], a1324[34][i,j], d_a1324[34][i,j] = \
-            CO.plot_charge_correlation('Q3','Q4',ax=ax1, thresh=(thresh1,thresh2))
-        pC[13][i,j], d_pC[13][i,j], a1324[13][i,j], d_a1324[13][i,j] = \
-            CO.plot_charge_correlation('Q1','Q3',ax=ax1, thresh=(thresh1,thresh2))
+# thresh_list = np.arange(0.05, 0.35, 0.01)
+# n = thresh_list.size
+# pC = { 12: np.full((n,n),np.nan),
+       # 34: np.full((n,n),np.nan),
+       # 13: np.full((n,n),np.nan) }
+# d_pC = { 12: np.full((n,n),np.nan),
+       # 34: np.full((n,n),np.nan),
+       # 13: np.full((n,n),np.nan) }
+# a1324 = { 12: np.full((n,n),np.nan),
+       # 34: np.full((n,n),np.nan),
+       # 13: np.full((n,n),np.nan) }
+# d_a1324 = { 12: np.full((n,n),np.nan),
+       # 34: np.full((n,n),np.nan),
+       # 13: np.full((n,n),np.nan) }
+# for i, thresh1 in enumerate(thresh_list):
+    # for j, thresh2 in enumerate(thresh_list):
+        # print i,j
+        # pC[12][i,j], d_pC[12][i,j], a1324[12][i,j], d_a1324[12][i,j] = \
+            # CO.plot_charge_correlation('Q1','Q2',ax=ax1, thresh=(thresh1,thresh2), plot=False)
+        # pC[34][i,j], d_pC[34][i,j], a1324[34][i,j], d_a1324[34][i,j] = \
+            # CO.plot_charge_correlation('Q3','Q4',ax=ax1, thresh=(thresh1,thresh2), plot=False)
+        # pC[13][i,j], d_pC[13][i,j], a1324[13][i,j], d_a1324[13][i,j] = \
+            # CO.plot_charge_correlation('Q1','Q3',ax=ax1, thresh=(thresh1,thresh2), plot=False)
 
 
 # for qq in [34,12,13]:
@@ -100,6 +128,7 @@ for i, thresh1 in enumerate(thresh_list):
         # plt.colorbar(m, ax=axs[i], location='bottom')
         # plt.draw(); plt.pause(0.05)
 
+thresh_list = np.arange(0.05, 0.35, 0.01)
 plt.rcParams['errorbar.capsize'] = 2
 fig1, ax1 = plt.subplots(1, 1)
 fig2, ax2 = plt.subplots(1, 1)
@@ -110,6 +139,21 @@ ax1.legend()
 ax2.legend()
 ax1.set_title('pC')
 ax2.set_title('13/24')
+plt.draw()
+plt.pause(0.05)
+
+jumps, sigma = CO.get_jump_sizes()
+fig, axs = plt.subplots(1, 3)
+for i,(q1,q2) in enumerate([('Q3','Q4'),('Q1','Q2'),('Q1','Q3')]):
+    corrJumps = [ np.sum(CO._above(jumps[q1], t) & CO._above(jumps[q2], t)) for t in thresh_list]
+    jumps1 = [ np.sum(CO._above(jumps[q1], t) & CO._above(jumps[q2], 0)) for t in thresh_list]
+    jumps2 = [ np.sum(CO._above(jumps[q2], t) & CO._above(jumps[q1], 0)) for t in thresh_list]
+    axs[i].plot( thresh_list, jumps1, label='N Jumps {}'.format(q1) )
+    axs[i].plot( thresh_list, jumps2, label='N Jumps {}'.format(q2) )
+    axs[i].plot( thresh_list, corrJumps, label='N Corr Jumps' )
+    axs[i].legend()
+    axs[i].set_title('{} - {}'.format(q1,q2))
+    axs[i].set_xlabel('Threshhold')
 plt.draw()
 plt.pause(0.05)
 

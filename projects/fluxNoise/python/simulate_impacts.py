@@ -15,6 +15,7 @@ import impact_lib
 reload(impact_lib)
 from impact_lib import *
 import pickle
+import gc
 
 path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data'
 calc_all = True
@@ -61,7 +62,7 @@ for L in (150, 300, 750):
             except ZeroDivisionError:
                 a = np.nan
             try:
-                da = assym[L][fq][(q1,q2)] * np.sqrt( 1./(qq1+qq3) + 1./(qq2+qq4) )
+                da = a * np.sqrt( 1./(qq1+qq3) + 1./(qq2+qq4) )
             except ZeroDivisionError:
                 da = np.nan
             assym[L][fq][(q1,q2)] = a, da
@@ -88,7 +89,8 @@ for L in (150, 300, 750):
                 pass
         fig.savefig('{}/qq_figs/L{}fq{}.pdf'.format(path,L,fq))
         plt.close(fig)
-        
+        del app
+        gc.collect()
 
 with open('dump_sim_impacts.dat', 'rb') as f:
     q_induced,corr,assym = pickle.load(f)
@@ -148,4 +150,3 @@ plt.pause(0.05)
     # ax3.imshow(np.sum(v17.T, axis=1), norm=mpl.colors.LogNorm(), origin='lower')
     # ax1.set_title('(0,0,0)'); ax2.set_title('(0,0,0.1)'); ax3.set_title('(0,0,0.17)');
     # plt.draw(); plt.pause(0.05)
-    

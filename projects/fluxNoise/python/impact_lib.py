@@ -11,11 +11,13 @@ import matplotlib.pyplot as plt
 import noiselib
 from numba import jit
 import time
+import multiprocessing as mp
+import pathos.pools as pp
 
 
 class ImpactEvent(object):
     
-    def __init__(self, pdfs, track, energy, qubit_xys, charge_map):
+    def __init__(self, pdfs, charge_map, qubit_xys, track=None, energy=None):
     
         self.PDFs = pdfs
         self.track = track
@@ -57,6 +59,43 @@ class ImpactEvent(object):
             self.charge = xyz, polarity
             print( xyz.nbytes/1e6 )
         return xyz, polarity
+    
+    # def get_charge(self, fQ=1., cache=False):
+        # """ Generates and returns positions and polarities of charges from track 
+        # and energy. """
+    
+        # if hasattr(self, 'charge'):
+            # return self.charge
+        # xyz = []
+        # polarity = []
+        # pool = pp.ProcessPool(mp.cpu_count()-1)
+        # n = len(self.track)
+        # results = pool.amap(self.get_charge_from_point, range(n), np.full(n,1.))
+        # results = list(results)
+        # # results = [pool.apply( self.get_charge_from_point, args=(i,fQ) )
+                    # # for i in range(len(self.track))]
+        # # pool.close()
+        # print len(self.track), len(results)
+        # print type(results)
+        # print reslts[0]
+        # for p,x in results:
+            # xyz += x
+            # polarity += p
+        
+        # xyz = np.concatenate(xyz)
+        # polarity = np.concatenate(polarity)
+        # if cache:
+            # self.charge = xyz, polarity
+            # print( xyz.nbytes/1e6 )
+        # return xyz, polarity
+    
+    def get_charge_from_point(self, i, fQ ):
+        x,y,z = self.track[i]
+        res = self.diffuseCharge(x,y,z,self.energy[i],fQ=fQ,epseh=3.6,verbose=False)
+        polarity = [np.full(res['electrons'].shape[1], -1.), 
+                     np.full(res['holes'].shape[1], 1.) ]
+        xyz = [res['electrons'].T, res['holes'].T]
+        return polarity, xyz
     
     def get_charge_on_qubits(self, charge_xyz, charge_polarity):
         """ Return the charge that lands directly on each qubit island. """
@@ -263,11 +302,30 @@ class Controller(QtGui.QApplication):
                           (-1.564, -0.420)]
         
         self.fQ = fQ
+        self.event_files = event_files
         
-        PDFs = np.load(pdfs_file, allow_pickle=True)
-        PDFs = PDFs.tolist()
+        PDFs = np.load(pdfs_file, allow_pickle=True).tolist()
         
-        q_map = noiselib.loadmat('Z:/mcdermott-group/data/fluxNoise2/sim_data/charge_map.mat')
+        charge_map = self.load_charge_map('Z:/mcdermott-group/data/fluxNoise2/sim_data/charge_map.mat')
+        
+        self.event = ImpactEvent(PDFs, charge_map, self.qubit_xys)
+        
+        self.i = -1
+        self.n_events = self.get_num_events()
+        
+        if plot:
+            self.view = MainWindow(self, self.qubit_xys)
+            self.show_next()
+        
+        if calc_all:
+            self.e = ImpactEvent(PDFs, 1, 1, self.qubit_xys, charge_map)
+            self.thread = threading.Thread(target=self.analyze_all_events)
+            self.thread.start()
+            # self.analyze_all_events()
+    
+    def load_charge_map(self, path):
+        
+        q_map = noiselib.loadmat(path)
         q = q_map['charge_mat']
         q[~np.isfinite(q)] = -1. # right below center of qubit
         def map_charge(r, z, q, rp, zp): 
@@ -287,29 +345,40 @@ class Controller(QtGui.QApplication):
         charge_map = lambda rp,zp: map_charge( q_map['r']/1000., 
                                                q_map['z']/1000., 
                                                q, rp, zp )
-        
-        data = []
-        for f in event_files:
-            data.append( np.loadtxt(f, skiprows=1) )
-        data = np.concatenate(data)
-        self.split_data = np.split(data, np.where(np.diff(data[:,0]))[0]+1)
-        self.events = []
-        for event in self.split_data:
-            e = ImpactEvent(PDFs, event[:,[2,3,4]], event[:,5] * 1e6,
-                            self.qubit_xys, charge_map)
-            self.events.append(e)
-        
-        self.i = -1
-        
-        if plot:
-            self.view = MainWindow(self, self.qubit_xys)
-            self.show_next()
-        
-        if calc_all:
-            self.e = ImpactEvent(PDFs, 1, 1, self.qubit_xys, charge_map)
-            self.thread = threading.Thread(target=self.analyze_all_events)
-            self.thread.start()
+        return charge_map
     
+    def load_track_data(self, i):
+        
+        txt_data = []
+        index = 0
+        for path in self.event_files:
+            f_index = 0
+            with open(path, 'r') as f:
+                for j,line in enumerate(f):
+                    if j==0: 
+                        continue
+                    f_index = int(line.split()[0])
+                    if i < index + f_index:
+                        break
+                    if i == index + f_index:
+                        txt_data.append(line)
+            index += f_index
+        data = np.loadtxt(txt_data)
+        return data
+    
+    def get_num_events(self):
+        
+        index = 0
+        for path in self.event_files:
+            f_index = 0
+            with open(path, 'r') as f:
+                for j,line in enumerate(f):
+                    if j==0: 
+                        continue
+                    f_index = int(line.split()[0])
+            index += f_index
+        return index + 1
+            
     def show_previous(self):
         
         self.i -= 1
@@ -322,25 +391,26 @@ class Controller(QtGui.QApplication):
         
     def show_event(self):
     
-        event = self.events[ self.i % len(self.split_data) ]
-        track_xyz, track_color = event.get_track()
-        charge_xyz, charge_polarity = event.get_charge(fQ=self.fQ)
+        e = self.load_track_data( self.i % self.n_events )
+        self.event.set_track(e[:,[2,3,4]], e[:,5] * 1e6)
+        track_xyz, track_color = self.event.get_track()
+        charge_xyz, charge_polarity = self.event.get_charge(fQ=self.fQ)
         self.view.plot_track(track_xyz, track_color, charge_xyz, charge_polarity)
     
     def analyze_all_events(self):
         
-        e = self.e
         self.q_induced = []
         self.q_direct = []
         start_time = time.time()
         bar_length = 50.
-        n = len(self.split_data)
-        for i,event in enumerate(self.split_data):
-            e.set_track(event[:,[2,3,4]], event[:,5] * 1e6)
-            xyz, polarity = e.get_charge(fQ=self.fQ)
-            qi = e.get_induced_charge_on_qubits(xyz, polarity)
-            # qi = e.get_induced_charge_on_qubits(np.full((1,1),(0,0,0)), [1])
-            qd = e.get_charge_on_qubits(xyz, polarity)
+        n = self.n_events
+        for i in range(n):
+            e = self.load_track_data( i % n )
+            self.event.set_track(e[:,[2,3,4]], e[:,5] * 1e6)
+            xyz, polarity = self.event.get_charge(fQ=self.fQ)
+            qi = self.event.get_induced_charge_on_qubits(xyz, polarity)
+            # qi = self.event.get_induced_charge_on_qubits(np.full((1,1),(0,0,0)), [1])
+            qd = self.event.get_charge_on_qubits(xyz, polarity)
             self.q_induced.append(qi)
             self.q_direct.append(qd)
             
@@ -393,16 +463,18 @@ class Controller(QtGui.QApplication):
     def plot_charge_hist_from_impact(self, q):
         """ Show histogram of charge induced on qubit q from CURRENT event. """
     
-        event = self.events[ self.i % len(self.split_data) ]
-        charge_xyz, charge_polarity = event.get_charge(fQ=self.fQ)
-        qs = event.get_induced_charge_on_qubits(charge_xyz, charge_polarity, sum=False)
+        e = self.load_track_data( self.i % self.n_events )
+        self.event.set_track(e[:,[2,3,4]], e[:,5] * 1e6)
+        charge_xyz, charge_polarity = self.event.get_charge(fQ=self.fQ)
+        qs = self.event.get_induced_charge_on_qubits(charge_xyz, charge_polarity,
+                                                     sum=False)
         qs = qs[q-1,:]
         fig, ax = plt.subplots(1,1)
         ax.hist([qs[charge_polarity<0], qs[charge_polarity>0]], bins=50)
         ax.set_xlabel('Q{} unaliased charge [e]'.format(q))
         ax.set_ylabel('Counts')
         ax.set_title('Distribution of induced charge from event {} on Q{}'.format( 
-                            self.i % len(self.split_data), q ))
+                            self.i % self.n_events, q ))
         ax.legend(['electrons','holes'])
         plt.draw()
         plt.pause(0.05)
@@ -442,6 +514,7 @@ class Controller(QtGui.QApplication):
         except ZeroDivisionError:
             dcorr = np.nan
         return corr, dcorr
+            
         
 
 if __name__ == '__main__':

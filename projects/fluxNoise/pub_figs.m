@@ -28,15 +28,16 @@ p1(1).LineWidth = 1;
 p2(1).LineWidth = 1;
 p1(1).Marker = '.';
 p2(1).Marker = '.';
-p1(1).MarkerSize = 4;
-p2(1).MarkerSize = 4;
-xlabel('Applied Offset Charge (V)')
+p1(1).MarkerSize = 6;
+p2(1).MarkerSize = 6;
+xlabel('Applied Offset Voltage (V)')
 ylabel('Occupation')
-ylim(0,0.9);
+ylim([0,0.9]);
 box on;
-set(gcf, 'PaperUnits', 'inches');
-set(gcf, 'PaperSize', [3.375/2 1.25]);
-set(gcf,'units','inches','position',[3,3,3.375/2,1.25])
+set(gcf, 'PaperUnits', 'centimeters');
+set(gcf, 'PaperSize', [75/10, 50/10]);
+set(gcf,'units','centimeters','position',[3,3,75/10,50/10])
+set(gca,'FontSize',10)
 
 path = 'Z:\mcdermott-group\data\fluxNoise2\DR1 - 2019-12-17\CorrFar\Q1\General\07-19-20\Qubit_spectroscopy\MATLABData\Qubit_spectroscopy_001.mat';
 data = loadMeasurementData(path);
@@ -46,6 +47,7 @@ title('');
 xlabel('Applied Offset Voltage (V)');
 ylabel('f-f_{01} (MHz)');
 colorbar off;
-set(gcf, 'PaperUnits', 'inches');
-set(gcf, 'PaperSize', [3.375/2 1.25]);
-set(gcf,'units','inches','position',[3,3,3.375/2,1.25])
+set(gcf, 'PaperUnits', 'centimeters');
+set(gcf, 'PaperSize', [75/10, 50/10]);
+set(gcf,'units','centimeters','position',[3,3,75/10,50/10])
+set(gca,'FontSize',10)
