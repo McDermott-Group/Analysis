@@ -13,18 +13,18 @@ import datasets as ds
 charge_path = '{}\DR1 - 2019-12-17\CorrFar\{}Corr\General\Parameter\{}_correlation.hdf5'
 CO = ChargeOffset()
 
-for d in [#ds.q1q2q3q4_charge_1, ds.q1q2q3q4_charge_2, ds.q1q2q3q4_charge_3,
-          ds.q1q2q3q4_charge_4, ds.q1q2q3q4_charge_5, ds.q1q2q3q4_charge_6,
-          ds.q1q2q3q4_charge_7, ds.q1q2q3q4_charge_8, ds.q1q2q3q4_charge_9,
-          ds.q1q2q3q4_charge_10]: 
-# for d in [ds.q1q2_0711_charge_T1, ds.q1q2_0714_charge_T1, ds.q1q2_0715_charge_T1,
-          # ds.q1q2_0719_charge_T1, ds.q1q2_0720_charge_T1, ds.q1q2_0722_charge_T1,
-          # ds.q1q2_0722_charge_T1_2, ds.q1q2_0724_charge_T1, ds.q1q2_0724_charge_T1_2,
-          # ds.q1q2_0725_charge_T1, ds.q1q2q4_0726_charge_T1, ds.q1q2q4_0727_charge_T1, 
-          # ds.q1q2q4_0728_charge_T1, ds.q1q2q4_0729_charge_T1, ds.q1q2q4_0730_charge_T1, 
-          # ds.q1q2q4_0731_charge_T1, ds.q1q2q4_0801_charge_T1, ds.q1q2q4_0802_charge_T1, 
-          # # ds.q1q4_0803_charge_T1, ds.q1q4_0805_charge_T1, 
-          # ds.q1q2q4_0810_charge_T1, ds.q1q2q4_0811_charge_T1, ds.q1q2q4_0812_charge_T1]: # Q1 only
+# for d in [ds.q1q2q3q4_charge_1, ds.q1q2q3q4_charge_2, ds.q1q2q3q4_charge_3,
+          # ds.q1q2q3q4_charge_4, ds.q1q2q3q4_charge_5, ds.q1q2q3q4_charge_6,
+          # ds.q1q2q3q4_charge_7, ds.q1q2q3q4_charge_8, ds.q1q2q3q4_charge_9,
+          # ds.q1q2q3q4_charge_10]: 
+for d in [ds.q1q2_0711_charge_T1, ds.q1q2_0714_charge_T1, ds.q1q2_0715_charge_T1,
+          ds.q1q2_0719_charge_T1, ds.q1q2_0720_charge_T1, ds.q1q2_0722_charge_T1,
+          ds.q1q2_0722_charge_T1_2, ds.q1q2_0724_charge_T1, ds.q1q2_0724_charge_T1_2,
+          ds.q1q2_0725_charge_T1, ds.q1q2q4_0726_charge_T1, ds.q1q2q4_0727_charge_T1, 
+          ds.q1q2q4_0728_charge_T1, ds.q1q2q4_0729_charge_T1, ds.q1q2q4_0730_charge_T1, 
+          ds.q1q2q4_0731_charge_T1, ds.q1q2q4_0801_charge_T1, ds.q1q2q4_0802_charge_T1, 
+          # ds.q1q4_0803_charge_T1, ds.q1q4_0805_charge_T1, 
+          ds.q1q2q4_0810_charge_T1, ds.q1q2q4_0811_charge_T1, ds.q1q2q4_0812_charge_T1]: # Q1 only
 # for d in [ds.q1q2q3q4_charge_11, ds.q1q2q3q4_charge_12, ds.q1q2q3q4_charge_13, 
           # ds.q1q2q3q4_charge_14]:
 
@@ -77,12 +77,14 @@ for i,ax in enumerate([ax1,ax2,ax3]):
     ax.plot( line_x, -line_y, 'k:' )
     ax.plot(-line_y,  line_x, 'k:' )
     ax.plot( line_y,  line_x, 'k:' )
-    ax.spines['bottom'].set_linewidth(2)
-    ax.spines['left'].set_linewidth(2)
+    ax.spines['bottom'].set_linewidth(3)
+    ax.spines['left'].set_linewidth(3)
     q1,q2 = [(3,4),(1,2),(1,3)][i]
     ax.spines['bottom'].set_color('C{}'.format(q1-1))
     ax.spines['left'].set_color('C{}'.format(q2-1))
 ax1.set_yticklabels([u'\u22120.5','',0,'',0.5])
+ax1.set_xlabel('$\Delta q_1$ (e)')
+ax1.set_ylabel('$\Delta q_2$ (e)')
 fig.savefig(fig_path+'\qq.pdf')
 # CO.plot_time_steps()
 print 'jump assymetry:'

@@ -71,6 +71,7 @@ P11 = {'Q2': np.zeros(2*N+1), 'Q4': np.zeros(2*N+1)}
 n_trace = {'Q2': np.zeros(2*N+1), 'Q4': np.zeros(2*N+1)}
 n0 = {'Q2': np.zeros(2*N+1), 'Q4': np.zeros(2*N+1)}
 n1 = {'Q2': np.zeros(2*N+1), 'Q4': np.zeros(2*N+1)}
+M1_before_trig = {'Q2': np.array([]), 'Q4': np.array([])}
 
 
 whitelist = None
@@ -247,14 +248,15 @@ for k,f in enumerate(files[:]): # 290
             P11[q][N-rep:N+nreps-rep] += p11
             n0[q][N-rep:N+nreps-rep] += p0
             n1[q][N-rep:N+nreps-rep] += p1
+            M1_before_trig[q] = np.concatenate( [M1_before_trig[q], M1[:rep]] )
 
 with open('dump_T1_sums.dat', 'wb') as f:
-    pickle.dump( (P10,P01,P00,P11,n_trace,n0,n1), f)
+    pickle.dump( (P10,P01,P00,P11,n_trace,n0,n1,M1_before_trig), f)
 
 
 
 with open('dump_T1_sums.dat', 'rb') as f:
-    P10,P01,P00,P11,n_trace,n0,n1 = pickle.load(f)
+    P10,P01,P00,P11,n_trace,n0,n1,M1_before_trig = pickle.load(f)
 # n0,n1=1.,1.
 t = np.arange(-N,N+1)/2.
 fig, ax = plt.subplots(1,1)
@@ -273,4 +275,6 @@ ax.legend()
 
 plt.draw()
 plt.pause(0.05)
-    
+
+print np.mean(M1_before_trig['Q2'])
+print np.mean(M1_before_trig['Q4'])

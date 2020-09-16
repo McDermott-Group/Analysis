@@ -11,15 +11,21 @@ import matplotlib.pyplot as plt
 import noiselib
 from numba import jit
 import time
-import multiprocessing as mp
-import pathos.pools as pp
+# import multiprocessing as mp
+# import pathos.pools as pp
 
+base_path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data'
 
 class ImpactEvent(object):
     
     def __init__(self, pdfs, charge_map, qubit_xys, track=None, energy=None):
     
-        self.PDFs = pdfs
+        if len(pdfs) > 1:
+            self.PDFs = {'electrons': pdfs[0],
+                         'holes': pdfs[1] }
+        else:
+            self.PDFs = {'electrons': pdfs[0],
+                         'holes': pdfs[0] }
         self.track = track
         self.energy = energy
         self.qubit_xys = qubit_xys
@@ -129,13 +135,13 @@ class ImpactEvent(object):
     
     def getPDF(self, z, charge_type='electrons'):
         
-        zcuts = self.PDFs['zarray']
+        zcuts = self.PDFs[charge_type]['zarray']
         zind = np.argmin(np.abs(z-zcuts))
-        return self.PDFs[zcuts[zind]][charge_type]
+        return self.PDFs[charge_type][zcuts[zind]][charge_type]
     
     def diffuseCharge(self, x, y, z, energy, fQ = 1.0, epseh=3.6, verbose=True):
     
-        PDFs = self.PDFs
+        PDFs = self.PDFs['electrons']
         
         neh = int(np.floor(energy/epseh)*fQ)
         if(verbose):
@@ -164,8 +170,8 @@ class ImpactEvent(object):
             yf += +np.random.rand(len(yf))*PDFs['dy'] - PDFs['dy']/2.0
             zf += +np.random.rand(len(zf))*PDFs['dz'] - PDFs['dz']/2.0
             
-            zmax = self.PDFs['thickness']/2.
-            zmin = -self.PDFs['thickness']/2.
+            zmax = PDFs['thickness']/2.
+            zmin = -PDFs['thickness']/2.
             xf[zf > zmax] = (x+(zf-z)*(xf-x))[zf > zmax]
             xf[zf < zmin] = (x+(zf-z)*(xf-x))[zf < zmin]
             yf[zf > zmax] = (y+(zf-z)*(yf-y))[zf > zmax]
@@ -190,8 +196,8 @@ class MainWindow(gl.GLViewWidget):
         self.show()
         self.model = model
         
-        # g = gl.GLGridItem()
-        # g.setSize(10,10,10)
+        # g = gl.GLGridItem(color=pg.glColor('w'))
+        # g.setSize(6.25,6.25,0.375)
         # self.addItem(g)
         
         self.track = gl.GLScatterPlotItem( size=5 )
@@ -202,11 +208,13 @@ class MainWindow(gl.GLViewWidget):
         self.charge.setGLOptions('translucent')
         self.addItem(self.charge)
         
-        ax = gl.GLAxisItem()
-        ax.setSize(10,10,10)
-        self.addItem(ax)
+        # ax = gl.GLAxisItem()
+        # ax.setSize(10,10,10)
+        # self.addItem(ax)
         
+        # self.setBackgroundColor('w')
         self.draw_chip_lines()
+        # self.draw_chip_faces()
         
         for x,y in qubit_xys:
             self.draw_qubit(x,y)
@@ -224,7 +232,7 @@ class MainWindow(gl.GLViewWidget):
         faces = np.array([[0,2,4], [2,4,6],
                           [0,1,5], [0,4,5],
                           [0,2,3], [0,1,3]])
-        return gl.GLMeshItem(vertexes=vertexes, faces=faces)
+        self.addItem( gl.GLMeshItem(vertexes=vertexes, faces=faces) )
     
     def draw_chip_lines(self, h=0.375/2., L=6.25/2.):
         vertexes = np.array([[-L,-L,-h],
@@ -250,7 +258,7 @@ class MainWindow(gl.GLViewWidget):
                              [np.nan,np.nan,np.nan],
                              [ L, L,-h],
                              [ L, L, h]])
-        self.addItem( gl.GLLinePlotItem(pos=vertexes) )
+        self.addItem( gl.GLLinePlotItem(pos=vertexes, color=pg.glColor('w'), width=2, antialias=True) )
     
     def draw_qubit(self, x, y, r_inner=0.07, r_outer=0.0905, h=0.375/2.):
         
@@ -289,9 +297,11 @@ class MainWindow(gl.GLViewWidget):
 
 class Controller(QtGui.QApplication):
     
-    def __init__(self, sys_argv, plot=False, calc_all=True,
-                 pdfs_file='sim_data/ChargePDFs_150.npy',
-                 event_files=['sim_data/Gamma.txt', 'sim_data/Gamma_10deg.txt'],
+    def __init__(self, sys_argv, plot=True, calc_all=False,
+                 pdfs_file='{}/ChargePDFs_{}.npy'.format(base_path,100),
+                 event_files=[base_path+'/Gamma.txt', 
+                              base_path+'/Gamma_10deg.txt',
+                              base_path+'/Gamma_10deg_pt2.txt'],
                  fQ=1.):
                  
         super(Controller, self).__init__(sys_argv)
@@ -303,8 +313,11 @@ class Controller(QtGui.QApplication):
         
         self.fQ = fQ
         self.event_files = event_files
+        self.txt_data = []
         
-        PDFs = np.load(pdfs_file, allow_pickle=True).tolist()
+        if type(pdfs_file) != list:
+            pdfs_file = [pdfs_file]
+        PDFs = [np.load(p_file, allow_pickle=True).tolist() for p_file in pdfs_file]
         
         charge_map = self.load_charge_map('Z:/mcdermott-group/data/fluxNoise2/sim_data/charge_map.mat')
         
@@ -350,21 +363,54 @@ class Controller(QtGui.QApplication):
     def load_track_data(self, i):
         
         txt_data = []
+        last_index = 0
         index = 0
         for path in self.event_files:
-            f_index = 0
             with open(path, 'r') as f:
                 for j,line in enumerate(f):
                     if j==0: 
                         continue
-                    f_index = int(line.split()[0])
-                    if i < index + f_index:
-                        break
-                    if i == index + f_index:
+                    new_index = int(line.split()[0])
+                    if new_index > last_index:
+                        index += 1
+                    if index == i:
                         txt_data.append(line)
-            index += f_index
-        data = np.loadtxt(txt_data)
-        return data
+                    elif index > i:
+                        data = np.loadtxt(txt_data)
+                        if len(data.shape) == 1:
+                            data = data.reshape(1,data.size)
+                        return data
+                    last_index = new_index
+    
+    # def load_track_data(self, i):
+        
+        # txt_data = self.txt_data
+        # data = []
+        # for path in self.event_files:
+            # data.append( np.loadtxt(path, skiprows=1) )
+        # data = np.concatenate(data)
+        # split_data = np.split(data, np.where(np.diff(data[:,0]))[0]+1)
+        # return split_data[i]
+    
+    def get_next_track(self):
+        
+        txt_data = []
+        last_index = 0
+        for path in self.event_files:
+            with open(path, 'r') as f:
+                for j,line in enumerate(f):
+                    if j==0: 
+                        continue
+                    new_index = int(line.split()[0])
+                    if new_index > last_index:
+                        data = np.loadtxt(txt_data)
+                        if len(data.shape) == 1:
+                            data = data.reshape(1,data.size)
+                        txt_data = [line]
+                        yield data
+                    else:
+                        txt_data.append(line)
+                    last_index = new_index
     
     def get_num_events(self):
         
@@ -403,9 +449,14 @@ class Controller(QtGui.QApplication):
         self.q_direct = []
         start_time = time.time()
         bar_length = 50.
+        track_gen = self.get_next_track()
         n = self.n_events
         for i in range(n):
-            e = self.load_track_data( i % n )
+            try:
+                e = track_gen.next()
+            except StopIteration:
+                print 'extra event attempt'
+                continue
             self.event.set_track(e[:,[2,3,4]], e[:,5] * 1e6)
             xyz, polarity = self.event.get_charge(fQ=self.fQ)
             qi = self.event.get_induced_charge_on_qubits(xyz, polarity)

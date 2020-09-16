@@ -3,6 +3,8 @@ import numpy as np
 import os
 from Markov_Python2.analyze_QPTunneling_pomegranate import observed_to_recovered_signal
 from scipy.signal import periodogram
+import matplotlib.pyplot as plt
+import matplotlib as mpl
 
 def loadmat(filename):
     '''
@@ -61,6 +63,46 @@ def loadmat(filename):
     if len(keys) == 1:
         data = data[keys[0]]['Data']
     return data
+
+
+def legend(ax=None):
+    """Call this legend instead of plt.legend() to make lines that can be turned
+    on and off by clicking on the legend.  
+    https://matplotlib.org/3.2.2/gallery/event_handling/legend_picking.html """
+    if ax is None:
+        ax = plt.gca()
+    lines = ax.lines
+    labels = [line.get_label() for line in lines]
+    for i in range(len(lines)-1,-1,-1):
+        if labels[i][0] == '_':
+            lines.pop(i)
+            labels.pop(i)
+    leg = ax.legend()
+    
+    # we will set up a dict mapping legend line to orig line, and enable
+    # picking on the legend line
+    lined = dict()
+    for legline, origline in zip(leg.get_lines(), lines):
+        legline.set_picker(5)  # 5 pts tolerance
+        lined[legline] = origline
+
+
+    def onpick(event):
+        # on the pick event, find the orig line corresponding to the
+        # legend proxy line, and toggle the visibility
+        legline = event.artist
+        origline = lined[legline]
+        vis = not origline.get_visible()
+        origline.set_visible(vis)
+        # Change the alpha on the line in the legend so we can see what lines
+        # have been toggled
+        if vis:
+            legline.set_alpha(1.0)
+        else:
+            legline.set_alpha(0.2)
+        ax.get_figure().canvas.draw()
+
+    ax.get_figure().canvas.mpl_connect('pick_event', onpick)
 
 
 def unwrap_voltage_to_charge(vs, wrap_voltage, dedv):

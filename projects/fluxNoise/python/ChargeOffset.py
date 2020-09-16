@@ -251,7 +251,7 @@ class ChargeOffset(object):
             ax.set_xlabel('Jump Size {} [e]'.format(label1))
             ax.set_ylabel('Jump Size {} [e]'.format(label2))
             # ax.scatter(jumps1, jumps2, c=corrJumps, cmap='rainbow', marker='.')
-            ax.scatter(jumps1, jumps2, marker='.', s=4)
+            ax.scatter(jumps1, jumps2, c='k', marker='.', s=4)
             plt.draw()
             plt.pause(0.05)
         return 1.*pC/np.mean([pA,pB]), 1.*pC/np.mean([pA,pB])*np.sqrt( (d_pC/pC)**2 + (d_pA**2+d_pB**2)/(pA+pB)**2 ), a1324, d_a1324
