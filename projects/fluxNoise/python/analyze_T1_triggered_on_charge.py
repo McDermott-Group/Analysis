@@ -47,8 +47,9 @@ import pickle
             # ds.q1q2_0725_charge_T1, ds.q1q2q4_0726_charge_T1, ds.q1q2q4_0727_charge_T1, 
             # ds.q1q2q4_0728_charge_T1, ds.q1q2q4_0729_charge_T1, ds.q1q2q4_0730_charge_T1, 
             # ds.q1q2q4_0731_charge_T1, ds.q1q2q4_0801_charge_T1, ds.q1q2q4_0802_charge_T1, 
-            # ds.q1q2q4_0803_charge_T1, ds.q1q4_0803_charge_T1, ds.q1q4_0805_charge_T1]: # ALL
-# # for d in [ds.q1q2q4_0802_charge_T1]: #new 
+            # ds.q1q4_0803_charge_T1, ds.q1q4_0805_charge_T1,
+            # ds.q1q2q4_0810_charge_T1, ds.q1q2q4_0811_charge_T1, ds.q1q2q4_0812_charge_T1]: # ALL
+# # for d in [ds.q1q2q4_0812_charge_T1]: #new 
           
     # CO.add_dataset(charge_path.format(d['Q'], d['path_charge']))
     # if 'exclude_data' in d:
@@ -70,6 +71,7 @@ P11 = {'Q2': np.zeros(2*N+1), 'Q4': np.zeros(2*N+1)}
 n_trace = {'Q2': np.zeros(2*N+1), 'Q4': np.zeros(2*N+1)}
 n0 = {'Q2': np.zeros(2*N+1), 'Q4': np.zeros(2*N+1)}
 n1 = {'Q2': np.zeros(2*N+1), 'Q4': np.zeros(2*N+1)}
+M1_before_trig = {'Q2': np.array([]), 'Q4': np.array([])}
 
 
 whitelist = None
@@ -155,7 +157,12 @@ whitelist = { '06-03-20':[1288,1343,1669],
               # '08-07-20':[185.7, 266.1, 361.5, 495.3, 849.3, 942.0, 1012.0, 1055.7,
                           # 1093.0, 1292.3, 1343.8, 1354.4, 1403.0, 1858.5, 1893.7,
                           # 2317.5, 2350.0, 2512.1, 2535.4, 2535.9, 2570.4], 
+              '08-10-20':[601.7, 662.1, 704.6, 847.4, 1571.6, 1610.0],
+              '08-11-20':[95.8, 129.6, 542.5],
+              '08-12-20':[35.6, 440.6, 822.1],
+              '08-13-20':[70.3, 631.4, 651.4, 880.9, 1016.2],
              }
+# whitelist = None
 # weird blips: 7/12: 1275.6, 1815.4, 1892.9, 1899.2, 1901.9, 1904.0, 1916.8, 
                    # 2119.2, 2141.6
 blacklist = {'05-29-20': { 13:[8], 544:[4], 576:[4], 1867:[1] },
@@ -173,74 +180,83 @@ blacklist = {'05-29-20': { 13:[8], 544:[4], 576:[4], 1867:[1] },
 data_files = {}
 reg = re.compile('Q1(Q\d)(Q\d)*')
 
-# with open('dump_T1_files.dat', 'rb') as f:
-    # files = pickle.load(f)
-# print len(files)
-# for k,f in enumerate(files[4000:4500]): # 290
-    # Qs = list(reg.findall(f)[0])
-    # if Qs[-1] == '':
-        # Qs.pop()
-    # path, num = noiselib.path_to_num(f)
-    # date = f.split('\\')[-4]
-    # if k == 0:
-        # base_trace = noiselib.loadmat(path.format(num+2))['Single_Shot_Occupation_RO2_SB1']
-    # if (whitelist is not None 
-        # and (date not in whitelist or num not in np.floor(whitelist[date]))):
-        # continue
-    # meas_vars = ['Single_Shot_Occupations_RO2_SB2',
-                 # 'Single_Shot_Occupations_RO1_SB2']
-    # if len(Qs) > 1:
-        # meas_vars += ['Single_Shot_Occupations_RO2_SB3',
-                      # 'Single_Shot_Occupations_RO1_SB3']
-    # DF = TwoMeasDataFile(path.format(num), 
-                         # charge_var='Single_Shot_Occupations_RO2_SB1',
-                                  # #'Single_Shot_Occupations_RO2_SB1'], 
-                         # # meas_var=['Single_Shot_Occupations_RO2_SB2',
-                                   # # 'Single_Shot_Occupations_RO1_SB2'])
-                         # # meas_var=['Single_Shot_Occupations_RO2_SB3',
-                                   # # 'Single_Shot_Occupations_RO1_SB3'])
-                         # meas_var=meas_vars)
-    # # DF.set_trigger_params(1000000., 300, 0.5)
-    # DF.set_trigger_params(10000000., 500, 1)
-    # trials = None
-    # if whitelist is not None and np.array(whitelist[date]).dtype == float:
-        # i = np.argwhere( np.floor(whitelist[date]) == num )
-        # v = np.array(whitelist[date])[i]
-        # trials = np.round((10*(v%1))).reshape(-1).astype(int)
-    # trigs = DF.get_triggers(trials)
-    # trigs = [(t,r) for t,r in trigs if date not in blacklist
-                                    # or num not in blacklist[date]
-                                    # or t not in blacklist[date][num]]
-    # # data_files[f] = DF
-    # print k, date, num, trigs
-    # for trial, rep in trigs:
-        # DF.add_base_ramsey_trace(base_trace)
-        # DF.plot(trial)
-        # # plt.show()
-        # for i,q in enumerate(Qs):
-            # M2 = DF.get_P1_around_trig((trial,rep), meas_index=0+2*i)
-            # M1 = DF.get_P1_around_trig((trial,rep), meas_index=1+2*i)
-            # p10 = (M1 == 1) & (M2 == 0)
-            # p01 = (M1 == 0) & (M2 == 1)
-            # p11 = (M1 == 1) & (M2 == 1)
-            # p00 = (M1 == 0) & (M2 == 0)
-            # p1 = (M1 == 1)
-            # p0 = (M1 == 0)
-            
-            # nreps = M2.size
-            # n_trace[q][N-rep:N+nreps-rep] += 1
-            # P10[q][N-rep:N+nreps-rep] += p10
-            # P01[q][N-rep:N+nreps-rep] += p01
-            # P00[q][N-rep:N+nreps-rep] += p00
-            # P11[q][N-rep:N+nreps-rep] += p11
-            # n0[q][N-rep:N+nreps-rep] += p0
-            # n1[q][N-rep:N+nreps-rep] += p1
 
-# with open('dump_T1_sums.dat', 'wb') as f:
-    # pickle.dump( (P10,P01,P00,P11,n_trace,n0,n1), f)
+with open('dump_T1_files.dat', 'rb') as f:
+    files = pickle.load(f)
+print len(files)
+for k,f in enumerate(files[:]): # 290
+    Qs = list(reg.findall(f)[0])
+    if Qs[-1] == '':
+        Qs.pop()
+    path, num = noiselib.path_to_num(f)
+    date = f.split('\\')[-4]
+    if k == 0:
+        base_trace = noiselib.loadmat(path.format(num+2))['Single_Shot_Occupation_RO2_SB1']
+    if (whitelist is not None 
+        and (date not in whitelist or num not in np.floor(whitelist[date]))):
+        continue
+    meas_vars = ['Single_Shot_Occupations_RO2_SB2',
+                 'Single_Shot_Occupations_RO1_SB2']
+    if len(Qs) > 1:
+        meas_vars += ['Single_Shot_Occupations_RO2_SB3',
+                      'Single_Shot_Occupations_RO1_SB3']
+    DF = TwoMeasDataFile(path.format(num), 
+                         charge_var='Single_Shot_Occupations_RO2_SB1',
+                                  #'Single_Shot_Occupations_RO2_SB1'], 
+                         # meas_var=['Single_Shot_Occupations_RO2_SB2',
+                                   # 'Single_Shot_Occupations_RO1_SB2'])
+                         # meas_var=['Single_Shot_Occupations_RO2_SB3',
+                                   # 'Single_Shot_Occupations_RO1_SB3'])
+                         meas_var=meas_vars)
+    IsQsFile = noiselib.loadmat(path.format(num))
+    # DF.set_trigger_params(1000000., 300, 0.5)
+    DF.set_trigger_params(10000000., 500, 1)
+    trials = None
+    if whitelist is not None and np.array(whitelist[date]).dtype == float:
+        i = np.argwhere( np.floor(whitelist[date]) == num )
+        v = np.array(whitelist[date])[i]
+        trials = np.round((10*(v%1))).reshape(-1).astype(int)
+    trigs = DF.get_triggers(trials)
+    trigs = [(t,r) for t,r in trigs if date not in blacklist
+                                    or num not in blacklist[date]
+                                    or t not in blacklist[date][num]]
+    # data_files[f] = DF
+    print k, date, num, trigs
+    for trial, rep in trigs:
+        DF.add_base_ramsey_trace(base_trace)
+        # plt.figure()
+        # plt.scatter(IsQsFile['Is_RO2_SB2'][trial], IsQsFile['Qs_RO2_SB2'][trial], s=1)
+        # plt.scatter(IsQsFile['Is_RO2_SB2'][trial][rep-10:rep+10], IsQsFile['Qs_RO2_SB2'][trial][rep-10:rep+10], c=cm.brg(np.arange(20)/20.))
+        # plt.draw(); plt.pause(0.05);
+        # DF.plot(trial)
+        # plt.show()
+        for i,q in enumerate(Qs):
+            M2 = DF.get_P1_around_trig((trial,rep), meas_index=0+2*i)
+            M1 = DF.get_P1_around_trig((trial,rep), meas_index=1+2*i)
+            p10 = (M1 == 1) & (M2 == 0)
+            p01 = (M1 == 0) & (M2 == 1)
+            p11 = (M1 == 1) & (M2 == 1)
+            p00 = (M1 == 0) & (M2 == 0)
+            p1 = (M1 == 1)
+            p0 = (M1 == 0)
+            
+            nreps = M2.size
+            n_trace[q][N-rep:N+nreps-rep] += 1
+            P10[q][N-rep:N+nreps-rep] += p10
+            P01[q][N-rep:N+nreps-rep] += p01
+            P00[q][N-rep:N+nreps-rep] += p00
+            P11[q][N-rep:N+nreps-rep] += p11
+            n0[q][N-rep:N+nreps-rep] += p0
+            n1[q][N-rep:N+nreps-rep] += p1
+            M1_before_trig[q] = np.concatenate( [M1_before_trig[q], M1[:rep]] )
+
+with open('dump_T1_sums.dat', 'wb') as f:
+    pickle.dump( (P10,P01,P00,P11,n_trace,n0,n1,M1_before_trig), f)
+
+
 
 with open('dump_T1_sums.dat', 'rb') as f:
-    P10,P01,P00,P11,n_trace,n0,n1 = pickle.load(f)
+    P10,P01,P00,P11,n_trace,n0,n1,M1_before_trig = pickle.load(f)
 # n0,n1=1.,1.
 t = np.arange(-N,N+1)/2.
 fig, ax = plt.subplots(1,1)
@@ -256,40 +272,9 @@ for q in ['Q2','Q4']:
     ax.plot( t, 1.*n_trace[q], 'k', label='number of files {}'.format(q) )
 ax.set_xlabel('Time From Trigger [ms]')
 ax.legend()
-    
-# for publication
-plt.rcParams['font.family'] = 'Arial'
-plt.rcParams['font.size'] = 10
-
-fig = plt.figure(figsize=(3.375,2))
-# ax = fig.add_axes([0.1,0.1,1,1])
-ax = fig.add_subplot(111)
-ax.set_xlim(-200,200)
-ax.set_ylim(0,50)
-ax.set_xlabel('Time From Trigger (ms)')
-ax.set_ylabel('T1 Time ($\mu$s)')
-a = {'Q2':0.6551, 'Q4':0.708}
-c = {'Q2':0.1785, 'Q4':0.06842}
-for q in ['Q2','Q4']:
-    o = noiselib.movingmean(1.*P01[q]/n0[q], 5)
-    T1 = -10./np.log((o-c[q])/a[q])
-    ax.plot( t, T1, label='Averaged P01 smoothed 30 {}'.format(q) )
-
-# 2166.7, 1069.3, 1830.0, 1256.5, *497.8*, 73.8, 2104.8
-# for k,f in enumerate(files[:]): # 290
-    # path, num = noiselib.path_to_num(f)
-    # if num == 497:
-        # print f
-
-p = (r'Z:\mcdermott-group\data\fluxNoise2\DR1 - 2019-12-17\CorrFar\Q1Q4Corr\General\08-04-20\Charge_resetting\MATLABData\Charge_resetting_497.mat')
-data = noiselib.loadmat(p)
-charge_trace = data['Single_Shot_Occupations_RO2_SB1']
-fig = plt.figure(figsize=(3.375,2))
-# ax = fig.add_axes([0.1,0.1,1,1])
-ax = fig.add_subplot(111)
-# ax.set_xlim(-200,200)
-ax.set_xlabel('')
-ax.plot( noiselib.movingmean(charge_trace[8], 30) )
 
 plt.draw()
 plt.pause(0.05)
+
+print np.mean(M1_before_trig['Q2'])
+print np.mean(M1_before_trig['Q4'])

@@ -11,458 +11,208 @@ import matplotlib.pyplot as plt
 import noiselib
 from numba import jit
 import time
+import impact_lib
+reload(impact_lib)
+from impact_lib import *
+import pickle
+import gc
+
+path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data'
+calc_all = False
+thresh = 0.12
 
 
-class ImpactEvent(object):
+# # for L in [100, 200, 300, 400, 500, 600, 700, 800]:
+# for L in [800]:
+    # for fq in [ 0.01 ]:
     
-    def __init__(self, pdfs, track, energy, qubit_xys, charge_map):
-    
-        self.PDFs = pdfs
-        self.track = track
-        self.energy = energy
-        self.qubit_xys = qubit_xys
-        self.charge_map = charge_map
-    
-    def set_track(self, track, energy):
-    
-        self.track = track
-        self.energy = energy
-        if hasattr(self, 'charge'):
-            del self.charge
-    
-    def get_track(self):
-    
-        c = self.energy
-        colorFloats = np.interp(c, (c.min(), c.max()), (0,1))
-        color = cm.autumn(colorFloats)
-        return self.track, color
-    
-    def get_charge(self, fQ=1., cache=False):
-        """ Generates and returns positions and polarities of charges from track 
-        and energy. """
-    
-        if hasattr(self, 'charge'):
-            return self.charge
-        xyz = []
-        polarity = []
-        for i in range(len(self.track)):
-            x,y,z = self.track[i]
-            res = self.diffuseCharge(x,y,z,self.energy[i],fQ=fQ,epseh=3.6,verbose=False)
-            polarity += [np.full(res['electrons'].shape[1], -1.), 
-                         np.full(res['holes'].shape[1], 1.) ]
-            xyz += [res['electrons'].T, res['holes'].T]
-        xyz = np.concatenate(xyz)
-        polarity = np.concatenate(polarity)
-        if cache:
-            self.charge = xyz, polarity
-            print( xyz.nbytes/1e6 )
-        return xyz, polarity
-    
-    def get_charge_on_qubits(self, charge_xyz, charge_polarity):
-        """ Return the charge that lands directly on each qubit island. """
-    
-        q = []
-        for i,xy_q in enumerate(self.qubit_xys):
-            dx,dy,dz = (charge_xyz - (xy_q[0], xy_q[1], 0.375/2.)).T
-            r = np.hypot(dx,dy)
-            qs = (r < 0.07) & (dz == 0)
-            q.append( (np.sum(qs[charge_polarity<0]),
-                       np.sum(qs[charge_polarity>0])) )
-        return q
-    
-    def get_induced_charge_on_qubits(self, charge_xyz, charge_polarity, sum=True):
-        """ Calculate the induced offset charge on each qubit from the distribution
-        charge_xyz and polarity charge_polarity of the charges.  If sum==True, 
-        the induced charge will be summed before being returned, giving the total
-        offset charge.  If False, an array of induced charges will be returned
-        for each qubit. """
-    
-        q = []
-        for i,xy_q in enumerate(self.qubit_xys):
-            dx,dy,dz = (charge_xyz - (xy_q[0], xy_q[1], 0.375/2.)).T
-            r = np.hypot(dx,dy)
-            qs = self.charge_map(r,-dz)
-            if sum:
-                q.append( np.sum(qs*charge_polarity) )
-            else:
-                q.append(qs)
-        return np.array(q)
-    
-    def getPDF(self, z, charge_type='electrons'):
+        # ### SIMULATE
+        # print('Gammas:  L = {}  fQ = {}'.format(L, fq))
         
-        zcuts = self.PDFs['zarray']
-        zind = np.argmin(np.abs(z-zcuts))
-        return self.PDFs[zcuts[zind]][charge_type]
-    
-    def diffuseCharge(self, x, y, z, energy, fQ = 1.0, epseh=3.6, verbose=True):
-    
-        PDFs = self.PDFs
-        
-        neh = int(np.floor(energy/epseh)*fQ)
-        if(verbose):
-            print('Event Energy: '+str(energy)+' eV')
-            print('Electron-Hole Pairs: '+str(neh))
-        
-        results=dict()
-        for charge_type in ['electrons','holes']:
-            Hn=self.getPDF(z,charge_type=charge_type)
-            Hr = Hn.ravel()
-            # vals = np.random.choice(Hr.size, p=Hr.astype('float64'), size=neh)
-            r = np.random.random(neh)
-            cumsum = np.cumsum(Hr)
-            vals = np.searchsorted(cumsum/np.sum(Hr), r)
-            inds = np.unravel_index(vals,Hn.shape)
-
-            sim_distx = PDFs['x'][inds[0]]
-            sim_disty = PDFs['y'][inds[1]]
-            sim_distz = PDFs['z'][inds[2]]
-        
-            xf = x+sim_distx
-            yf = y+sim_disty
-            zf = z+sim_distz
+        # if type(L) in (list,tuple):
+            # pdfs_file = ['{}/ChargePDFs_{}.npy'.format(path,l) for l in L]
+        # else:
+            # pdfs_file = '{}/ChargePDFs_{}.npy'.format(path,L)
+        # app = Controller(sys.argv, fQ=fq, calc_all=calc_all, plot=False,
+                         # pdfs_file=pdfs_file,
+                         # event_files=[path+'/Gamma.txt', 
+                                      # path+'/Gamma_10deg.txt',
+                                      # path+'/Gamma_10deg_pt2.txt'])
+                         # # event_files=[path+'/Muons.txt', path+'sim_data/Muons2.txt'])
+        # if hasattr(app, 'view'):
+            # sys.exit(app.exec_())
+        # if not calc_all:
+            # with open('dump_sim_impacts.dat', 'rb') as f:
+                # q_induced, corr, assym = pickle.load(f)
+            # app.q_induced = q_induced[L,fq]
+        # else:
+            # while hasattr(app, 'thread') and app.thread.is_alive():
+                # time.sleep(1)
             
-            xf += +np.random.rand(len(xf))*PDFs['dx'] - PDFs['dx']/2.0
-            yf += +np.random.rand(len(yf))*PDFs['dy'] - PDFs['dy']/2.0
-            zf += +np.random.rand(len(zf))*PDFs['dz'] - PDFs['dz']/2.0
-            
-            zmax = self.PDFs['thickness']/2.
-            zmin = -self.PDFs['thickness']/2.
-            xf[zf > zmax] = (x+(zf-z)*(xf-x))[zf > zmax]
-            xf[zf < zmin] = (x+(zf-z)*(xf-x))[zf < zmin]
-            yf[zf > zmax] = (y+(zf-z)*(yf-y))[zf > zmax]
-            yf[zf < zmin] = (y+(zf-z)*(yf-y))[zf < zmin]
-            zf[zf > zmax] = zmax
-            zf[zf < zmin] = zmin
-            
-            if charge_type == 'electrons':
-                results['electrons']=np.array([xf,yf,zf])
-            else:
-                results['holes']=np.array([xf,yf,zf])
-        
-        return results
+        # ### PLOT QQ, CALC ERROR
+        # while pickle.load( open('dump_saveInProgress.dat','rb') ):
+            # print '.',
+            # time.sleep(1)
+        # pickle.dump( True, open('dump_saveInProgress.dat','wb') )
+        # with open('dump_sim_impacts.dat', 'rb') as f:
+            # q_induced, corr, assym = pickle.load(f)
+        # print( 'total events: {}'.format(app.q_induced.shape[0]) )
+        # fig, axs = plt.subplots(1, 3, figsize=(15,6))
+        # fig.suptitle('Gammas:  L = {}  fQ = {}'.format(L, fq))
+        # for i,(q1,q2) in enumerate( ((1,2), (3,4), (1,3)) ):
+            # app.plot_qq(q1,q2, axs[i])
+            # qq1 = app.count(q1,q2,1,thresh=thresh)
+            # qq2 = app.count(q1,q2,2,thresh=thresh)
+            # qq3 = app.count(q1,q2,3,thresh=thresh)
+            # qq4 = app.count(q1,q2,4,thresh=thresh)
+            # corr[L,fq,(q1,q2)] = app.get_correlation(q1,q2,thresh)
+            # try:
+                # a = 1. * (qq1+qq3) / (qq2+qq4)
+            # except ZeroDivisionError:
+                # a = np.nan
+            # try:
+                # da = a * np.sqrt( 1./(qq1+qq3) + 1./(qq2+qq4) )
+            # except ZeroDivisionError:
+                # da = np.nan
+            # assym[L,fq,(q1,q2)] = a, da
+            # q_induced[L,fq] = np.array(app.q_induced)
+            # print( 'Q{} - Q{}'.format(q1,q2) )
+            # print( '    quadrants 1,2,3,4: {}, {}, {}, {}'.format( qq1, qq2, qq3, qq4 ) )
+            # try:
+                # print( '    quadrants 1,2,3,4: {:.2f}, {:.2f}, {:.2f}, {:.2f} %'.format( 
+                             # *np.array((qq1, qq2, qq3, qq4))/float(qq1+qq2+qq3+qq4) ) )
+            # except ZeroDivisionError:
+                # pass
+            # print( u'    correlation: {:.2f} \u00B1 {:.3f}'.format( 
+                            # *corr[L,fq,(q1,q2)] ) )
+            # print( u'    13/24 asymmetry: {:.2f} \u00B1 {:.3f}'.format( 
+                            # *assym[L,fq,(q1,q2)]  ) )
+        # with open('dump_sim_impacts.dat', 'wb') as f:
+            # pickle.dump((q_induced,corr,assym), f)
+        # for q in (1,2,3,4):
+            # e = noiselib.alias(app.q_induced[:,q-1])
+            # try:
+                # print( 'Q{} charge asymmetry: {:.3f}'.format( q, 
+                                    # 1.*np.sum(e>thresh)/np.sum(np.abs(e)>thresh) ) )
+            # except ZeroDivisionError:
+                # pass
+        # pickle.dump( False, open('dump_saveInProgress.dat','wb') )
+        # fig.savefig('{}/qq_figs/L{}fq{}.pdf'.format(path,L,fq))
+        # plt.close(fig)
+        # del app
+        # gc.collect()
+
+with open('dump_sim_impacts.dat', 'rb') as f:
+    q_induced, corr, assym = pickle.load(f)
+    
+    
+""" Plot +/- assymetry as a function of L,fq """
+data = np.full( (8,3,4), 0. )
+for i,L in enumerate((100, 200, 300, 400, 500, 600, 700, 800)):
+    for j,fq in enumerate((1., 0.1, 0.01)):
+        q5 = noiselib.alias(q_induced[L,fq],0.5)
+        data[i,j,:] = 1.*np.sum(q5>thresh,axis=0)/np.sum(np.abs(q5)>thresh,axis=0)
+fig, axs = plt.subplots(1,4,constrained_layout=True)
+for i in range(4):
+    p = axs[i].imshow(data[:,:,i], origin='lower', extent=(0.5,-2.5,50,850), 
+                      vmin=0.3, vmax = 0.7, aspect='auto', cmap='bwr')
+fig.colorbar(p, ax=axs)
+plt.draw()
+plt.pause(0.05)
+fig, ax = plt.subplots(1,1,constrained_layout=True)
+p = ax.imshow(np.mean(data,axis=2), origin='lower', extent=(0.5,-2.5,50,850), 
+                  aspect='auto', cmap='bwr')
+fig.colorbar(p, ax=ax)
+ax.set_ylabel('L')
+ax.set_xlabel('fq $10^x$')
+ax.set_title('Avg +/- assympetry')
+plt.draw()
+plt.pause(0.05)
 
 
-class MainWindow(gl.GLViewWidget):
-    
-    def __init__(self, model, qubit_xys):
-    
-        super(MainWindow, self).__init__()
-        # self.setGeometry(300, 300, 250, 150)
-        self.show()
-        self.model = model
-        
-        # g = gl.GLGridItem()
-        # g.setSize(10,10,10)
-        # self.addItem(g)
-        
-        self.track = gl.GLScatterPlotItem( size=5 )
-        self.track.setGLOptions('translucent')
-        self.addItem(self.track)
-        
-        self.charge = gl.GLScatterPlotItem( size=2 )
-        self.charge.setGLOptions('translucent')
-        self.addItem(self.charge)
-        
-        ax = gl.GLAxisItem()
-        ax.setSize(10,10,10)
-        self.addItem(ax)
-        
-        self.draw_chip_lines()
-        
-        for x,y in qubit_xys:
-            self.draw_qubit(x,y)
-    
-    def draw_chip_faces(self, h=0.375/2., L=6.25/2.):
-        
-        vertexes = np.array([[-L,-L,-h],
-                             [-L,-L, h],
-                             [-L, L,-h],
-                             [-L, L, h],
-                             [ L,-L,-h],
-                             [ L,-L, h],
-                             [ L, L,-h],
-                             [ L, L, h]])
-        faces = np.array([[0,2,4], [2,4,6],
-                          [0,1,5], [0,4,5],
-                          [0,2,3], [0,1,3]])
-        return gl.GLMeshItem(vertexes=vertexes, faces=faces)
-    
-    def draw_chip_lines(self, h=0.375/2., L=6.25/2.):
-        vertexes = np.array([[-L,-L,-h],
-                             [ L,-L,-h],
-                             [ L, L,-h],
-                             [-L, L,-h],
-                             [-L,-L,-h],
-                             [np.nan,np.nan,np.nan],
-                             [-L,-L, h],
-                             [ L,-L, h],
-                             [ L, L, h],
-                             [-L, L, h],
-                             [-L,-L, h],
-                             [np.nan,np.nan,np.nan],
-                             [-L,-L,-h],
-                             [-L,-L, h],
-                             [np.nan,np.nan,np.nan],
-                             [-L, L,-h],
-                             [-L, L, h],
-                             [np.nan,np.nan,np.nan],
-                             [ L,-L,-h],
-                             [ L,-L, h],
-                             [np.nan,np.nan,np.nan],
-                             [ L, L,-h],
-                             [ L, L, h]])
-        self.addItem( gl.GLLinePlotItem(pos=vertexes) )
-    
-    def draw_qubit(self, x, y, r_inner=0.07, r_outer=0.0905, h=0.375/2.):
-        
-        outer_circle = self._circle((x,y), r_outer)
-        outer_circle = np.concatenate([outer_circle, [outer_circle[0]]])
-        self.addItem( gl.GLLinePlotItem(pos=outer_circle) )
-        
-        inner_circle = self._circle((x,y), r_inner)
-        vertexes = np.concatenate([[[x,y,h]], inner_circle])
-        pts = range(1,len(vertexes))
-        faces = np.array([ [0,pts[i],pts[i+1]] for i in range(-1,len(pts)-1) ])
-        self.addItem( gl.GLMeshItem(vertexes=vertexes, faces=faces) )
-    
-    def _circle(self, xy, r, h=0.375/2., n=100):
-        """Returns points for a circle."""
-        x = xy[0] + r*np.cos(np.linspace(0,2*np.pi,n))
-        y = xy[1] + r*np.sin(np.linspace(0,2*np.pi,n))
-        h = np.full(n, h)
-        return np.transpose([x,y,h])
-        
-    def keyPressEvent(self, event):
-        if event.key() == QtCore.Qt.Key_Left:
-            self.model.show_previous()
-        elif event.key() == QtCore.Qt.Key_Right:
-            self.model.show_next()
-        else:
-            return
-    
-    def plot_track(self, track_xyz, track_color, charge_xyz, charge_polarity):
-    
-        self.track.setData(pos=track_xyz,
-                           color=track_color)
-        self.charge.setData(pos=charge_xyz,
-                            color=cm.PiYG(charge_polarity))
+""" Plot corr, assym as function of L,fq """
+def print_dict(d):
+    print(u'{:>6}{:>6}{:>15}{:>15}{:>15}'.format('L','fq','(3,4)','(1,2)','(1,3)'))
+    for L in (100, 200, 300, 400, 500, 600, 700, 800):
+        for fq in (1., 0.1, 0.01):
+            print(u'{:>6}{:>6}{:>15}{:>15}{:>15}'.format(L, fq, 
+                u'{:.2f} \u00B1 {:.3f}'.format(d[L,fq,(3,4)][0], d[L,fq,(3,4)][1]),
+                u'{:.2f} \u00B1 {:.3f}'.format(d[L,fq,(1,2)][0], d[L,fq,(1,2)][1]),
+                u'{:.2f} \u00B1 {:.3f}'.format(d[L,fq,(1,3)][0], d[L,fq,(1,2)][1]) ))
 
+def plot_dict(d, pair, range=(0.,1.), label='', measured=None):
+    L_list = np.array([100,200,300,400,500,600,700,800])# - 50
+    fq_list = np.array([0,-1,-2])# + 0.5
+    data = np.full( (len(L_list),len(fq_list)), 0. )
+    for i,L in enumerate([100,200,300,400,500,600,700,800]):
+        for j,fq in enumerate([1.,0.1,0.01]):
+            data[i,j] = d[L,fq,pair][0]
+    fig, ax = plt.subplots(1,1,constrained_layout=True)
+    if measured is not None:
+        d = np.nanmax(np.abs(measured - data))
+        range = (measured - d, measured + d)
+    # p = ax.pcolormesh(L_list, fq_list, data.T, vmin=range[0], vmax=range[1])
+    p = ax.imshow(data, origin='lower', extent=(0.5,-2.5,50,850), aspect='auto', 
+                        vmin=range[0], vmax=range[1], cmap='bwr')
+    ax.set_ylabel('L')
+    ax.set_xlabel('fq $10^x$')
+    ax.set_title(label+str(pair))
+    fig.colorbar(p, ax=ax)
+    # fig.tight_layout()
+    plt.draw()
+    plt.pause(0.05)
+    return L_list, fq_list, data
+        
+print_dict(corr)
+print_dict(assym)
 
-class Controller(QtGui.QApplication):
-    
-    def __init__(self, sys_argv):
-    
-        super(Controller, self).__init__(sys_argv)
-    
-        self.qubit_xys = [( 1.564,  0.570),
-                          ( 1.564, -0.070),
-                          (-1.564, -0.080),
-                          (-1.564, -0.420)]
-        
-        PDFs = np.load('sim_data/ChargePDFs.npy',allow_pickle=True)
-        PDFs = PDFs.tolist()
-        
-        q_map = noiselib.loadmat('sim_data/charge_map.mat')
-        q = q_map['charge_mat']
-        q[~np.isfinite(q)] = -1. # right below center of qubit
-        # charge_map = interp2d( q_map['r']/1000., q_map['z']/1000., q, copy=False)
-        # charge_map = np.vectorize(charge_map) # much slower
-        def map_charge(r, z, q, rp, zp): 
-            # my own bilinear interpolation, much faster
-            # https://math.stackexchange.com/questions/3230376/
-            #   interpolate-between-4-points-on-a-2d-plane
-            ri = np.searchsorted(r, rp)
-            zi = np.searchsorted(z, zp)
-            dr, dz = r[1]-r[0], z[1]-z[0]
-            rpp = (rp-r[np.clip(ri-1,0,r.size-1)])/dr
-            zpp = (zp-z[np.clip(zi-1,0,z.size-1)])/dz
-            q1 = q[np.clip(zi-1,0,z.size-1), np.clip(ri-1,0,r.size-1)]
-            q2 = q[np.clip(zi-1,0,z.size-1), np.clip(ri  ,0,r.size-1)]
-            q3 = q[np.clip(zi  ,0,z.size-1), np.clip(ri  ,0,r.size-1)]
-            q4 = q[np.clip(zi  ,0,z.size-1), np.clip(ri-1,0,r.size-1)]
-            return (1-rpp)*(1-zpp)*q1 + rpp*(1-zpp)*q2 + (1-rpp)*zpp*q3 + rpp*zpp*q4
-        charge_map = lambda rp,zp: map_charge( q_map['r']/1000., 
-                                               q_map['z']/1000., 
-                                               q, rp, zp )
-        
-        # data1 = np.loadtxt('sim_data/Muons.txt', skiprows=1)
-        # data2 = np.loadtxt('sim_data/Muons2.txt', skiprows=1)
-        data1 = np.loadtxt('sim_data/Gamma.txt', skiprows=1)
-        data2 = np.loadtxt('sim_data/Gamma_10deg.txt', skiprows=1)
-        data = np.concatenate([data1, data2])
-        self.split_data = np.split(data, np.where(np.diff(data[:,0]))[0]+1)
-        self.events = []
-        for event in self.split_data:
-            e = ImpactEvent(PDFs, event[:,[2,3,4]], event[:,5] * 1e6,
-                            self.qubit_xys, charge_map)
-            # e = ImpactEvent(PDFs, np.array((0,0,0)).reshape(1,3), np.array((.1e6,)),
-                            # self.qubit_xys, charge_map)
-            self.events.append(e)
-        
-        self.i = -1
-        
-        # self.view = MainWindow(self, self.qubit_xys)
-        # self.show_next()
-        
-        self.e = ImpactEvent(PDFs, 1, 1, self.qubit_xys, charge_map)
-        thread = threading.Thread(target=self.analyze_all_events)
-        thread.start()
-    
-    def show_previous(self):
-        
-        self.i -= 1
-        self.show_event()
-    
-    def show_next(self):
-        
-        self.i += 1
-        self.show_event()
-        
-    def show_event(self):
-    
-        event = self.events[ self.i % len(self.split_data) ]
-        track_xyz, track_color = event.get_track()
-        charge_xyz, charge_polarity = event.get_charge()
-        self.view.plot_track(track_xyz, track_color, charge_xyz, charge_polarity)
-    
-    def analyze_all_events(self):
-        
-        e = self.e
-        self.q_induced = []
-        self.q_direct = []
-        start_time = time.time()
-        bar_length = 50.
-        n = len(self.split_data)
-        for i,event in enumerate(self.split_data):
-            e.set_track(event[:,[2,3,4]], event[:,5] * 1e6)
-            xyz, polarity = e.get_charge()
-            qi = e.get_induced_charge_on_qubits(xyz, polarity)
-            # qi = e.get_induced_charge_on_qubits(np.full((1,1),(0,0,0)), [1])
-            qd = e.get_charge_on_qubits(xyz, polarity)
-            self.q_induced.append(qi)
-            self.q_direct.append(qd)
-            
-            # Update progress bar
-            progress = (i+1.)/n
-            finish_time = time.localtime(
-                start_time + n * (time.time() - start_time) / (i+1) )
-            bartxt = '[' + '#'*int(np.floor(bar_length*progress)) \
-                        + ' '*int(np.ceil(bar_length*(1.-progress))) \
-                        + '] {}% '.format(int(100.*progress)) \
-                        + time.strftime("%H:%M:%S %m/%d/%Y\r", finish_time)
-            sys.stdout.flush()
-            sys.stdout.write(bartxt)
-            sys.stdout.flush()
-            
-        self.q_induced = np.array(self.q_induced).reshape(-1,4)
-        self.q_direct = np.array(self.q_direct).reshape(-1,4,2)
-    
-    def plot_qq(self, q1, q2):
-        """ Shows 2d plot showing the aliased charge induced from all events, with
-        one axis as q1 and the other axis q2. """
-        
-        fig, ax = plt.subplots(1,1)
-        ax.plot( noiselib.alias(self.q_induced[:,q1-1]),
-                 noiselib.alias(self.q_induced[:,q2-1]), '.' )
-        ax.set_xlabel('Q{} aliased charge [e]'.format(q1))
-        ax.set_ylabel('Q{} aliased charge [e]'.format(q2))
-        ax.set_title('Q{} - Q{}'.format(q1,q2))
-        ax.set_aspect(1)
-        ax.set_xlim(-0.5,0.5)
-        ax.set_ylim(-0.5,0.5)
-        plt.draw()
-        plt.pause(0.05)
-    
-    def plot_charge_hist(self, q):
-        """ Shows histogram of the induced charge on qubit q for ALL events. """
-        
-        fig, ax = plt.subplots(1,1)
-        ax.hist( noiselib.alias(self.q_induced[:,q-1]), bins=50, range=(-0.5,0.5) )
-        ax.set_xlabel('Q{} aliased charge [e]'.format(q))
-        ax.set_ylabel('Counts')
-        ax.set_title('Distribution of induced charge from all events on Q{}'.format(q))
-        plt.draw()
-        plt.pause(0.05)
-    
-    def plot_charge_hist_from_impact(self, q):
-        """ Show histogram of charge induced on qubit q from CURRENT event. """
-    
-        event = self.events[ self.i % len(self.split_data) ]
-        charge_xyz, charge_polarity = event.get_charge()
-        qs = event.get_induced_charge_on_qubits(charge_xyz, charge_polarity, sum=False)
-        qs = qs[q-1,:]
-        fig, ax = plt.subplots(1,1)
-        ax.hist([qs[charge_polarity<0], qs[charge_polarity>0]], bins=50)
-        ax.set_xlabel('Q{} unaliased charge [e]'.format(q))
-        ax.set_ylabel('Counts')
-        ax.set_title('Distribution of induced charge from event {} on Q{}'.format( 
-                            self.i % len(self.split_data), q ))
-        ax.legend(['electrons','holes'])
-        plt.draw()
-        plt.pause(0.05)
-    
-    def count(self, q1, q2, quadrant, thresh=0.1):
-        
-        e1 = noiselib.alias(self.q_induced[:,q1-1])
-        e2 = noiselib.alias(self.q_induced[:,q2-1])
-        
-        if quadrant == 1:
-            return np.sum( (e1 > thresh) & (e2 > thresh) )
-        elif quadrant == 2:
-            return np.sum( (e1 > thresh) & (e2 < -thresh) )
-        elif quadrant == 3:
-            return np.sum( (e1 < -thresh) & (e2 < -thresh) )
-        elif quadrant == 4:
-            return np.sum( (e1 < -thresh) & (e2 > thresh) )
-    
-    def get_correlation(self, q1, q2, thresh=0.1):
-        
-        e1 = noiselib.alias(self.q_induced[:,q1-1])
-        e2 = noiselib.alias(self.q_induced[:,q2-1])
-        return 1.*np.sum( (np.abs(e1) > thresh) & (np.abs(e2) > thresh) ) / \
-                  np.sum( (np.abs(e1) > thresh) | (np.abs(e2) > thresh) )
-        
+plot_dict(corr, (3,4), label='Corr ', range=(0.,0.7), measured=0.52)
+plot_dict(corr, (1,2), label='Corr ', range=(0.,0.7), measured=0.43)
+plot_dict(corr, (1,3), label='Corr ', range=(0.,0.7), measured=0.0)
+plot_dict(assym, (3,4), label='13/24 Assym ', range=(0.,3.5), measured=1.03)
+plot_dict(assym, (1,2), label='13/24 Assym ', range=(0.,3.5), measured=1.38)
+plot_dict(assym, (1,3), label='13/24 Assym ', range=(0.,3.5), measured=1.5)
 
-if __name__ == '__main__':
-    app = Controller(sys.argv)
-    if hasattr(app, 'view'):
-        sys.exit(app.exec_())
-
-
-
-
-# run -i simulate_impacts.py
-# print( 'total events: {}'.format(app.q_induced.shape[0]) )
-# for q1,q2 in ((1,2), (3,4), (1,3)):
-    # app.plot_qq(q1,q2)
-    # qq1 = app.count(q1,q2,1)
-    # qq2 = app.count(q1,q2,2)
-    # qq3 = app.count(q1,q2,3)
-    # qq4 = app.count(q1,q2,4)
-    # print( 'Q{} - Q{}'.format(q1,q2) )
-    # print( '    13/24 asymmetry: {:.2f}'.format( 1.*(qq1+qq3) / (qq2+qq4) ) )
-    # print( '    quadrants 1,2,3,4: {}, {}, {}, {}'.format( qq1, qq2, qq3, qq4 ) )
-    # print( '    correlation: {:.2f}'.format( app.get_correlation(q1,q2,0.1) ) )
-# for q in (1,2,3,4):
-    # e = noiselib.alias(app.q_induced[:,q-1])
-    # print( 'Q{} charge asymmetry: {:.2f}'.format( q, 1.*np.sum(e>0)/np.sum(e<0) ) )
+""" Overlay 1D histograms """
+# fig, axi = plt.subplots(1,1)
+# axi = plt.figure(1).axes[0]
+# axi.set_title('Charge Jumps')
+# axi.set_xlabel('Jump Size [e]')
+# axi.set_ylabel('')
+# for (L,fq),q in q_induced.items():
+    # for Q in [1]:
+        # e = noiselib.alias(q[:,Q-1])
+        # h, bins = np.histogram(e, bins=500, range=(-0.5,0.5))
+        # x = (bins[1:]+bins[:-1])/2
+        # center = (bins[:-1] + bins[1:])/2
+        # center2 = center**2 * np.sign(center)
+        # widths = np.diff(bins**2)
+        # bg = np.sum(np.abs(e)>0.2)
+        # axi.step(center2, 2553./bg*noiselib.movingmean(h,30),
+                    # label='L={} fq={}'.format(L,fq))
+# axi.set_yscale('log')
+# axi.set_ylim([10e-1, 1.5*h.max()])
+# noiselib.legend()
+# plt.draw()
+# plt.pause(0.05)
 
 # print event.get_induced_charge_on_qubits(np.full((1,3),(0,0,0)), [1])
 
-# import numpy as np
-# import matplotlib.pyplot as plt
-# import matplotlib as mpl
-# import simulate_impacts
-# reload(simulate_impacts)
-# from simulate_impacts import ImpactEvent
-# PDFs = np.load('sim_data/ChargePDFs.npy',allow_pickle=True).tolist()
-# e = ImpactEvent(PDFs, np.array((0,0,0)).reshape(1,3), np.array((.1e6,)), 0, 1)
-# v00 = e.getPDF(0)
-# v10 = e.getPDF(0.1)
-# v17 = e.getPDF(0.17)
-# fig, (ax1,ax2,ax3) = plt.subplots(1,3)
-# ax1.imshow(np.sum(v00.T, axis=1), norm=mpl.colors.LogNorm(), origin='lower')
-# ax2.imshow(np.sum(v10.T, axis=1), norm=mpl.colors.LogNorm(), origin='lower')
-# ax3.imshow(np.sum(v17.T, axis=1), norm=mpl.colors.LogNorm(), origin='lower')
-# ax1.set_title('(0,0,0)'); ax2.set_title('(0,0,0.1)'); ax3.set_title('(0,0,0.17)');
-# plt.draw(); plt.pause(0.05)
+# if __name__ == '__main__':
+    # import numpy as np
+    # import matplotlib.pyplot as plt
+    # import matplotlib as mpl
+    # import simulate_impacts
+    # reload(simulate_impacts)
+    # from simulate_impacts import ImpactEvent
+    # PDFs = np.load('sim_data/ChargePDFs_750.npy',allow_pickle=True).tolist()
+    # e = ImpactEvent(PDFs, np.array((0,0,0)).reshape(1,3), np.array((.1e6,)), 0, 1)
+    # v00 = e.getPDF(0)
+    # v10 = e.getPDF(0.1)
+    # v17 = e.getPDF(0.17)
+    # fig, (ax1,ax2,ax3) = plt.subplots(1,3)
+    # ax1.imshow(np.sum(v00.T, axis=1), norm=mpl.colors.LogNorm(), origin='lower')
+    # ax2.imshow(np.sum(v10.T, axis=1), norm=mpl.colors.LogNorm(), origin='lower')
+    # ax3.imshow(np.sum(v17.T, axis=1), norm=mpl.colors.LogNorm(), origin='lower')
+    # ax1.set_title('(0,0,0)'); ax2.set_title('(0,0,0.1)'); ax3.set_title('(0,0,0.17)');
+    # plt.draw(); plt.pause(0.05)
