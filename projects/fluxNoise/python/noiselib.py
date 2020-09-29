@@ -1,7 +1,7 @@
 import scipy.io as spio
 import numpy as np
 import os
-from Markov_Python2.analyze_QPTunneling_pomegranate import observed_to_recovered_signal
+# from Markov_Python2.analyze_QPTunneling_pomegranate import observed_to_recovered_signal
 from scipy.signal import periodogram
 
 def loadmat(filename):
@@ -222,7 +222,7 @@ def apply_infidelity_correction(o, n_bins=9, thresh=0.5):
     return o
 
 
-def apply_infidelity_correction_HMM(o, fidelity=[0.95, 0.8]):
+# def apply_infidelity_correction_HMM(o, fidelity=[0.95, 0.8]):
     o = o.astype(np.int)
     if len(o.shape) > 1:
         for trial in o:
