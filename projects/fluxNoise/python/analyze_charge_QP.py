@@ -37,6 +37,8 @@ large_jumps = {l: np.append(False, np.abs(jumps[l]) > 0.1) for l in jumps.keys()
 date = '03-21-20'
 QP_files_Q1 = np.arange(0, 489+1, 2)
 QP_files_Q2 = np.arange(1, 489+1, 2)
+# QP_files_Q1 = np.arange(0, 49+1, 2)
+# QP_files_Q2 = np.arange(1, 49+1, 2)
 filenames_Q1_jump = [QP_path.format(date) + 'Charge_resetting_QP_{:03d}.mat'.format(i) 
                     for i in QP_files_Q1[large_jumps['Q1']]]
 filenames_Q1_nojump = [QP_path.format(date) + 'Charge_resetting_QP_{:03d}.mat'.format(i) 

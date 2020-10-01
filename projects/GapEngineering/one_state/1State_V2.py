@@ -41,15 +41,31 @@ class one_state(object):
         plt.plot((self.time)*10**3, self.one_state_avg)
         # plt.title(self.name)
 
-date = '09-28-20'
-path = ('Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap/Leiden_2020Jul/Debug/LIU/Q4_withQ5Poison/{}/{}/MATLABData/{}')
+# date = '09-28-20'
+# path = ('Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap/Leiden_2020Jul/Debug/LIU/Q4_withQ5Poison/{}/{}/MATLABData/{}')
 
-exp_name = ('One_State_Poison_Neg7dBm')
-date = '09-29-20'
-files = np.arange(0, 500, 1)
+# exp_name = ('One_State_Poison_Neg8dBm')
+# date = '09-29-20'
+# files = np.arange(0, 2900, 1)
+# filenames = [path.format(date, exp_name, exp_name) + '_{:03d}.mat'.format(i) for i in files]
+# os_test_Neg8dBm = one_state()
+# os_test_Neg8dBm.add_data_from_matlab(filenames)
+#
+# path = ('Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap/Leiden_2020Jul/Debug/LIU/Q6_withQ5Poison/{}/{}/MATLABData/{}')
+# exp_name = ('One_State_Poison_Neg6dBm')
+# date = '09-29-20'
+# files = np.arange(0, 2500, 1)
+# filenames = [path.format(date, exp_name, exp_name) + '_{:03d}.mat'.format(i) for i in files]
+# os_test_Neg6dBm = one_state()
+# os_test_Neg6dBm.add_data_from_matlab(filenames)
+
+path = ('Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap/Leiden_2020Jul/Debug/LIU/Q6_withQ5Poison/{}/{}/MATLABData/{}')
+exp_name = ('One_State_Poison_Off')
+date = '09-30-20'
+files = np.arange(0, 2500, 1)
 filenames = [path.format(date, exp_name, exp_name) + '_{:03d}.mat'.format(i) for i in files]
-os_test_Neg7dBm = one_state()
-os_test_Neg7dBm.add_data_from_matlab(filenames)
+os_test_Off = one_state()
+os_test_Off.add_data_from_matlab(filenames)
 
 # exp_name = ('One_State_Poison_Neg80dBm8GHz')
 # date = '09-29-20'
@@ -66,8 +82,9 @@ os_test_Neg7dBm.add_data_from_matlab(filenames)
 # plt.title('Poison -6 dBm')
 
 fig = plt.figure(2)
-os_test_Neg7dBm.plot_one_state_avg_vs_time()
-plt.title('Poison -7 dBm')
+# os_test_Neg6dBm.plot_one_state_avg_vs_time()
+os_test_Off.plot_one_state_avg_vs_time()
+plt.title('Q6 Poison Off')
 plt.show()
 
 

@@ -20,12 +20,19 @@ class QPTunneling(object):
         for f in file_path:
             data = noiselib.loadmat(f)
             o = np.array(data[data_str])
-            o = noiselib.apply_infidelity_correction(o, 9)
+            # o = noiselib.apply_infidelity_correction(o, 9)
             self.add_data(o)
     
     def add_data(self, o):
         self.n_rows += 1 # don't divide by number of rows because these are already averaged in partition_and_avg_psd
         cpsd, f = noiselib.partition_and_avg_psd(o, self.fs)
+        # V
+        print('o=',o)
+        print('type(o)=',type(o))
+        print('type(o[0])=',type(o[0]))
+        print('len(o[0])=',len(o[0]))
+        print('o[0][:10]=',o[0][:10])
+        # V
         if not hasattr(self, 'cpsd'):
             self.cpsd, self.f = cpsd, f
         else:

@@ -37,7 +37,7 @@ class one_state(object):
 
 
 date = '09-28-20'
-path = ('Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap/Leiden_2020Jul/Debug/LIU/Q4_withQ5Poison/{}/{}/MATLABData/{}')
+path = ('Z:/mcdermo````````````````````````tt-group/data/GapEngineer/Nb_GND_Dev06_Trap/Leiden_2020Jul/Debug/LIU/Q4_withQ5Poison/{}/{}/MATLABData/{}')
 
 # exp_name = ('One_State_Poison_Off')
 # files = np.arange(49, 149, 1)
