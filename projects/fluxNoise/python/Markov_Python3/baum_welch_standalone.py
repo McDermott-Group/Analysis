@@ -293,5 +293,5 @@ for trial in range(n_trials):
     f.savefig('hmm_{}.png'.format(trial))
     for ii in range(len(ax)):
         ax[ii].clear()
-    #plt.show()
+    plt.show()
 
