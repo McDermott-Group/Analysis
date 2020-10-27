@@ -9,9 +9,10 @@ import datetime
 import matplotlib.pyplot as plt
 from datetime import datetime
 from noiselib import loadmat
-
 from dataChest import dataChest
 from dataChestUtils import FilePicker
+# import Markov_Python2.analyze_QPTunneling_pomegranate as pome
+from Markov_Python2.analyze_QPTunneling_pomegranate import *
 
 ExptInfo = {
     ## processed data save information
@@ -26,11 +27,13 @@ ExptInfo = {
     ## matlab data import info:
     'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
             '/Leiden_2020Jul/Debug/LIU/Q4_withQ5Poison/{}/{}/MATLABData/{}',
-    'expt_name_p1': 'Interleave_P1_Freq',
+    'expt_name_p1': 'Interleave_P1',
     # 'expt_name_p1': 'P1_50us',
-    'expt_name_parity_switch': 'Interleave_PSD_1us',
-    'date': '10-23-20',
-    'files': np.arange(280, 300, 1),
+    'expt_name_parity_switch': 'Interleave_PSD',
+    'date': '10-17-20',
+    'files': np.arange(131, 135, 1),
+    # 'files': np.arange(0, 10, 1),
+    # 'files': np.arange(0, 1, 1),
 }
 
 
@@ -40,11 +43,14 @@ class OneState(object):
         self.p1_sso_avg_pre = np.array([])
         self.p1_sso_avg = np.array([])
         self.parity_trace_avg = np.array([])
+        self.parity_time_trace_list = []    # HMM Check
+        self.parity_trace_HMM_list = []    # HMM Check
         self.parity_jump = np.array([])
+        self.parity_jump_HMM = np.array([])
         self.charge_parity_sso_avg = np.array([])
         self.charge_parity_sso_avg_pre = np.array([])
         self.time = []
-        self.average_n1 = 5000  # this is the average number from raw matlab data to datachest
+        self.average_n1 = 10000  # this is the average number from raw matlab data to datachest
         self.expt_info = {}  # this stores the data source and path, etc
 
     def add_p1_data_from_matlab(self, filenames,
@@ -80,26 +86,54 @@ class OneState(object):
             parity_trace_list = np.array(data[data_type_parity_trace])
             parity_jump_count_list = np.array(data[data_type_parity_trace_jump_count])
             for i_os in parity_trace_list:
+
+                # i_os is an array, i_os = [-1.0, -1.0, 1.0, 1.0, ...]
                 avg = self._get_one_state_avg(os=i_os, n=n)
                 self.parity_trace_avg = np.append(self.parity_trace_avg, avg)
+                ### Add parity data to HMM
+                i_os_HMM = self._apply_HMM(i_os)
+                jump_count = transitions_count(i_os_HMM)
+
+                self.parity_trace_HMM_list.append(i_os_HMM)
+                self.parity_jump_HMM = np.append(self.parity_jump_HMM, jump_count)
+
             for i_os in parity_jump_count_list:
                 avg = self._get_one_state_avg(os=i_os, n=1)
                 self.parity_jump = np.append((self.parity_jump), avg)
+        # print (len(self.parity_time_trace_list[0]))
 
     def _get_one_state_avg(self, os, n):
         one_state_array = np.asarray(os)
         avg = np.mean(one_state_array.reshape(-1, n), axis=1)
         return avg
 
+    def _apply_HMM(self, os):
+        random_seed = 1
+        os_0and1 = self._parity_offset_convert(os)
+        # recovered_signal_BW_Result = observed_to_recovered_signal_BW(os_0and1, seed=random_seed)
+        # os_HMM = recovered_signal_BW_Result[0]
+        # print(recovered_signal_BW_Result[1:])
+        os_HMM = os_0and1
+        return os_HMM
+
+    def _parity_offset_convert(self, os):
+        """
+        Convert the -1, 1 parity value to 0, and 1 for the HMM code already written
+        :param os:
+        :return:
+        """
+        os_0and1 = [int(i * 0.5 + 0.5) for i in os]
+        return os_0and1
+
     def averaged_data_to_dataChest(self):
         d = create_datachest_object(self.expt_info)
         time_axis = self.time * 10 ** 3
         date = datetime.strptime(ExptInfo['date'], '%m-%d-%y')
         date = date.strftime('%Y%b%d')
-        d.createDataset(date+'_'+ExptInfo['Experiment Name']+'_'+ExptInfo['expt_name_p1'],
-                        [("time", [len(time_axis)], "float64", "ms")],
-                        [("P1 SSO Avg ", [len(time_axis)], "float64", "")]
-                        )
+        # d.createDataset(date+'_'+ExptInfo['Experiment Name']+'_'+ExptInfo['expt_name_p1'],
+        #                 [("time", [len(time_axis)], "float64", "ms")],
+        #                 [("P1 SSO Avg ", [len(time_axis)], "float64", "")]
+        #                 )
         # d.createDataset(ExptInfo['Experiment Name'],
         #                 [("time", [len(time_axis)], "float64", "ms")],
         #                 [("P1 SSO Avg ", [len(time_axis)], "float64", "")]
@@ -108,7 +142,14 @@ class OneState(object):
         #                 [("time", [len(time_axis)], "float64", "ms")],
         #                 [("P1 SSO Avg ", [len(time_axis)], "float64", ""),
         #                  ("Parity Trace Avg ", [len(time_axis)], "float64", ""),
-        #                  ("Parity Jump Counts ", [len(time_axis)], "float64", "")])
+        #                  ("Parity Jump Counts ", [len(time_axis)], "float64","")
+        #                  ])
+        d.createDataset(date+'_'+ExptInfo['Experiment Name']+'_'+ExptInfo['expt_name_p1'],
+                        [("time", [len(time_axis)], "float64", "ms")],
+                        [("P1 SSO Avg ", [len(time_axis)], "float64", ""),
+                         ("Parity Trace Avg ", [len(time_axis)], "float64", ""),
+                         ("Parity Jump Counts ", [len(time_axis)], "float64", ""),
+                         ("Parity Jump Counts HMM ", [len(time_axis)], "float64", "")])
         d.addParameter("X Lable", "Time")
         d.addParameter("Y Lable", "Occupation")
 
@@ -119,7 +160,9 @@ class OneState(object):
         # d.addData([[time_axis, self.p1_sso_avg_pre, self.p1_sso_avg, self.parity_trace_avg,
         #             self.charge_parity_sso_avg, self.charge_parity_sso_avg_pre]])
         # d.addData([[time_axis, self.p1_sso_avg, self.parity_trace_avg, (self.parity_jump)*0.0001]])
-        d.addData([[time_axis, self.p1_sso_avg]])
+        d.addData([[time_axis, self.p1_sso_avg, self.parity_trace_avg,
+                    (self.parity_jump)*0.0001, self.parity_jump_HMM*0.001]])
+        # d.addData([[time_axis, self.p1_sso_avg]])
 
 def create_datachest_object(expt_info):
     path_information_dict = expt_info
@@ -145,13 +188,46 @@ def run_matlab_data_to_datachest(ExptInfo):
         in files]
     os.add_p1_data_from_matlab(filenames_p1)
 
-    # expt_name_parity_switch = ExptInfo['expt_name_parity_switch']
-    # filenames_parity_switch = [
-    #     path.format(date, expt_name_parity_switch, expt_name_parity_switch) + '_{:03d}.mat'.format(i) for i
-    #     in files]
-    # os.add_parity_data_from_matlab(filenames_parity_switch)
+    expt_name_parity_switch = ExptInfo['expt_name_parity_switch']
+    filenames_parity_switch = [
+        path.format(date, expt_name_parity_switch, expt_name_parity_switch) + '_{:03d}.mat'.format(i) for i
+        in files]
+    os.add_parity_data_from_matlab(filenames_parity_switch)
 
     os.averaged_data_to_dataChest()
 
+def run_matlab_data_to_datachest_HMM(ExptInfo):
+    os = OneState()
+    for key in ExptInfo:
+        os.expt_info[key] = ExptInfo[key]
 
-run_matlab_data_to_datachest(ExptInfo)
+    path = ExptInfo['path']
+    date = ExptInfo['date']
+    files = ExptInfo['files']
+    expt_name_p1 = ExptInfo['expt_name_p1']
+    filenames_p1 = [
+        path.format(date, expt_name_p1,
+                    expt_name_p1) + '_{:03d}.mat'.format(i) for i
+        in files]
+    os.add_p1_data_from_matlab(filenames_p1)
+
+    expt_name_parity_switch = ExptInfo['expt_name_parity_switch']
+    filenames_parity_switch = [
+        path.format(date, expt_name_parity_switch,
+                    expt_name_parity_switch) + '_{:03d}.mat'.format(i) for
+        i
+        in files]
+    os.add_parity_data_from_matlab(filenames_parity_switch)
+
+    os.averaged_data_to_dataChest()
+
+    ### HMM debug starts
+
+    # Recovered_Signal_BW = os.parity_trace_HMM_list[0]
+    # fig = plt.figure(figsize=(12, 4))
+    # plt.plot(asarray(Recovered_Signal_BW), 'o-', label=r"{} Recovered Transitions".format(transitions_count(Recovered_Signal_BW)))
+    # plt.legend(bbox_to_anchor=(0.75, 0.58), loc=2)
+    # plt.show()
+    ### HMM debug ends
+
+run_matlab_data_to_datachest_HMM(ExptInfo)

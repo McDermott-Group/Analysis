@@ -68,7 +68,7 @@ def observed_to_recovered_signal_BW(observed_signal, seed=0):
     model = pome.HiddenMarkovModel.from_matrix(trans_mat_guess, dists, starts, ends)
     print('len(seq[0])=', asarray(seq).shape)
     model.fit(seq, algorithm='baum-welch', verbose=False)
-    transition_count_matrix, emissions_matrix = model.forward_backward(flat_seq)
+    # transition_count_matrix, emissions_matrix = model.forward_backward(flat_seq)
     est_tran_mat = model.dense_transition_matrix()
     recovered_seq = model.predict(flat_seq)
     

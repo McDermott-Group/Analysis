@@ -37,7 +37,8 @@ class QP_PSD(object):
         for i in range(n):
             if yale:
                 # parity_string = (parity_string_array[i]*1.0-0.5)*2
-                parity_string = parity_string_array[i] # Chris's way
+                # parity_string = parity_string_array[i] # Chris's way
+                parity_string = (parity_string_array[i]*0.5+0.5) # Chris's way
                 # parity_string = generate_sin() # the sin function with
                 # parity_string = [(ps - 0.5) * 2 for ps in generate_hidden_signal(p_QP=[0.01, 0.01])] # the simulated data works fine with the peridogram fft
                 # parity_string = [ps for ps in generate_hidden_signal(p_QP=[0.01, 0.01])] # the simulated data works fine with the peridogram fft
@@ -45,9 +46,9 @@ class QP_PSD(object):
                 parity_string = parity_string_array[i]
 
             # freq, spetral_power_density = welch(parity_string, self.fs) # welch seems to give weird result
-            freq, spetral_power_density = periodogram(parity_string, self.fs) # this passes the sin
-            # o = np.array(list([parity_string])) # Chris's way
-            # spetral_power_density, freq = noiselib.partition_and_avg_psd(o, self.fs)
+            # freq, spetral_power_density = periodogram(parity_string, self.fs) # this passes the sin
+            o = np.array(list([parity_string])) # Chris's way
+            spetral_power_density, freq = noiselib.partition_and_avg_psd(o, self.fs)
             if i == 0:
                 self.Spp_avg = spetral_power_density
                 self.f_data = freq
@@ -128,16 +129,24 @@ def generate_hidden_signal(length=10000, charge_burst_time=4000, p_QP=[0.01, 0.0
 # n = 10
 # date = '08-23-20'
 QP_path = ('Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap/Leiden_2020Jul/Debug/LIU/Q4_withQ5Poison/{}/{}/MATLABData/{}')
-QP_files = np.arange(110, 140, 1)
+QP_files_Dirty = np.arange(121, 129, 1)
+# QP_files_Dirty = [125, 126, 127, 128, 129, 131, 132, 133, 134]
+# QP_files_Clean = np.arange(116, 125, 1)
+QP_files_Clean = np.arange(0, 9, 1)
 # files_none = np.arange(1,n/11+1,1)*11-1
 # QP_files = np.delete(QP_files, files_none)
 
-date = '10-18-20'
+date = '10-17-20'
 experiment_name = ('Interleave_PSD')
-QP_filenames = [QP_path.format(date, experiment_name, experiment_name) + '_{:03d}.mat'.format(i) for i in QP_files]
-QP_psd = QP_PSD()
-QP_psd.add_data_from_matlab(QP_filenames)
-QP_psd.plot_PSD(fit=False, plot=True)
+QP_filenames = [QP_path.format(date, experiment_name, experiment_name) + '_{:03d}.mat'.format(i) for i in QP_files_Dirty]
+QP_psd_Dirty = QP_PSD()
+QP_psd_Dirty.add_data_from_matlab(QP_filenames)
+QP_psd_Dirty.plot_PSD(fit=False, plot=True)
+
+QP_filenames_Clean = [QP_path.format(date, experiment_name, experiment_name) + '_{:03d}.mat'.format(i) for i in QP_files_Clean]
+QP_psd_Clean = QP_PSD()
+QP_psd_Clean.add_data_from_matlab(QP_filenames_Clean)
+QP_psd_Clean.plot_PSD(fit=False, plot=True)
 
 
 # def fit_PSD_target_function(f, f_QP, f_RO=1):
@@ -146,13 +155,14 @@ QP_psd.plot_PSD(fit=False, plot=True)
     # return (4 * f_QP) / ((2 * f_QP) ** 2 + (2 * np.pi * f) ** 2)
 
     
-# fig = plt.figure()
-# plt.loglog(QP_psd.f_data, QP_psd.Spp_avg, label='Neg2 dBm')
-#
-# axes = plt.gca()
-# axes.set_ylim([1e-6, 1e-2])
-# plt.xlabel('frequency [Hz]')
-# plt.ylabel('PSD [1/Hz]')
-# plt.legend(bbox_to_anchor=(0.75, 0.58), loc=2)
-# plt.show()
+fig = plt.figure()
+plt.loglog(QP_psd_Dirty.f_data, QP_psd_Dirty.Spp_avg, label='Dirty')
+plt.loglog(QP_psd_Clean.f_data, QP_psd_Clean.Spp_avg, label='Clean')
+
+axes = plt.gca()
+axes.set_ylim([1e-6, 1e-2])
+plt.xlabel('frequency [Hz]')
+plt.ylabel('PSD [1/Hz]')
+plt.legend(bbox_to_anchor=(0.75, 0.58), loc=2)
+plt.show()
 # # print QP_Off_psd.params
