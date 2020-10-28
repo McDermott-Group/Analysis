@@ -1,14 +1,17 @@
 """Model Pomegranate Author: Jacob Schreiber.
 Author Vincent Liu and Sohair Abdullah."""
 
+
 import numpy as np
 from pomegranate import *
 from numpy import *
-import string
+# import string
 import matplotlib.pyplot as plt
+import json
+import jsonpickle
 
 
-def generate_hidden_signal(length=8192, charge_burst_time=4000, p_QP=[0.01, 0.01]):
+def generate_hidden_signal(length=10000, charge_burst_time=4000, p_QP=[0.01, 0.01]):
     """
     Generate hidden signal from given parameters
     :param length: the length of the hidden signal, eg. 8192
@@ -34,7 +37,7 @@ def generate_hidden_signal(length=8192, charge_burst_time=4000, p_QP=[0.01, 0.01
     return hidden_signal
 
 
-def hidden_to_observed_signal(hidden_signal, readout_fidelity=[0.95, 0.75]):
+def hidden_to_observed_signal(hidden_signal, readout_fidelity=[0.9, 0.8]):
     """
     Convert the hidden signal to the observed signal
     :param hidden_signal: the hidden signal list [0,1,1,1,0,...]
@@ -57,7 +60,7 @@ def hidden_to_observed_signal(hidden_signal, readout_fidelity=[0.95, 0.75]):
     return observed_signal
 
 
-def observed_to_recovered_signal(observed_signal, readout_fidelity=[0.95, 0.75], p_QP=0.01):
+def observed_to_recovered_signal(observed_signal, readout_fidelity=[0.9, 0.8], p_QP=0.01):
     """
 
     :param observed_signal: observed signal for parity from given readout fidelity
@@ -109,7 +112,53 @@ def observed_to_recovered_signal(observed_signal, readout_fidelity=[0.95, 0.75],
     return recovered_signal
 
 
-def observed_to_recovered_signal_LIU(observed_signal, readout_fidelity=[0.95, 0.75], p_QP=0.01):
+def observed_to_recovered_signal_BW(observed_signal, seed=0):
+    observed_signal = [str(i) for i in observed_signal]
+    Observed_Signal_List = []
+    Observed_Signal_List.append(observed_signal)
+
+    seq = Observed_Signal_List
+    flat_seq = seq[0]
+    np.random.seed(seed + 2)
+
+    # random initial emission probability
+    temp1 = np.random.uniform(low=0.5, high=1)  # indicates P[g|g]
+    temp2 = np.random.uniform(low=0.5, high=1)  # indicates P[e|e]
+    dists = [DiscreteDistribution({'0': temp1, '1': 1 - temp1}),
+             DiscreteDistribution({'0': 1 - temp2, '1': temp2})]    # random initial guess for transition matrix, we can polish if we know rough ranges for this
+    trans_mat_guess = np.array(np.random.rand(2, 2))
+    # trans_mat_guess = [[0.9, 0.1], [0.1, 0.9]]
+    # print('trans_mat_guess=', trans_mat_guess)
+
+    # estimate values / hidden sequence by BW
+    starts = np.array([0.5, 0.5])
+    ends = np.array([0.5, 0.5])
+    model = HiddenMarkovModel.from_matrix(trans_mat_guess, dists, starts, ends)
+    model.fit(seq, algorithm='baum-welch', verbose=False)
+    # transition_count_matrix, emissions_matrix = model.forward_backward(
+    #     flat_seq)
+    est_tran_mat = model.dense_transition_matrix()
+    recovered_seq = model.predict(flat_seq)
+
+    # obtain estimated values...
+    traneg = est_tran_mat[0][1]
+    trange = est_tran_mat[1][0]
+
+    empJSON0 = jsonpickle.encode(model.states[0])
+    state_dicts0g = json.loads(empJSON0)
+    empJSON1 = jsonpickle.encode(model.states[1])
+    state_dicts1e = json.loads(empJSON1)
+
+    emis0g = \
+    state_dicts0g['py/reduce'][1]['py/tuple'][0]['py/reduce'][1]['py/tuple'][
+        0]['0']
+    emis1e = \
+    state_dicts1e['py/reduce'][1]['py/tuple'][0]['py/reduce'][1]['py/tuple'][
+        0]['1']
+    return np.asarray(recovered_seq), emis0g, emis1e, traneg, trange
+
+
+def observed_to_recovered_signal_LIU(observed_signal, readout_fidelity=[0.9, 0.8], p_QP=0.01):
     """
 
     :param observed_signal:
@@ -201,7 +250,7 @@ Parameters Setup
 # p_QP_after = 1.0 - exp(-t_meas/t_QP_after)
 # p_QP = [p_QP_before, p_QP_after]
 # p_0g = 0.95
-# p_1e= 0.75
+# p_1e= 0.85
 # readout_fidelity = [p_0g, p_1e]
 #
 # # For VTB
@@ -211,13 +260,16 @@ Parameters Setup
 # p_1e_VTB = 0.75
 # readout_fidelity_VTB = [p_0g_VTB, p_1e_VTB]
 #
-# Hidden_Signal = generate_hidden_signal(p_QP=[0.01, 0.01])
+# Hidden_Signal = generate_hidden_signal(p_QP=[0.2, 0.2])
 # Observed_Signal = hidden_to_observed_signal(Hidden_Signal)
-# Recovered_Signal = observed_to_recovered_signal(Observed_Signal, p_QP=0.01)
-
+# Recovered_Signal = observed_to_recovered_signal(Observed_Signal, p_QP=0.2)
+# Recovered_Signal_BW = observed_to_recovered_signal_BW(Observed_Signal)
+#
 # fig = plt.figure(figsize=(12, 4))
 # plt.plot(asarray(Hidden_Signal)+1.5, 'o-', label=r"{} Hidden Transitions".format(transitions_count(Hidden_Signal)))
-# plt.plot(asarray(Recovered_Signal), 'o-', label=r"{} Recovered Transitions".format(transitions_count(Recovered_Signal)))
+# plt.plot(asarray(Observed_Signal), 'o-', label=r"{} Observed Transitions".format(transitions_count(Observed_Signal)))
+# plt.plot(asarray(Recovered_Signal)-1.5, 'o-', label=r"{} Recovered Transitions".format(transitions_count(Recovered_Signal)))
+# plt.plot(asarray(Recovered_Signal_BW[0])-3, 'o-', label=r"{} Recovered Transitions".format(transitions_count(Recovered_Signal_BW[0])))
 # plt.legend(bbox_to_anchor=(0.75, 0.58), loc=2)
 # plt.show()
 
