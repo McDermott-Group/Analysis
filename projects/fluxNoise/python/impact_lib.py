@@ -7,9 +7,10 @@ import sys
 import threading
 from scipy.special import ellipk
 from scipy.interpolate import interp2d, griddata
+from scipy import constants
 import matplotlib.pyplot as plt
 import noiselib
-from numba import jit
+# from numba import jit
 import time
 # import multiprocessing as mp
 # import pathos.pools as pp
@@ -133,11 +134,33 @@ class ImpactEvent(object):
                 q.append(qs)
         return np.array(q)
     
+    def get_induced_qubit_rotation(self, charge_xyz, sum=True):
+        """ Calculate the induced rotation on each qubit from charges in the method
+        get_induced_charge_on_qubits() above.  If sum==True, 
+        the induced rotations will be summed before being returned, giving the total
+        rotation.  If False, an array of induced rotations will be returned
+        for each qubit. """
+        
+        qs = self.get_induced_charge_on_qubits(charge_xyz, 1, sum=False)
+        qs = noiselib.alias(qs, 1.)
+        Ec = 2 * np.pi * 235e6
+        w_01 = 2 * np.pi * 4.1e9
+        if sum:
+            qs2 = np.sum(qs**2, axis=1)
+        else:
+            qs2 = qs**2
+        return 2*np.sqrt(Ec/w_01) * np.sqrt(qs2)
+    
     def getPDF(self, z, charge_type='electrons'):
         
         zcuts = self.PDFs[charge_type]['zarray']
         zind = np.argmin(np.abs(z-zcuts))
-        return self.PDFs[charge_type][zcuts[zind]][charge_type]
+        label = (charge_type,zcuts[zind],charge_type)
+        if label not in self.PDFs:
+            Hn = self.PDFs[charge_type][zcuts[zind]][charge_type]
+            Hr = Hn.ravel()
+            self.PDFs[label] = np.cumsum(Hr)/np.sum(Hr), Hn.shape
+        return self.PDFs[label]
     
     def diffuseCharge(self, x, y, z, energy, fQ = 1.0, epseh=3.6, verbose=True):
     
@@ -150,13 +173,14 @@ class ImpactEvent(object):
         
         results=dict()
         for charge_type in ['electrons','holes']:
-            Hn=self.getPDF(z,charge_type=charge_type)
-            Hr = Hn.ravel()
+            # Hn=self.getPDF(z,charge_type=charge_type)
+            # Hr = Hn.ravel()
+            # normcumsum = np.cumsum(Hr)/np.sum(Hr)
             # vals = np.random.choice(Hr.size, p=Hr.astype('float64'), size=neh)
+            normcumsum, shape = self.getPDF(z,charge_type=charge_type)
             r = np.random.random(neh)
-            cumsum = np.cumsum(Hr)
-            vals = np.searchsorted(cumsum/np.sum(Hr), r)
-            inds = np.unravel_index(vals,Hn.shape)
+            vals = np.searchsorted(normcumsum, r)
+            inds = np.unravel_index(vals, shape)
 
             sim_distx = PDFs['x'][inds[0]]
             sim_disty = PDFs['y'][inds[1]]
@@ -435,18 +459,23 @@ class Controller(QtGui.QApplication):
         self.i += 1
         self.show_event()
         
-    def show_event(self):
+    def sim_event(self):
     
         e = self.load_track_data( self.i % self.n_events )
         self.event.set_track(e[:,[2,3,4]], e[:,5] * 1e6)
         track_xyz, track_color = self.event.get_track()
         charge_xyz, charge_polarity = self.event.get_charge(fQ=self.fQ)
+        return track_xyz, track_color, charge_xyz, charge_polarity
+        
+    def show_event(self):
+        track_xyz, track_color, charge_xyz, charge_polarity = self.sim_event()
         self.view.plot_track(track_xyz, track_color, charge_xyz, charge_polarity)
     
     def analyze_all_events(self):
         
         self.q_induced = []
         self.q_direct = []
+        self.rot_induced = []
         start_time = time.time()
         bar_length = 50.
         track_gen = self.get_next_track()
@@ -460,9 +489,11 @@ class Controller(QtGui.QApplication):
             self.event.set_track(e[:,[2,3,4]], e[:,5] * 1e6)
             xyz, polarity = self.event.get_charge(fQ=self.fQ)
             qi = self.event.get_induced_charge_on_qubits(xyz, polarity)
+            roti = self.event.get_induced_qubit_rotation(xyz)
             # qi = self.event.get_induced_charge_on_qubits(np.full((1,1),(0,0,0)), [1])
             qd = self.event.get_charge_on_qubits(xyz, polarity)
             self.q_induced.append(qi)
+            self.rot_induced.append(roti)
             self.q_direct.append(qd)
             
             # Update progress bar
@@ -478,6 +509,7 @@ class Controller(QtGui.QApplication):
             sys.stdout.flush()
             
         self.q_induced = np.array(self.q_induced).reshape(-1,4)
+        self.rot_induced = np.array(self.rot_induced).reshape(-1,4)
         self.q_direct = np.array(self.q_direct).reshape(-1,4,2)
     
     def plot_qq(self, q1, q2, ax=None, q_induced=None):

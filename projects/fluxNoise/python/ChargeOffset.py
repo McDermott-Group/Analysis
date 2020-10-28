@@ -99,9 +99,11 @@ class ChargeOffset(object):
                 offset[ftag] = np.append( offset[ftag], np.full(n_new, np.nan) )
         return time, offset
     
-    def get_jump_sizes(self, datasets = None, plot=False, ax=None):
+    def get_jump_sizes(self, datasets = None, plot=False, ax=None, qubits=None):
         time, offset = self.get_charge_offset(datasets)
-        jumps = {l: offset[l][1:] - offset[l][:-1] for l in offset.keys()}
+        if qubits is None:
+            qubits = offset.keys()
+        jumps = {l: offset[l][1:] - offset[l][:-1] for l in offset.keys() if l in qubits}
         
         # find 2*sigma jump size for each label
         # def gaus(x, b, A, mu, sigma):#, A2, mu2, sigma2):
@@ -111,7 +113,10 @@ class ChargeOffset(object):
             return b + A * exp(-(x-mu)**2/(2*sigma**2))
         sigma = {}
         for l in jumps.keys():
+            if l not in qubits:
+                continue
             h, bins = np.histogram(jumps[l][~np.isnan(jumps[l])], bins=500, range=(-0.5,0.5))
+            # h = noiselib.movingmean(h, 10)
             x = (bins[1:]+bins[:-1])/2
             popt, pcov = curve_fit(gaus, x, h, p0=[0,h.max(),0.1])
             # popt, pcov = curve_fit(gaus, x, h, p0=[0,h.max(),0,0.1,h.max(),0.005,0.3])
@@ -128,11 +133,13 @@ class ChargeOffset(object):
                 axi.set_xlabel('Jump Size {} [e]'.format(l))
                 axi.set_ylabel('')
                 center = (bins[:-1] + bins[1:])/2
-                center2 = center**2 * np.sign(center)
-                widths = np.diff(bins**2)
-                axi.bar(center2, h, width=widths)
-                axi.bar(center2, h-gaus(center, 0, *popt[1:]), width=widths)
-                axi.plot(center2, gaus(center, 0, *popt[1:]), 'r-' )
+                widths = np.diff(bins)
+                # center2 = center**2 * np.sign(center)
+                # widths = np.diff(bins**2)
+                axi.bar(center, h, color='C2', width=widths)
+                # axi.bar(center, h-gaus(center, 0, *popt[1:]), 
+                        # color='C3', width=widths)
+                axi.plot(center, gaus(center, 0, *popt[1:]), 'k-' )
                 axi.set_yscale('log')
                 axi.set_ylim([10e-1, 1.5*h.max()])
                 plt.draw()
@@ -193,6 +200,14 @@ class ChargeOffset(object):
         eitherJumps = self._above(jumps1, thresh[0]) | self._above(jumps2, thresh[1])
         bothMeas = np.isfinite(jumps1) & np.isfinite(jumps2)
         
+        nA, nB = np.sum(np.isfinite(jumps1)), np.sum(np.isfinite(jumps2))
+        jA = np.sum( self._above( jumps1,thresh[0],abs=True) )
+        jB = np.sum( self._above( jumps2,thresh[1],abs=True) )
+        pA = 1. * jA / nA
+        d_pA = 1. * np.sqrt(jA) / nA
+        pB = 1. * jB / nB
+        d_pB = 1. * np.sqrt(jB) / nB
+        
         jumps1[np.isnan(jumps2)] = np.nan
         jumps2[np.isnan(jumps1)] = np.nan
         print( 'Correlated Jumps: {}-{}'.format(label1,label2) )
@@ -217,27 +232,37 @@ class ChargeOffset(object):
         print(u'    13/24 = ({}+{})/({}+{}) = {:.2f} \u00B1 {:.3f}'.format(
                     q1, q3, q2, q4, a1324, d_a1324  ))
         
-        nA, nB = np.sum(np.isfinite(jumps1)), np.sum(np.isfinite(jumps2))
-        jA = np.sum( self._above( jumps1,thresh[0],abs=True) )
-        jB = np.sum( self._above( jumps2,thresh[1],abs=True) )
-        pA = 1. * jA / nA
-        d_pA = pA * np.sqrt( 1./jA + 1./nA )
-        pB = 1. * jB / nB
-        d_pB = pB * np.sqrt( 1./jB + 1./nB )
+        # nA, nB = np.sum(np.isfinite(jumps1)), np.sum(np.isfinite(jumps2))
+        # jA = np.sum( self._above( jumps1,thresh[0],abs=True) )
+        # jB = np.sum( self._above( jumps2,thresh[1],abs=True) )
+        # pA = 1. * jA / nA
+        # d_pA = 1. * np.sqrt(jA) / nA
+        # pB = 1. * jB / nB
+        # d_pB = 1. * np.sqrt(jB) / nB
+        # pA,d_pA = 0.05549, 0.00244  # Q1
+        # pB,d_pB = 0.06050, 0.00278  # Q2
+        # pA,d_pA = 0.06049, 0.00256  # Q3
+        # pB,d_pB = 0.06035, 0.00269  # Q4
         p_obs = 1.*(q1 + q2 + q3 + q4) / np.sum( bothMeas )
         d_p_obs = p_obs * np.sqrt( 1./(q1 + q2 + q3 + q4) + 1./np.sum( bothMeas ) )
         pC = 1.*(p_obs-pA*pB) / (1.+p_obs-pA-pB)
         d_pC_top = np.sqrt( d_p_obs**2 + (pA*pB)**2*((d_pA/pA)**2+(d_pB/pB)**2) )
         d_pC_bot = np.sqrt( d_p_obs**2 + d_pA**2 + d_pB**2 )
         d_pC = pC * np.sqrt( (d_pC_top/(p_obs-pA*pB))**2 + (d_pC_bot/(1+p_obs-pA-pB))**2 )
+        pAp = (pA-pC)/(1-pC)
+        d_pAp = pAp * np.sqrt( (d_pA**2+d_pC**2)/(pA-pC)**2 + d_pC**2/pC**2 )
+        pBp = (pB-pC)/(1-pC)
+        d_pBp = pBp * np.sqrt( (d_pB**2+d_pC**2)/(pB-pC)**2 + d_pC**2/pC**2 )
         
         # print('    pA,pB,p_obs = {:.2f},{:.2f},{:.2f}'.format(pA,pB,p_obs))
-        print(u'    pA = {}/{} = {:.2f} \u00B1 {:.3f}'.format( jA, nA, pA, d_pA ))
-        print(u'    pB = {}/{} = {:.2f} \u00B1 {:.3f}'.format( jB, nB, pB, d_pB ))
-        print(u'    p_obs = {}/{} = {:.2f} \u00B1 {:.3f}'.format( (q1 + q2 + q3 + q4),
+        print(u'    pA = {}/{} = {:.5f} \u00B1 {:.5f}'.format( jA, nA, pA, d_pA ))
+        print(u'    pB = {}/{} = {:.5f} \u00B1 {:.5f}'.format( jB, nB, pB, d_pB ))
+        print(u"    pA' = {:.4f} \u00B1 {:.3f}".format(pAp,d_pAp))
+        print(u"    pB' = {:.4f} \u00B1 {:.3f}".format(pBp,d_pBp))
+        print(u'    p_obs = {}/{} = {:.4f} \u00B1 {:.3f}'.format( (q1 + q2 + q3 + q4),
                                              np.sum( bothMeas ), p_obs, d_p_obs ))
-        print(u'    pC = {:.2f} \u00B1 {:.3f}'.format(pC, d_pC))
-        print(u'    pC/mean(pA,pB) = {:.2f} \u00B1 {:.3f}'.format( 
+        print(u'    pC = {:.3f} \u00B1 {:.4f}'.format(pC, d_pC))
+        print(u'    pC/mean(pA,pB) = {:.3f} \u00B1 {:.4f}'.format( 
                         1.*pC/np.mean([pA,pB]),
                         1.*pC/np.mean([pA,pB])*np.sqrt( (d_pC/pC)**2 + (d_pA**2+d_pB**2)/(pA+pB)**2 )   ))
         
@@ -261,9 +286,10 @@ class ChargeOffset(object):
             datasets = self.file_tags
         dt = np.array([])
         for ftag in datasets:
-            dt = np.append(dt, self.time[ftag][1:] - self.time[ftag][:-1])
+            dt = np.append(dt, [np.nan])
+            dt = np.append(dt, np.diff(self.time[ftag]))
             
-        print('Average Measurement Interval T = {:.2f}'.format(np.mean(dt)))
+        print('Average Measurement Interval T = {:.2f}'.format(np.nanmean(dt)))
         
         if ax is None:
             fig, ax = plt.subplots(1,1)
@@ -273,6 +299,7 @@ class ChargeOffset(object):
         ax.plot(dt)
         plt.draw()
         plt.pause(0.05)
+        return dt
         
     def get_files_triggered_on_bad_fit(self, dataset, label, path, thresh=0.9):
         """Takes in a specific dataset tag and the path to the folder holding the

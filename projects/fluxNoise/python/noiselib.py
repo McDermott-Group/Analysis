@@ -1,7 +1,10 @@
 import scipy.io as spio
 import numpy as np
 import os
-from Markov_Python2.analyze_QPTunneling_pomegranate import observed_to_recovered_signal
+try:
+    from Markov_Python2.analyze_QPTunneling_pomegranate import observed_to_recovered_signal
+except ImportError as e:
+    print('Could not load pomegranite\n'+str(e))
 from scipy.signal import periodogram
 import matplotlib.pyplot as plt
 import matplotlib as mpl
