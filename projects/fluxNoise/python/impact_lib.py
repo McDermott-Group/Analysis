@@ -67,43 +67,6 @@ class ImpactEvent(object):
             print( xyz.nbytes/1e6 )
         return xyz, polarity
     
-    # def get_charge(self, fQ=1., cache=False):
-        # """ Generates and returns positions and polarities of charges from track 
-        # and energy. """
-    
-        # if hasattr(self, 'charge'):
-            # return self.charge
-        # xyz = []
-        # polarity = []
-        # pool = pp.ProcessPool(mp.cpu_count()-1)
-        # n = len(self.track)
-        # results = pool.amap(self.get_charge_from_point, range(n), np.full(n,1.))
-        # results = list(results)
-        # # results = [pool.apply( self.get_charge_from_point, args=(i,fQ) )
-                    # # for i in range(len(self.track))]
-        # # pool.close()
-        # print len(self.track), len(results)
-        # print type(results)
-        # print reslts[0]
-        # for p,x in results:
-            # xyz += x
-            # polarity += p
-        
-        # xyz = np.concatenate(xyz)
-        # polarity = np.concatenate(polarity)
-        # if cache:
-            # self.charge = xyz, polarity
-            # print( xyz.nbytes/1e6 )
-        # return xyz, polarity
-    
-    def get_charge_from_point(self, i, fQ ):
-        x,y,z = self.track[i]
-        res = self.diffuseCharge(x,y,z,self.energy[i],fQ=fQ,epseh=3.6,verbose=False)
-        polarity = [np.full(res['electrons'].shape[1], -1.), 
-                     np.full(res['holes'].shape[1], 1.) ]
-        xyz = [res['electrons'].T, res['holes'].T]
-        return polarity, xyz
-    
     def get_charge_on_qubits(self, charge_xyz, charge_polarity):
         """ Return the charge that lands directly on each qubit island. """
     

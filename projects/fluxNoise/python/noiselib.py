@@ -275,3 +275,12 @@ def apply_infidelity_correction_HMM(o, fidelity=[0.95, 0.8]):
     else:
         o[...] = observed_to_recovered_signal(list(o), readout_fidelity=fidelity)
     return o
+    
+
+def overlap(l1, l2):
+    """returns the lists where both values are finite.  Removes nans where data
+    from one qubit was deleted."""
+    filter = np.isfinite(l1) & np.isfinite(l2)
+    return l1[filter], l2[filter]
+        
+    

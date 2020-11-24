@@ -8,6 +8,7 @@ from ChargeOffset import *
 import datasets
 reload(datasets)
 import datasets as ds
+import pickle
 
 
 charge_path = '{}\DR1 - 2019-12-17\CorrFar\{}Corr\General\Parameter\{}_correlation.hdf5'
@@ -59,12 +60,66 @@ def make_CO_from_datasets(ds_list):
                 pass
     return CO
 
+def save_datasets():
+    CO = make_CO_from_datasets(ds_q1)
+    jumps, sigma = CO.get_jump_sizes(plot=True, ax=ax, qubits='Q1')
+    q = jumps['Q1']
+    with open('dump_measured_Q1.dat', 'wb') as f:
+        pickle.dump(q, f)
+    CO = make_CO_from_datasets(ds_all4)
+    jumps, sigma = CO.get_jump_sizes(plot=False)
+    q = np.vstack([jumps['Q1'],jumps['Q2'],jumps['Q3'],jumps['Q4']]).T
+    with open('dump_measured_Q1234.dat', 'wb') as f:
+        pickle.dump(q, f)
 
+
+def pubplot_err_1d():
+    CO = make_CO_from_datasets(ds_q1)
+    fig, ax = plt.subplots(1, 1, figsize=(fullwidth,3.), num=700)
+    jumps, sigma = CO.get_jump_sizes(qubits='Q1')
+    dw01 = 2. * np.pi * 12e3
+    Ec = 2. * np.pi * 250e6
+    tau = 1e-6
+    dq = jumps['Q1'][ np.isfinite(jumps['Q1']) ]
+    err = dw01**2 / 12. * np.sin(np.pi*dq/2.)**2 * tau**2
+    
+    h, bins = np.histogram(err, bins=np.logspace(np.log10(1e-14),np.log10(1e-3),101))
+    ax.bar( bins[:-1], 1.*h/np.sum(h), width=np.diff(bins), align='edge' )
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax.set_xlabel('$\epsilon_\phi$')
+    ax.set_ylabel('Normalized Counts')
+    plt.draw()
+    plt.pause(0.05)
+
+def pubplot_err_2d():
+    fig,(ax1,ax2,ax3) = plt.subplots(1,3, figsize=(fullwidth,2.6))
+    CO = make_CO_from_datasets(ds_all4)
+    jumps, sigma = CO.get_jump_sizes(plot=False)
+    dw01 = 2. * np.pi * 12e3
+    Ec = 2. * np.pi * 250e6
+    tau = 1e-6
+    for i,ax in enumerate((ax1,ax2,ax3)):
+        j,k = [(3,4),(1,2),(1,3)][i]
+        dq1, dq2 = noiselib.overlap( jumps['Q%i'%j], jumps['Q%i'%k] )
+        err1 = dw01**2 / 12. * np.sin(np.pi*dq1/2.)**2 * tau**2
+        err2 = dw01**2 / 12. * np.sin(np.pi*dq2/2.)**2 * tau**2
+        
+        ax.scatter(err1[np.abs(dq1)<0.1], err2[np.abs(dq1)<0.1], marker='.', s=4)
+        ax.scatter(err1[np.abs(dq1)>0.1], err2[np.abs(dq1)>0.1], marker='.', s=4)
+        ax.scatter(err1[np.abs(dq2)>0.1], err2[np.abs(dq2)>0.1], marker='.', s=4)
+        # ax.scatter(err1, err2, c='k', marker='.', s=4)
+        noiselib.format_hist2d(i, ax, log=True, cprofile=qcolors)
+    noiselib.edges_tick_labels([ax1,ax2,ax3], xlabel=u'$\epsilon_1$', ylabel=u'$\epsilon_1$')
+    
+    plt.draw()
+    plt.pause(0.05)
 
 def pubplot_hist_1d():
     CO = make_CO_from_datasets(ds_q1)
-    fig, ax = plt.subplots(1, 1, figsize=(halfwidth,2.), num=700)
+    fig, ax = plt.subplots(1, 1, figsize=(fullwidth,3.), num=700)
     jumps, sigma = CO.get_jump_sizes(plot=True, ax=ax, qubits='Q1')
+    ax.lines[1].set_visible(False)
     print np.sum(np.abs(jumps['Q1'])>0.05)
     print sigma
 
@@ -72,17 +127,13 @@ def pubplot_hist_2d():
     CO = make_CO_from_datasets(ds_all4)
     jumps, sigma = CO.get_jump_sizes(plot=False)
     print sigma
-    fig,(ax1,ax2,ax3) = plt.subplots(1,3, figsize=(7.2,2.6))
-    CO.plot_charge_correlation('Q3','Q4',ax=ax1, thresh=(thresh,thresh))
-    CO.plot_charge_correlation('Q1','Q2',ax=ax2, thresh=(thresh,thresh))
+    fig,(ax1,ax2,ax3) = plt.subplots(1,3, figsize=(fullwidth,2.6))
+    _,_,_,_,g3,dg3,g4,dg4 = CO.plot_charge_correlation('Q3','Q4',ax=ax1, thresh=(thresh,thresh))
+    _,_,_,_,g1,dg1,g2,dg2 = CO.plot_charge_correlation('Q1','Q2',ax=ax2, thresh=(thresh,thresh))
     CO.plot_charge_correlation('Q1','Q3',ax=ax3, thresh=(thresh,thresh))
-    ax1.set_title(u'$340\ \mathrm{\mu m}$')
-    ax2.set_title(u'$640\ \mathrm{\mu m}$')
-    ax3.set_title(u'$3195\ \mathrm{\mu m}$');
     # ax2.get_yaxis().set_visible(False); ax3.get_yaxis().set_visible(False);
     for i,ax in enumerate([ax1,ax2,ax3]):
-        ax.set_xticks([-0.5,-0.25,0,0.25,0.5])
-        ax.set_yticks([-0.5,-0.25,0,0.25,0.5])
+        noiselib.format_hist2d(i, ax, cprofile=qcolors)
         ax.set_xticklabels([u'\u22120.5','',0,'',0.5])
         ax.set_yticklabels(['','','','',''])
         ax.set_xlabel('')
@@ -93,11 +144,6 @@ def pubplot_hist_2d():
         ax.plot( line_x, -line_y, 'k:' )
         ax.plot(-line_y,  line_x, 'k:' )
         ax.plot( line_y,  line_x, 'k:' )
-        ax.spines['bottom'].set_linewidth(3)
-        ax.spines['left'].set_linewidth(3)
-        q1,q2 = [('Q3','Q4'),('Q1','Q2'),('Q1','Q3')][i]
-        ax.spines['bottom'].set_color(qcolors[q1])
-        ax.spines['left'].set_color(qcolors[q2])
     ax1.set_yticklabels([u'\u22120.5','',0,'',0.5])
     ax1.set_xlabel('$\Delta q_\mathrm{1}$ ($e$)')
     ax1.set_ylabel('$\Delta q_\mathrm{2}$ ($e$)')
@@ -109,6 +155,7 @@ def pubplot_hist_2d():
         print '    {}: {:.3f}'.format( q, 1.*np.sum(jumps[q]>thresh)/np.sum(np.abs(jumps[q])>thresh) )
     plt.draw()
     plt.pause(0.05)
+    return np.array([g1,g2,g3,g4]), np.array([dg1,dg2,dg3,dg4])
 
 
 # CO = make_CO_from_datasets(ds_all4)
@@ -116,20 +163,23 @@ def pubplot_hist_2d():
 # CO.plot_jump_sizes()
 # CO.plot_time_steps()
 
-pubplot_hist_1d()
-pubplot_hist_2d()
+save_datasets()
+pubplot_err_1d()
+pubplot_err_2d()
+# pubplot_hist_1d()
+rates, d_rates = pubplot_hist_2d()
 
 CO = make_CO_from_datasets(ds_all4)
 jumps, sigma = CO.get_jump_sizes(plot=False)
 
 """ How many events expected from gamma/muon rates? """
-if True:
+if False:
     rate_muons = 0.5e-3
     rate_gamma = 3e-3
-    thresh_fraction_gamma = 0.0690310322989
+    thresh_fraction_gamma = 0.0615579480684#0.0690310322989
     thresh_fraction_muons = 0.169750430293
     filter = {q:np.isfinite(jumps[q]) for q in ('Q1','Q2','Q3','Q4')}
-    t = CO.plot_time_steps()
+    t = CO.get_time_steps()
     t_q = np.array([np.nansum(t[filter[q]]) for q in ('Q1','Q2','Q3','Q4')])
     print('number of gammas above threshhold:')
     print('    expected = {:.2f}'.format(
@@ -137,10 +187,21 @@ if True:
                     + rate_gamma*thresh_fraction_gamma)))
     # print('    measured = {}'.format(np.sum(np.abs(jumps['Q1'])>thresh)))
     thresh_hits = [np.sum(np.abs(jumps[q])>thresh) for q in ('Q1','Q2','Q3','Q4')]
-    rates = (1.*np.array(thresh_hits) - rate_muons*thresh_fraction_muons*t_q)/t_q/1e-3/thresh_fraction_gamma
-    print('    measured = {}'.format(thresh_hits))
-    print('    measured hit rate = {} mHz'.format(rates))
-    print('    mean hit rate = {} mHz'.format(np.mean(rates)))
+    # rates = 1.*np.array(thresh_hits)/t_q
+    # d_rates = 1.*np.sqrt(thresh_hits)/t_q
+    avg_rate = np.sum(rates/d_rates**2) / np.sum(1/d_rates**2)
+    d_avg_rate = 1. / np.sqrt( np.sum(1/d_rates**2) )
+    avg_rate_gammas = avg_rate - rate_muons*thresh_fraction_muons
+    print rates/1e-3
+    print d_rates/1e-3
+    print avg_rate/1e-3, d_avg_rate/1e-3
+    print avg_rate_gammas/1e-3, d_avg_rate/1e-3
+    print avg_rate_gammas/thresh_fraction_gamma/1e-3, d_avg_rate/thresh_fraction_gamma/1e-3
+    # print rates/thresh_fraction_gamma
+    # rates = (1.*np.array(thresh_hits) - rate_muons*thresh_fraction_muons*t_q)/t_q/1e-3/thresh_fraction_gamma
+    # print('    measured = {}'.format(thresh_hits))
+    # print('    measured hit rate = {} mHz'.format(rates))
+    # print('    mean hit rate = {} mHz'.format(np.mean(rates)))
 
 # thresh_list = np.arange(0.05, 0.35, 0.01)
 # n = thresh_list.size
