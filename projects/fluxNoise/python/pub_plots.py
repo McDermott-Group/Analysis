@@ -147,8 +147,8 @@ def format_hist2d(i, ax, cprofile, log=False, range=None, title=True):
         if not range:
                 ax.set_xlim(1e-15, 1e-3)
                 ax.set_ylim(1e-15, 1e-3)
-        ax.xaxis.labelpad = 0
-        ax.yaxis.labelpad = -6
+        # ax.xaxis.labelpad = 0
+        # ax.yaxis.labelpad = -6
     else:
         if not range:
             ax.set_xlim(-0.5, 0.5)
@@ -309,7 +309,7 @@ def plot_charge_offset_large(ax):
     ax.add_patch(rect)
     # ax.legend()
     ax.set_xlabel('Time (hours)')
-    ax.set_ylabel('Charge Offset ($e$)')
+    ax.set_ylabel('Offset Charge ($e$)')
 if 'offset_large' in run_plots:
     fig, ax = plt.subplots(1, 1, figsize=(5.25,2.5))
     plot_charge_offset_large(ax)
@@ -713,7 +713,7 @@ def set_style(ax):
     ax.set_xlim(-0.5,0.5)
     ax.set_yscale('log')
 if 'hist1d_jumps' in run_plots:
-    fig, ax = plt.subplots(1, 1, figsize=(halfwidth,2))
+    fig, ax = plt.subplots(1, 1, figsize=(fullwidth,3))
     # fig = plt.figure(700)
     # ax = fig.axes[0]
     with open('dump_measured_Q1.dat'.format(hit_type), 'rb') as f:
@@ -747,6 +747,8 @@ if 'hist2d_jumps_meas' in run_plots:
         draw_thresh_lines(ax)
     lower_left_tick_labels(axs, xlabel='$\Delta q_\mathrm{1}$ ($e$)',
                                 ylabel='$\Delta q_\mathrm{2}$ ($e$)')
+    plt.draw()
+    plt.pause(0.05)
     fig.savefig(fig_path+r'\hist2d_jumps_meas.pdf')
 if 'hist2d_jumps_sim' in run_plots:
     fig, axs = plt.subplots(2, 3, figsize=(fullwidth-0.5,5.2-0.5))
@@ -790,7 +792,7 @@ if 'err_phase_joint' in run_plots:
         with open('dump_sim_impacts_{}.dat'.format(hit_type), 'rb') as f:
             q_induced, corr, assym, rot_induced = pickle.load(f)
         plot_err_phase_joint(axs[i], q_induced[300,0.2])
-    edges_tick_labels(axs, xlabel=u'$\epsilon_\phi$', ylabel='Fidelity')
+    edges_tick_labels(axs, xlabel=u'$\epsilon_\phi$', ylabel='Normalized Integrated Counts')
     fig.savefig(fig_path+r'\err_phase_joint.pdf')
 
 
@@ -940,8 +942,8 @@ if 'spectra_absorbed' in run_plots:
     rate_gammas /= (0.03*1000)
     
     fig, ax = plt.subplots(1, 1, figsize=(halfwidth,2.5))
-    ax.step(E_gammas, rate_gammas, 'C0', where='mid')
-    ax.step(E_muons, rate_muons, 'C3', where='mid')
+    ax.step(E_gammas, rate_gammas, 'C3', where='mid')
+    ax.step(E_muons, rate_muons, 'C0', where='mid')
     ax.set_xlim(0, 3)
     ax.set_yscale('log')
     ax.set_xlabel('Energy (MeV)')
