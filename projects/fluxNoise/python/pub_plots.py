@@ -309,7 +309,7 @@ def plot_charge_offset_large(ax):
     ax.add_patch(rect)
     # ax.legend()
     ax.set_xlabel('Time (hours)')
-    ax.set_ylabel('Offset Charge ($e$)')
+    ax.set_ylabel('Offset charge ($e$)')
 if 'offset_large' in run_plots:
     fig, ax = plt.subplots(1, 1, figsize=(5.25,2.5))
     plot_charge_offset_large(ax)
@@ -779,10 +779,13 @@ def plot_err_phase_joint(ax, q_induced):
         err = dw01**2 / 12. * np.sin(np.pi*q_induced/2.)**2 * tau**2
         err = err[~np.all(err == 0, axis=1)]
         err_axis = np.logspace(-15, -3, 101)
+        indices = np.searchsorted(err_axis, [1e-4, 1e-6])
         joint_err = [ np.sum( (err[:,ij[j][0]]>t)&(err[:,ij[j][1]]>t) )
                       for t in err_axis ]
         joint_err = 1. - 1. * np.array(joint_err) / err.shape[0]
         ax.plot( err_axis, joint_err )
+        ax.plot([0,1e-4],2*[joint_err[indices[0]]],':',color='C{}'.format(j))
+        ax.plot([0,1e-6],2*[joint_err[indices[1]]],':',color='C{}'.format(j))
     ax.set_xscale('log')
     ax.set_xlim(1e-15,1e-3)
     ax.set_xticks([1e-15,1e-12,1e-9,1e-6,1e-3])
@@ -792,6 +795,9 @@ if 'err_phase_joint' in run_plots:
         with open('dump_sim_impacts_{}.dat'.format(hit_type), 'rb') as f:
             q_induced, corr, assym, rot_induced = pickle.load(f)
         plot_err_phase_joint(axs[i], q_induced[300,0.2])
+    for ax in axs:
+        ax.axvline(x=1e-4, color='k', linestyle=':')
+        ax.axvline(x=1e-6, color='k', linestyle=':')
     edges_tick_labels(axs, xlabel=u'$\epsilon_\phi$', ylabel='Normalized Integrated Counts')
     fig.savefig(fig_path+r'\err_phase_joint.pdf')
 
