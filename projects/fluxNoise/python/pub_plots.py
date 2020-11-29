@@ -43,7 +43,7 @@ run_plots = [
             # 'fit_dropout',
             # 'gamma',
             # 'all_triggered',
-            # 'offset_large',
+            'offset_large',
             # 'offset_zoom',
             # 'qubit_spec',
             # 'ramsey_fit',
@@ -58,8 +58,8 @@ run_plots = [
             # 'hist2d_err_phase',
             # 'err_phase_joint',
             # 'dipole',
-            'spectra_emitted',
-            'spectra_absorbed'
+            # 'spectra_emitted',
+            # 'spectra_absorbed'
             ]
 
 def draw_thresh_lines(ax, thresh=0.1):
