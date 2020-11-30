@@ -43,7 +43,7 @@ run_plots = [
             # 'fit_dropout',
             # 'gamma',
             # 'all_triggered',
-            'offset_large',
+            # 'offset_large',
             # 'offset_zoom',
             # 'qubit_spec',
             # 'ramsey_fit',
@@ -54,7 +54,7 @@ run_plots = [
             # 'hist2d_jumps_sim',
             # 'bloch',
             # 'induced_rotation',
-            # 'err_bitflip',
+            'err_bitflip',
             # 'hist2d_err_phase',
             # 'err_phase_joint',
             # 'dipole',
@@ -847,7 +847,7 @@ if 'err_bitflip' in run_plots:
     # w0 = 2 * np.pi * 4.1e9
     # Ec = 2 * np.pi * 435e6
     w0 = 2 * np.pi * 5e9
-    Ec = 2 * np.pi * 300e6
+    Ec = 2 * np.pi * 250e6
     
     fig1d, axs1d = plt.subplots(1, 2, figsize=(fullwidth,2.5))
     fig2d, axs2d = plt.subplots(2, 3, figsize=(fullwidth-0.5,4.6))
@@ -933,7 +933,7 @@ if 'err_bitflip' in run_plots:
             ax.scatter(err[:,j-1], err[:,k-1], c='k', marker='.', s=4)
             format_hist2d(i, ax, qcolors, log=True, range=(1e-15,1e-1), title=(h==0))
         
-    edges_tick_labels(axs2d, xlabel='$\epsilon_1$', ylabel='$\epsilon_2$')
+    edges_tick_labels(axs2d, xlabel=r'$\epsilon_{\theta,1}$', ylabel=r'$\epsilon_{\theta,2}$')
     
     fig1d.savefig(fig_path+r'\hist1d_err_bitflip.pdf')
     fig2d.savefig(fig_path+r'\hist2d_err_bitflip.pdf')
@@ -956,27 +956,35 @@ if 'spectra_absorbed' in run_plots:
     ax.set_ylabel('Rate (Counts/sec/keV)')
     fig.savefig(fig_path+r'\spectra_absorbed.pdf')
     
-def get_calibrated_spect_lngs():
-    return np.linspace(0,3000,1001), np.full(1001, 1e-4)
-def get_calibrated_spect_madison():
-    return np.linspace(0,3000,1001), np.full(1001, 1e-4)
+def get_raw_spect_lngs():
+    path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data'
+    return np.loadtxt(path+'/Rome_RAW_Rate.txt', delimiter=',').T
+def get_raw_spect_madison():
+    path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data'
+    return np.loadtxt(path+'/MSN_RAW_Tuned_Rate.txt', delimiter=',').T
 if 'spectra_emitted' in run_plots:
     path = r'Z:\mcdermott-group\data\fluxNoise2\sim_data'
-    E_mad, rate_mad = get_calibrated_spect_madison()
-    E_lngs, rate_lngs = get_calibrated_spect_lngs()
-    elem_labels = {'$^{214}\mathrm{Bi}$':600, '$^{40}\mathrm{K}$':1500, 
-      '$^{214}\mathrm{Bi}$':1700, '$^{214}\mathrm{Bi}$':2200, '$^{208}\mathrm{Tl}$':2600}
+    E_mad, rate_mad = get_raw_spect_madison()
+    E_lngs, rate_lngs = get_raw_spect_lngs()
+    # elem_labels = {609.312:'$^{214}\mathrm{Bi}$', 1504.9:'$^{40}\mathrm{K}$', 
+                # 1764.494:'$^{214}\mathrm{Bi}$', 2204.21:'$^{214}\mathrm{Bi}$', 
+                # 2614.533:'$^{208}\mathrm{Tl}$'}
+    elem_labels = {550:'$^{214}\mathrm{Bi}$', 1460:'$^{40}\mathrm{K}$', 
+                1764.494:'$^{214}\mathrm{Bi}$', 2204.21:'$^{214}\mathrm{Bi}$', 
+                2614.533:'$^{208}\mathrm{Tl}$'}
     
     fig, ax = plt.subplots(1, 1, figsize=(halfwidth,2.5))
-    ax.step(E_mad, rate_mad, 'C0', where='mid')
-    ax.step(E_lngs, rate_lngs, 'C3', where='mid')
+    ax.step(E_mad/1e3, rate_mad, 'C3', where='mid')
+    ax.step(E_lngs/1e3, rate_lngs, 'C0', where='mid')
     # add labels
-    for label in elem_labels:
-        v_mad  =  rate_mad[np.searchsorted(E_mad, elem_labels[label])]
-        v_lngs = rate_lngs[np.searchsorted(E_lngs,elem_labels[label])]
-        ax.text( elem_labels[label], 2*max(v_mad,v_lngs), label, 
-                 horizontalalignment='center')
-    ax.set_xlim(0, 3000)
+    for energy,label in elem_labels.items():
+        v_mad  =  rate_mad[np.searchsorted(E_mad, energy)]
+        v_lngs = rate_lngs[np.searchsorted(E_lngs,energy)]
+        # ax.text( energy, 2*max(v_mad,v_lngs), label, horizontalalignment='center')
+        # ax.plot([energy], [max(v_mad,v_lngs)], 'k.')
+        ax.annotate( label, (energy/1e3, max(v_mad,v_lngs)), ha='center', va='bottom',
+                    xytext=(0,3), textcoords='offset pixels')
+    ax.set_xlim(0, 2.865)
     ax.set_yscale('log')
     ax.set_xlabel('Energy (MeV)')
     ax.set_ylabel('Rate (Counts/sec/keV)')

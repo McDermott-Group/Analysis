@@ -5,6 +5,9 @@ from QPTunneling import *
 import ChargeOffset
 reload(ChargeOffset)
 from ChargeOffset import *
+import ChargeJumps
+reload(ChargeJumps)
+from ChargeJumps import *
 import datasets
 reload(datasets)
 import datasets as ds
@@ -128,6 +131,9 @@ def pubplot_hist_2d():
     jumps, sigma = CO.get_jump_sizes(plot=False)
     print sigma
     fig,(ax1,ax2,ax3) = plt.subplots(1,3, figsize=(fullwidth,2.6))
+    CJ = ChargeJumps()
+    print CO.plot_charge_correlation('Q3','Q4',ax=ax1, thresh=(thresh,thresh), plot=False)
+    print CJ.plot_charge_correlation(CO, 'Q3','Q4',ax=ax1, thresh=(thresh,thresh), plot=False)
     _,_,_,_,g3,dg3,g4,dg4 = CO.plot_charge_correlation('Q3','Q4',ax=ax1, thresh=(thresh,thresh))
     _,_,_,_,g1,dg1,g2,dg2 = CO.plot_charge_correlation('Q1','Q2',ax=ax2, thresh=(thresh,thresh))
     CO.plot_charge_correlation('Q1','Q3',ax=ax3, thresh=(thresh,thresh))
@@ -163,9 +169,9 @@ def pubplot_hist_2d():
 # CO.plot_jump_sizes()
 # CO.plot_time_steps()
 
-save_datasets()
-pubplot_err_1d()
-pubplot_err_2d()
+# save_datasets()
+# pubplot_err_1d()
+# pubplot_err_2d()
 # pubplot_hist_1d()
 rates, d_rates = pubplot_hist_2d()
 
