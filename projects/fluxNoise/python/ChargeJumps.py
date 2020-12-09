@@ -1,27 +1,6 @@
-import os
 import numpy as np
 import noiselib
 reload(noiselib)
-from dataChest import *
-import matplotlib.pyplot as plt
-from scipy import asarray as ar,exp
-from scipy.optimize import curve_fit
-from scipy.stats import norm
-from dateStamp import dateStamp
-import glob
-
-# def add(*args):
-    # res = np.sum([v for v,e in args])
-    # err = np.sqrt(np.sum([e**2 for v,e in args]))
-    # return res, err
-
-# def mult(*args):
-    # res = np.product([v for v,e in args])
-    # err = np.abs(res) * np.sqrt(np.sum([(e/v)**2 for v,e in args]))
-    # return res, err
-
-# def div((A,dA),(B,dB)):
-    # return mult( (A,dA), (1./B,dB/B**2) )
     
 class ve(object):
 
@@ -30,11 +9,22 @@ class ve(object):
         self.e = e
     
     def __str__(self):
-        print 'this was called'
-        return str(self.__repr__())
+        sig_dig = int(np.floor(np.log10(np.abs(self.e))))
+        return '{:.{sd}f}({})'.format( self.v, 
+                                       int(np.round(10**(-sig_dig) * self.e)), 
+                                       sd=-sig_dig )
     
     def __repr__(self):
         return str(self.to_tuple(self))
+    
+    def __float__(self):
+        return float(self.v)
+    
+    def __int__(self):
+        return int(self.v)
+    
+    def __abs__(self):
+        return ve(np.abs(self.v),self.e)
     
     def to_tuple(self, o):
         if isinstance(o, ve):
@@ -113,16 +103,33 @@ class ChargeJumps(object):
     
     def p_thresh(self, q, thresh):
         q = q[np.isfinite(q)]
+        q = noiselib.alias(q, 0.5)
         return 1. * pve(np.sum(np.abs(q)>thresh)) / pve(q.size)
     
     def g_thresh(self, q, thresh, dt):
         q, dt = noiselib.overlap(q, dt)
+        q = noiselib.alias(q, 0.5)
         return 1. * pve(np.sum(np.abs(q)>thresh)) / np.sum(dt)
+    
+    def thresh_fraction(self, q, thresh):
+        q = q[np.isfinite(q)]
+        q = noiselib.alias(q, 0.5)
+        return 1. * pve(np.sum(np.abs(q)>thresh)) / pve(q.size)
+    
+    def assym(self, q, thresh):
+        """ """
+        q = q[np.isfinite(q)]
+        q = noiselib.alias(q, 0.5)
+        p = pve( np.sum( q > thresh ) )
+        a = pve( np.sum( np.abs(q) > thresh ) )
+        return 1. * p / a
     
     def assym1324(self, q1, q2, thresh1, thresh2):
         """q1 and q2 should be arrays of charge measurements, with equal lengths.
         nans can be included and those rows will be removed from both arrays."""
         q1, q2 = noiselib.overlap(q1, q2)
+        q1 = noiselib.alias(q1, 0.5)
+        q2 = noiselib.alias(q2, 0.5)
         Q1 = pve( np.sum( (  q1 > thresh1 ) & (  q2 > thresh2 ) ) )
         Q2 = pve( np.sum( ( -q1 > thresh1 ) & (  q2 > thresh2 ) ) )
         Q3 = pve( np.sum( ( -q1 > thresh1 ) & ( -q2 > thresh2 ) ) )
@@ -134,33 +141,48 @@ class ChargeJumps(object):
         """q1 and q2 should be arrays of charge measurements, with equal lengths.
         nans can be included and those rows will be removed from both arrays."""
         q1, q2 = noiselib.overlap(q1, q2)
+        q1 = noiselib.alias(q1, 0.5)
+        q2 = noiselib.alias(q2, 0.5)
         n_corr = pve( np.sum( ( np.abs(q1) > thresh1 ) & ( np.abs(q2) > thresh2 ) ) )
-        p_obs = 1.*n_corr / pve(q1.size)
-        return p_obs
+        pABo = 1.*n_corr / pve(q1.size)
+        return pABo
+    
+    def raw_correlation(self, q1,q2, thresh1, thresh2):
+        """The number of corrrelated events divided by the number of events in 
+        which either has a jump above the threshhold."""
+        corr_counts = pve(np.sum( (np.abs(q1)>thresh1) & (np.abs(q2)>thresh2) ))
+        tot_counts = pve(np.sum( (np.abs(q1)>thresh1) | (np.abs(q2)>thresh2) ))
+        return 1. * corr_counts / tot_counts
         
+    def calc_probabilities(self, qA, qB, threshA, threshB):
         
-    def plot_charge_correlation(self, CO, label1, label2, thresh=None, 
-                                      datasets=None, ax=None, plot=True):
+        pAo = self.p_thresh(qA, threshA)
+        pBo = self.p_thresh(qB, threshB)
+        pABo = self.p_correlation(qA, qB, threshA, threshB)
         
-        jumps, sigma = CO.get_jump_sizes(datasets)
-        dt = CO.get_time_steps(datasets)
-        qA, qB = jumps[label1], jumps[label2]
-        threshA, threshB = thresh
+        pAB = 1.*(pABo-pAo*pBo) / (1.+pABo-pAo-pBo)
+        pA = (pAo-pAB) / (1.-pAB)
+        pB = (pBo-pAB) / (1.-pAB)
+        pAB_norm = 1.*pAB / ((pAo+pBo)/2.)
         
-        pA = self.p_thresh(qA, threshA)
-        pB = self.p_thresh(qB, threshB)
-        gA = self.g_thresh(qA, threshA, dt)
-        gB = self.g_thresh(qB, threshB, dt)
-        gAB = (gA+gB)/2.
+        return pAo, pBo, pA, pB, pABo, pAB, pAB_norm
         
+    def calc_rates(self, qA, qB, threshA, threshB, dt):
+        
+        _,_,_,_,_,_,pAB_norm = self.calc_probabilities(qA, qB, threshA, threshB)
+        gAo = self.g_thresh(qA, threshA, dt)
+        gBo = self.g_thresh(qB, threshB, dt)
+        gABo = (gAo+gBo)/2.
+        gAB = pAB_norm * gABo
+        
+        return gAo, gBo, gAB
+        
+    def calc_params(self, qA, qB, threshA, threshB, dt):
+    
         a1324 = self.assym1324(qA, qB, threshA, threshB)
-        p_obs = self.p_correlation(qA, qB, threshA, threshB)
+        pAo, pBo, pA, pB, pABo, pAB, pAB_norm = \
+            self.calc_probabilities(qA, qB, threshA, threshB)
+        gAo, gBo, gAB = self.calc_rates(qA, qB, threshA, threshB, dt)
+        # return pAB_norm, a1324, gAo, gBo
+        return pAo, pBo, pA, pB, gAo, gBo, pABo, pAB, gAB, pAB_norm, a1324
         
-        pC = 1.*(p_obs-pA*pB) / (1.+p_obs-pA-pB)
-        pAp = (pA-pC)/(1.-pC)
-        pBp = (pB-pC)/(1.-pC)
-        pCp = 1.*pC/((pA+pB)/2.)
-        
-        gC = pCp * gAB
-        
-        return pCp, a1324, gA, gB

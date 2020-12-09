@@ -173,41 +173,59 @@ def pubplot_hist_2d():
 # pubplot_err_1d()
 # pubplot_err_2d()
 # pubplot_hist_1d()
-rates, d_rates = pubplot_hist_2d()
+# rates, d_rates = pubplot_hist_2d()
 
 CO = make_CO_from_datasets(ds_all4)
 jumps, sigma = CO.get_jump_sizes(plot=False)
+dt = CO.get_time_steps()
+CJ = ChargeJumps()
+
+p_obs, p, G, pAB_norm = {}, {}, {}, {}
+for q1,q2 in [('Q3','Q4'),('Q1','Q2')]:
+    (p_obs[q1], p_obs[q2], p[q1], p[q2], G[q1], G[q2], 
+     p_obs[(q1,q2)], p[(q1,q2)], G[(q1,q2)], pAB_norm[(q1,q2)], a1324) \
+     = CJ.calc_params(jumps[q1], jumps[q2], thresh, thresh, dt)
+for q1,q2 in [('Q1','Q3')]:
+    ( _,_,_,_,_,_, 
+     p_obs[(q1,q2)], p[(q1,q2)], G[(q1,q2)], pAB_norm[(q1,q2)], a1324) \
+     = CJ.calc_params(jumps[q1], jumps[q2], thresh, thresh, dt)
+     
+for k in ('Q1','Q2','Q3','Q4',('Q3','Q4'),('Q1','Q2'),('Q1','Q3')):
+    print( '{:>15} {:>15} {:>15} {:>15}'.format(k, p_obs[k], p[k], G[k]) )
+for k in (('Q3','Q4'),('Q1','Q2'),('Q1','Q3')):
+    print( '{:>15} {:>15}'.format(k, pAB_norm[k]) )
+
+def get_thresh_fractions():
+    L0, fq0 = 300, 0.2
+    data_files = {}
+    data_files['gammas'] = ['dump_sim_impacts_{}_noise_{}.dat'.format('gammas',i)
+                                        for i in (0,1,2,3)]
+    data_files['muons'] = ['dump_sim_impacts_{}_noise_0.dat'.format('muons')]
+    thresh_frac = {}
+    for h,hit_type in enumerate(['gammas', 'muons']):
+        data = []
+        for fname in data_files[hit_type]:
+            with open(fname, 'rb') as f:
+                data += [pickle.load(f)]
+        thresh_frac[hit_type] = np.mean( [ d['thresh_fraction'][L0,fq0]
+                                                for d in data ] )
+    return thresh_frac
 
 """ How many events expected from gamma/muon rates? """
-if False:
+if True:
     rate_muons = 0.5e-3
     rate_gamma = 3e-3
-    thresh_fraction_gamma = 0.0615579480684#0.0690310322989
-    thresh_fraction_muons = 0.169750430293
-    filter = {q:np.isfinite(jumps[q]) for q in ('Q1','Q2','Q3','Q4')}
-    t = CO.get_time_steps()
-    t_q = np.array([np.nansum(t[filter[q]]) for q in ('Q1','Q2','Q3','Q4')])
-    print('number of gammas above threshhold:')
-    print('    expected = {:.2f}'.format(
-        np.nansum(t)*(rate_muons*thresh_fraction_muons 
-                    + rate_gamma*thresh_fraction_gamma)))
-    # print('    measured = {}'.format(np.sum(np.abs(jumps['Q1'])>thresh)))
-    thresh_hits = [np.sum(np.abs(jumps[q])>thresh) for q in ('Q1','Q2','Q3','Q4')]
-    # rates = 1.*np.array(thresh_hits)/t_q
-    # d_rates = 1.*np.sqrt(thresh_hits)/t_q
+    thresh_frac = get_thresh_fractions()
+    rates = np.array([G[q] for q in ('Q1','Q2','Q3','Q4')])
+    d_rates = np.array([G[q].e for q in ('Q1','Q2','Q3','Q4')])
     avg_rate = np.sum(rates/d_rates**2) / np.sum(1/d_rates**2)
-    d_avg_rate = 1. / np.sqrt( np.sum(1/d_rates**2) )
-    avg_rate_gammas = avg_rate - rate_muons*thresh_fraction_muons
-    print rates/1e-3
-    print d_rates/1e-3
-    print avg_rate/1e-3, d_avg_rate/1e-3
-    print avg_rate_gammas/1e-3, d_avg_rate/1e-3
-    print avg_rate_gammas/thresh_fraction_gamma/1e-3, d_avg_rate/thresh_fraction_gamma/1e-3
-    # print rates/thresh_fraction_gamma
-    # rates = (1.*np.array(thresh_hits) - rate_muons*thresh_fraction_muons*t_q)/t_q/1e-3/thresh_fraction_gamma
-    # print('    measured = {}'.format(thresh_hits))
-    # print('    measured hit rate = {} mHz'.format(rates))
-    # print('    mean hit rate = {} mHz'.format(np.mean(rates)))
+    avg_rate_gammas = avg_rate - rate_muons*thresh_frac['muons']
+    print( rates/1e-3 )
+    print( 'Simulated thresh fractions: {}'.format(thresh_frac) )
+    print( 'Avg rate above thresh (all): {} mHz'.format(avg_rate/1e-3) )
+    print( 'Avg rate above thresh (gammas): {} mHz'.format(avg_rate_gammas/1e-3) )
+    print( 'Avg total rate (gammas): {} mHz'.format(
+                avg_rate_gammas/thresh_frac['gammas']/1e-3) )
 
 # thresh_list = np.arange(0.05, 0.35, 0.01)
 # n = thresh_list.size

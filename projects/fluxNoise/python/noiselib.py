@@ -284,3 +284,19 @@ def overlap(l1, l2):
     return l1[filter], l2[filter]
         
     
+def interp2d(r, z, q, rp, zp): 
+    """Given a grid (r,z,q), return the interpolated value q' at each pair of
+    coordinates given by the lists [rp] and [zp].
+    # my own bilinear interpolation, much faster
+    # https://math.stackexchange.com/questions/3230376/
+    #   interpolate-between-4-points-on-a-2d-plane """
+    ri = np.searchsorted(r, rp)
+    zi = np.searchsorted(z, zp)
+    dr_, dz_ = r[1]-r[0], z[1]-z[0]
+    rpp = (rp-r[np.clip(ri-1,0,r.size-1)])/dr_
+    zpp = (zp-z[np.clip(zi-1,0,z.size-1)])/dz_
+    q1 = q[np.clip(zi-1,0,z.size-1), np.clip(ri-1,0,r.size-1)]
+    q2 = q[np.clip(zi-1,0,z.size-1), np.clip(ri  ,0,r.size-1)]
+    q3 = q[np.clip(zi  ,0,z.size-1), np.clip(ri  ,0,r.size-1)]
+    q4 = q[np.clip(zi  ,0,z.size-1), np.clip(ri-1,0,r.size-1)]
+    return (1-rpp)*(1-zpp)*q1 + rpp*(1-zpp)*q2 + (1-rpp)*zpp*q3 + rpp*zpp*q4

@@ -306,7 +306,7 @@ class Controller(QtGui.QApplication):
             pdfs_file = [pdfs_file]
         PDFs = [np.load(p_file, allow_pickle=True).tolist() for p_file in pdfs_file]
         
-        charge_map = self.load_charge_map('Z:/mcdermott-group/data/fluxNoise2/sim_data/charge_map.mat')
+        charge_map = self.load_charge_map('Z:/mcdermott-group/data/fluxNoise2/sim_data/charge_map2.mat')
         
         self.event = ImpactEvent(PDFs, charge_map, self.qubit_xys)
         
@@ -328,23 +328,9 @@ class Controller(QtGui.QApplication):
         q_map = noiselib.loadmat(path)
         q = q_map['charge_mat']
         q[~np.isfinite(q)] = -1. # right below center of qubit
-        def map_charge(r, z, q, rp, zp): 
-            # my own bilinear interpolation, much faster
-            # https://math.stackexchange.com/questions/3230376/
-            #   interpolate-between-4-points-on-a-2d-plane
-            ri = np.searchsorted(r, rp)
-            zi = np.searchsorted(z, zp)
-            dr, dz = r[1]-r[0], z[1]-z[0]
-            rpp = (rp-r[np.clip(ri-1,0,r.size-1)])/dr
-            zpp = (zp-z[np.clip(zi-1,0,z.size-1)])/dz
-            q1 = q[np.clip(zi-1,0,z.size-1), np.clip(ri-1,0,r.size-1)]
-            q2 = q[np.clip(zi-1,0,z.size-1), np.clip(ri  ,0,r.size-1)]
-            q3 = q[np.clip(zi  ,0,z.size-1), np.clip(ri  ,0,r.size-1)]
-            q4 = q[np.clip(zi  ,0,z.size-1), np.clip(ri-1,0,r.size-1)]
-            return (1-rpp)*(1-zpp)*q1 + rpp*(1-zpp)*q2 + (1-rpp)*zpp*q3 + rpp*zpp*q4
-        charge_map = lambda rp,zp: map_charge( q_map['r']/1000., 
-                                               q_map['z']/1000., 
-                                               q, rp, zp )
+        charge_map = lambda rp,zp: noiselib.interp2d( q_map['r']/1000., 
+                                                      q_map['z']/1000., 
+                                                      q, rp, zp )
         return charge_map
     
     def load_track_data(self, i):
