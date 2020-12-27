@@ -1,7 +1,10 @@
 import scipy.io as spio
 import numpy as np
 import os
-# from Markov_Python2.analyze_QPTunneling_pomegranate import observed_to_recovered_signal
+try:
+    from Markov_Python2.analyze_QPTunneling_pomegranate import observed_to_recovered_signal
+except ImportError as e:
+    print('Could not load pomegranite\n'+str(e))
 from scipy.signal import periodogram
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -324,7 +327,7 @@ def apply_infidelity_correction(o, n_bins=9, thresh=0.5):
     return o
 
 
-# def apply_infidelity_correction_HMM(o, fidelity=[0.95, 0.8]):
+def apply_infidelity_correction_HMM(o, fidelity=[0.95, 0.8]):
     o = o.astype(np.int)
     if len(o.shape) > 1:
         for trial in o:
@@ -332,3 +335,28 @@ def apply_infidelity_correction(o, n_bins=9, thresh=0.5):
     else:
         o[...] = observed_to_recovered_signal(list(o), readout_fidelity=fidelity)
     return o
+    
+
+def overlap(l1, l2):
+    """returns the lists where both values are finite.  Removes nans where data
+    from one qubit was deleted."""
+    filter = np.isfinite(l1) & np.isfinite(l2)
+    return l1[filter], l2[filter]
+        
+    
+def interp2d(r, z, q, rp, zp): 
+    """Given a grid (r,z,q), return the interpolated value q' at each pair of
+    coordinates given by the lists [rp] and [zp].
+    # my own bilinear interpolation, much faster
+    # https://math.stackexchange.com/questions/3230376/
+    #   interpolate-between-4-points-on-a-2d-plane """
+    ri = np.searchsorted(r, rp)
+    zi = np.searchsorted(z, zp)
+    dr_, dz_ = r[1]-r[0], z[1]-z[0]
+    rpp = (rp-r[np.clip(ri-1,0,r.size-1)])/dr_
+    zpp = (zp-z[np.clip(zi-1,0,z.size-1)])/dz_
+    q1 = q[np.clip(zi-1,0,z.size-1), np.clip(ri-1,0,r.size-1)]
+    q2 = q[np.clip(zi-1,0,z.size-1), np.clip(ri  ,0,r.size-1)]
+    q3 = q[np.clip(zi  ,0,z.size-1), np.clip(ri  ,0,r.size-1)]
+    q4 = q[np.clip(zi  ,0,z.size-1), np.clip(ri-1,0,r.size-1)]
+    return (1-rpp)*(1-zpp)*q1 + rpp*(1-zpp)*q2 + (1-rpp)*zpp*q3 + rpp*zpp*q4

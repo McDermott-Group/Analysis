@@ -7,9 +7,10 @@ import sys
 import threading
 from scipy.special import ellipk
 from scipy.interpolate import interp2d, griddata
+from scipy import constants
 import matplotlib.pyplot as plt
 import noiselib
-from numba import jit
+# from numba import jit
 import time
 # import multiprocessing as mp
 # import pathos.pools as pp
@@ -66,43 +67,6 @@ class ImpactEvent(object):
             print( xyz.nbytes/1e6 )
         return xyz, polarity
     
-    # def get_charge(self, fQ=1., cache=False):
-        # """ Generates and returns positions and polarities of charges from track 
-        # and energy. """
-    
-        # if hasattr(self, 'charge'):
-            # return self.charge
-        # xyz = []
-        # polarity = []
-        # pool = pp.ProcessPool(mp.cpu_count()-1)
-        # n = len(self.track)
-        # results = pool.amap(self.get_charge_from_point, range(n), np.full(n,1.))
-        # results = list(results)
-        # # results = [pool.apply( self.get_charge_from_point, args=(i,fQ) )
-                    # # for i in range(len(self.track))]
-        # # pool.close()
-        # print len(self.track), len(results)
-        # print type(results)
-        # print reslts[0]
-        # for p,x in results:
-            # xyz += x
-            # polarity += p
-        
-        # xyz = np.concatenate(xyz)
-        # polarity = np.concatenate(polarity)
-        # if cache:
-            # self.charge = xyz, polarity
-            # print( xyz.nbytes/1e6 )
-        # return xyz, polarity
-    
-    def get_charge_from_point(self, i, fQ ):
-        x,y,z = self.track[i]
-        res = self.diffuseCharge(x,y,z,self.energy[i],fQ=fQ,epseh=3.6,verbose=False)
-        polarity = [np.full(res['electrons'].shape[1], -1.), 
-                     np.full(res['holes'].shape[1], 1.) ]
-        xyz = [res['electrons'].T, res['holes'].T]
-        return polarity, xyz
-    
     def get_charge_on_qubits(self, charge_xyz, charge_polarity):
         """ Return the charge that lands directly on each qubit island. """
     
@@ -133,11 +97,33 @@ class ImpactEvent(object):
                 q.append(qs)
         return np.array(q)
     
+    def get_induced_qubit_rotation(self, charge_xyz, sum=True):
+        """ Calculate the induced rotation on each qubit from charges in the method
+        get_induced_charge_on_qubits() above.  If sum==True, 
+        the induced rotations will be summed before being returned, giving the total
+        rotation.  If False, an array of induced rotations will be returned
+        for each qubit. """
+        
+        qs = self.get_induced_charge_on_qubits(charge_xyz, 1, sum=False)
+        qs = noiselib.alias(qs, 1.)
+        Ec = 2 * np.pi * 235e6
+        w_01 = 2 * np.pi * 4.1e9
+        if sum:
+            qs2 = np.sum(qs**2, axis=1)
+        else:
+            qs2 = qs**2
+        return 2*np.sqrt(Ec/w_01) * np.sqrt(qs2)
+    
     def getPDF(self, z, charge_type='electrons'):
         
         zcuts = self.PDFs[charge_type]['zarray']
         zind = np.argmin(np.abs(z-zcuts))
-        return self.PDFs[charge_type][zcuts[zind]][charge_type]
+        label = (charge_type,zcuts[zind],charge_type)
+        if label not in self.PDFs:
+            Hn = self.PDFs[charge_type][zcuts[zind]][charge_type]
+            Hr = Hn.ravel()
+            self.PDFs[label] = np.cumsum(Hr)/np.sum(Hr), Hn.shape
+        return self.PDFs[label]
     
     def diffuseCharge(self, x, y, z, energy, fQ = 1.0, epseh=3.6, verbose=True):
     
@@ -150,13 +136,14 @@ class ImpactEvent(object):
         
         results=dict()
         for charge_type in ['electrons','holes']:
-            Hn=self.getPDF(z,charge_type=charge_type)
-            Hr = Hn.ravel()
+            # Hn=self.getPDF(z,charge_type=charge_type)
+            # Hr = Hn.ravel()
+            # normcumsum = np.cumsum(Hr)/np.sum(Hr)
             # vals = np.random.choice(Hr.size, p=Hr.astype('float64'), size=neh)
+            normcumsum, shape = self.getPDF(z,charge_type=charge_type)
             r = np.random.random(neh)
-            cumsum = np.cumsum(Hr)
-            vals = np.searchsorted(cumsum/np.sum(Hr), r)
-            inds = np.unravel_index(vals,Hn.shape)
+            vals = np.searchsorted(normcumsum, r)
+            inds = np.unravel_index(vals, shape)
 
             sim_distx = PDFs['x'][inds[0]]
             sim_disty = PDFs['y'][inds[1]]
@@ -319,7 +306,7 @@ class Controller(QtGui.QApplication):
             pdfs_file = [pdfs_file]
         PDFs = [np.load(p_file, allow_pickle=True).tolist() for p_file in pdfs_file]
         
-        charge_map = self.load_charge_map('Z:/mcdermott-group/data/fluxNoise2/sim_data/charge_map.mat')
+        charge_map = self.load_charge_map('Z:/mcdermott-group/data/fluxNoise2/sim_data/charge_map2.mat')
         
         self.event = ImpactEvent(PDFs, charge_map, self.qubit_xys)
         
@@ -341,23 +328,9 @@ class Controller(QtGui.QApplication):
         q_map = noiselib.loadmat(path)
         q = q_map['charge_mat']
         q[~np.isfinite(q)] = -1. # right below center of qubit
-        def map_charge(r, z, q, rp, zp): 
-            # my own bilinear interpolation, much faster
-            # https://math.stackexchange.com/questions/3230376/
-            #   interpolate-between-4-points-on-a-2d-plane
-            ri = np.searchsorted(r, rp)
-            zi = np.searchsorted(z, zp)
-            dr, dz = r[1]-r[0], z[1]-z[0]
-            rpp = (rp-r[np.clip(ri-1,0,r.size-1)])/dr
-            zpp = (zp-z[np.clip(zi-1,0,z.size-1)])/dz
-            q1 = q[np.clip(zi-1,0,z.size-1), np.clip(ri-1,0,r.size-1)]
-            q2 = q[np.clip(zi-1,0,z.size-1), np.clip(ri  ,0,r.size-1)]
-            q3 = q[np.clip(zi  ,0,z.size-1), np.clip(ri  ,0,r.size-1)]
-            q4 = q[np.clip(zi  ,0,z.size-1), np.clip(ri-1,0,r.size-1)]
-            return (1-rpp)*(1-zpp)*q1 + rpp*(1-zpp)*q2 + (1-rpp)*zpp*q3 + rpp*zpp*q4
-        charge_map = lambda rp,zp: map_charge( q_map['r']/1000., 
-                                               q_map['z']/1000., 
-                                               q, rp, zp )
+        charge_map = lambda rp,zp: noiselib.interp2d( q_map['r']/1000., 
+                                                      q_map['z']/1000., 
+                                                      q, rp, zp )
         return charge_map
     
     def load_track_data(self, i):
@@ -435,18 +408,23 @@ class Controller(QtGui.QApplication):
         self.i += 1
         self.show_event()
         
-    def show_event(self):
+    def sim_event(self):
     
         e = self.load_track_data( self.i % self.n_events )
         self.event.set_track(e[:,[2,3,4]], e[:,5] * 1e6)
         track_xyz, track_color = self.event.get_track()
         charge_xyz, charge_polarity = self.event.get_charge(fQ=self.fQ)
+        return track_xyz, track_color, charge_xyz, charge_polarity
+        
+    def show_event(self):
+        track_xyz, track_color, charge_xyz, charge_polarity = self.sim_event()
         self.view.plot_track(track_xyz, track_color, charge_xyz, charge_polarity)
     
     def analyze_all_events(self):
         
         self.q_induced = []
         self.q_direct = []
+        self.rot_induced = []
         start_time = time.time()
         bar_length = 50.
         track_gen = self.get_next_track()
@@ -460,9 +438,11 @@ class Controller(QtGui.QApplication):
             self.event.set_track(e[:,[2,3,4]], e[:,5] * 1e6)
             xyz, polarity = self.event.get_charge(fQ=self.fQ)
             qi = self.event.get_induced_charge_on_qubits(xyz, polarity)
+            roti = self.event.get_induced_qubit_rotation(xyz)
             # qi = self.event.get_induced_charge_on_qubits(np.full((1,1),(0,0,0)), [1])
             qd = self.event.get_charge_on_qubits(xyz, polarity)
             self.q_induced.append(qi)
+            self.rot_induced.append(roti)
             self.q_direct.append(qd)
             
             # Update progress bar
@@ -478,6 +458,7 @@ class Controller(QtGui.QApplication):
             sys.stdout.flush()
             
         self.q_induced = np.array(self.q_induced).reshape(-1,4)
+        self.rot_induced = np.array(self.rot_induced).reshape(-1,4)
         self.q_direct = np.array(self.q_direct).reshape(-1,4,2)
     
     def plot_qq(self, q1, q2, ax=None, q_induced=None):
