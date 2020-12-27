@@ -64,6 +64,65 @@ def loadmat(filename):
         data = data[keys[0]]['Data']
     return data
 
+def loadmat_ExptVars(filename):
+    '''
+    this functions is modified from loadmat to import other indepenent variables
+    this function should be called instead of direct spio.loadmat
+    as it cures the problem of not properly recovering python dictionaries
+    from mat files. It calls the function check keys to cure all entries
+    which are still mat-objects
+    Taken from https://stackoverflow.com/questions/7008608/scipy-io-loadmat-nested-structures-i-e-dictionaries
+    '''
+
+    def _check_keys(d):
+        '''
+        checks if entries in dictionary are mat-objects. If yes
+        todict is called to change them to nested dictionaries
+        '''
+        for key in d:
+            if isinstance(d[key], spio.matlab.mio5_params.mat_struct):
+                d[key] = _todict(d[key])
+        return d
+
+    def _todict(matobj):
+        '''
+        A recursive function which constructs from matobjects nested dictionaries
+        '''
+        d = {}
+        for strg in matobj._fieldnames:
+            elem = matobj.__dict__[strg]
+            if isinstance(elem, spio.matlab.mio5_params.mat_struct):
+                d[strg] = _todict(elem)
+            elif isinstance(elem, np.ndarray):
+                d[strg] = elem #_tolist(elem) # not sure we need to check every elem
+            else:
+                d[strg] = elem
+        return d
+
+    def _tolist(ndarray):
+        '''
+        A recursive function which constructs lists from cellarrays
+        (which are loaded as numpy ndarrays), recursing into the elements
+        if they contain matobjects.
+        '''
+        elem_list = []
+        for sub_elem in ndarray:
+            if isinstance(sub_elem, spio.matlab.mio5_params.mat_struct):
+                elem_list.append(_todict(sub_elem))
+            elif isinstance(sub_elem, np.ndarray):
+                elem_list.append(_tolist(sub_elem))
+            else:
+                elem_list.append(sub_elem)
+        return elem_list
+
+    data = spio.loadmat(filename, struct_as_record=False, squeeze_me=True,
+                                  verify_compressed_data_integrity=False)
+    data = _check_keys(data)
+    keys = [key for key in data.keys() if key[0] != '_']
+    if len(keys) == 1:
+        data = data[keys[0]]['ExptVars']
+    return data
+
 
 def legend(ax=None):
     """Call this legend instead of plt.legend() to make lines that can be turned
@@ -133,6 +192,7 @@ def window_averaging(psd):
     for i in range(psd.size):
         filter_fl = int(np.max([0, np.round(i - i / 4.)]))
         filter_fh = int(np.min([psd.size, np.round(i + i / 4.)]))
+        # a warning here, if i = 0, filter_fl=filter_fh=0
         psd_avg[i] = np.mean(psd[filter_fl:filter_fh])
     return psd_avg
 

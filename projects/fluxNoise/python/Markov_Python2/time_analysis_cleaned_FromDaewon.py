@@ -88,16 +88,18 @@ def observed_to_recovered_signal_BW(observed_signal, seed=0):
 
 
 # observation length
-var_length = 10000
+var_length = 2000
 
 # True transition probability
-t_meas = 0.03  # units ms
+t_meas = 0.05  # units ms
 t_QP = 10.0  # units ms
-p_QP = 1.0 - np.exp(-t_meas/t_QP)
+# p_QP = 1.0 - np.exp(-t_meas/t_QP)
+p_QP = 0.9
+# print('p_QP=', p_QP)
 
 # True emission probability
-p_0g = 0.95
-p_1e = 0.85
+p_0g = 0.9
+p_1e = 0.9
 readout_fidelity = [p_0g, p_1e]
 
 print('Trans prob =%.5f'%p_QP, 'read_fidelity =', readout_fidelity, 'at length =', var_length)
@@ -106,7 +108,7 @@ print('Trans prob =%.5f'%p_QP, 'read_fidelity =', readout_fidelity, 'at length =
 
 
 # control the randomness
-random_seed = 0
+random_seed = 1
 
 Observed_Signal_List=[]
 Hidden_Signal = generate_hidden_signal(length = var_length, p_QP=[p_QP, p_QP], seed=random_seed)
@@ -131,7 +133,7 @@ print('True P[e|g]=%.5f'%p_QP, 'P[g|e]=%.5f'%p_QP)
 print('Estimated P[e|g]=%.5f'%traneg_est, 'P[g|e]=%.5f'%trange_est)
 
 print('True P[0|g]=%.5f'%p_0g, 'P[1|e]=%.5f'%p_1e)
-print('Estimated P[e|g]=%.5f'%emis0g_est, 'P[g|e]=%.5f'%emis1e_est)
+print('Estimated P[0|g]=%.5f'%emis0g_est, 'P[1|e]=%.5f'%emis1e_est)
 
 
 fig = plt.figure(figsize=(12, 4))

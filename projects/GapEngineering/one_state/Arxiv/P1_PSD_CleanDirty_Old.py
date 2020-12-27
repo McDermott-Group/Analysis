@@ -8,9 +8,9 @@ import numpy as np
 import datetime
 import matplotlib.pyplot as plt
 from datetime import datetime
-from noiselib import loadmat, loadmat_ExptVars
+from noiselib import loadmat
+from noiselib import loadmat_ExptVars
 from dataChest import dataChest
-from QPTunneling_LIU import QPTunneling_Liu, plotMultiFittedPSD, QPTunneling_Wilen
 from dataChestUtils import FilePicker
 # import Markov_Python2.analyze_QPTunneling_pomegranate as pome
 from Markov_Python2.analyze_QPTunneling_pomegranate import *
@@ -20,23 +20,17 @@ ExptInfo = {
     'Device Name': 'DataAnalysis_test',
     'User': 'LIU',
     'Base Path': r'Z:\mcdermott-group\data\GapEngineer\Nb_GND_Dev06_Trap\Leiden_2020Jul\P1PSD',
-    # 'Base Path': r'Z:\mcdermott-group\data\GapEngineer\Nb_GND_Dev06_Trap\Leiden_2020Jul\Debug',
     'Experiment Name': 'P1_Parity_Interleave',
     'Poison Method': 'No Poison',
-    'Poison Resonator': 'R5',
-    'Measurement Qubit': 'Q4',
+    'Poison Resonator': 'R2',
+    'Measurement Qubit': 'Q1',
 
-    ## matlab data import info:
     'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
-            '/Leiden_2020Jul/P1PSD/LIU/Q6_withQ5Poison/{}/{}/MATLABData/{}',
-    # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
-    #         '/Leiden_2020Jul/P1PSD/LIU/Q4_withQ5Poison/{}/{}/MATLABData/{}',
-    # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
-    #         '/Leiden_2020Jul/P1PSD/LIU/Q1_withQ2Poison/{}/{}/MATLABData/{}',
-    'expt_name_p1': 'Interleave_P1_Neg100',
-    'expt_name_parity_switch': 'Interleave_PSD_Neg100',
-    'date': '12-07-20',
-    'files': np.arange(0, 500, 1),
+            '/Leiden_2020Jul/P1PSD/LIU/Q4_withQ5Poison/{}/{}/MATLABData/{}',
+    'expt_name_p1': 'Interleave_P1_Neg10',
+    'expt_name_parity_switch': 'Interleave_PSD_Neg10',
+    'date': '10-29-20',
+    'files': np.arange(0, 1, 1),
 }
 
 
@@ -50,8 +44,6 @@ class OneState(object):
         self.parity_trace_HMM_list = []    # HMM Check
         self.parity_jump = np.array([])
         self.parity_jump_HMM = np.array([])
-        self.parity_PSD_knee_freq = np.array([])
-        self.parity_PSD_mapping_fidelity = np.array([])
         self.charge_parity_sso_avg = np.array([])
         self.charge_parity_sso_avg_pre = np.array([])
         self.time = []
@@ -66,14 +58,15 @@ class OneState(object):
         :param filenames: a list of file names
         :param data_type:
         :return: array of single_shot_occupations
+
         """
-        n = self.average_n1
 
         f_l = filenames[0]
         sample_rate = loadmat_ExptVars(f_l)['Total_Time']
-        sample_rate = sample_rate * 10**(-6)
+        sample_rate = sample_rate * 10**(-6)    # convert to microseconds
         self.t = sample_rate
 
+        n = self.average_n1
         for f in filenames:
             data = loadmat(f)
             one_state_list = np.array(data[data_type])
@@ -108,20 +101,7 @@ class OneState(object):
         :return: array of single_shot_occupations
         """
         n = self.average_n1
-        for i, f in enumerate(filenames):
-            """QPT PSD"""
-            # QPT = QPTunneling_Liu()
-            QPT = QPTunneling_Wilen()
-            QPT.add_datasets(filenames[i:i+5])
-            QPT.get_psd(True)
-            QPT.get_fit()
-            f_QP = QPT.params[0]
-            f_Map = QPT.params[1]
-            for __ in range(5):
-                self.parity_PSD_knee_freq = np.append(self.parity_PSD_knee_freq, f_QP)
-                self.parity_PSD_mapping_fidelity = np.append(self.parity_PSD_mapping_fidelity, f_Map)
-            """PSD Stops"""
-
+        for f in filenames:
             data = loadmat(f)
             parity_trace_list = np.array(data[data_type_parity_trace])
             parity_jump_count_list = np.array(data[data_type_parity_trace_jump_count])
@@ -140,7 +120,7 @@ class OneState(object):
             for i_os in parity_jump_count_list:
                 avg = self._get_one_state_avg(os=i_os, n=1)
                 self.parity_jump = np.append((self.parity_jump), avg)
-        # print (self.parity_PSD_knee_freq, self.parity_PSD_mapping_fidelity)
+        # print (len(self.parity_time_trace_list[0]))
 
     def _get_one_state_avg(self, os, n):
         one_state_array = np.asarray(os)
@@ -173,14 +153,32 @@ class OneState(object):
         file_axis = self.file_axis
         date = datetime.strptime(ExptInfo['date'], '%m-%d-%y')
         date = date.strftime('%Y%b%d')
+        # d.createDataset(date+'_'+ExptInfo['Experiment Name']+'_'+ExptInfo['expt_name_p1'],
+        #                 [("time", [len(time_axis)], "float64", "ms")],
+        #                 [("P1 SSO Avg ", [len(time_axis)], "float64", "")]
+        #                 )
+        # d.createDataset(ExptInfo['Experiment Name'],
+        #                 [("time", [len(time_axis)], "float64", "ms")],
+        #                 [("P1 SSO Avg ", [len(time_axis)], "float64", "")]
+        # #                 )
+        # d.createDataset(date+'_'+ExptInfo['Experiment Name']+'_'+ExptInfo['expt_name_p1'],
+        #                 [("time", [len(time_axis)], "float64", "ms")],
+        #                 [("P1 SSO Avg ", [len(time_axis)], "float64", ""),
+        #                  ("Parity Trace Avg ", [len(time_axis)], "float64", ""),
+        #                  ("Parity Jump Counts ", [len(time_axis)], "float64","")
+        #                  ])
+        # d.createDataset(date+'_'+ExptInfo['Experiment Name']+'_'+ExptInfo['expt_name_p1'],
+        #                 [("time", [len(time_axis)], "float64", "ms")],
+        #                 [("P1 SSO Avg ", [len(time_axis)], "float64", ""),
+        #                  ("Parity Trace Avg ", [len(time_axis)], "float64", ""),
+        #                  ("Parity Jump Counts ", [len(time_axis)], "float64", ""),
+        #                  ("Parity Jump Counts HMM ", [len(time_axis)], "float64", "")])
         d.createDataset(date+'_'+ExptInfo['Experiment Name']+'_'+ExptInfo['expt_name_p1'],
                         [("file_number", [len(time_axis)], "float64", "")],
                         [("P1 SSO Avg ", [len(time_axis)], "float64", ""),
                          ("Parity Trace Avg ", [len(time_axis)], "float64", ""),
                          ("Parity Jump Counts ", [len(time_axis)], "float64", ""),
-                         ("Parity Jump Counts HMM ", [len(time_axis)], "float64", ""),
-                         ("Parity PSD Knee Freq ", [len(time_axis)], "float64", ""),
-                         ("Parity PSD Mapping Fidelity ", [len(time_axis)], "float64", "")])
+                         ("Parity Jump Counts HMM ", [len(time_axis)], "float64", "")])
         d.addParameter("X Lable", "Time")
         d.addParameter("Y Lable", "Occupation")
 
@@ -194,8 +192,7 @@ class OneState(object):
         # d.addData([[time_axis, self.p1_sso_avg, self.parity_trace_avg,
         #             (self.parity_jump)*0.0001, self.parity_jump_HMM*0.001]])
         d.addData([[self.file_axis, self.p1_sso_avg, self.parity_trace_avg,
-                    (self.parity_jump)*0.0001, self.parity_jump_HMM*0.001,
-                    self.parity_PSD_knee_freq*0.001, self.parity_PSD_mapping_fidelity]])
+                    (self.parity_jump)*0.0001, self.parity_jump_HMM*0.001]])
         # d.addData([[time_axis, self.p1_sso_avg]])
 
 def create_datachest_object(expt_info):
@@ -207,28 +204,6 @@ def create_datachest_object(expt_info):
     experiment_path.append('HDF5Data')
     d = dataChest(experiment_path)
     return d
-
-def run_matlab_data_to_datachest(ExptInfo):
-    os = OneState()
-    for key in ExptInfo:
-        os.expt_info[key] = ExptInfo[key]
-
-    path = ExptInfo['path']
-    date = ExptInfo['date']
-    files = ExptInfo['files']
-    expt_name_p1 = ExptInfo['expt_name_p1']
-    filenames_p1 = [
-        path.format(date, expt_name_p1, expt_name_p1) + '_{:03d}.mat'.format(i) for i
-        in files]
-    os.add_p1_data_from_matlab(filenames_p1)
-
-    expt_name_parity_switch = ExptInfo['expt_name_parity_switch']
-    filenames_parity_switch = [
-        path.format(date, expt_name_parity_switch, expt_name_parity_switch) + '_{:03d}.mat'.format(i) for i
-        in files]
-    os.add_parity_data_from_matlab(filenames_parity_switch)
-
-    os.averaged_data_to_dataChest()
 
 def run_matlab_data_to_datachest_HMM(ExptInfo):
     os = OneState()
@@ -253,15 +228,15 @@ def run_matlab_data_to_datachest_HMM(ExptInfo):
         in files]
     os.add_parity_data_from_matlab(filenames_parity_switch)
 
-    os.averaged_data_to_dataChest()
+    # os.averaged_data_to_dataChest()
 
     ### HMM debug starts
 
-    # Recovered_Signal_BW = os.parity_trace_HMM_list[0]
-    # fig = plt.figure(figsize=(12, 4))
-    # plt.plot(asarray(Recovered_Signal_BW), 'o-', label=r"{} Recovered Transitions".format(transitions_count(Recovered_Signal_BW)))
-    # plt.legend(bbox_to_anchor=(0.75, 0.58), loc=2)
-    # plt.show()
+    Recovered_Signal_BW = os.parity_trace_HMM_list[0]
+    fig = plt.figure(figsize=(12, 4))
+    plt.plot(asarray(Recovered_Signal_BW), 'o-', label=r"{} Recovered Transitions".format(transitions_count(Recovered_Signal_BW)))
+    plt.legend(bbox_to_anchor=(0.75, 0.58), loc=2)
+    plt.show()
     ### HMM debug ends
 
 run_matlab_data_to_datachest_HMM(ExptInfo)

@@ -8,52 +8,58 @@ import numpy as np
 import datetime
 import matplotlib.pyplot as plt
 from datetime import datetime
-from noiselib import loadmat
-
+from noiselib import loadmat, loadmat_ExptVars
 from dataChest import dataChest
+from QPTunneling_LIU import QPTunneling_Liu, plotMultiFittedPSD, QPTunneling_Wilen
 from dataChestUtils import FilePicker
+# import Markov_Python2.analyze_QPTunneling_pomegranate as pome
+from Markov_Python2.analyze_QPTunneling_pomegranate import *
 
 ExptInfo = {
     ## processed data save information
     'Device Name': 'DataAnalysis_test',
     'User': 'LIU',
-    'Base Path': r'Z:\mcdermott-group\data\GapEngineer\Nb_GND_Dev06_Trap\Leiden_2020Jul\Debug',
-    'Experiment Name': 'one_state',
-    'Poison Method': 'No Poison',
-    # 'Poison Method': 'Cavity bare resonance',
-    'Poison Resonator': 'R5',
-    'Measurement Qubit': 'Q4',
+    'Base Path': r'Z:\mcdermott-group\data\GapEngineer\Nb_GND_Dev06_Trap\Leiden_2020Jul\P1PSD',
+    # 'Base Path': r'Z:\mcdermott-group\data\GapEngineer\Nb_GND_Dev06_Trap\Leiden_2020Jul\Debug',
+    'Experiment Name': 'P1_Parity_Interleave',
+    'Poison Method': 'Bare Cavity',
+    'Poison Resonator': 'R2',
+    'Measurement Qubit': 'Q3',
 
     ## matlab data import info:
+    # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
+    #         '/Leiden_2020Jul/P1PSD/LIU/Q6_withQ5Poison/{}/{}/MATLABData/{}',
+    # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
+    #         '/Leiden_2020Jul/P1PSD/LIU/Q4_withQ5Poison/{}/{}/MATLABData/{}',
     'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
-            '/Leiden_2020Jul/Debug/LIU/Q4_withQ5Poison/{}/{}/MATLABData/{}',
-    # 'expt_name': 'One_State_X_Total50us_RO2us_Idle3us',
-    # 'expt_name': 'Interleave_One_State_Off',
-    # 'expt_name': 'Interleave_T1_Off',
-    # 'expt_name': 'Interleave_T1_Neg10',
-    # 'expt_name': 'Interleave_One_State_Neg10',
-    # 'expt_name': 'Interleave_I_Off',
-    # 'expt_name': 'Interleave_X_Off',
-    'expt_name': 'Interleave_I_Off_1',
-    'date': '10-14-20',
+            '/Leiden_2020Jul/P1PSD/LIU/Q3_withQ2Poison/{}/{}/MATLABData/{}',
+    'expt_name_p1': 'HiRONoCharge_Interleave_P1_Neg30',
+    'expt_name_parity_switch': 'HiRONoCharge_Interleave_PSD_Neg30',
+    'Comment': '5 us T1, 50us duty cycle, No Charge reset, the PSD data can be ignored',
+    'date': '12-18-20',
     'files': np.arange(0, 500, 1),
 }
 
 
 class OneState(object):
-    def __init__(self, t=10e-6):
+    def __init__(self, t=50e-6):
         self.t = t
-        self.one_state_avg_pre = np.array([])
-        self.one_state_avg = np.array([])
-        self.one_state_avg_filtered = np.array([])
+        self.p1_sso_avg_pre = np.array([])
+        self.p1_sso_avg = np.array([])
+        self.parity_trace_avg = np.array([])
+        self.parity_time_trace_list = []    # HMM Check
+        self.parity_trace_HMM_list = []    # HMM Check
+        self.parity_jump = np.array([])
+        self.parity_jump_HMM = np.array([])
+        self.charge_parity_sso_avg = np.array([])
+        self.charge_parity_sso_avg_pre = np.array([])
         self.time = []
+        self.file_axis = []
         self.average_n1 = 10000  # this is the average number from raw matlab data to datachest
         self.expt_info = {}  # this stores the data source and path, etc
 
-    def add_data_from_matlab(self, filenames,
-                             data_type='Single_Shot_Occupations',
-                             data_type_pre='Single_Shot_Occupations_Pre',
-                             data_type_filtered='Single_Shot_Occupation_Filtered'):
+    def add_p1_data_from_matlab(self, filenames,
+                             data_type='Single_Shot_Occupations'):
         """
         import the data from Matlab and do first level average
         :param filenames: a list of file names
@@ -61,57 +67,119 @@ class OneState(object):
         :return: array of single_shot_occupations
         """
         n = self.average_n1
+
+        f_l = filenames[0]
+        sample_rate = loadmat_ExptVars(f_l)['Total_Time']
+        sample_rate = sample_rate * 10**(-6)
+        self.t = sample_rate
+
         for f in filenames:
             data = loadmat(f)
-            one_state_filtered_list = np.array(data[data_type_filtered])
-            one_state_pre_list = np.array(data[data_type_pre])
             one_state_list = np.array(data[data_type])
-            for i_os_filtered in one_state_filtered_list:
-                avg_filtered = self._get_one_state_avg(os=i_os_filtered, n=1)
-                self.one_state_avg_filtered = np.append(
-                    self.one_state_avg_filtered, avg_filtered)
-            for i_os_pre in one_state_pre_list:
-                avg_pre = self._get_one_state_avg(os=i_os_pre, n=n)
-                self.one_state_avg_pre = np.append(self.one_state_avg_pre,
-                                                   avg_pre)
             for i_os in one_state_list:
                 avg = self._get_one_state_avg(os=i_os, n=n)
-                self.one_state_avg = np.append(self.one_state_avg, avg)
+                self.p1_sso_avg = np.append(self.p1_sso_avg, avg)
         t_avg = n * self.t
-        self.time = (np.arange(0, len(self.one_state_avg), 1)) * t_avg
+        self.time = (np.arange(0, len(self.p1_sso_avg), 1)) * t_avg
+
+        self.file_axis = self._get_interpolate_file_axis()
+
+    def _get_interpolate_file_axis(self):
+        files = self.expt_info['files']
+        time_axis = self.time
+        n_inter = len(time_axis)/len(files)
+        file_axis = []
+        # print('n_inter=', n_inter)
+        for f in files:
+            for n in range(n_inter):
+                file_axis.append(1.0*f+1.0*n/n_inter)
+        # print(file_axis)
+        return file_axis
+
+
+    def add_parity_data_from_matlab(self, filenames,
+                                    data_type_parity_trace='Charge_Parity_Trace',
+                                    data_type_parity_trace_jump_count='Charge_Parity_Jump_Counts'):
+        """
+        import the data from Matlab and do first level average
+        :param filenames: a list of file names
+        :param data_type:
+        :return: array of single_shot_occupations
+        """
+        n = self.average_n1
+        for i, f in enumerate(filenames):
+
+            data = loadmat(f)
+            parity_trace_list = np.array(data[data_type_parity_trace])
+            parity_jump_count_list = np.array(data[data_type_parity_trace_jump_count])
+            for i_os in parity_trace_list:
+
+                # i_os is an array, i_os = [-1.0, -1.0, 1.0, 1.0, ...]
+                avg = self._get_one_state_avg(os=i_os, n=n)
+                self.parity_trace_avg = np.append(self.parity_trace_avg, avg)
+                ### Add parity data to HMM
+                i_os_HMM = self._apply_HMM(i_os)
+                jump_count = transitions_count(i_os_HMM)
+
+                self.parity_trace_HMM_list.append(i_os_HMM)
+                self.parity_jump_HMM = np.append(self.parity_jump_HMM, jump_count)
+
+            for i_os in parity_jump_count_list:
+                avg = self._get_one_state_avg(os=i_os, n=1)
+                self.parity_jump = np.append((self.parity_jump), avg)
 
     def _get_one_state_avg(self, os, n):
         one_state_array = np.asarray(os)
         avg = np.mean(one_state_array.reshape(-1, n), axis=1)
         return avg
 
+    def _apply_HMM(self, os, apply=False):
+        random_seed = 2
+        os_0and1 = self._parity_offset_convert(os)
+        if apply:
+            recovered_signal_BW_Result = observed_to_recovered_signal_BW(os_0and1, seed=random_seed)
+            os_HMM = recovered_signal_BW_Result[0]
+            print(recovered_signal_BW_Result[1:])
+        else:
+            os_HMM = os_0and1
+        return os_HMM
+
+    def _parity_offset_convert(self, os):
+        """
+        Convert the -1, 1 parity value to 0, and 1 for the HMM code already written
+        :param os:
+        :return:
+        """
+        os_0and1 = [int(i * 0.5 + 0.5) for i in os]
+        return os_0and1
+
     def averaged_data_to_dataChest(self):
         d = create_datachest_object(self.expt_info)
         time_axis = self.time * 10 ** 3
+        file_axis = self.file_axis
         date = datetime.strptime(ExptInfo['date'], '%m-%d-%y')
         date = date.strftime('%Y%b%d')
-        # d.createDataset(date+'_'+ExptInfo['Experiment Name']+'_'+ExptInfo['expt_name'],
-        #                 [("time", [len(time_axis)], "float64", "ms")],
-        #                 [("Occupation Pre", [len(time_axis)], "float64", ""),
-        #                  ("Occupation", [len(time_axis)], "float64", ""),
-        #                  ("Occupation Filtered", [len(time_axis)], "float64",
-        #                   "")]
-        #                 )
-        d.createDataset(date+'_'+ExptInfo['Experiment Name']+'_'+ExptInfo['expt_name'],
-                        [("time", [len(time_axis)], "float64", "ms")],
-                        [("Occupation Pre", [len(time_axis)], "float64", ""),
-                         ("Occupation", [len(time_axis)], "float64", "")]
-                        )
+        d.createDataset(date+'_'+ExptInfo['Experiment Name']+'_'+ExptInfo['expt_name_p1'],
+                        [("file_number", [len(time_axis)], "float64", "")],
+                        [("P1 SSO Avg ", [len(time_axis)], "float64", ""),
+                         ("Parity Trace Avg ", [len(time_axis)], "float64", ""),
+                         ("Parity Jump Counts ", [len(time_axis)], "float64", ""),
+                         ("Parity Jump Counts HMM ", [len(time_axis)], "float64", "")])
         d.addParameter("X Lable", "Time")
         d.addParameter("Y Lable", "Occupation")
 
         for key in self.expt_info:
             d.addParameter(key, self.expt_info[key])
 
-        # d.addData([[time_axis, self.one_state_avg_pre, self.one_state_avg,
-                    # self.one_state_avg_filtered]])
 
-        d.addData([[time_axis, self.one_state_avg_pre, self.one_state_avg]])
+        # d.addData([[time_axis, self.p1_sso_avg_pre, self.p1_sso_avg, self.parity_trace_avg,
+        #             self.charge_parity_sso_avg, self.charge_parity_sso_avg_pre]])
+        # d.addData([[time_axis, self.p1_sso_avg, self.parity_trace_avg, (self.parity_jump)*0.0001]])
+        # d.addData([[time_axis, self.p1_sso_avg, self.parity_trace_avg,
+        #             (self.parity_jump)*0.0001, self.parity_jump_HMM*0.001]])
+        d.addData([[self.file_axis, self.p1_sso_avg, self.parity_trace_avg,
+                    (self.parity_jump)*0.0001, self.parity_jump_HMM*0.001]])
+        # d.addData([[time_axis, self.p1_sso_avg]])
 
 def create_datachest_object(expt_info):
     path_information_dict = expt_info
@@ -123,103 +191,60 @@ def create_datachest_object(expt_info):
     d = dataChest(experiment_path)
     return d
 
-
 def run_matlab_data_to_datachest(ExptInfo):
     os = OneState()
     for key in ExptInfo:
         os.expt_info[key] = ExptInfo[key]
 
     path = ExptInfo['path']
-    expt_name = ExptInfo['expt_name']
     date = ExptInfo['date']
     files = ExptInfo['files']
-    filenames = [
-        path.format(date, expt_name, expt_name) + '_{:03d}.mat'.format(i) for i
+    expt_name_p1 = ExptInfo['expt_name_p1']
+    filenames_p1 = [
+        path.format(date, expt_name_p1, expt_name_p1) + '_{:03d}.mat'.format(i) for i
         in files]
+    os.add_p1_data_from_matlab(filenames_p1)
 
-    os.add_data_from_matlab(filenames)
+    expt_name_parity_switch = ExptInfo['expt_name_parity_switch']
+    filenames_parity_switch = [
+        path.format(date, expt_name_parity_switch, expt_name_parity_switch) + '_{:03d}.mat'.format(i) for i
+        in files]
+    os.add_parity_data_from_matlab(filenames_parity_switch)
+
     os.averaged_data_to_dataChest()
 
+def run_matlab_data_to_datachest_HMM(ExptInfo):
+    os = OneState()
+    for key in ExptInfo:
+        os.expt_info[key] = ExptInfo[key]
 
-class OneStateAnalyze(object):
-    def __init__(self):
-        self.one_state_data = np.array([])
-        self.one_state_data_pre = np.array([])
-        self.one_state_data_filtered = np.array([])
-        self.time_data = np.asarray([])
-        self.average_n2 = 1000  # this is the rolling avg data
-        self.data_set = ''
-        self.file_name = ''
-        self.files = []
+    path = ExptInfo['path']
+    date = ExptInfo['date']
+    files = ExptInfo['files']
+    expt_name_p1 = ExptInfo['expt_name_p1']
+    filenames_p1 = [
+        path.format(date, expt_name_p1,
+                    expt_name_p1) + '_{:03d}.mat'.format(i) for i
+        in files]
+    os.add_p1_data_from_matlab(filenames_p1)
 
-    def one_state_data_retrieve(self, data_path, data_set):
-        self.data_set = data_set
+    expt_name_parity_switch = ExptInfo['expt_name_parity_switch']
+    filenames_parity_switch = [
+        path.format(date, expt_name_parity_switch,
+                    expt_name_parity_switch) + '_{:03d}.mat'.format(i) for
+        i
+        in files]
+    os.add_parity_data_from_matlab(filenames_parity_switch)
 
-        if data_set == 'Q6Off':
-            file_name = 'Q6_PoisonOff_0_2499.hdf5'
-        elif data_set == 'Q6Neg10dBm':
-            file_name = 'Q6_PoisonNeg10dBm_0_2499.hdf5'
-        elif data_set == 'Q6Neg8dBm':
-            file_name = 'Q6_PoisonNeg8dBm_0_2499.hdf5'
-        elif data_set == 'Q6Neg7dBm':
-            file_name = 'Q6_PoisonNeg7dBm_0_2499.hdf5'
-        elif data_set == 'Q6Neg6dBm':
-            file_name = 'Q6_PoisonNeg6dBm_0_2499.hdf5'
-        elif data_set == 'Q6Neg4dBm':
-            file_name = 'Q6_PoisonNeg4dBm_0_2499.hdf5'
+    os.averaged_data_to_dataChest()
 
-        elif data_set == 'Q4Neg6dBm':
-            file_name = 'Q4_PoisonNeg6dBm_0_4370.hdf5'
-        elif data_set == 'Q4Neg8dBm':
-            file_name = 'Q4_PoisonNeg8dBm_0_2960.hdf5'
-        elif data_set == 'Q4Off':
-            file_name = 'Q4_PoisonOff_0_3779.hdf5'
+    ### HMM debug starts
 
-        elif data_set == 'Interleave_T1':
-            file_name = 'Q4_Off_Interleave_T1_Cal_0_700.hdf5'
+    # Recovered_Signal_BW = os.parity_trace_HMM_list[0]
+    # fig = plt.figure(figsize=(12, 4))
+    # plt.plot(asarray(Recovered_Signal_BW), 'o-', label=r"{} Recovered Transitions".format(transitions_count(Recovered_Signal_BW)))
+    # plt.legend(bbox_to_anchor=(0.75, 0.58), loc=2)
+    # plt.show()
+    ### HMM debug ends
 
-        elif data_set == 'Interleave_One_State':    #13140 seconds
-            file_name = 'Q4_Off_Interleave_One_State_Cal_0_700.hdf5'
-
-        elif data_set == 'Interleave_T1_Oct_11':
-            file_name = 'Q4_Off_Interleave_T1_Cal_382_1116.hdf5'
-
-        elif data_set == 'Interleave_One_State_Oct_11':
-            file_name = 'Q4_Off_Interleave_One_State_Cal_382_1116.hdf5'
-
-        # file_info = FilePicker()
-        # data_path = file_info.relativePath
-        # file_name = file_info.selectedFileName
-        self.file_name = file_name
-        d = dataChest(data_path)
-        d.openDataset(file_name)
-        self.files = d.getParameter("files")
-        variable_info = d.getVariables()
-        independent_variable_info = variable_info[0]
-        dependent_variable_info = variable_info[1]
-
-        # print('dependent_variable_info=', dependent_variable_info)
-        # print('dependent_variable_info[0]=', dependent_variable_info[0])
-
-        occupation_data_pre = d.getData(
-            variablesList=[dependent_variable_info[0][0]])
-        occupation_data_pre = np.asarray(occupation_data_pre).flatten()
-
-        occupation_data = d.getData(
-            variablesList=[dependent_variable_info[1][0]])
-        occupation_data = np.asarray(occupation_data).flatten()
-
-        occupation_data_filtered = d.getData(
-            variablesList=[dependent_variable_info[2][0]])
-        occupation_data_filtered = np.asarray(occupation_data_filtered).flatten()
-
-        time_data = d.getData(variablesList=[independent_variable_info[0][0]])
-        time_data = np.asarray(time_data).flatten()
-
-        self.one_state_data_pre = occupation_data_pre
-        self.one_state_data = occupation_data
-        self.one_state_data_filtered = occupation_data_filtered
-        self.time_data = time_data
-
-
-run_matlab_data_to_datachest(ExptInfo)
+run_matlab_data_to_datachest_HMM(ExptInfo)
