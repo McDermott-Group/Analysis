@@ -302,7 +302,7 @@ def plotMultiFittedPSD(QPT_List):
             T_parity, F_map = QPT.params[0], QPT.params[1]
             plt.loglog(f_fit, psd_fit, '-',
                        label='{} fit [{:.5f} ms], fidelity={:.2f}'.format(
-                           QPT.name, (1/T_parity)*10**3, F_map))
+                           QPT.name, (T_parity)*10**3, F_map))
     plt.xlabel('Frequency (Hz)')
     plt.ylabel('S (1/Hz)')
     plt.grid()

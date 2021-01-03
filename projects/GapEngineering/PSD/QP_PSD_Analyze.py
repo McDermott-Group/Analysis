@@ -195,6 +195,14 @@ experiment_name = ('Interleave_PSD_Neg10')
 # QPT_Q4_Poison_Neg20dBm_Dirty = QPTunneling_Liu(name='Q4_Poison_Neg20dBm_Dirty')
 # QPT_Q4_Poison_Neg20dBm_Dirty.add_datasets(QP_filenames_Q4_Poison_Neg20dBm_Dirty, HMM=False)
 
+date = '10-28-20'
+experiment_name = ('Interleave_PSD_Neg100')
+QP_file = np.arange(0, 100, 1)
+
+QP_filenames_Q4_Poison_Neg100dBm = [QP_path.format(date, experiment_name, experiment_name) + '_{:03d}.mat'.format(i) for i in QP_file]
+QPT_Q4_Poison_Neg100dBm = QPTunneling_Liu(name='Q4_Poison_Neg100dBm')
+QPT_Q4_Poison_Neg100dBm.add_datasets(QP_filenames_Q4_Poison_Neg100dBm, HMM=False)
+
 """Q6 Starts"""
 
 QP_path = ('Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap/Leiden_2020Jul/P1PSD/LIU/Q6_withQ5Poison/{}/{}/MATLABData/{}')
@@ -567,7 +575,7 @@ date = '12-07-20'
 # QPT_Q1_Neg30.add_datasets(QP_filenames, HMM=True)
 
 """Q3 data"""
-QP_path = ('Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap/Leiden_2020Jul/P1PSD/LIU/Q3_withQ2Poison/{}/{}/MATLABData/{}')
+# QP_path = ('Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap/Leiden_2020Jul/P1PSD/LIU/Q3_withQ2Poison/{}/{}/MATLABData/{}')
 # experiment_name = ('50us_Interleave_PSD_Neg100')
 # date = '12-15-20'
 # QP_file = np.arange(0, 500, 1)   #
@@ -576,13 +584,14 @@ QP_path = ('Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap/Leiden_2020Jul
 # QPT_Q3_Neg100 = QPTunneling_Liu(name='Q3_Neg100_50us')
 # QPT_Q3_Neg100.add_datasets(QP_filenames)
 
-experiment_name = ('25us_Interleave_PSD_Neg100')
-date = '12-16-20'
-QP_file = np.arange(0, 500, 1)   #
-QP_filenames = [QP_path.format(date, experiment_name, experiment_name) + '_{:03d}.mat'.format(i) for i in QP_file]
-QPT_Q3_Neg100 = QPTunneling_Liu(name='Q3_Neg100_25us')
-QPT_Q3_Neg100.add_datasets(QP_filenames)
+# experiment_name = ('25us_Interleave_PSD_Neg100')
+# date = '12-16-20'
+# QP_file = np.arange(0, 500, 1)   #
+# QP_filenames = [QP_path.format(date, experiment_name, experiment_name) + '_{:03d}.mat'.format(i) for i in QP_file]
+# QPT_Q3_Neg100 = QPTunneling_Liu(name='Q3_Neg100_25us')
+# QPT_Q3_Neg100.add_datasets(QP_filenames)
 
+QPT_List = [QPT_Q4_Poison_Neg100dBm]
 # QPT_List = [QPT_Q4_Poison_Neg100dBm_Clean, QPT_Q4_Poison_Neg100dBm_Dirty]
 # QPT_List = [QPT_Q4_NoPoison, QPT_Q4_Poison, QPT_Q6_NoPoison]
 # QPT_List = [QPT_Q6_NoPoison_Clean, QPT_Q6_NoPoison_Dirty]
@@ -597,7 +606,7 @@ QPT_Q3_Neg100.add_datasets(QP_filenames)
 # QPT_List = [QPT_Q4_Poison_Neg10dBm]
 # QPT_List = [QPT_Q1_Neg30]
 # QPT_List = [QPT_Q1_Neg100]
-QPT_List = [QPT_Q3_Neg100]
+# QPT_List = [QPT_Q3_Neg100]
 
 plotMultiFittedPSD(QPT_List)
 

@@ -23,21 +23,21 @@ ExptInfo = {
     # 'Base Path': r'Z:\mcdermott-group\data\GapEngineer\Nb_GND_Dev06_Trap\Leiden_2020Jul\Debug',
     'Experiment Name': 'P1_Parity_Interleave',
     'Poison Method': 'Bare Cavity',
-    'Poison Resonator': 'R2',
-    'Measurement Qubit': 'Q3',
+    'Poison Resonator': 'None',
+    'Measurement Qubit': 'Q4',
 
     ## matlab data import info:
     # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
     #         '/Leiden_2020Jul/P1PSD/LIU/Q6_withQ5Poison/{}/{}/MATLABData/{}',
-    # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
-    #         '/Leiden_2020Jul/P1PSD/LIU/Q4_withQ5Poison/{}/{}/MATLABData/{}',
     'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
-            '/Leiden_2020Jul/P1PSD/LIU/Q3_withQ2Poison/{}/{}/MATLABData/{}',
-    'expt_name_p1': 'HiRONoCharge_Interleave_P1_Neg30',
-    'expt_name_parity_switch': 'HiRONoCharge_Interleave_PSD_Neg30',
-    'Comment': '5 us T1, 50us duty cycle, No Charge reset, the PSD data can be ignored',
-    'date': '12-18-20',
-    'files': np.arange(0, 500, 1),
+            '/Leiden_2020Jul/P1PSD/LIU/Q4_withQ5Poison/{}/{}/MATLABData/{}',
+    # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
+    #         '/Leiden_2020Jul/P1PSD/LIU/Q3_withQ2Poison/{}/{}/MATLABData/{}',
+    'expt_name_p1': 'Interleave_P1_Neg6',
+    'expt_name_parity_switch': 'Interleave_PSD_Neg6',
+    'Comment': '10 us T1, did weighted occupation',
+    'date': '01-01-21',
+    'files': np.arange(0, 300, 1),
 }
 
 
@@ -46,11 +46,14 @@ class OneState(object):
         self.t = t
         self.p1_sso_avg_pre = np.array([])
         self.p1_sso_avg = np.array([])
+        self.p1_weighted = np.array([])
         self.parity_trace_avg = np.array([])
         self.parity_time_trace_list = []    # HMM Check
         self.parity_trace_HMM_list = []    # HMM Check
         self.parity_jump = np.array([])
         self.parity_jump_HMM = np.array([])
+        self.stripped_charge_bias = np.array([])
+        self.freq_detuning = np.array([])
         self.charge_parity_sso_avg = np.array([])
         self.charge_parity_sso_avg_pre = np.array([])
         self.time = []
@@ -59,7 +62,9 @@ class OneState(object):
         self.expt_info = {}  # this stores the data source and path, etc
 
     def add_p1_data_from_matlab(self, filenames,
-                             data_type='Single_Shot_Occupations'):
+                             data_type='Single_Shot_Occupations',
+                                data_type_p1_weighted='Weighted_Occupation',
+                                data_type_stripped_charge='Stripped_Charge_Bias'):
         """
         import the data from Matlab and do first level average
         :param filenames: a list of file names
@@ -76,13 +81,34 @@ class OneState(object):
         for f in filenames:
             data = loadmat(f)
             one_state_list = np.array(data[data_type])
+            weighted_occupation_list = np.array(data[data_type_p1_weighted])
+            stripped_charge_bias_list = np.array(data[data_type_stripped_charge])
             for i_os in one_state_list:
                 avg = self._get_one_state_avg(os=i_os, n=n)
                 self.p1_sso_avg = np.append(self.p1_sso_avg, avg)
+
+            for charge_bias in stripped_charge_bias_list:
+                self.stripped_charge_bias = np.append((self.stripped_charge_bias), charge_bias)
+
+            for WO in weighted_occupation_list:
+                self.p1_weighted = np.append((self.p1_weighted), WO)
+
         t_avg = n * self.t
         self.time = (np.arange(0, len(self.p1_sso_avg), 1)) * t_avg
 
         self.file_axis = self._get_interpolate_file_axis()
+
+        # print('self.stripped_charge_bias=', self.stripped_charge_bias)
+
+        freq_detuning = [0.1*np.abs(1.25*np.cos(2*np.pi*(-x0))) for x0 in self.stripped_charge_bias]
+        # stripped_charge_bias = self.stripped_charge_bias
+        # freq_detuning = self.stripped_charge_bias
+        # for i in range(len(stripped_charge_bias)-1):
+        #     x0 = stripped_charge_bias[i]
+        #     x1 = stripped_charge_bias[i+1]
+        #     freq_detuning[i] = 0.1*np.abs(1.25*np.cos(2*np.pi*(x1-x0)))
+        self.freq_detuning = freq_detuning
+
 
     def _get_interpolate_file_axis(self):
         files = self.expt_info['files']
@@ -128,6 +154,7 @@ class OneState(object):
                 avg = self._get_one_state_avg(os=i_os, n=1)
                 self.parity_jump = np.append((self.parity_jump), avg)
 
+
     def _get_one_state_avg(self, os, n):
         one_state_array = np.asarray(os)
         avg = np.mean(one_state_array.reshape(-1, n), axis=1)
@@ -161,16 +188,18 @@ class OneState(object):
         date = date.strftime('%Y%b%d')
         d.createDataset(date+'_'+ExptInfo['Experiment Name']+'_'+ExptInfo['expt_name_p1'],
                         [("file_number", [len(time_axis)], "float64", "")],
-                        [("P1 SSO Avg ", [len(time_axis)], "float64", ""),
-                         ("Parity Trace Avg ", [len(time_axis)], "float64", ""),
-                         ("Parity Jump Counts ", [len(time_axis)], "float64", ""),
-                         ("Parity Jump Counts HMM ", [len(time_axis)], "float64", "")])
+                        [("P1 SSO Avg", [len(time_axis)], "float64", ""),
+                         ("Parity Trace Avg", [len(time_axis)], "float64", ""),
+                         ("Parity Jump Counts", [len(time_axis)], "float64", ""),
+                         ("Parity Jump Counts HMM", [len(time_axis)], "float64", ""),
+                         ("Stripped Charge Bias", [len(time_axis)], "float64", "10 e"),
+                         ("Freq Detuning", [len(time_axis)], "float64", "10 MHz"),
+                         ("P1 Weighted", [len(time_axis)], "float64", "")])
         d.addParameter("X Lable", "Time")
         d.addParameter("Y Lable", "Occupation")
 
         for key in self.expt_info:
             d.addParameter(key, self.expt_info[key])
-
 
         # d.addData([[time_axis, self.p1_sso_avg_pre, self.p1_sso_avg, self.parity_trace_avg,
         #             self.charge_parity_sso_avg, self.charge_parity_sso_avg_pre]])
@@ -178,7 +207,9 @@ class OneState(object):
         # d.addData([[time_axis, self.p1_sso_avg, self.parity_trace_avg,
         #             (self.parity_jump)*0.0001, self.parity_jump_HMM*0.001]])
         d.addData([[self.file_axis, self.p1_sso_avg, self.parity_trace_avg,
-                    (self.parity_jump)*0.0001, self.parity_jump_HMM*0.001]])
+                    (self.parity_jump)*0.0001, self.parity_jump_HMM*0.001,
+                    self.stripped_charge_bias * 0.1, self.freq_detuning, self.p1_weighted]])
+                   # self.stripped_charge_bias])
         # d.addData([[time_axis, self.p1_sso_avg]])
 
 def create_datachest_object(expt_info):

@@ -191,25 +191,25 @@ QP_path = ('Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap/Leiden_2020Jul
 # QPT_Q6_Poison_Neg16dBm_Clean.add_datasets(PSD_Clean_Files)
 # QPT_Q6_Poison_Neg16dBm_Dirty.add_datasets(PSD_Dirty_Files)
 
-date = '12-09-20'
-experiment_name_P1 = ('Interleave_P1_Neg13')
-experiment_name_PSD = ('Interleave_PSD_Neg13')
-
-P1_file_Number = np.arange(0, 500, 1)
-PSD_file_Number = P1_file_Number
-P1_file = [QP_path.format(date, experiment_name_P1, experiment_name_P1) + '_{:03d}.mat'.format(i) for i in P1_file_Number]
-P1CleanDirty = OneStateCleanDirty()
-P1CleanDirty.update_experiment_name(experiment_name_P1, experiment_name_PSD)
-P1CleanDirty.add_p1_data_from_matlab(P1_file, P1_threshold=0.085)
-
-PSD_Clean_Files = P1CleanDirty.clean_files
-PSD_Dirty_Files = P1CleanDirty.dirty_files
-
-QPT_Q6_Poison_Neg13dBm_Clean = QPTunneling_Wilen(name='Q6_Poison_Neg13dBm_Clean (P1<0.085)')
-QPT_Q6_Poison_Neg13dBm_Dirty = QPTunneling_Wilen(name='Q6_Poison_Neg13dBm_Dirty (P1>0.085)')
-
-QPT_Q6_Poison_Neg13dBm_Clean.add_datasets(PSD_Clean_Files)
-QPT_Q6_Poison_Neg13dBm_Dirty.add_datasets(PSD_Dirty_Files)
+# date = '12-09-20'
+# experiment_name_P1 = ('Interleave_P1_Neg13')
+# experiment_name_PSD = ('Interleave_PSD_Neg13')
+#
+# P1_file_Number = np.arange(0, 500, 1)
+# PSD_file_Number = P1_file_Number
+# P1_file = [QP_path.format(date, experiment_name_P1, experiment_name_P1) + '_{:03d}.mat'.format(i) for i in P1_file_Number]
+# P1CleanDirty = OneStateCleanDirty()
+# P1CleanDirty.update_experiment_name(experiment_name_P1, experiment_name_PSD)
+# P1CleanDirty.add_p1_data_from_matlab(P1_file, P1_threshold=0.085)
+#
+# PSD_Clean_Files = P1CleanDirty.clean_files
+# PSD_Dirty_Files = P1CleanDirty.dirty_files
+#
+# QPT_Q6_Poison_Neg13dBm_Clean = QPTunneling_Wilen(name='Q6_Poison_Neg13dBm_Clean (P1<0.085)')
+# QPT_Q6_Poison_Neg13dBm_Dirty = QPTunneling_Wilen(name='Q6_Poison_Neg13dBm_Dirty (P1>0.085)')
+#
+# QPT_Q6_Poison_Neg13dBm_Clean.add_datasets(PSD_Clean_Files)
+# QPT_Q6_Poison_Neg13dBm_Dirty.add_datasets(PSD_Dirty_Files)
 
 # QPT_List = [QPT_Q4_Poison_Neg100dBm_Clean, QPT_Q4_Poison_Neg100dBm_Dirty]
 # QPT_List = [QPT_Q4_Poison_Neg20dBm_Clean, QPT_Q4_Poison_Neg20dBm_Dirty]
