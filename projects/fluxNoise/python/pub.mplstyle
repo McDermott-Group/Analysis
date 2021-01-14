@@ -1,0 +1,8 @@
+# font.family: Helvetica
+font.family: Arial
+mathtext.fontset: cm
+font.size: 10
+lines.linewidth: 1.
+xtick.direction: in
+ytick.direction: in
+figure.constrained_layout.use: True

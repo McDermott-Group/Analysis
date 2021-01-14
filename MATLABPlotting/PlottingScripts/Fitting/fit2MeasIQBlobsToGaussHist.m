@@ -7,7 +7,7 @@ function [data, maxFidelity, singleShotFidelity, probOne, rotInfo] = ...
 % distribution.
 
 % Number of bins in a histogram.
-Nbins = 250;
+Nbins = 100;
 
 % Check to see if gate data was fed into the function or needs to be.
 if ~exist('GATE_I','var')

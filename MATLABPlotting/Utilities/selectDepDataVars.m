@@ -23,7 +23,7 @@ end
 
 cell_size = length(data);
 
-fields = data{1}.dep;
+fields = sort(data{1}.dep);
 dep_vars = cell(length(fields), 1);
 for f = 1:length(dep_vars)
     % Do not show standard deviation variables.

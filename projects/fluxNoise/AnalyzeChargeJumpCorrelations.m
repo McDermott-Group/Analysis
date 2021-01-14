@@ -2,15 +2,18 @@ function [N, nA, nB, nCorrAB, nCorrBA, nCorrExpected] = AnalyzeChargeJumpCorrela
 
 data = loadMeasurementData(file_path);
 
-period_2e_QA = eval(['data.x2e_Period_' qA]);
-period_2e_QB = eval(['data.x2e_Period_' qB]);
-%period_2e_QA = 0.4126;
-%period_2e_QB = 0.418;
+try
+    period_2e_QA = eval(['data.x2e_Period_' qA]);
+    period_2e_QB = eval(['data.x2e_Period_' qB]);
+catch
+    period_2e_QA = 0.4126;
+    period_2e_QB = 0.418;
+end
 vs_QA = eval(['data.Offset_Voltage_' qA]);
 vs_QB = eval(['data.Offset_Voltage_' qB]);
 
 colorCorrAB = 'Red'; [0.8500 0.3250 0.0980];  
-colorCorrBA = [1 0.6 0]; [0.9290 0.6940 0.1250]; 
+colorCorrBA = 'Red'; [1 0.6 0]; [0.9290 0.6940 0.1250]; 
 colorNoCorr = 'Blue'; [0 0.4470 0.7410];  
 
 % figure; plot(t, vs_QA(1:end-1), t, vs_QB(1:end-1));

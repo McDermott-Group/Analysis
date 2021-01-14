@@ -33,7 +33,7 @@ end
 [~, filename, ~] = fileparts(data.Filename);
 
 dep_vals = data.(data_variable);
-dep_rels = data.rels.(data_variable);
+dep_rels = data.rels.(data_variable)
     
 if isempty(dep_rels)
     error(['Independent (sweep) variables for data variable ''',...
@@ -61,7 +61,8 @@ if length(dep_rels) == 3
 %                 min_dep_vals(i,j) = 6.36;
 %                 min_dep_valsS21(i,j) = -0.05;
 %             else 
-                min_dep_vals(i,j) = data.RF_Frequency(k)
+%                 min_dep_vals(i,j) = data.Cavity_Frequency(k)
+                min_dep_vals(i,j) = data.RO_Drive_Frequency(k);
                 min_dep_valsS21(i,j) = t;
 %             end
         end 
@@ -71,7 +72,7 @@ if length(dep_rels) == 3
     processed_data_var2 = ['minimumOfCutSubtracted_', data_variable];
     data.(processed_data_var) = min_dep_vals;
     data.(processed_data_var2) = min_dep_valsS21;
-    data.units.(processed_data_var) = data.units.RF_Frequency;
+    data.units.(processed_data_var) = data.units.RO_Drive_Frequency;
     data.rels.(processed_data_var) = data.rels.(data_variable);
     data.units.(processed_data_var2) = data.units.(data_variable);
     data.rels.(processed_data_var2) = data.rels.(data_variable);
