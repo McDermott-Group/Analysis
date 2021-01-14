@@ -14,6 +14,7 @@ index = 142;
 % subtract_index = 1262; % cuc1833nzp
 subtract_index = 1672; % cud0112txh
 pathname = 'Z:\mcdermott-group\data\fluxNoise\DR1 - 2019-12-17\CorrFar\Q1Q2Corr\General\02-18-20\Charge_resetting\MATLABData';
+pathname = '/Volumes/smb/mcdermott-group/data/fluxNoise/DR1 - 2019-12-17/CorrFar/Q1Q2Corr/General/02-18-20/Charge_resetting/MATLABData';
 pathnames = {};
 filenames = {};
 for i=1:6

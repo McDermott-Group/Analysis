@@ -1,11 +1,36 @@
 function [r,z,charge_mat,int_val] = simulate_InducedChargeRings()
 %All units in microns
 
+%%%%%%%% for figure 1 %%%%%%%%%
+% w = 8.9/2; h = 0.65*2.54;
+
+% %Generate the coordinate matrix for the charge placement
+% z_step = 1;
+% z_max = 375;%375 um
+% r_step = 1;
+% r_max = 200;
+% z = 0:z_step:z_max;
+% r = 1:r_step:r_max;
+% num_r = length(r);
+% num_z = length(z);
+% charge_mat = zeros(num_z,num_r);
+% 
+% %Parameters for the device rings
+% r_inner_step = 1;
+% r_inner = 70;
+% r_outer = 90.5;
+% r_outer_step = 1;
+% r_outer_max = 550;
+% z_shift = 0.1;%To avoid Infs
+
+%%%%%%%% for expanded range %%%%%%%%%
+w = 8.9; h = 2*0.65*2.54;
+
 %Generate the coordinate matrix for the charge placement
 z_step = 1;
 z_max = 375;%375 um
 r_step = 3;
-r_max = 550;
+r_max = 1000;
 z = 0:z_step:z_max;
 r = 1:r_step:r_max;
 num_r = length(r);
@@ -13,11 +38,11 @@ num_z = length(z);
 charge_mat = zeros(num_z,num_r);
 
 %Parameters for the device rings
-r_inner_step = 1;
-r_inner = 108;
-r_outer = 500;
-r_outer_step = 1;
-r_outer_max = 550;
+r_inner_step = 1.5;
+r_inner = 70;
+r_outer = 90.5;
+r_outer_step = 4;
+r_outer_max = 1200;
 z_shift = 0.1;%To avoid Infs
 
 %Initialize vectors
@@ -55,23 +80,54 @@ for zi = 1:num_z
         charge_mat(zi,ri) = charge_inner/charge;
     end
 end
+charge_mat(isnan(charge_mat)) = -1;
 %Alias the data
-charge_mat = abs(noiselib.alias(charge_mat, 0.5));%NOTE: Abs is not necessary
+% charge_mat = abs(noiselib.alias(charge_mat, 0.5));%NOTE: Abs is not necessary
+% Plot Gradient
+[gz, gr] = gradient(charge_mat, z_step*1e-6, r_step*1e-6);
+alpha_grad = sqrt(gz.^2 + gr.^2);
 
-figure();imagesc(r,z,charge_mat)
-title(strcat(['r_{in}: ',num2str(r_inner),', r_{out}: ',num2str(r_outer)]))
-map = [zeros(10,3); parula(40)];
-colormap(map)
-line([0 r_inner],[0 0],'Color','red','LineWidth',4)
-line([r_outer 550],[0 0],'Color','red','LineWidth',4)
+plot_and_save(-charge_mat, r, z, r_inner, r_outer, w, h, 'alpha.pdf')
+plot_and_save(alpha_grad, r, z, r_inner, r_outer, w, h, 'alpha_gradient.pdf')
 
 [h]=makeHistogram(r,z,charge_mat);
 figure(10);hold on;histogram(h,75)
 
-
 axis([0.1 0.5 0 10^4])
 set(gca, 'YScale', 'log')
 int_val = sum(sum(h>0.1));
+
+end
+
+
+function [] = plot_and_save(A, r, z, r1, r2, w, h, file)
+
+figure(); imagesc([flip(-r) r],z,[flip(A,2) A])
+%title(strcat(['r_{in}: ',num2str(r1),', r_{out}: ',num2str(r2)]))
+map = [zeros(0,3); parula(50)];
+colormap(map)
+rectangle('Position', [-r1   -20 2*r1    20], 'FaceColor', 'red', 'LineStyle', 'none');
+rectangle('Position', [ r2   -20 1500-r2 20], 'FaceColor', 'red', 'LineStyle', 'none');
+rectangle('Position', [-1500 -20 1500-r2 20], 'FaceColor', 'red', 'LineStyle', 'none');
+ylim([-20,inf]);
+
+axis off;
+set(gcf, 'PaperUnits', 'centimeters');
+set(gcf, 'PaperSize', [w h]);
+set(gca, 'Position', [0 0 1 1])
+cb = colorbar('south');%,'color','white');
+pos = cb.Position;
+cb.Position = [0.5-0.035,pos(2),pos(3)/2-0.035,2*pos(4)];
+set(gcf,'units','centimeters','position',[3,3,w,h]);
+set(cb,'FontSize',10);
+set(cb,'FontName','Arial');
+set(gca,'ColorScale','log')
+l = floor(log10(min(A(:))));
+u = ceil(log10(max(A(:))));
+caxis(10.^[ l, u ]);
+set(cb,'YTick',10.^flip(u:-floor((u-l)/2):l))
+fig_path = '/Volumes/smb/mcdermott-group/users/ChrisWilen/FluxNoise/figs/';
+%saveas(gcf, [fig_path file])
 
 end
 
