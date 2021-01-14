@@ -244,6 +244,7 @@ reg = re.compile('Q1(Q\d)(Q\d)*')
 with open('dump_T1_files.dat', 'rb') as f:
     files = pickle.load(f)
 print len(files)
+qs = {('Q2',):0, ('Q4',):0, ('Q2','Q4'):0}
 for k,f in enumerate(files[:]): # 290
     Qs = list(reg.findall(f)[0])
     if Qs[-1] == '':
@@ -290,6 +291,7 @@ for k,f in enumerate(files[:]): # 290
         # plt.draw(); plt.pause(0.05);
         # DF.plot(trial)
         # plt.show()
+        qs[tuple(Qs)] += 1
         for i,q in enumerate(Qs):
             M2 = DF.get_P1_around_trig((trial,rep), meas_index=0+2*i)
             M1 = DF.get_P1_around_trig((trial,rep), meas_index=1+2*i)
