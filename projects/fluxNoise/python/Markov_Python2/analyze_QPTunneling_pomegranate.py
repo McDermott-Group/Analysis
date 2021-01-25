@@ -127,13 +127,13 @@ def observed_to_recovered_signal_BW(observed_signal, seed=0):
     flat_seq = seq[0]
     np.random.seed(seed + 2)
 
-    # random initial emission probability
+    # random initial emission probability, the readout fidelity
     temp1 = np.random.uniform(low=0.5, high=1)  # indicates P[g|g]
     temp2 = np.random.uniform(low=0.5, high=1)  # indicates P[e|e]
     dists = [DiscreteDistribution({'0': temp1, '1': 1 - temp1}),
              DiscreteDistribution({'0': 1 - temp2, '1': temp2})]    # random initial guess for transition matrix, we can polish if we know rough ranges for this
-    trans_mat_guess = np.array(np.random.rand(2, 2))
-    # trans_mat_guess = [[0.9, 0.1], [0.1, 0.9]]
+    # trans_mat_guess = np.array(np.random.rand(2, 2))
+    trans_mat_guess = [[0.9, 0.1], [0.1, 0.9]]
     # print('trans_mat_guess=', trans_mat_guess)
 
     # estimate values / hidden sequence by BW
@@ -266,18 +266,19 @@ Parameters Setup
 # p_1e_VTB = 0.75
 # readout_fidelity_VTB = [p_0g_VTB, p_1e_VTB]
 #
-# Hidden_Signal = generate_hidden_signal(p_QP=[0.01, 0.01])
-# Observed_Signal = hidden_to_observed_signal(Hidden_Signal)
-# Recovered_Signal = observed_to_recovered_signal(Observed_Signal, p_QP=0.01)
-# Recovered_Signal_BW = observed_to_recovered_signal_BW(Observed_Signal)
-#
-# fig = plt.figure(figsize=(12, 4))
-# plt.plot(asarray(Hidden_Signal)+1.5, 'o-', label=r"{} Hidden Transitions".format(transitions_count(Hidden_Signal)))
-# plt.plot(asarray(Observed_Signal), 'o-', label=r"{} Observed Transitions".format(transitions_count(Observed_Signal)))
-# plt.plot(asarray(Recovered_Signal)-1.5, 'o-', label=r"{} Recovered Transitions VTB".format(transitions_count(Recovered_Signal)))
-# plt.plot(asarray(Recovered_Signal_BW[0])-3, 'o-', label=r"{} Recovered Transitions BW".format(transitions_count(Recovered_Signal_BW[0])))
-# plt.legend(bbox_to_anchor=(0.75, 0.58), loc=2)
-# plt.show()
+Hidden_Signal = generate_hidden_signal(p_QP=[0.01, 0.01])
+Observed_Signal = hidden_to_observed_signal(Hidden_Signal)
+Recovered_Signal = observed_to_recovered_signal(Observed_Signal, p_QP=0.01)
+# print('Recovered_Signal=', Recovered_Signal[:10])
+Recovered_Signal_BW = observed_to_recovered_signal_BW(Observed_Signal)
+
+fig = plt.figure(figsize=(12, 4))
+plt.plot(asarray(Hidden_Signal)+1.5, 'o-', label=r"{} Hidden Transitions".format(transitions_count(Hidden_Signal)))
+plt.plot(asarray(Observed_Signal), 'o-', label=r"{} Observed Transitions".format(transitions_count(Observed_Signal)))
+plt.plot(asarray(Recovered_Signal)-1.5, 'o-', label=r"{} Recovered Transitions VTB".format(transitions_count(Recovered_Signal)))
+plt.plot(asarray(Recovered_Signal_BW[0])-3, 'o-', label=r"{} Recovered Transitions BW".format(transitions_count(Recovered_Signal_BW[0])))
+plt.legend(bbox_to_anchor=(0.75, 0.58), loc=2)
+plt.show()
 
 """
 TO DO

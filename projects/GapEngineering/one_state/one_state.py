@@ -24,7 +24,7 @@ ExptInfo = {
     'Experiment Name': 'P1_Parity_Interleave',
     'Poison Method': 'Bare Cavity',
     'Poison Resonator': 'None',
-    'Measurement Qubit': 'Q4',
+    'Measurement Qubit': 'Q2',
 
     ## matlab data import info:
     # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
@@ -33,10 +33,15 @@ ExptInfo = {
             '/Leiden_2020Jul/P1PSD/LIU/Q4_withQ5Poison/{}/{}/MATLABData/{}',
     # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
     #         '/Leiden_2020Jul/P1PSD/LIU/Q3_withQ2Poison/{}/{}/MATLABData/{}',
-    'expt_name_p1': 'Interleave_P1_Neg6',
-    'expt_name_parity_switch': 'Interleave_PSD_Neg6',
-    'Comment': '10 us T1, did weighted occupation',
-    'date': '01-01-21',
+    # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
+    #         '/Leiden_2020Jul/P1PSD/LIU/Q2_withQ5Poison/{}/{}/MATLABData/{}',
+    # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
+    #         '/Leiden_2020Jul/P1PSD/LIU/Q1_withQ2Poison/{}/{}/MATLABData/{}',
+    # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
+    'expt_name_p1': 'Fiveus_Interleave_P1_Neg7',
+    'expt_name_parity_switch': 'Fiveus_Interleave_PSD_Neg7',
+    'Comment': '12 us T1, faster measurement for Q4 and Poisson analysis',
+    'date': '01-10-21',
     'files': np.arange(0, 300, 1),
 }
 

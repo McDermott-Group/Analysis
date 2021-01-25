@@ -24,6 +24,7 @@ class QPTunneling_Wilen(object):
         self.n_rows = 0
         self.name = name
         self.params = [0, 0]
+        self.f_or_t = 'f'  # the PSD extraction is frequency or time
 
     def add_datasets(self, file_path, data_str='Charge_Parity_Trace'):
         if type(file_path) == str:
@@ -86,6 +87,7 @@ class QPTunneling_Wilen(object):
         self.params = params[::-1]
         f_QP = self.params[1]
         f_RO = self.params[0]
+        self.f_or_t = 'f'
         return y(f, f_QP, f_RO), f
 
 class QPTunneling_Liu(object):
@@ -100,6 +102,7 @@ class QPTunneling_Liu(object):
         self.f_data = None
         self.params = None
         self.name = name
+        self.f_or_t = 't'   # the PSD extraction is frequency or time
 
     def add_datasets(self, file_path, data_type='Charge_Parity_Trace', HMM=False, simulate=False):
         """
@@ -250,7 +253,8 @@ class OneStateCleanDirty(object):
         self.PSD_name = PSD_name
 
     def add_p1_data_from_matlab(self, file_path,
-                                data_type='Single_Shot_Occupation', P1_threshold=0.05):
+                                data_type='Weighted_Occupation', P1_threshold=0.05):
+                                # data_type='Single_Shot_Occupation', P1_threshold=0.05):
         """
         import the data from Matlab and do first level average
         :param filenames: a list of file names
@@ -299,7 +303,12 @@ def plotMultiFittedPSD(QPT_List):
         fit = True
         if fit:
             psd_fit, f_fit = QPT.get_fit()
-            T_parity, F_map = QPT.params[0], QPT.params[1]
+            F_map = QPT.params[1]
+            if QPT.f_or_t == 't':
+                T_parity = QPT.params[0]
+            else:
+                T_parity = (1/QPT.params[0])
+            print('T_parity=', T_parity)
             plt.loglog(f_fit, psd_fit, '-',
                        label='{} fit [{:.5f} ms], fidelity={:.2f}'.format(
                            QPT.name, (T_parity)*10**3, F_map))
