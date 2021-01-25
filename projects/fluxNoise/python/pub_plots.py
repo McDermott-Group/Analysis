@@ -32,6 +32,7 @@ from scipy.ndimage.filters import gaussian_filter
 
 plt.style.use('pub.mplstyle')
 fig_path = r'Z:\mcdermott-group\users\ChrisWilen\FluxNoise\figs'
+sim_data_path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data'
 halfwidth = 3.5
 fullwidth = 7.2
 # qcolors = {'Q1':'C0', 'Q2':'C1', 'Q3':'C2', 'Q4':'C3'}
@@ -128,18 +129,18 @@ def format_hist2d(i, ax, cprofile, log=False, range=None, title=True):
     q1,q2 = [('Q3','Q4'),('Q1','Q2'),('Q1','Q3')][i]
     ax.spines['bottom'].set_color(cprofile[q1])
     ax.spines['left'].set_color(cprofile[q2])
-    
+
     ax.set_aspect(1)
     if range is not None:
         ax.set_xlim(range[0], range[1])
         ax.set_ylim(range[0], range[1])
-        
+
     if title:
         title_str = ( u'$340\ \mathrm{\mu m}$',
                       u'$640\ \mathrm{\mu m}$',
                      u'$3195\ \mathrm{\mu m}$')
         ax.set_title(title_str[i])
-    
+
     if log == True:
         ax.set_xscale('log')
         ax.set_yscale('log')
@@ -160,7 +161,7 @@ def format_hist2d(i, ax, cprofile, log=False, range=None, title=True):
         ax.set_yticklabels([u'\u22120.5','',0,'',0.5])
         ax.xaxis.labelpad = 0
         ax.yaxis.labelpad = -12
-        
+
 
 with open('dump_T1_sums.dat', 'rb') as f:
     P10,P01,P00,P11,n_trace,n0,n1,M1_before_trig = pickle.load(f)
@@ -189,7 +190,7 @@ if 'charge_jump' in run_plots:
     fig, ax = plt.subplots(1,1,figsize=(halfwidth,2))
     plot_jump_trace(ax)
     fig.savefig(fig_path+'\charge_jump.pdf')
-    
+
 """Plot T1 dropouts in occupation."""
 def plot_fit_occ(ax):
     def gaus(x, b, A, sigma, mu=0):
@@ -213,22 +214,22 @@ def plot_fit_occ(ax):
     ax.set_ylabel('$P_{1}$')
     for i,q in enumerate(['Q2','Q4']):
         o = noiselib.movingmean(1.*P01[q]/n0[q], 1)
-        print n0[q][10000]
+        print(n0[q][10000])
         # popt, pcov = curve_fit(gaus, t[8000:12000], o[8000:12000], p0=[0.6,o[8000:12000].min()-0.6,5.])
-        # popt, pcov = curve_fit(gausexp, t[8000:12000], o[8000:12000], 
+        # popt, pcov = curve_fit(gausexp, t[8000:12000], o[8000:12000],
                                 # p0=[0.6,o[8000:12000].min()-0.6,5.,-0.3,5])
-        popt, pcov = curve_fit(gausexp2, t[9000:11000], o[9000:11000], 
+        popt, pcov = curve_fit(gausexp2, t[9000:11000], o[9000:11000],
                                 p0=[0.6,-0.9,.3,.3],
                                 bounds=(-np.inf,
                                         [np.inf,np.inf,np.inf,np.inf]))
                                 # p0=[0.6,-0.1,2.,12.])
         # o2 = noiselib.movingmean(1.*P01['Q2']/n0['Q2'], 1)
         # o4 = noiselib.movingmean(1.*P01['Q4']/n0['Q4'], 1)
-        # popt, pcov = curve_fit(gausexp3, np.concatenate([t[9000:11000],t[9000:11000]]), 
-                                # np.concatenate([o2[9000:11000], o4[9000:11000]]), 
+        # popt, pcov = curve_fit(gausexp3, np.concatenate([t[9000:11000],t[9000:11000]]),
+                                # np.concatenate([o2[9000:11000], o4[9000:11000]]),
                                 # p0=[0.6,0.6,-1,-1,2.,1.,1.])
-        print popt
-        print pcov
+        print(popt)
+        print(pcov)
         ax.plot( t, o, label='Averaged P01 smoothed 5 {}'.format(q), color=qcolors[q] )
         ax.axvline(x=0, color='k', linestyle=':')
         if q == 'Q4':
@@ -382,11 +383,11 @@ def plot_ramsey_fit(ax):
     guess_vis = np.max(o1) - np.min(o1)
     def ram(bias, offset, vis, noff, nper):
         return offset + vis/2.*np.cos(np.pi*np.cos(np.pi*(bias-noff)/nper))
-    popt1, pcov1 = curve_fit(ram, b, o1, 
+    popt1, pcov1 = curve_fit(ram, b, o1,
                                 p0=[guess_offset,guess_vis,-0.05,0.3])
-    popt2, pcov2 = curve_fit(ram, b[b<b[break_index]], o1[b<b[break_index]], 
+    popt2, pcov2 = curve_fit(ram, b[b<b[break_index]], o1[b<b[break_index]],
                                 p0=[guess_offset,guess_vis,0.16,0.3])
-    print popt1,popt2
+    print(popt1,popt2)
     popt1[0] = popt1[0] - 0.02
     popt2p = popt1.copy()
     popt2p[2] = 0.1529 #popt2[2]
@@ -405,12 +406,11 @@ if 'ramsey_fit' in run_plots:
 
 """Plot Muon and Gamma tracks"""
 def plot_tracks(ax1,ax2,ax3,ax4):
-    path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data'
     _range = {'Muons':range(3,33),'Gamma':range(0,60)}
     for k,hit_type in enumerate(['Muons','Gamma']):
         app = Controller(sys.argv, fQ=0.01, calc_all=False, plot=False,
-                            pdfs_file='{}/ChargePDFs_{}r_vhs_fine.npy'.format(path,500),
-                            event_files=[path+'/{}.txt'.format(hit_type)])
+                            pdfs_file='{}/ChargePDFs_{}r_vhs_fine.npy'.format(sim_data_path,500),
+                            event_files=[sim_data_path+'/{}.txt'.format(hit_type)])
         track_xyz, track_color, charge_xyz, charge_polarity = [],[],[],[]
         for i in _range[hit_type]:
             app.i = i
@@ -441,7 +441,7 @@ def plot_tracks(ax1,ax2,ax3,ax4):
                      (-1.564, -0.420)]
         for x,y in qubit_xys:
             ax1.add_artist( plt.Circle((x,y), 0.07, color='black', zorder=10) )
-            ax1.add_artist( plt.Circle((x,y), 0.095, ec='black', zorder=10, 
+            ax1.add_artist( plt.Circle((x,y), 0.095, ec='black', zorder=10,
                                         fill=False, linewidth=0.5) )
     # ax1.set_aspect(1)
     # ax2.set_aspect(1./2.5)
@@ -465,7 +465,7 @@ def plot_tracks(ax1,ax2,ax3,ax4):
     ax3.set_xticklabels([])
     ax3.set_yticklabels([])
 if 'tracks' in run_plots:
-    fig, ((ax1,ax2),(ax3,ax4)) = plt.subplots(2, 2, figsize=(halfwidth,halfwidth), 
+    fig, ((ax1,ax2),(ax3,ax4)) = plt.subplots(2, 2, figsize=(halfwidth,halfwidth),
                                             gridspec_kw={'width_ratios': [1, 7],
                                                          'height_ratios': [1, 7]})
     plot_tracks(ax4,ax3,ax2,ax1)
@@ -474,28 +474,27 @@ if 'tracks' in run_plots:
 
 """Plot PDFs"""
 def plot_pdf_raw(ax1,ax2):
-    path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data'
-    PDFs = np.load(path+'/ChargePDFs_300r_vhs_fine.npy',allow_pickle=True).tolist()
+    PDFs = np.load(sim_data_path+'/ChargePDFs_300r_vhs_fine.npy',allow_pickle=True).tolist()
     e = ImpactEvent([PDFs], np.array((0,0,0)).reshape(1,3), np.array((.1e6,)), 0, 1)
-    
+
     for j,species in enumerate(['electrons','holes']):
-        
+
         zcuts = e.PDFs[species]['zarray']
         zind = np.argmin(np.abs(0-zcuts))
         xyz = e.PDFs[species][zcuts[zind]][species]
-        
+
         xyz[51:,:,:] += np.flip(xyz[:50,:,:], axis=0)
         xyz[51:,51:,:] += np.flip(xyz[51:,:50,:], axis=1)
         xyz[51:,51:,51:] += np.flip(xyz[51:,51:,:50], axis=2)
         xyz[51:,51:,51:] /= 8.
-        
+
         z = e.PDFs[species]['z']
         inds = (z < 0.025) & (z > -0.0000025)
         xy = np.sum(xyz[:,:,inds],axis=-1)
-        
+
         ax = [ax1,ax2][j]
-        ax.imshow(xy, origin='lower', 
-                  norm=mpl.colors.LogNorm(), 
+        ax.imshow(xy, origin='lower',
+                  norm=mpl.colors.LogNorm(),
                   cmap=cm.get_cmap('jet'))
 
         # Y, X = np.meshgrid((x[1:]+x[0:-1])/2,(y[1:]+y[0:-1])/2)
@@ -503,7 +502,7 @@ def plot_pdf_raw(ax1,ax2):
 
         # ax3.contour(gaussian_filter(np.sum(v00.T, axis=2),0.9), norm=mpl.colors.LogNorm(), origin='lower')
             # # ax1.contour(v00.T[:,:,25], norm=mpl.colors.LogNorm(), origin='lower')
-    
+
         # ax.set_xlim(-0.1,0.1)
         # ax.set_ylim(-0.1,0.1)
         # ax.set_xticks([-.1,-0.05,0,0.05,.1])
@@ -516,25 +515,24 @@ def plot_pdf_raw(ax1,ax2):
         ax.set_yticklabels([])
         ax.set_aspect('equal')
 def plot_pdf_cut(ax1,ax2):
-    path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data'
-    PDFs = np.load(path+'/ChargePDFs_300r_vhs_fine.npy',allow_pickle=True).tolist()
+    PDFs = np.load(sim_data_path+'/ChargePDFs_300r_vhs_fine.npy',allow_pickle=True).tolist()
     e = ImpactEvent([PDFs], np.array((0,0,0)).reshape(1,3), np.array((.1e6,)), 0, 1)
-    
+
     r110, r100 = {}, {}
     n110, n100 = {}, {}
-    
+
     for j,species in enumerate(['electrons','holes']):
-        
+
         zcuts = e.PDFs[species]['zarray']
         zind = np.argmin(np.abs(0-zcuts))
         xyz = e.PDFs[species][zcuts[zind]][species]
-        
+
         # this code flips the quadrants into the +++ quadrant and averages it
         # xyz[51:,:,:] += np.flip(xyz[:50,:,:], axis=0)
         # xyz[51:,51:,:] += np.flip(xyz[51:,:50,:], axis=1)
         # xyz[51:,51:,51:] += np.flip(xyz[51:,51:,:50], axis=2)
         # xyz[51:,51:,51:] /= 8.
-        
+
         x,y,z = e.PDFs[species]['x'], e.PDFs[species]['y'], e.PDFs[species]['z']
         r110[species] = e.PDFs[species]['x']
         r100[species] = e.PDFs[species]['x'] * np.sqrt(2)
@@ -543,13 +541,13 @@ def plot_pdf_cut(ax1,ax2):
         # normalize
         # n110[species] = n110[species] / np.sum(n110[species])
         # n100[species] = n100[species] / np.sum(n100[species])
-        
+
         ax = [ax1,ax2][j]
         ax.plot(r110[species], n110[species])
         ax.plot(r100[species], n100[species])
         ax.plot(r110[species], n110[species].max() * np.exp(-r110[species]/300e-3), 'k')
         ax.set_yscale('log')
-        
+
         # average all points with the same radius
         xi, yi, zi = np.indices(xyz.shape) - np.full(xyz.shape, 50)
         dx,dy,dz = e.PDFs[species]['dx'], e.PDFs[species]['dy'], e.PDFs[species]['dz']
@@ -571,16 +569,15 @@ def plot_pdf_cut(ax1,ax2):
                 n0 = [n_sorted[i]]
         # ax.plot(r_sorted, n_sorted)
         ax.plot(r_avg, n_avg)
-        
+
     fig, ax = plt.subplots(1, 1)
     ax.plot(r110['electrons'], n110['holes']-n110['electrons'])
     ax.plot(r100['electrons'], n100['holes']-n100['electrons'])
 def plot_pdf_qgen(ax1,ax2):
-    path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data'
-    PDFs = np.load(path+'/ChargePDFs_300r_vhs_fine.npy',allow_pickle=True).tolist()
+    PDFs = np.load(sim_data_path+'/ChargePDFs_300r_vhs_fine.npy',allow_pickle=True).tolist()
     e = ImpactEvent([PDFs], np.array((0,0,0)).reshape(1,3), np.array((.1e6,)), 0, 1)
     res = e.diffuseCharge(0.0, 0.0, 0.0, 1e8)#, PDFdict['fine'])
-    
+
     # # plot for (electrons - holes)
     # fig, axxx = plt.subplots(1, 1, figsize=(halfwidth,halfwidth))
     # inds = (res['electrons'][2] < 0.025) & (res['holes'][2] > -0.025)
@@ -593,7 +590,7 @@ def plot_pdf_qgen(ax1,ax2):
     # axxx.contour(X, Y, np.log10(h), levels=[2.5,3,3.5,4,4.5,5,5.5,6], color='black')
 
     for j,species in enumerate(['electrons','holes']):
-    
+
         ax = [ax1,ax2][j]
 
         inds = (res[species][2] < 0.025) & (res[species][2] > -0.025)
@@ -665,7 +662,7 @@ def plot_error(ax, rot_induced, cindex):
     ax.axvline(x=1e-4, color='k', linestyle=':')
     y3 = 1.*np.searchsorted(sorted_err, 1e-3)/sorted_err.size
     y4 = 1.*np.searchsorted(sorted_err, 1e-4)/sorted_err.size
-    print 1.-y3,1.-y4
+    print(1.-y3,1.-y4)
     ax.plot([0,1e-3],[y3,y3],':', color=['C3','C0'][i])
     ax.plot([0,1e-4],[y4,y4],':', color=['C3','C0'][i])
     ax.set_xlim(1e-10,1)
@@ -685,7 +682,7 @@ if 'induced_rotation' in run_plots:
         plot_rotation_hist(ax_rot, rot_induced, i)
         plot_error(ax_err, rot_induced, i)
     fig.savefig(fig_path+r'\err.pdf')
-    
+
 def plot_hist1d_jumps_meas(ax, q):
     h, bins = np.histogram(q, bins=500, range=(-0.5,0.5))
     x = (bins[1:]+bins[:-1])/2
@@ -726,8 +723,8 @@ if 'hist1d_jumps' in run_plots:
         plot_hist1d_jumps_sim(ax, data['q_induced'], bg)
     set_style(ax)
     fig.savefig(fig_path+r'\hist1d_jumps.pdf')
-    
-    
+
+
 def plot_hist2d(axs, q, title=True, log=False):
     ij = [(2,3),(0,1),(0,2)]
     q = noiselib.alias(q, 0.5)
@@ -769,10 +766,10 @@ if 'hist2d_err_phase' in run_plots:
     # for ax in np.ravel(axs):
         # ax.set_xticks([1e-12,1e-9,1e-6,1e-3])
         # ax.set_yticks([1e-12,1e-9,1e-6,1e-3])
-    edges_tick_labels(axs, xlabel=u'$\epsilon_{\phi,1}$', 
+    edges_tick_labels(axs, xlabel=u'$\epsilon_{\phi,1}$',
                            ylabel=u'$\epsilon_{\phi,2}$')
     fig.savefig(fig_path+r'\hist2d_err_phase.pdf')
-     
+
 def plot_err_phase_joint(ax, q_induced):
     ij = [(2,3),(0,1),(0,2)]
     tau = 1e-6
@@ -808,8 +805,7 @@ if 'err_phase_joint' in run_plots:
 
 
 if 'err_bitflip' in run_plots:
-    path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data/charge_map.mat'
-    q_map = noiselib.loadmat(path)
+    q_map = noiselib.loadmat(sim_data_path+'/charge_map.mat')
     q = -q_map['charge_mat']
     q[~np.isfinite(q)] = -1. # right below center of qubit
     r, z = q_map['r']*1e-3, q_map['z']*1e-3
@@ -829,35 +825,34 @@ if 'err_bitflip' in run_plots:
     dalpha_map  = lambda rp,zp: noiselib.interp2d( r, z, dq,  rp, zp )
     dalphar_map = lambda rp,zp: noiselib.interp2d( r, z, dqr, rp, zp )
     dalphaz_map = lambda rp,zp: noiselib.interp2d( r, z, dqz, rp, zp )
-    
+
     qubit_xys = [( 1.564,  0.570),
                  ( 1.564, -0.070),
                  (-1.564, -0.080),
                  (-1.564, -0.420)]
-                 
+
     cs = 1e4
     # w0 = 2 * np.pi * 4.1e9
     # Ec = 2 * np.pi * 435e6
     w0 = 2 * np.pi * 5e9
     Ec = 2 * np.pi * 250e6
-    
+
     fig1d, axs1d = plt.subplots(1, 2, figsize=(fullwidth,2.5))
     fig2d, axs2d = plt.subplots(2, 3, figsize=(fullwidth-0.5,4.6))
-    
+
     for h,hit_type in enumerate(['gammas','muons']):
         data = []
-        path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data'
         if hit_type == 'gammas':
-            efiles = [path+'/Gamma.txt', 
-                      path+'/Gamma_10deg.txt',
-                      path+'/Gamma_10deg_pt2.txt']
+            efiles = [sim_data_path+'/Gamma.txt',
+                      sim_data_path+'/Gamma_10deg.txt',
+                      sim_data_path+'/Gamma_10deg_pt2.txt']
         elif hit_type == 'muons':
-            efiles = [path+'/Muons.txt', path+'/Muons2.txt']
-        for path in efiles:
-            data.append( np.loadtxt(path, skiprows=1) )
+            efiles = [sim_data_path+'/Muons.txt', sim_data_path+'/Muons2.txt']
+        for sim_data_path in efiles:
+            data.append( np.loadtxt(sim_data_path, skiprows=1) )
         data = np.concatenate(data)
         split_data = np.split(data, np.where(np.diff(data[:,0]))[0]+1)
-        
+
         E_sfq = []
         for event_data in split_data:
             xyz, E = event_data[:,[2,3,4]], event_data[:,5] * 1e6
@@ -877,19 +872,19 @@ if 'err_bitflip' in run_plots:
                 da_r = dalphar_map(dr,-dz)
                 da_z = dalphaz_map(dr,-dz)
                 da_x, da_y = np.cos(da_r/da), np.sin(da_r/da)
-                E_sfq_q += [np.sum( n * cs**2 / w0**2 * ((da_x*dip_x)**2 
-                                                       + (da_y*dip_y)**2 
+                E_sfq_q += [np.sum( n * cs**2 / w0**2 * ((da_x*dip_x)**2
+                                                       + (da_y*dip_y)**2
                                                        + (da_z*dip_z)**2) )]
             E_sfq += [E_sfq_q]
         E_sfq = np.array(E_sfq)
         err = E_sfq * 2./3. * Ec/w0
         print('% above error of {{1e-4,1e-6,1e-8}} = {},{},{}'.format(
-                    100.*np.sum(err>1e-4)/err.size, 
+                    100.*np.sum(err>1e-4)/err.size,
                     100.*np.sum(err>1e-6)/err.size,
                     100.*np.sum(err>1e-8)/err.size ))
         print( 100.*np.sum((err[:,3-1]>1e-8) & (err[:,4-1]>1e-8))/err.shape[0],
                100.*np.sum((err[:,1-1]>1e-8) & (err[:,2-1]>1e-8))/err.shape[0] )
-        
+
         """
         th = np.linspace(0,np.pi,100)
         dist = 0.5 * np.sin(th)
@@ -910,7 +905,7 @@ if 'err_bitflip' in run_plots:
             E_sfq += [E_sfq_q]
         E_sfq = np.array(E_sfq)
         """
-        
+
         hist, bins = np.histogram(np.mean(E_sfq,axis=1),
                       bins=np.logspace(np.log10(1e-14),np.log10(1e0),101) )
         axs1d[h].bar( bins[:-1], 1.*hist/np.sum(hist), width=np.diff(bins), align='edge' )
@@ -919,21 +914,20 @@ if 'err_bitflip' in run_plots:
         axs1d[h].set_xscale('log')
         axs1d[h].set_yscale('log')
         # axs1d[h].set_title(hit_type)
-        
+
         for i,ax in enumerate(axs2d[h]):
             j,k = [(3,4),(1,2),(1,3)][i]
             ax.scatter(err[:,j-1], err[:,k-1], c='k', marker='.', s=4)
             format_hist2d(i, ax, qcolors, log=True, range=(1e-15,1e-1), title=(h==0))
-        
+
     edges_tick_labels(axs2d, xlabel=r'$\epsilon_{\theta,1}$', ylabel=r'$\epsilon_{\theta,2}$')
-    
+
     fig1d.savefig(fig_path+r'\hist1d_err_bitflip.pdf')
     fig2d.savefig(fig_path+r'\hist2d_err_bitflip.pdf')
 
 # test different ways of doing the charge mappinng:
 if True:
-    path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data/charge_map.mat'
-    q_map = noiselib.loadmat(path)
+    q_map = noiselib.loadmat(sim_data_path+'/charge_map.mat')
     q = -q_map['charge_mat']
     q[~np.isfinite(q)] = -1. # right below center of qubit
     r, z = q_map['r'], q_map['z']
@@ -963,8 +957,7 @@ if True:
     plt.draw()
     plt.pause(0.05)
 
-    path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data/charge_dist.mat'
-    q_data = noiselib.loadmat(path)
+    q_data = noiselib.loadmat(sim_data_path+'/charge_dist.mat')
     def alpha_map2(q_data,rp,zp):
         r_rings, q_rings = q_data['r_coord_vec'], q_data['q_vec']
         shape = [r_rings.size] + rp.ndim*[1]
@@ -983,18 +976,18 @@ if True:
 
 
 def matrix_from_d(L_list, fq_list, d, pair=None):
-    a = np.array([[ d[(L,fq,pair) if pair else (L,fq)] 
-                                    for fq in fq_list ] 
+    a = np.array([[ d[(L,fq,pair) if pair else (L,fq)]
+                                    for fq in fq_list ]
                                     for L in L_list ], dtype=float)
     if a.ndim == 3:
         a = np.mean(a, axis=-1)
-    return a 
+    return a
 def plot_M(M, measured=None, ax=None, cbo='vertical'):
     if measured is None:
         measured = np.mean(M)
     m = np.nanmax(np.abs(measured - M[np.isfinite(M)]))
     crange = (measured - m, measured + m)
-    p = ax.imshow(M, origin='lower', extent=(-0.5,-0.5+len(fq_list),50,1050), 
+    p = ax.imshow(M, origin='lower', extent=(-0.5,-0.5+len(fq_list),50,1050),
                   aspect='auto', vmin=crange[0], vmax=crange[1], cmap='bwr')
     ax.set_ylabel('$\lambda_\mathrm{trap}\ (\mathrm{\mu m})$')
     ax.set_xlabel('$f_q$')
@@ -1043,7 +1036,7 @@ def plot_L_fq_colorplots():
             plot_M(a, measured=meas, ax=axs[i], cbo='horizontal')
         del_axes_add_title(axs)
         fig.savefig(fig_path+r'\corr_{}.pdf'.format(hit_type))
-        
+
         # plot 13/24 assym
         fig = plt.figure(constrained_layout=True, figsize=(halfwidth,2.5))
         spec = gridspec.GridSpec(ncols=3, nrows=1, figure=fig, wspace=0.15)
@@ -1058,7 +1051,7 @@ def plot_L_fq_colorplots():
             plot_M(a, measured=meas, ax=axs[i], cbo='horizontal')
         del_axes_add_title(axs)
         fig.savefig(fig_path+r'\assym_{}.pdf'.format(hit_type))
-        
+
         # plot +/- assym
         fig, ax = plt.subplots(1,1,constrained_layout=True, figsize=(halfwidth,2.5))
         fig.canvas.manager.window.geometry('+%i+600'%x)
@@ -1068,7 +1061,7 @@ def plot_L_fq_colorplots():
             for d in data], axis=0)
         plot_M(a, measured=0.579, ax=ax)
         fig.savefig(fig_path+r'\pmassym_{}.pdf'.format(hit_type))
-        
+
         # plot thresh fraction (% events above thresh)
         fig, ax = plt.subplots(1,1,constrained_layout=True, figsize=(halfwidth,2.5))
         fig.canvas.manager.window.geometry('+%i+700'%x)
@@ -1078,21 +1071,20 @@ def plot_L_fq_colorplots():
             for d in data], axis=0)
         plot_M(a, ax=ax)
         print('Thresh fractions:')
-        print a[np.where(L_list==300), np.where(fq_list==0.2)]
+        print( a[np.where(L_list==300), np.where(fq_list==0.2)] )
         # fig.savefig(fig_path+r'\pmassym_{}.pdf'.format(hit_type))
-        
+
 if 'L_fq_colorplots' in run_plots:
     plot_L_fq_colorplots()
 
 
 if 'spectra_absorbed' in run_plots:
-    path = r'Z:\mcdermott-group\data\fluxNoise2\sim_data'
-    E_muons, rate_muons = np.loadtxt(path+'\simulation_muons.txt', skiprows=1).T
-    E_gammas, rate_gammas = np.loadtxt(path+'\simulation_ambient_radioactivity.txt', skiprows=1).T
+    E_muons, rate_muons = np.loadtxt(sim_data_path+'\simulation_muons.txt', skiprows=1).T
+    E_gammas, rate_gammas = np.loadtxt(sim_data_path+'\simulation_ambient_radioactivity.txt', skiprows=1).T
     # change units to counts/sec/keV
     rate_muons /= (0.03*1000)
     rate_gammas /= (0.03*1000)
-    
+
     fig, ax = plt.subplots(1, 1, figsize=(halfwidth,2.5))
     ax.step(E_gammas, rate_gammas, 'C3', where='mid')
     ax.step(E_muons, rate_muons, 'C0', where='mid')
@@ -1101,24 +1093,21 @@ if 'spectra_absorbed' in run_plots:
     ax.set_xlabel('Energy (MeV)')
     ax.set_ylabel('Rate (Counts/sec/keV)')
     fig.savefig(fig_path+r'\spectra_absorbed.pdf')
-    
+
 def get_raw_spect_lngs():
-    path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data'
-    return np.loadtxt(path+'/Rome_RAW_Rate.txt', delimiter=',').T
+    return np.loadtxt(sim_data_path+'/Rome_RAW_Rate.txt', delimiter=',').T
 def get_raw_spect_madison():
-    path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data'
-    return np.loadtxt(path+'/MSN_RAW_Tuned_Rate.txt', delimiter=',').T
+    return np.loadtxt(sim_data_path+'/MSN_RAW_Tuned_Rate.txt', delimiter=',').T
 if 'spectra_emitted' in run_plots:
-    path = r'Z:\mcdermott-group\data\fluxNoise2\sim_data'
     E_mad, rate_mad = get_raw_spect_madison()
     E_lngs, rate_lngs = get_raw_spect_lngs()
-    # elem_labels = {609.312:'$^{214}\mathrm{Bi}$', 1504.9:'$^{40}\mathrm{K}$', 
-                # 1764.494:'$^{214}\mathrm{Bi}$', 2204.21:'$^{214}\mathrm{Bi}$', 
+    # elem_labels = {609.312:'$^{214}\mathrm{Bi}$', 1504.9:'$^{40}\mathrm{K}$',
+                # 1764.494:'$^{214}\mathrm{Bi}$', 2204.21:'$^{214}\mathrm{Bi}$',
                 # 2614.533:'$^{208}\mathrm{Tl}$'}
-    elem_labels = {550:'$^{214}\mathrm{Bi}$', 1460:'$^{40}\mathrm{K}$', 
-                1764.494:'$^{214}\mathrm{Bi}$', 2204.21:'$^{214}\mathrm{Bi}$', 
+    elem_labels = {550:'$^{214}\mathrm{Bi}$', 1460:'$^{40}\mathrm{K}$',
+                1764.494:'$^{214}\mathrm{Bi}$', 2204.21:'$^{214}\mathrm{Bi}$',
                 2614.533:'$^{208}\mathrm{Tl}$'}
-    
+
     fig, ax = plt.subplots(1, 1, figsize=(halfwidth,2.5))
     ax.step(E_mad/1e3, rate_mad, 'C3', where='mid')
     ax.step(E_lngs/1e3, rate_lngs, 'C0', where='mid')
@@ -1146,7 +1135,7 @@ def plot_dipole_sphere(ax):
     z = r*np.cos(phi)
     ax.plot_surface(
         x, y, z,  rstride=1, cstride=1, color='c', alpha=0.3, linewidth=0)
-    
+
     n = 200
     phi = 2 * np.pi * np.random.random(n)
     costheta = np.random.uniform(-1, 1, n)
@@ -1154,7 +1143,7 @@ def plot_dipole_sphere(ax):
     xx = np.sin( theta ) * np.cos( phi )
     yy = np.sin( theta ) * np.sin( phi )
     zz = np.cos( theta )
-    
+
     ax.scatter(xx[:n/2], yy[:n/2], zz[:n/2], color="C1", s=20, alpha=1.)
     ax.scatter(xx[n/2:], yy[n/2:], zz[n/2:], color="C3", s=20, alpha=1.)
 
@@ -1167,7 +1156,7 @@ if 'dipole' in run_plots:
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     plot_dipole_sphere(ax)
-    
+
 
 """Plot Bloch Sphere"""
 def circle(x=0, y=0, r=1., theta1=0, theta2=2*np.pi):
