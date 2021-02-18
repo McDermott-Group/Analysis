@@ -134,14 +134,14 @@ t = Q4_NoPoison.time_data[:file_length]
 # Q4_list = [Q4_Neg13dBm, Q4_Neg12dBm, Q4_Neg11dBm, Q4_Neg10dBm,
 #            Q4_Neg9dBm, Q4_Neg8dBm, Q4_Neg7dBm, Q4_Neg6dBm]
 
-Q4_list = [Q4_Neg13dBm, Q4_Neg10dBm, Q4_Neg7dBm]
+# Q4_list = [Q4_Neg13dBm, Q4_Neg10dBm, Q4_Neg7dBm]
 
-# Q4_list = [Q4_NoPoison, Q4_Neg20dBm, Q4_Neg19dBm, Q4_Neg18dBm, Q4_Neg17dBm, Q4_Neg16dBm,
-#            Q4_Neg15dBm, Q4_Neg14dBm, Q4_Neg13dBm, Q4_Neg12dBm, Q4_Neg11dBm,
-#            Q4_Neg10dBm, Q4_Neg9dBm, Q4_Neg8dBm, Q4_Neg7dBm, Q4_Neg6dBm]
+Q4_list = [Q4_NoPoison, Q4_Neg20dBm, Q4_Neg19dBm, Q4_Neg18dBm, Q4_Neg17dBm, Q4_Neg16dBm,
+           Q4_Neg15dBm, Q4_Neg14dBm, Q4_Neg13dBm, Q4_Neg12dBm, Q4_Neg11dBm,
+           Q4_Neg10dBm, Q4_Neg9dBm, Q4_Neg8dBm, Q4_Neg7dBm, Q4_Neg6dBm]
 
 len_list = len(Q4_list)
-p1_max = 0.2
+p1_max = 0.4
 f, ax = plt.subplots(len_list, 2)
 ax[0][0].set_title('Q4 P1 Time Trace')
 for i, Q4 in enumerate(Q4_list):

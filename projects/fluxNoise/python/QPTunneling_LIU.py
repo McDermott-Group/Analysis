@@ -82,7 +82,7 @@ class QPTunneling_Wilen(object):
         f = f[~np.isnan(psd)]
         psd = psd[~np.isnan(psd)]
 
-        params, covariance = curve_fit(y, f, psd, p0=[1, 2000],
+        params, covariance = curve_fit(y, f, psd, p0=[0.1, 50],
                                        bounds=(0, np.inf), method='trf')
         self.params = params[::-1]
         f_QP = self.params[1]
