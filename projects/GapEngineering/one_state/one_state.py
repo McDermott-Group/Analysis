@@ -17,27 +17,41 @@ from Markov_Python2.analyze_QPTunneling_pomegranate import *
 
 ExptInfo = {
     ## processed data save information
-    'Device Name': 'DataAnalysis_test',
+    'Device Name': 'Q4_withQ5Poison_DataAnalysis',
+    # 'Device Name': 'Q6_withQ5Poison_DataAnalysis_2021Feb12ROPower',
     'User': 'LIU',
-    'Base Path': r'Z:\mcdermott-group\data\GapEngineer\Nb_GND_Dev06_Trap\Leiden_2020Jul\P1PSD',
+    'Base Path': r'Z:\mcdermott-group\data\GapEngineer\Nb_GND_Dev06_Trap\Leiden_2021Jan\P1PSD',
     # 'Base Path': r'Z:\mcdermott-group\data\GapEngineer\Nb_GND_Dev06_Trap\Leiden_2020Jul\Debug',
     'Experiment Name': 'P1_Parity_Interleave',
     'Poison Method': 'Bare Cavity',
-    'Poison Resonator': 'None',
-    'Measurement Qubit': 'Q4',
+    'Poison Resonator': 'Q5',
+    'Measurement Qubit': 'Q6',
 
     ## matlab data import info:
     # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
-    #         '/Leiden_2020Jul/P1PSD/LIU/Q6_withQ5Poison/{}/{}/MATLABData/{}',
+    #         '/Leiden_2021Jan/P1PSD/LIU/Q6_withQ5Poison/{}/{}/MATLABData/{}',
     'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
-            '/Leiden_2020Jul/P1PSD/LIU/Q4_withQ5Poison/{}/{}/MATLABData/{}',
+            '/Leiden_2021Jan/P1PSD/LIU/Q4_withQ5Poison/{}/{}/MATLABData/{}',
+    # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
+    #         '/Leiden_2020Jul/P1PSD/LIU/Q4_withQ5Poison/{}/{}/MATLABData/{}',
     # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
     #         '/Leiden_2020Jul/P1PSD/LIU/Q3_withQ2Poison/{}/{}/MATLABData/{}',
-    'expt_name_p1': 'Interleave_P1_Neg6',
-    'expt_name_parity_switch': 'Interleave_PSD_Neg6',
-    'Comment': '10 us T1, did weighted occupation',
-    'date': '01-01-21',
-    'files': np.arange(0, 300, 1),
+    # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
+    #         '/Leiden_2020Jul/P1PSD/LIU/Q2_withQ5Poison/{}/{}/MATLABData/{}',
+    # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
+    #         '/Leiden_2020Jul/P1PSD/LIU/Q1_withQ2Poison/{}/{}/MATLABData/{}',
+    # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
+    'expt_name_p1': 'Interleave_P1_Neg20',
+    'expt_name_parity_switch': 'Interleave_PSD_Neg20',
+    # 'expt_name_p1': 'C400mD_Interleave_P1_Neg100',
+    # 'expt_name_parity_switch': 'C400mD_Interleave_PSD_Neg100',
+    # 'expt_name_p1': 'Interleave_P1_Att31',
+    # 'expt_name_parity_switch': 'Interleave_PSD_Att31',
+    'Comment': '10 us T1, measurement for Q4',
+    # 'date': '02-17-21',
+    'date': '2021Feb17',
+    # 'date': '2021Feb12ROPower',
+    'files': np.arange(0, 500, 1),
 }
 
 
@@ -184,8 +198,18 @@ class OneState(object):
         d = create_datachest_object(self.expt_info)
         time_axis = self.time * 10 ** 3
         file_axis = self.file_axis
-        date = datetime.strptime(ExptInfo['date'], '%m-%d-%y')
-        date = date.strftime('%Y%b%d')
+        try:
+            date = datetime.strptime(ExptInfo['date'], '%m-%d-%y')
+            date = date.strftime('%Y%b%d')
+        except ValueError:
+            date = ExptInfo['date']
+
+        # try:
+        #     fit_data = fit_charge(DACArray, data, e_period)
+        # except RuntimeError:
+        #     print('Rerun charge stabilize Starts')
+        #     fit_data = self.charge_stabilize()
+
         d.createDataset(date+'_'+ExptInfo['Experiment Name']+'_'+ExptInfo['expt_name_p1'],
                         [("file_number", [len(time_axis)], "float64", "")],
                         [("P1 SSO Avg", [len(time_axis)], "float64", ""),
