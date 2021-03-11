@@ -40,18 +40,22 @@ class QPTunneling(object):
     def get_fit(self, window_averaging = True):
         def y(x, a, gamma):
             return gamma*a/(np.pi**2*x**2 + gamma**2)
+            # return gamma*a/(4.*np.pi**2*x**2 + gamma**2/4.)
         psd, f = self.get_psd(window_averaging)
         psd = psd[~np.isnan(f)]
         f = f[~np.isnan(f)]
         f = f[~np.isnan(psd)]
         psd = psd[~np.isnan(psd)]
-        popt, pcov = curve_fit(y, f, psd, bounds=(0,np.inf))
+        popt, pcov = curve_fit(y, f, psd, p0=(psd[0],1e3), bounds=(0,np.inf))
         print popt
         return popt[-1], y(f, *popt), f
         
     def plot_psd(self, window_averaging = True, figNum=None, label=None, fit=True):
         fig = plt.figure(figNum)
-        ax = fig.add_subplot(111)
+        if len(fig.axes) > 0:
+            ax = fig.axes[0]
+        else:
+            ax = fig.add_subplot(111)
         ax.set_title('PSD')
         ax.set_xlabel('Frequency [Hz]')
         ax.set_ylabel('$S_\eta (\eta^2/Hz)$')
@@ -66,7 +70,7 @@ class QPTunneling(object):
         
         ax.set_xscale('log')
         ax.set_yscale('log')
-        ax.legend()
+        noiselib.legend(ax)
         ax.grid()
         plt.draw()
         plt.pause(0.05)
