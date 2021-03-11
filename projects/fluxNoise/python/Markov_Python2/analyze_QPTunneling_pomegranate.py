@@ -36,6 +36,20 @@ def generate_hidden_signal(length=10000, charge_burst_time=4000, p_QP=[0.01, 0.0
 
     return hidden_signal
 
+def generate_hidden_signal_two_freq(length=10000, t_meas=50e-6, t_base=10e-3, t_poison=1e-3):
+
+    p_base = 1-exp(-t_meas/t_base)
+    p_poison = 1-exp(-t_meas/t_poison)
+    hidden_signal = [0] * length
+    hidden_signal[0] = random.choice([0, 1], p=[0.5, 0.5])  # Initial parity
+    p_stay = 1-p_base-p_poison
+    # p_stay = (1-p_base)(1-p_poison)+p_base*p_poison
+
+    for i in range(1, length):
+        hidden_signal[i] = random.choice([hidden_signal[i - 1], 1 - hidden_signal[i - 1]],
+                                         p=[p_stay, 1-p_stay])
+    return hidden_signal
+
 
 def hidden_to_observed_signal(hidden_signal, readout_fidelity=[0.9, 0.8]):
     """

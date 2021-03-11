@@ -17,8 +17,8 @@ from Markov_Python2.analyze_QPTunneling_pomegranate import *
 
 ExptInfo = {
     ## processed data save information
-    'Device Name': 'Q4_withQ5Poison_DataAnalysis',
-    # 'Device Name': 'Q6_withQ5Poison_DataAnalysis_2021Feb12ROPower',
+    # 'Device Name': 'Q4_withQ5Poison_DataAnalysis_2021Feb22_Neg6',
+    'Device Name': 'Q6_withQ5Poison_DataAnalysis_2021Feb26HiRO',
     'User': 'LIU',
     'Base Path': r'Z:\mcdermott-group\data\GapEngineer\Nb_GND_Dev06_Trap\Leiden_2021Jan\P1PSD',
     # 'Base Path': r'Z:\mcdermott-group\data\GapEngineer\Nb_GND_Dev06_Trap\Leiden_2020Jul\Debug',
@@ -28,10 +28,10 @@ ExptInfo = {
     'Measurement Qubit': 'Q6',
 
     ## matlab data import info:
-    # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
-    #         '/Leiden_2021Jan/P1PSD/LIU/Q6_withQ5Poison/{}/{}/MATLABData/{}',
     'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
-            '/Leiden_2021Jan/P1PSD/LIU/Q4_withQ5Poison/{}/{}/MATLABData/{}',
+            '/Leiden_2021Jan/P1PSD/LIU/Q6_withQ5Poison/{}/{}/MATLABData/{}',
+    # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
+    #         '/Leiden_2021Jan/P1PSD/LIU/Q4_withQ5Poison/{}/{}/MATLABData/{}',
     # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
     #         '/Leiden_2020Jul/P1PSD/LIU/Q4_withQ5Poison/{}/{}/MATLABData/{}',
     # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
@@ -41,17 +41,18 @@ ExptInfo = {
     # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
     #         '/Leiden_2020Jul/P1PSD/LIU/Q1_withQ2Poison/{}/{}/MATLABData/{}',
     # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
-    'expt_name_p1': 'Interleave_P1_Neg20',
-    'expt_name_parity_switch': 'Interleave_PSD_Neg20',
+    'expt_name_p1': 'Interleave_P1_Neg0',
+    'expt_name_parity_switch': 'Interleave_PSD_Neg0',
     # 'expt_name_p1': 'C400mD_Interleave_P1_Neg100',
     # 'expt_name_parity_switch': 'C400mD_Interleave_PSD_Neg100',
-    # 'expt_name_p1': 'Interleave_P1_Att31',
-    # 'expt_name_parity_switch': 'Interleave_PSD_Att31',
-    'Comment': '10 us T1, measurement for Q4',
+    # 'expt_name_p1': 'Interleave_P1_Att30',
+    # 'expt_name_parity_switch': 'Interleave_PSD_Att30',
+    'Comment': '10 us T1, measurement for Q6, look at higher poison with slightly lower RO power',
     # 'date': '02-17-21',
-    'date': '2021Feb17',
+    # 'date': '2021Feb23HiRO',
     # 'date': '2021Feb12ROPower',
-    'files': np.arange(0, 500, 1),
+    'date': '2021Feb26HiPoison',
+    'files': np.arange(0, 100, 1),
 }
 
 
