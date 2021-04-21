@@ -17,42 +17,25 @@ from Markov_Python2.analyze_QPTunneling_pomegranate import *
 
 ExptInfo = {
     ## processed data save information
-    # 'Device Name': 'Q4_withQ5Poison_DataAnalysis_2021Feb22_Neg6',
-    'Device Name': 'Q6_withQ5Poison_DataAnalysis_2021Feb26HiRO',
+    'Device Name': 'Q4_DataAnalysis',
     'User': 'LIU',
-    'Base Path': r'Z:\mcdermott-group\data\GapEngineer\Nb_GND_Dev06_Trap\Leiden_2021Jan\P1PSD',
-    # 'Base Path': r'Z:\mcdermott-group\data\GapEngineer\Nb_GND_Dev06_Trap\Leiden_2020Jul\Debug',
+    # 'Base Path': r'Z:\mcdermott-group\data\GapEngineer\Nb_GND_Dev06_Trap\Leiden_2021Jan\P1PSD',
+    'Base Path': r'Z:\mcdermott-group\data\BlackBody\Circmon\LIU\CW20180514A_Ox2',
     'Experiment Name': 'P1_Parity_Interleave',
-    'Poison Method': 'Bare Cavity',
-    'Poison Resonator': 'Q5',
-    'Measurement Qubit': 'Q6',
+    'Poison Method': 'BB 305mK',
+    # 'Poison Resonator': 'BB',
+    'Measurement Qubit': 'Q4',
 
     ## matlab data import info:
-    'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
-            '/Leiden_2021Jan/P1PSD/LIU/Q6_withQ5Poison/{}/{}/MATLABData/{}',
     # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
-    #         '/Leiden_2021Jan/P1PSD/LIU/Q4_withQ5Poison/{}/{}/MATLABData/{}',
-    # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
-    #         '/Leiden_2020Jul/P1PSD/LIU/Q4_withQ5Poison/{}/{}/MATLABData/{}',
-    # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
-    #         '/Leiden_2020Jul/P1PSD/LIU/Q3_withQ2Poison/{}/{}/MATLABData/{}',
-    # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
-    #         '/Leiden_2020Jul/P1PSD/LIU/Q2_withQ5Poison/{}/{}/MATLABData/{}',
-    # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
-    #         '/Leiden_2020Jul/P1PSD/LIU/Q1_withQ2Poison/{}/{}/MATLABData/{}',
-    # 'path': 'Z:/mcdermott-group/data/GapEngineer/Nb_GND_Dev06_Trap'
-    'expt_name_p1': 'Interleave_P1_Neg100',
-    'expt_name_parity_switch': 'Interleave_PSD_Neg100',
-    # 'expt_name_p1': 'C400mD_Interleave_P1_Neg100',
-    # 'expt_name_parity_switch': 'C400mD_Interleave_PSD_Neg100',
-    # 'expt_name_p1': 'Interleave_P1_Att30',
-    # 'expt_name_parity_switch': 'Interleave_PSD_Att30',
-    'Comment': '10 us T1, measurement for Q6, look at higher poison with slightly lower RO power',
-    # 'date': '02-17-21',
-    # 'date': '2021Feb23HiRO',
-    # 'date': '2021Feb12ROPower',
-    'date': '2021Feb06',
-    'files': np.arange(0, 1, 1),
+    #         '/Leiden_2021Jan/P1PSD/LIU/Q6_withQ5Poison/{}/{}/MATLABData/{}',
+    'path': 'Z:/mcdermott-group/data/BlackBody/Circmon/LIU/CW20180514A_Ox2/{}/{}/MATLABData/{}',
+    'expt_name_p1': 'Interleave_P1_Neg305',
+    'expt_name_parity_switch': 'Interleave_PSD_Neg305',
+    'Comment': '14 us T1',
+    'date': '04-16-21',
+    # 'date': '2021Feb06',
+    'files': np.arange(0, 200, 1),
 }
 
 
@@ -156,7 +139,7 @@ class OneState(object):
             for i_os in parity_trace_list:
 
                 """plot"""
-                print ('i_os=', i_os[:100])
+                # print ('i_os=', i_os[:100])
                 # i_os is an array, i_os = [-1.0, -1.0, 1.0, 1.0, ...]
                 avg = self._get_one_state_avg(os=i_os, n=n)
                 self.parity_trace_avg = np.append(self.parity_trace_avg, avg)
