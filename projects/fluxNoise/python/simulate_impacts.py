@@ -10,6 +10,7 @@ from scipy.interpolate import interp2d, griddata
 from scipy import constants
 import matplotlib.pyplot as plt
 import noiselib
+from importlib import reload
 # from numba import jit
 import time
 import impact_lib
@@ -89,7 +90,7 @@ def simulate_impacts():
             sys.exit(app.exec_())
         while hasattr(app, 'thread') and app.thread.is_alive():
             time.sleep(1)
-            
+
         # save data once sim has finished
         start_file_lock()
         try:
@@ -104,7 +105,7 @@ def simulate_impacts():
         with open(dump_path+'dump_sim_impacts_{}.dat'.format(hit_type), 'wb') as f:
             pickle.dump(data, f)
         end_file_lock()
-        
+
         del app
         gc.collect()
 
@@ -112,7 +113,7 @@ def _add_noise(q):
     sigma = [[0.02086807133980249, 0.04472867181129812, 0.008811574164510916, 0.011038152654827339]]
     m_sigma = np.repeat(sigma, q.shape[0], axis=0)
     return q + np.random.normal(0, m_sigma)
-    
+
 def add_noise():
     from_file = dump_path+'dump_sim_impacts_{}.dat'.format(hit_type)
     to_file   = dump_path+'dump_sim_impacts_{}_noise.dat'.format(hit_type)
@@ -172,25 +173,25 @@ for hit_type in ['gammas']:#,'muons']:
     # calc_corr_assym( dump_path+'dump_sim_impacts_{}.dat'.format(hit_type) )
     # calc_corr_assym( dump_path+'dump_sim_impacts_{}_noise.dat'.format(hit_type) )
     pass
-    
-    
+
+
 """ Print stuff
     print( 'Q{} - Q{}'.format(q1,q2) )
     print( '    quadrants 1,2,3,4: {}, {}, {}, {}'.format( qq1, qq2, qq3, qq4 ) )
     try:
-        print( '    quadrants 1,2,3,4: {:.2f}, {:.2f}, {:.2f}, {:.2f} %'.format( 
+        print( '    quadrants 1,2,3,4: {:.2f}, {:.2f}, {:.2f}, {:.2f} %'.format(
                      *np.array((qq1, qq2, qq3, qq4))/float(qq1+qq2+qq3+qq4) ) )
     except ZeroDivisionError:
         pass
-    print( u'    correlation: {:.2f} \u00B1 {:.3f}'.format( 
+    print( u'    correlation: {:.2f} \u00B1 {:.3f}'.format(
                     *corr[L,fq,(q1,q2)] ) )
-    print( u'    13/24 asymmetry: {:.2f} \u00B1 {:.3f}'.format( 
+    print( u'    13/24 asymmetry: {:.2f} \u00B1 {:.3f}'.format(
                     *assym[L,fq,(q1,q2)]  ) )
-        print( 'Q{} charge asymmetry: {:.3f}'.format( q, 
+        print( 'Q{} charge asymmetry: {:.3f}'.format( q,
                             1.*np.sum(e>thresh)/np.sum(np.abs(e)>thresh) ) )
 """
 
-    
+
 
 plt.style.use('pub.mplstyle')
 fig_path = r'Z:\mcdermott-group\users\ChrisWilen\FluxNoise\figs'
@@ -203,26 +204,26 @@ def print_dict(d):
     print(u'{:>6}{:>6}{:>15}{:>15}{:>15}'.format('L','fq','(3,4)','(1,2)','(1,3)'))
     for L in (100, 200, 300, 400, 500, 600, 700, 800):
         for fq in (1., 0.1, 0.01):
-            print(u'{:>6}{:>6}{:>15}{:>15}{:>15}'.format(L, fq, 
+            print(u'{:>6}{:>6}{:>15}{:>15}{:>15}'.format(L, fq,
                 u'{:.2f} \u00B1 {:.3f}'.format(d[L,fq,(3,4)][0], d[L,fq,(3,4)][1]),
                 u'{:.2f} \u00B1 {:.3f}'.format(d[L,fq,(1,2)][0], d[L,fq,(1,2)][1]),
                 u'{:.2f} \u00B1 {:.3f}'.format(d[L,fq,(1,3)][0], d[L,fq,(1,2)][1]) ))
 
 def plot_dict(d, pair, crange=(0.,1.), measured=None, ax=None, cbo='vertical'):
-    
+
     L_list = np.array([100,200,300,400,500,600,700,800,900,1000])
     fq_list = np.array([1.,0.5,0.2,0.1])
-    
-    a = np.array([[ d[(L,fq,pair) if pair else (L,fq)] 
-                                    for fq in fq_list ] 
+
+    a = np.array([[ d[(L,fq,pair) if pair else (L,fq)]
+                                    for fq in fq_list ]
                                     for L in L_list ], dtype=float)
     if a.ndim == 3:
         a = np.mean(a, axis=-1)
-    
+
     if measured is not None:
         m = np.nanmax(np.abs(measured - a))
         crange = (measured - m, measured + m)
-    p = ax.imshow(a, origin='lower', extent=(-0.5,-0.5+len(fq_list),50,1050), aspect='auto', 
+    p = ax.imshow(a, origin='lower', extent=(-0.5,-0.5+len(fq_list),50,1050), aspect='auto',
                         vmin=crange[0], vmax=crange[1], cmap='bwr')
     ax.set_ylabel('$\lambda_\mathrm{trap}\ (\mathrm{\mu m})$')
     ax.set_xlabel('$f_q$')
@@ -233,7 +234,7 @@ def plot_dict(d, pair, crange=(0.,1.), measured=None, ax=None, cbo='vertical'):
     c.ax.locator_params(axis='x', nbins=3)
     plt.draw()
     plt.pause(0.05)
-        
+
 def del_axes_add_title(axs):
     for ax in axs:
         ax.set_xlabel('')
@@ -253,11 +254,11 @@ with open(dump_path+'dump_sim_impacts_{}_noise.dat'.format('gammas'), 'rb') as f
 
 """ Plot percentage of events > thresh as a function of L,fQ """
 if False:
-    
+
     L0, fq0 = 300, 0.2
     L_list = [100,200,300,400,500,600,700,800,900,1000]
     fq_list = [1,0.5,0.2,0.1]
-    
+
     fig, ax_fq = plt.subplots(1,1)
     ax_fq.set_xlabel('L (um)')
     ax_fq.set_ylabel('Thresh fraction')
@@ -270,15 +271,15 @@ if False:
 
         with open(dump_path+'dump_sim_impacts_{}{}.dat'.format('gammas',ext), 'rb') as f:
             data = pickle.load(f)
-            
+
         d = data['thresh_fraction']
-        a = np.array([[ d[(L,fq)] for fq in fq_list ] 
+        a = np.array([[ d[(L,fq)] for fq in fq_list ]
                                   for L in L_list ], dtype=float)
-        
+
         fq_cut = a[:,fq_list.index(fq0),:]
         L_cut = a[L_list.index(L0),:,:]
         ax_fq.plot(L_list, fq_cut, c)
         ax_L.plot(fq_list, L_cut, c)
-    
+
     plt.draw()
     plt.pause(0.05)
