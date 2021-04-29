@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from dataChest import *
 from scipy.optimize import curve_fit
 from scipy.signal import periodogram
-from Markov_Python2.analyze_QPTunneling_pomegranate import observed_to_recovered_signal_BW, generate_hidden_signal, hidden_to_observed_signal
+from Markov_Python2.analyze_QPTunneling_pomegranate import observed_to_recovered_signal_BW, generate_hidden_signal, hidden_to_observed_signal, generate_hidden_signal_two_freq
 
 reload(noiselib)
 
@@ -25,10 +25,15 @@ class QPTunneling_Wilen(object):
         self.name = name
         self.params = [0, 0]
         self.f_or_t = 'f'  # the PSD extraction is frequency or time
+        self.T_parity = None
 
     def add_datasets(self, file_path, data_str='Charge_Parity_Trace'):
         if type(file_path) == str:
             file_path = [file_path]
+        f_l = file_path[0]
+        sample_rate = noiselib.loadmat_ExptVars(f_l)['Total_Time']
+        sample_rate = sample_rate * 10**(-6)
+        self.fs = 1.0/sample_rate
         for f in file_path:
             data = noiselib.loadmat(f)
             o = np.array(data[data_str])
@@ -83,11 +88,13 @@ class QPTunneling_Wilen(object):
         psd = psd[~np.isnan(psd)]
 
         params, covariance = curve_fit(y, f, psd, p0=[0.1, 50],
+        # params, covariance = curve_fit(y, f, psd, p0=[0.05, 500],
                                        bounds=(0, np.inf), method='trf')
         self.params = params[::-1]
         f_QP = self.params[1]
         f_RO = self.params[0]
         self.f_or_t = 'f'
+        self.T_parity = 1/f_RO
         return y(f, f_QP, f_RO), f
 
 class QPTunneling_Liu(object):
@@ -103,6 +110,7 @@ class QPTunneling_Liu(object):
         self.params = None
         self.name = name
         self.f_or_t = 't'   # the PSD extraction is frequency or time
+        self.T_parity = None
 
     def add_datasets(self, file_path, data_type='Charge_Parity_Trace', HMM=False, simulate=False):
         """
@@ -124,8 +132,9 @@ class QPTunneling_Liu(object):
                 if simulate:
                     T_parity = 5*10**(-3)   # parity switching time
                     p_QP = 1 - np.exp(-sample_rate/T_parity) # converted to Poisson probability
-                    signal = generate_hidden_signal(p_QP=[p_QP, p_QP])
-                    signal = hidden_to_observed_signal(signal, [0.99, 0.99])
+                    # signal = generate_hidden_signal(p_QP=[p_QP, p_QP])
+                    signal = generate_hidden_signal_two_freq()
+                    signal = hidden_to_observed_signal(signal, [0.9, 0.9])
                     ps = [(ps - 0.5) * 2 for ps in signal]
                 if HMM:
                     ps = self.apply_HMM(ps)
@@ -186,7 +195,7 @@ class QPTunneling_Liu(object):
             sigma = f**1
             params_curr, params_covariance_curr = curve_fit(
                 fit_PSD_target_function, f, psd,
-                bounds=[(0.05*10**(-3), 0), (5*10**(-3), 1.0)], p0=[0.5*10**(-3), ig], method='trf',
+                bounds=[(0.5*10**(-3), 0), (5*10**(-3), 1.0)], p0=[1.5*10**(-3), ig], method='trf',
                 sigma=sigma)
             if params_covariance_curr[0][0] < covariance:
                 self.params = params_curr
@@ -194,6 +203,7 @@ class QPTunneling_Liu(object):
                 covariance = params_covariance_curr[0][0]
         T_parity = self.params[0]
         F_map = self.params[1]
+        self.T_parity = T_parity
         return fit_PSD_target_function(f, T_parity, F_map), f
 
     def get_fit_old(self):
@@ -317,4 +327,6 @@ def plotMultiFittedPSD(QPT_List):
     plt.grid()
     plt.legend()
     plt.show()
+    # plt.pause(1)
+    # plt.draw()
 
