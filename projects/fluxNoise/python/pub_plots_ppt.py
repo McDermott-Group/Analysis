@@ -31,8 +31,8 @@ from scipy.ndimage.filters import gaussian_filter
 
 
 plt.style.use('pub.mplstyle')
-# fig_path = r'Z:\mcdermott-group\users\ChrisWilen\FluxNoise\figs_ppt'
-fig_path = r'Z:\mcdermott-group\users\ChrisWilen\FluxNoise\figs'
+fig_path = r'Z:\mcdermott-group\users\ChrisWilen\FluxNoise\figs_ppt'
+# fig_path = r'Z:\mcdermott-group\users\ChrisWilen\FluxNoise\figs'
 sim_data_path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data'
 halfwidth = 3.5
 fullwidth = 7.2
@@ -44,26 +44,26 @@ run_plots = [
             # 'charge_jump',
             # 'fit_dropout',
             # 'gamma',
-            'all_triggered',
-            'offset_large',
-            'offset_zoom',
-            'qubit_spec',
-            'ramsey_fit',
-            'ramsey_jump',
+            # 'all_triggered',
+            # 'offset_large',
+            # 'offset_zoom',
+            # 'qubit_spec',
+            # 'ramsey_fit',
+            # 'ramsey_jump',
             # 'tracks',
             # 'pdfs',
-            'hist1d_jumps',
-            'hist2d_jumps_meas',
-            'hist2d_jumps_sim',
+            # 'hist1d_jumps',
+            # 'hist2d_jumps_meas',
+            # 'hist2d_jumps_sim',
             # 'bloch',
-            'induced_rotation',
-            'err_bitflip',
-            'hist2d_err_phase',
+            # 'induced_rotation',
+            # 'err_bitflip',
+            # 'hist2d_err_phase',
             'err_phase_joint',
-            'L_fq_colorplots',
+            # 'L_fq_colorplots',
             # 'dipole',
-            'spectra_emitted',
-            'spectra_absorbed'
+            # 'spectra_emitted',
+            # 'spectra_absorbed'
             ]
 
 def draw_thresh_lines(ax, thresh=0.1):
@@ -90,6 +90,9 @@ def lower_left_tick_labels(*args, **kwargs):
         axs = np.array([axs])
     elif len(axs.shape) == 2:
         ni, nj = axs.shape
+    if ('transpose' in kwargs) and kwargs['transpose']:
+        axs = axs.T
+        ni, nj = nj, ni
     for i in range(ni):
         for j in range(nj):
             ax = axs[i,j]
@@ -719,7 +722,7 @@ def plot_error(ax, rot_induced, cindex):
 if 'induced_rotation' in run_plots:
     fig, (ax_rot,ax_err) = plt.subplots(2, 1, figsize=(halfwidth,4))
     for i,hit_type in enumerate(['gammas','muons']):
-        with open('dump_sim_impacts_{}_0.dat'.format(hit_type), 'rb') as f:
+        with open('dump_sim_impacts_{}.dat'.format(hit_type), 'rb') as f:
             data = pickle.load(f)
         rot_induced = data['rot_induced'][300,0.2]
         plot_rotation_hist(ax_rot, rot_induced, i)
@@ -754,17 +757,18 @@ def set_style(ax):
     ax.set_xlim(-0.5,0.5)
     ax.set_yscale('log')
 if 'hist1d_jumps' in run_plots:
-    fig, ax = plt.subplots(1, 1, figsize=(fullwidth,3))
+    fig, ax = plt.subplots(1, 1, figsize=(fullwidth,5))
     # fig = plt.figure(700)
     # ax = fig.axes[0]
     with open('dump_measured_Q1.dat'.format(hit_type), 'rb') as f:
         q = pickle.load(f)
         bg = plot_hist1d_jumps_meas(ax, q)
     for i,hit_type in enumerate(['gammas']):
-        with open('dump_sim_impacts_{}_0.dat'.format(hit_type), 'rb') as f:
+        with open('dump_sim_impacts_{}_2.dat'.format(hit_type), 'rb') as f:
             data = pickle.load(f)
         plot_hist1d_jumps_sim(ax, data['q_induced'], bg)
     set_style(ax)
+    fig.legend(['Measured', 'Simulated'])
     fig.savefig(fig_path+r'\hist1d_jumps.pdf')
 
 
@@ -787,11 +791,11 @@ if 'hist2d_jumps_meas' in run_plots:
     plt.pause(0.05)
     fig.savefig(fig_path+r'\hist2d_jumps_meas.pdf')
 if 'hist2d_jumps_sim' in run_plots:
-    fig, axs = plt.subplots(2, 3, figsize=(fullwidth-0.5,5.2-0.5))
+    fig, axs = plt.subplots(3, 2, figsize=(5.2-0.5,fullwidth-0.5))
     for i,hit_type in enumerate(['gammas','muons']):
         with open('dump_sim_impacts_{}_noise_0.dat'.format(hit_type), 'rb') as f:
             data = pickle.load(f)
-        plot_hist2d(axs[i,:], data['q_induced'][300,0.2], title=(i==0))
+        plot_hist2d(axs[:,i], data['q_induced'][300,0.2], title=False)
     lower_left_tick_labels(axs, xlabel='$\Delta q_\mathrm{1}$ ($e$)',
                                 ylabel='$\Delta q_\mathrm{2}$ ($e$)')
     fig.savefig(fig_path+r'\hist2d_jumps_sim.pdf')
@@ -843,7 +847,9 @@ if 'err_phase_joint' in run_plots:
     for ax in axs:
         ax.axvline(x=1e-4, color='k', linestyle=':')
         ax.axvline(x=1e-6, color='k', linestyle=':')
-    edges_tick_labels(axs, xlabel=u'$\epsilon_\phi$', ylabel='Normalized Integrated Counts')
+        ax.set_xlabel(u'$\epsilon_\phi$')
+        ax.set_ylabel('Normalized Integrated Counts')
+    # edges_tick_labels(axs, xlabel=u'$\epsilon_\phi$', ylabel='Normalized Integrated Counts')
     fig.savefig(fig_path+r'\err_phase_joint.pdf')
 
 
@@ -891,8 +897,8 @@ if 'err_bitflip' in run_plots:
                       sim_data_path+'/Gamma_10deg_pt2.txt']
         elif hit_type == 'muons':
             efiles = [sim_data_path+'/Muons.txt', sim_data_path+'/Muons2.txt']
-        for sim_data_path_ in efiles:
-            data.append( np.loadtxt(sim_data_path_, skiprows=1) )
+        for sim_data_path in efiles:
+            data.append( np.loadtxt(sim_data_path, skiprows=1) )
         data = np.concatenate(data)
         split_data = np.split(data, np.where(np.diff(data[:,0]))[0]+1)
 
@@ -1141,20 +1147,9 @@ def get_raw_spect_lngs():
     return np.loadtxt(sim_data_path+'/Rome_RAW_Rate.txt', delimiter=',').T
 def get_raw_spect_madison():
     return np.loadtxt(sim_data_path+'/MSN_RAW_Tuned_Rate.txt', delimiter=',').T
-def get_fit_spect():
-    norm_x,norm_y = np.loadtxt(sim_data_path+'/spec_fit_composition.txt', 
-                               delimiter='\t', skiprows=1, usecols=(0,1), max_rows=132).T
-    K40_x,K40_y = np.loadtxt(sim_data_path+'/spec_fit_composition.txt', 
-                               delimiter='\t', skiprows=1, usecols=(2,3), max_rows=183).T
-    Th_x,Th_y = np.loadtxt(sim_data_path+'/spec_fit_composition.txt', 
-                               delimiter='\t', skiprows=1, usecols=(4,5), max_rows=127).T
-    Ur_x,Ur_y = np.loadtxt(sim_data_path+'/spec_fit_composition.txt', 
-                               delimiter='\t', skiprows=1, usecols=(6,7), max_rows=151).T
-    return norm_x[1:],norm_y[1:],K40_x[1:],K40_y[1:],Th_x[1:],Th_y[1:],Ur_x[1:],Ur_y[1:]
 if 'spectra_emitted' in run_plots:
     E_mad, rate_mad = get_raw_spect_madison()
     E_lngs, rate_lngs = get_raw_spect_lngs()
-    norm_x,norm_y,K40_x,K40_y,Th_x,Th_y,Ur_x,Ur_y = get_fit_spect()
     # elem_labels = {609.312:'$^{214}\mathrm{Bi}$', 1504.9:'$^{40}\mathrm{K}$',
                 # 1764.494:'$^{214}\mathrm{Bi}$', 2204.21:'$^{214}\mathrm{Bi}$',
                 # 2614.533:'$^{208}\mathrm{Tl}$'}
@@ -1165,11 +1160,6 @@ if 'spectra_emitted' in run_plots:
     fig, ax = plt.subplots(1, 1, figsize=(halfwidth,2.5))
     ax.step(E_mad/1e3, rate_mad, 'C3', where='mid')
     ax.step(E_lngs/1e3, rate_lngs, 'C0', where='mid')
-    scale = 1./346804
-    ax.plot(norm_x[:-1]/1e3, norm_y[:-1]*scale/80.*5.2, 'k--')
-    ax.plot(K40_x[:-1]/1e3, K40_y[:-1]*scale/80.*5.2, 'C1:', linewidth=1.5)
-    ax.plot(Th_x[:-1]/1e3, Th_y[:-1]*scale/80.*5.2, 'C2:', linewidth=1.5)
-    ax.plot(Ur_x[:-1]/1e3, Ur_y[:-1]*scale/80.*5.2, 'C4:', linewidth=1.5)
     # add labels
     for energy,label in elem_labels.items():
         v_mad  =  rate_mad[np.searchsorted(E_mad, energy)]
@@ -1178,8 +1168,7 @@ if 'spectra_emitted' in run_plots:
         # ax.plot([energy], [max(v_mad,v_lngs)], 'k.')
         ax.annotate( label, (energy/1e3, max(v_mad,v_lngs)), ha='center', va='bottom',
                     xytext=(0,3), textcoords='offset pixels')
-    ax.set_xlim(0.21, 2.865)
-    ax.set_ylim(2e-4, 0.5)
+    ax.set_xlim(0, 2.865)
     ax.set_yscale('log')
     ax.set_xlabel('Energy (MeV)')
     ax.set_ylabel('Rate (Counts/sec/keV)')

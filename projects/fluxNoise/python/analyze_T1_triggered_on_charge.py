@@ -320,7 +320,7 @@ with open('dump_T1_sums.dat', 'wb') as f:
 with open('dump_T1_sums.dat', 'rb') as f:
     P10,P01,P00,P11,n_trace,n0,n1,M1_before_trig = pickle.load(f)
 # n0,n1=1.,1.
-t = np.arange(-N,N+1)/2.
+t = np.arange(-N,N+1)/2.*0.04
 fig, ax = plt.subplots(1,1)
 for q in ['Q2','Q4']:
     # ax.plot( t, P11+P10, label='P11 + P10' )
