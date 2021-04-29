@@ -23,6 +23,7 @@ from ChargeJumps import *
 import itertools
 
 path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data'
+dump_path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data/python_dumps/'
 thresh = 0.1
 hit_type = 'muons'
 L_list = [100,200,300,400,500,600,700,800,900,1000]
@@ -48,27 +49,27 @@ def load_hits(hit_type):
     return efiles
 
 def start_file_lock():
-    while pickle.load( open('dump_saveInProgress.dat','rb') ):
+    while pickle.load( open(dump_path+'dump_saveInProgress.dat','rb') ):
         print '.',
         time.sleep(1)
-    pickle.dump( True, open('dump_saveInProgress.dat','wb') )
+    pickle.dump( True, open(dump_path+'dump_saveInProgress.dat','wb') )
     
 def end_file_lock():
-    pickle.dump( False, open('dump_saveInProgress.dat','wb') )
+    pickle.dump( False, open(dump_path+'dump_saveInProgress.dat','wb') )
 
 def L_fq_iter():
     while True:
         try:
-            with open('dump_sim_queue.dat', 'rb') as f:
+            with open(dump_path+'dump_sim_queue.dat', 'rb') as f:
                 L_fq,i = pickle.load(f)
         except IOError:
             L_fq = list(itertools.product(L_list,fq_list))
             i = -1
         i += 1
-        with open('dump_sim_queue.dat', 'wb') as f:
+        with open(dump_path+'dump_sim_queue.dat', 'wb') as f:
             pickle.dump((L_fq,i), f)
         if i >= len(L_fq):
-            # os.remove('dump_sim_queue.dat')
+            # os.remove(dump_path+'dump_sim_queue.dat')
             raise StopIteration
         else:
             yield L_fq[i]
@@ -92,7 +93,7 @@ def simulate_impacts():
         # save data once sim has finished
         start_file_lock()
         try:
-            with open('dump_sim_impacts_{}.dat'.format(hit_type), 'rb') as f:
+            with open(dump_path+'dump_sim_impacts_{}.dat'.format(hit_type), 'rb') as f:
                 data = pickle.load(f)
         except IOError:
             data = { 'q_induced':{}, 'q_direct':{}, 'rot_induced':{},
@@ -100,7 +101,7 @@ def simulate_impacts():
         data['q_induced'][L,fq] =  app.q_induced
         data['q_direct'][L,fq] =  app.q_direct
         data['rot_induced'][L,fq] = app.rot_induced
-        with open('dump_sim_impacts_{}.dat'.format(hit_type), 'wb') as f:
+        with open(dump_path+'dump_sim_impacts_{}.dat'.format(hit_type), 'wb') as f:
             pickle.dump(data, f)
         end_file_lock()
         
@@ -113,8 +114,8 @@ def _add_noise(q):
     return q + np.random.normal(0, m_sigma)
     
 def add_noise():
-    from_file = 'dump_sim_impacts_{}.dat'.format(hit_type)
-    to_file   = 'dump_sim_impacts_{}_noise.dat'.format(hit_type)
+    from_file = dump_path+'dump_sim_impacts_{}.dat'.format(hit_type)
+    to_file   = dump_path+'dump_sim_impacts_{}_noise.dat'.format(hit_type)
     with open(from_file, 'rb') as f:
         data = pickle.load(f)
     for L in L_list:
@@ -166,10 +167,10 @@ def calc_corr_assym(fname):
 for hit_type in ['gammas']:#,'muons']:
     # simulate_impacts()
     # add_noise()
-    # gen_qq_plots('dump_sim_impacts_{}.dat'.format(hit_type))
-    # gen_qq_plots('dump_sim_impacts_{}_noise.dat'.format(hit_type))
-    # calc_corr_assym( 'dump_sim_impacts_{}.dat'.format(hit_type) )
-    # calc_corr_assym( 'dump_sim_impacts_{}_noise.dat'.format(hit_type) )
+    # gen_qq_plots(dump_path+'dump_sim_impacts_{}.dat'.format(hit_type))
+    # gen_qq_plots(dump_path+'dump_sim_impacts_{}_noise.dat'.format(hit_type))
+    # calc_corr_assym( dump_path+'dump_sim_impacts_{}.dat'.format(hit_type) )
+    # calc_corr_assym( dump_path+'dump_sim_impacts_{}_noise.dat'.format(hit_type) )
     pass
     
     
@@ -246,7 +247,7 @@ def del_axes_add_title(axs):
     plt.pause(0.05)
 
 
-with open('dump_sim_impacts_{}_noise.dat'.format('gammas'), 'rb') as f:
+with open(dump_path+'dump_sim_impacts_{}_noise.dat'.format('gammas'), 'rb') as f:
     data = pickle.load(f)
 
 
@@ -267,7 +268,7 @@ if False:
 
     for ext,c in [('','b'), ('_noise','r')]:
 
-        with open('dump_sim_impacts_{}{}.dat'.format('gammas',ext), 'rb') as f:
+        with open(dump_path+'dump_sim_impacts_{}{}.dat'.format('gammas',ext), 'rb') as f:
             data = pickle.load(f)
             
         d = data['thresh_fraction']

@@ -34,6 +34,7 @@ plt.style.use('pub.mplstyle')
 # fig_path = r'Z:\mcdermott-group\users\ChrisWilen\FluxNoise\figs_ppt'
 fig_path = r'Z:\mcdermott-group\users\ChrisWilen\FluxNoise\figs'
 sim_data_path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data'
+dump_path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data/python_dumps/'
 halfwidth = 3.5
 fullwidth = 7.2
 # qcolors = {'Q1':'C0', 'Q2':'C1', 'Q3':'C2', 'Q4':'C3'}
@@ -165,7 +166,7 @@ def format_hist2d(i, ax, cprofile, log=False, range=None, title=True):
         ax.yaxis.labelpad = -12
 
 
-with open('dump_T1_sums.dat', 'rb') as f:
+with open(dump_path+'dump_T1_sums.dat', 'rb') as f:
     P10,P01,P00,P11,n_trace,n0,n1,M1_before_trig = pickle.load(f)
 
 """Plot single charge jump trace"""
@@ -719,7 +720,7 @@ def plot_error(ax, rot_induced, cindex):
 if 'induced_rotation' in run_plots:
     fig, (ax_rot,ax_err) = plt.subplots(2, 1, figsize=(halfwidth,4))
     for i,hit_type in enumerate(['gammas','muons']):
-        with open('dump_sim_impacts_{}_0.dat'.format(hit_type), 'rb') as f:
+        with open(dump_path+'dump_sim_impacts_{}_0.dat'.format(hit_type), 'rb') as f:
             data = pickle.load(f)
         rot_induced = data['rot_induced'][300,0.2]
         plot_rotation_hist(ax_rot, rot_induced, i)
@@ -757,11 +758,11 @@ if 'hist1d_jumps' in run_plots:
     fig, ax = plt.subplots(1, 1, figsize=(fullwidth,3))
     # fig = plt.figure(700)
     # ax = fig.axes[0]
-    with open('dump_measured_Q1.dat'.format(hit_type), 'rb') as f:
+    with open(dump_path+'dump_measured_Q1.dat'.format(hit_type), 'rb') as f:
         q = pickle.load(f)
         bg = plot_hist1d_jumps_meas(ax, q)
     for i,hit_type in enumerate(['gammas']):
-        with open('dump_sim_impacts_{}_0.dat'.format(hit_type), 'rb') as f:
+        with open(dump_path+'dump_sim_impacts_{}_0.dat'.format(hit_type), 'rb') as f:
             data = pickle.load(f)
         plot_hist1d_jumps_sim(ax, data['q_induced'], bg)
     set_style(ax)
@@ -776,7 +777,7 @@ def plot_hist2d(axs, q, title=True, log=False):
         format_hist2d(j, ax, cprofile=qcolors, title=title, log=log)
 if 'hist2d_jumps_meas' in run_plots:
     fig, axs = plt.subplots(1, 3, figsize=(fullwidth,2.6))
-    with open('dump_measured_Q1234.dat'.format(hit_type), 'rb') as f:
+    with open(dump_path+'dump_measured_Q1234.dat'.format(hit_type), 'rb') as f:
         q = pickle.load(f)
     plot_hist2d(axs, q)
     for ax in axs:
@@ -789,7 +790,7 @@ if 'hist2d_jumps_meas' in run_plots:
 if 'hist2d_jumps_sim' in run_plots:
     fig, axs = plt.subplots(2, 3, figsize=(fullwidth-0.5,5.2-0.5))
     for i,hit_type in enumerate(['gammas','muons']):
-        with open('dump_sim_impacts_{}_noise_0.dat'.format(hit_type), 'rb') as f:
+        with open(dump_path+'dump_sim_impacts_{}_noise_0.dat'.format(hit_type), 'rb') as f:
             data = pickle.load(f)
         plot_hist2d(axs[i,:], data['q_induced'][300,0.2], title=(i==0))
     lower_left_tick_labels(axs, xlabel='$\Delta q_\mathrm{1}$ ($e$)',
@@ -800,7 +801,7 @@ if 'hist2d_err_phase' in run_plots:
     tau = 1e-6
     dw01 = 2 * np.pi * 6e3
     for i,hit_type in enumerate(['gammas','muons']):
-        with open('dump_sim_impacts_{}_0.dat'.format(hit_type), 'rb') as f:
+        with open(dump_path+'dump_sim_impacts_{}_0.dat'.format(hit_type), 'rb') as f:
             data = pickle.load(f)
         dq = data['q_induced'][300,0.2]
         err = dw01**2 / 3. * np.sin(np.pi*dq/2.)**2 * tau**2
@@ -837,7 +838,7 @@ def plot_err_phase_joint(ax, q_induced):
 if 'err_phase_joint' in run_plots:
     fig, axs = plt.subplots(1, 2, figsize=(fullwidth,3))
     for i,hit_type in enumerate(['gammas','muons']):
-        with open('dump_sim_impacts_{}_0.dat'.format(hit_type), 'rb') as f:
+        with open(dump_path+'dump_sim_impacts_{}_0.dat'.format(hit_type), 'rb') as f:
             data = pickle.load(f)
         plot_err_phase_joint(axs[i], data['q_induced'][300,0.2])
     for ax in axs:
@@ -1055,9 +1056,9 @@ def plot_L_fq_colorplots():
     fq_list = np.array([1.,0.5,0.2,0.1])
     # average multiple files if so desired
     data_files = {}
-    data_files['gammas'] = ['dump_sim_impacts_{}_noise_{}.dat'.format('gammas',i)
+    data_files['gammas'] = [dump_path+'dump_sim_impacts_{}_noise_{}.dat'.format('gammas',i)
                                         for i in (0,1,2,3)]
-    data_files['muons'] = ['dump_sim_impacts_{}_noise_0.dat'.format('muons')]
+    data_files['muons'] = [dump_path+'dump_sim_impacts_{}_noise_0.dat'.format('muons')]
     for h,hit_type in enumerate(['gammas', 'muons']):
         x = 50 + 400*h
         data = []

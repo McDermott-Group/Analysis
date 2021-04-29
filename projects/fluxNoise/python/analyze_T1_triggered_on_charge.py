@@ -24,6 +24,7 @@ import pickle
 # charge_path = ('fluxNoise2\DR1 - 2019-12-17\CorrFar\{}Corr\General'
                # '\Parameter\{}_correlation.hdf5')
 # path = 'Z:\\mcdermott-group\\data\\fluxNoise2\\DR1 - 2019-12-17\\CorrFar\\{}Corr\\General\\{}\\{}\MATLABData\\'
+dump_path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data/python_dumps/'
 
 # # for d in [ds.q1q2_0524_charge_T1, ds.q1q2_0524_charge_T1_2, ds.q1q2_0525_charge_T1, 
           # # ds.q1q2_0526_charge_T1, ds.q1q2_0526_charge_T1_2, ds.q1q2_0527_charge_T1, 
@@ -63,7 +64,7 @@ import pickle
     # files += CO.get_files_triggered_on_bad_fit( d['path_charge'], 'Q{}'.format(Q_A), 
                 # [path.format(d['Q'], date,'Charge_resetting') for date in d['date']], 
                 # d['thresh_charge'])
-# with open('dump_T1_files.dat', 'wb') as f:
+# with open(dump_path+'dump_T1_files.dat', 'wb') as f:
     # pickle.dump(files, f)
 
     
@@ -241,7 +242,7 @@ data_files = {}
 reg = re.compile('Q1(Q\d)(Q\d)*')
 
 
-with open('dump_T1_files.dat', 'rb') as f:
+with open(dump_path+'dump_T1_files.dat', 'rb') as f:
     files = pickle.load(f)
 print len(files)
 qs = {('Q2',):0, ('Q4',):0, ('Q2','Q4'):0}
@@ -312,12 +313,12 @@ for k,f in enumerate(files[:]): # 290
             n1[q][N-rep:N+nreps-rep] += p1
             M1_before_trig[q] = np.concatenate( [M1_before_trig[q], M1[:rep]] )
 
-with open('dump_T1_sums.dat', 'wb') as f:
+with open(dump_path+'dump_T1_sums.dat', 'wb') as f:
     pickle.dump( (P10,P01,P00,P11,n_trace,n0,n1,M1_before_trig), f)
 
 
 
-with open('dump_T1_sums.dat', 'rb') as f:
+with open(dump_path+'dump_T1_sums.dat', 'rb') as f:
     P10,P01,P00,P11,n_trace,n0,n1,M1_before_trig = pickle.load(f)
 # n0,n1=1.,1.
 t = np.arange(-N,N+1)/2.*0.04
