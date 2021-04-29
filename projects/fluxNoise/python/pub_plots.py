@@ -31,6 +31,7 @@ from scipy.ndimage.filters import gaussian_filter
 
 
 plt.style.use('pub.mplstyle')
+# fig_path = r'Z:\mcdermott-group\users\ChrisWilen\FluxNoise\figs_ppt'
 fig_path = r'Z:\mcdermott-group\users\ChrisWilen\FluxNoise\figs'
 sim_data_path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data'
 halfwidth = 3.5
@@ -43,25 +44,26 @@ run_plots = [
             # 'charge_jump',
             # 'fit_dropout',
             # 'gamma',
-            # 'all_triggered',
-            # 'offset_large',
-            # 'offset_zoom',
-            # 'qubit_spec',
-            # 'ramsey_fit',
+            'all_triggered',
+            'offset_large',
+            'offset_zoom',
+            'qubit_spec',
+            'ramsey_fit',
+            'ramsey_jump',
             # 'tracks',
             # 'pdfs',
-            # 'hist1d_jumps',
-            # 'hist2d_jumps_meas',
-            # 'hist2d_jumps_sim',
+            'hist1d_jumps',
+            'hist2d_jumps_meas',
+            'hist2d_jumps_sim',
             # 'bloch',
-            # 'induced_rotation',
-            # 'err_bitflip',
-            # 'hist2d_err_phase',
-            # 'err_phase_joint',
-            # 'L_fq_colorplots',
+            'induced_rotation',
+            'err_bitflip',
+            'hist2d_err_phase',
+            'err_phase_joint',
+            'L_fq_colorplots',
             # 'dipole',
-            # 'spectra_emitted',
-            # 'spectra_absorbed'
+            'spectra_emitted',
+            'spectra_absorbed'
             ]
 
 def draw_thresh_lines(ax, thresh=0.1):
@@ -305,16 +307,19 @@ def plot_charge_offset_large(ax):
     y_max = np.vstack(offset.values())[:,trange].max()
     y_min = np.vstack(offset.values())[:,trange].min()
     ax.set_ylim(y_min, y_max)
+    # ax.legend()
+    ax.set_xlabel('Time (hours)')
+    ax.set_ylabel('Offset charge ($e$)')
+def add_rects(ax):
     rect = patches.Rectangle((1,1.5),0.75,1.5,linewidth=1,edgecolor='k',facecolor='none')
     ax.add_patch(rect)
     rect = patches.Rectangle((175./60,-1),20./60,2,linewidth=1,edgecolor='k',facecolor='none')
     ax.add_patch(rect)
-    # ax.legend()
-    ax.set_xlabel('Time (hours)')
-    ax.set_ylabel('Offset charge ($e$)')
 if 'offset_large' in run_plots:
     fig, ax = plt.subplots(1, 1, figsize=(5.25,2.5))
     plot_charge_offset_large(ax)
+    fig.savefig(fig_path+'\offset_charge_norects.pdf')
+    add_rects(ax)
     fig.savefig(fig_path+'\offset_charge.pdf')
 
 """Plot Charge Offset Zoom"""
@@ -368,6 +373,16 @@ if 'qubit_spec' in run_plots:
     fig, ax = plt.subplots(1, 1, figsize=(2.55,2))
     plot_qubit_spec(ax)
     fig.savefig(fig_path+'\qubit_spec.pdf')
+    ax.axis('off')
+    ax.images[0].set_visible(False)
+    fig.savefig(fig_path+'\qubit_spec_fitonly.pdf', transparent=True)
+    ax.axis('on')
+    ax.images[0].set_visible(True)
+    ax.lines[0].set_visible(False)
+    ax.lines[1].set_visible(False)
+    fig.savefig(fig_path+'\qubit_spec_imgonly.pdf', transparent=True)
+    # plt.draw()
+    # plt.pause(0.05)
 
 """Plot Ramsey Fit"""
 def plot_ramsey_fit(ax):
@@ -404,8 +419,29 @@ if 'ramsey_fit' in run_plots:
     plot_ramsey_fit(ax)
     fig.savefig(fig_path+r'\ramsey_fit.pdf')
 
+"""Plot Ramsey Jump"""
+def plot_ramsey_fit(ax):
+    path = r'Z:\mcdermott-group\data\fluxNoise2\DR1 - 2019-12-17\CorrFar\Q1Q4Corr\General\08-04-20\Charge_resetting\MATLABData\\'
+    # 37,39; 91,93; 120,122
+    data1 = noiselib.loadmat(path+'Charge_resetting_120.mat')
+    data2 = noiselib.loadmat(path+'Charge_resetting_122.mat')
+    breakPt = 5 - 1 # 4,3,5
+    o1 = data1['Single_Shot_Occupation_RO2_SB1']
+    o2 = data2['Single_Shot_Occupation_RO2_SB1']
+    b = np.arange(-1.,1.,0.2)
+    ax.plot(b, o1, 'C1', marker='.', markersize=6)
+    ax.plot(b, o2, 'C2', marker='.', markersize=6)
+    ax.plot([b[breakPt]], [o2[breakPt]], 'r.', markersize=10)
+    ax.set_xlabel('Applied offset charge ($e$)')
+    ax.set_ylabel('$P_1$')
+    ax.set_yticks([0.2,0.4,0.6,0.8])
+if 'ramsey_jump' in run_plots:
+    fig, ax = plt.subplots(1, 1, figsize=(2.55,2))
+    plot_ramsey_fit(ax)
+    fig.savefig(fig_path+r'\ramsey_jump.pdf')
+
 """Plot Muon and Gamma tracks"""
-def plot_tracks(ax1,ax2,ax3,ax4):
+def plot_tracks(ax1,ax2,ax3,ax4,plot_charge):
     _range = {'Muons':range(3,33),'Gamma':range(0,60)}
     for k,hit_type in enumerate(['Muons','Gamma']):
         app = Controller(sys.argv, fQ=0.01, calc_all=False, plot=False,
@@ -427,7 +463,7 @@ def plot_tracks(ax1,ax2,ax3,ax4):
         ax1.scatter(track_xyz[:,0], track_xyz[:,1], s=1, c=['C0','C3'][k])
         ax3.scatter(track_xyz[:,0], track_xyz[:,2], s=1, c=['C0','C3'][k])
         ax2.scatter(track_xyz[:,2], track_xyz[:,1], s=1, c=['C0','C3'][k])
-        if hit_type == 'Muons':
+        if hit_type == 'Muons' and plot_charge:
             n = 7
             for ax,i,j in [(ax1,0,1),(ax3,0,2),(ax2,2,1)]:
                 pos = charge_xyz[n][charge_polarity[n]>0]
@@ -468,9 +504,16 @@ if 'tracks' in run_plots:
     fig, ((ax1,ax2),(ax3,ax4)) = plt.subplots(2, 2, figsize=(halfwidth,halfwidth),
                                             gridspec_kw={'width_ratios': [1, 7],
                                                          'height_ratios': [1, 7]})
-    plot_tracks(ax4,ax3,ax2,ax1)
+    plot_tracks(ax4,ax3,ax2,ax1,plot_charge=True)
     fig.delaxes(ax1)
     fig.savefig(fig_path+'\hit_tracks.pdf')
+    
+    fig, ((ax1,ax2),(ax3,ax4)) = plt.subplots(2, 2, figsize=(halfwidth,halfwidth),
+                                            gridspec_kw={'width_ratios': [1, 7],
+                                                         'height_ratios': [1, 7]})
+    plot_tracks(ax4,ax3,ax2,ax1,plot_charge=False)
+    fig.delaxes(ax1)
+    fig.savefig(fig_path+'\hit_tracks_nocharge.pdf')
 
 """Plot PDFs"""
 def plot_pdf_raw(ax1,ax2):
@@ -676,7 +719,7 @@ def plot_error(ax, rot_induced, cindex):
 if 'induced_rotation' in run_plots:
     fig, (ax_rot,ax_err) = plt.subplots(2, 1, figsize=(halfwidth,4))
     for i,hit_type in enumerate(['gammas','muons']):
-        with open('dump_sim_impacts_{}.dat'.format(hit_type), 'rb') as f:
+        with open('dump_sim_impacts_{}_0.dat'.format(hit_type), 'rb') as f:
             data = pickle.load(f)
         rot_induced = data['rot_induced'][300,0.2]
         plot_rotation_hist(ax_rot, rot_induced, i)
@@ -718,7 +761,7 @@ if 'hist1d_jumps' in run_plots:
         q = pickle.load(f)
         bg = plot_hist1d_jumps_meas(ax, q)
     for i,hit_type in enumerate(['gammas']):
-        with open('dump_sim_impacts_{}.dat'.format(hit_type), 'rb') as f:
+        with open('dump_sim_impacts_{}_0.dat'.format(hit_type), 'rb') as f:
             data = pickle.load(f)
         plot_hist1d_jumps_sim(ax, data['q_induced'], bg)
     set_style(ax)
@@ -848,8 +891,8 @@ if 'err_bitflip' in run_plots:
                       sim_data_path+'/Gamma_10deg_pt2.txt']
         elif hit_type == 'muons':
             efiles = [sim_data_path+'/Muons.txt', sim_data_path+'/Muons2.txt']
-        for sim_data_path in efiles:
-            data.append( np.loadtxt(sim_data_path, skiprows=1) )
+        for sim_data_path_ in efiles:
+            data.append( np.loadtxt(sim_data_path_, skiprows=1) )
         data = np.concatenate(data)
         split_data = np.split(data, np.where(np.diff(data[:,0]))[0]+1)
 
@@ -926,7 +969,7 @@ if 'err_bitflip' in run_plots:
     fig2d.savefig(fig_path+r'\hist2d_err_bitflip.pdf')
 
 # test different ways of doing the charge mappinng:
-if True:
+if False:
     q_map = noiselib.loadmat(sim_data_path+'/charge_map.mat')
     q = -q_map['charge_mat']
     q[~np.isfinite(q)] = -1. # right below center of qubit
@@ -1098,9 +1141,20 @@ def get_raw_spect_lngs():
     return np.loadtxt(sim_data_path+'/Rome_RAW_Rate.txt', delimiter=',').T
 def get_raw_spect_madison():
     return np.loadtxt(sim_data_path+'/MSN_RAW_Tuned_Rate.txt', delimiter=',').T
+def get_fit_spect():
+    norm_x,norm_y = np.loadtxt(sim_data_path+'/spec_fit_composition.txt', 
+                               delimiter='\t', skiprows=1, usecols=(0,1), max_rows=132).T
+    K40_x,K40_y = np.loadtxt(sim_data_path+'/spec_fit_composition.txt', 
+                               delimiter='\t', skiprows=1, usecols=(2,3), max_rows=183).T
+    Th_x,Th_y = np.loadtxt(sim_data_path+'/spec_fit_composition.txt', 
+                               delimiter='\t', skiprows=1, usecols=(4,5), max_rows=127).T
+    Ur_x,Ur_y = np.loadtxt(sim_data_path+'/spec_fit_composition.txt', 
+                               delimiter='\t', skiprows=1, usecols=(6,7), max_rows=151).T
+    return norm_x[1:],norm_y[1:],K40_x[1:],K40_y[1:],Th_x[1:],Th_y[1:],Ur_x[1:],Ur_y[1:]
 if 'spectra_emitted' in run_plots:
     E_mad, rate_mad = get_raw_spect_madison()
     E_lngs, rate_lngs = get_raw_spect_lngs()
+    norm_x,norm_y,K40_x,K40_y,Th_x,Th_y,Ur_x,Ur_y = get_fit_spect()
     # elem_labels = {609.312:'$^{214}\mathrm{Bi}$', 1504.9:'$^{40}\mathrm{K}$',
                 # 1764.494:'$^{214}\mathrm{Bi}$', 2204.21:'$^{214}\mathrm{Bi}$',
                 # 2614.533:'$^{208}\mathrm{Tl}$'}
@@ -1111,6 +1165,11 @@ if 'spectra_emitted' in run_plots:
     fig, ax = plt.subplots(1, 1, figsize=(halfwidth,2.5))
     ax.step(E_mad/1e3, rate_mad, 'C3', where='mid')
     ax.step(E_lngs/1e3, rate_lngs, 'C0', where='mid')
+    scale = 1./346804
+    ax.plot(norm_x[:-1]/1e3, norm_y[:-1]*scale/80.*5.2, 'k--')
+    ax.plot(K40_x[:-1]/1e3, K40_y[:-1]*scale/80.*5.2, 'C1:', linewidth=1.5)
+    ax.plot(Th_x[:-1]/1e3, Th_y[:-1]*scale/80.*5.2, 'C2:', linewidth=1.5)
+    ax.plot(Ur_x[:-1]/1e3, Ur_y[:-1]*scale/80.*5.2, 'C4:', linewidth=1.5)
     # add labels
     for energy,label in elem_labels.items():
         v_mad  =  rate_mad[np.searchsorted(E_mad, energy)]
@@ -1119,7 +1178,8 @@ if 'spectra_emitted' in run_plots:
         # ax.plot([energy], [max(v_mad,v_lngs)], 'k.')
         ax.annotate( label, (energy/1e3, max(v_mad,v_lngs)), ha='center', va='bottom',
                     xytext=(0,3), textcoords='offset pixels')
-    ax.set_xlim(0, 2.865)
+    ax.set_xlim(0.21, 2.865)
+    ax.set_ylim(2e-4, 0.5)
     ax.set_yscale('log')
     ax.set_xlabel('Energy (MeV)')
     ax.set_ylabel('Rate (Counts/sec/keV)')
