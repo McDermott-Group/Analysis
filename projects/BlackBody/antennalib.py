@@ -5,7 +5,7 @@ A library for the antenna model
 import numpy as np
 from scipy.constants import *
 
-def getGamma_pa(T, dfn=2e9, f0=100e9):
+def getGamma_pa(T, dfn=2e9, f0=120e9):
     """
     To calculate the theoretic photon assisted QP poisoning events based on
     the blackbody temperature and transmon's characteristic mode frequency

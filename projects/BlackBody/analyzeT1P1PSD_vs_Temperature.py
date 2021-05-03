@@ -90,7 +90,7 @@ Gamma_down_total = [1/T for T in T1_total_array]
 Gamma_down_QP = [1/T for T in T1_QP_array]
 Gamma_up_QP = [1/T for T in Up_total_array]
 Gamma_PSD = [1/T for T in PSD_array]
-Gamma_pa = [getGamma_pa(Temp) for Temp in Temp_array]
+Gamma_pa = [getGamma_pa(Temp)+1/0.002750 for Temp in Temp_array]
 
 
 Gamma_down_QP_scale = [np.log(1/G) for G in Gamma_down_QP]
@@ -111,17 +111,17 @@ Gamma_pa_scale = [np.log(1/G) for G in Gamma_pa]
 # plt.show()
 
 """Plot rate"""
-# plt.plot(Temp_array, Gamma_up_QP, label='1/Up')
-# plt.plot(Temp_array, Gamma_down_QP, label='1/T1_QP')
-# plt.plot(Temp_array, Gamma_down_total, label='1/T1_tot')
-# plt.plot(Temp_array[15:38], Gamma_PSD[15:38], label='PSD')
-# # plt.plot(Temp_array, Gamma_pa, label='Photon Assisted')
-# plt.yscale("log")
-# plt.xlabel('Temp (Kelvin)')
-# plt.ylabel('Rate (1/sec)')
-# plt.grid()
-# plt.legend()
-# plt.show()
+plt.plot(Temp_array, Gamma_up_QP, label='1/Up')
+plt.plot(Temp_array, Gamma_down_QP, label='1/T1_QP')
+plt.plot(Temp_array, Gamma_down_total, label='1/T1_tot')
+plt.plot(Temp_array[15:38], Gamma_PSD[15:38], label='PSD')
+plt.plot(Temp_array, Gamma_pa, label='Photon Assisted')
+plt.yscale("log")
+plt.xlabel('Temp (Kelvin)')
+plt.ylabel('Rate (1/sec)')
+plt.grid()
+plt.legend()
+plt.show()
 
 # """Plot Up/PSD ratio"""
 # Up_PSD_ratio = np.divide(Gamma_up_QP, Gamma_PSD)
@@ -136,13 +136,13 @@ Gamma_pa_scale = [np.log(1/G) for G in Gamma_pa]
 
 """Processed data and function fit"""
 # plt.scatter([1/T for T in Temp_array], Gamma_down_QP_scale, label='QP_down')
-plt.scatter([1/T for T in Temp_array], Gamma_up_QP_scale, label='QP_Up')
-plt.scatter([1/T for T in Temp_array], [0.06/T-7.5 for T in Temp_array], label='QP_fit')
-# plt.scatter([1/T for T in Temp_array], [0.5/T-10.5 for T in Temp_array], label='QP_fit')
-# plt.scatter([1/T for T in Temp_array[:27]], Gamma_PSD_scale[:27], label='PSD')
-# plt.scatter([1/T for T in Temp_array], Gamma_pa_scale, label='Photon Assisted')
-plt.xlabel('1/Temp(Kelvin)')
-plt.ylabel('ln(df/Gamma)')
-plt.grid()
-plt.legend()
-plt.show()
+# plt.scatter([1/T for T in Temp_array], Gamma_up_QP_scale, label='QP_Up')
+# plt.scatter([1/T for T in Temp_array], [0.06/T-7.5 for T in Temp_array], label='QP_fit')
+# # plt.scatter([1/T for T in Temp_array], [0.5/T-10.5 for T in Temp_array], label='QP_fit')
+# # plt.scatter([1/T for T in Temp_array[:27]], Gamma_PSD_scale[:27], label='PSD')
+# # plt.scatter([1/T for T in Temp_array], Gamma_pa_scale, label='Photon Assisted')
+# plt.xlabel('1/Temp(Kelvin)')
+# plt.ylabel('ln(df/Gamma)')
+# plt.grid()
+# plt.legend()
+# plt.show()
