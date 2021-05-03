@@ -17,6 +17,7 @@ import pickle
 charge_path = '{}\DR1 - 2019-12-17\CorrFar\{}Corr\General\Parameter\{}_correlation.hdf5'
 plt.style.use('pub.mplstyle')
 fig_path = r'Z:\mcdermott-group\users\ChrisWilen\FluxNoise\figs'
+dump_path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data/python_dumps/'
 halfwidth = 3.5
 fullwidth = 7.2
 # qcolors = {'Q1':'C0', 'Q2':'C1', 'Q3':'C2', 'Q4':'C3'}
@@ -67,12 +68,12 @@ def save_datasets():
     CO = make_CO_from_datasets(ds_q1)
     jumps, sigma = CO.get_jump_sizes(plot=True, ax=ax, qubits='Q1')
     q = jumps['Q1']
-    with open('dump_measured_Q1.dat', 'wb') as f:
+    with open(dump_path+'dump_measured_Q1.dat', 'wb') as f:
         pickle.dump(q, f)
     CO = make_CO_from_datasets(ds_all4)
     jumps, sigma = CO.get_jump_sizes(plot=False)
     q = np.vstack([jumps['Q1'],jumps['Q2'],jumps['Q3'],jumps['Q4']]).T
-    with open('dump_measured_Q1234.dat', 'wb') as f:
+    with open(dump_path+'dump_measured_Q1234.dat', 'wb') as f:
         pickle.dump(q, f)
 
 
@@ -198,9 +199,9 @@ for k in (('Q3','Q4'),('Q1','Q2'),('Q1','Q3')):
 def get_thresh_fractions():
     L0, fq0 = 300, 0.2
     data_files = {}
-    data_files['gammas'] = ['dump_sim_impacts_{}_noise_{}.dat'.format('gammas',i)
+    data_files['gammas'] = [dump_path+'dump_sim_impacts_{}_noise_{}.dat'.format('gammas',i)
                                         for i in (0,1,2,3)]
-    data_files['muons'] = ['dump_sim_impacts_{}_noise_0.dat'.format('muons')]
+    data_files['muons'] = [dump_path+'dump_sim_impacts_{}_noise_0.dat'.format('muons')]
     thresh_frac = {}
     for h,hit_type in enumerate(['gammas', 'muons']):
         data = []
