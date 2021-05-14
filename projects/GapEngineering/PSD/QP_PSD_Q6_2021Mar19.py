@@ -14,7 +14,7 @@ power = 'Neg17'
 
 experiment_name_PSD = ('Long_Interleave_PSD_'+power)
 PSD_file_Number = np.arange(0, 2, 1)
-PSD_file = [QP_path.format(date, experiment_name_PSD, experiment_name_PSD) + '_{:03d}.mat'.format(i) for i in P1_file_Number]
+PSD_file = [QP_path.format(date, experiment_name_PSD, experiment_name_PSD) + '_{:03d}.mat'.format(i) for i in PSD_file_Number]
 
 
 QPT_Q6_Poison_Clean = QPTunneling_Wilen(name='Q6_Clean_P1<{} with poison={}'.format(P1, power))

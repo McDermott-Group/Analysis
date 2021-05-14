@@ -16,7 +16,7 @@ P1 = 0.06
 
 experiment_name_P1 = ('Interleave_P1_'+power)
 experiment_name_PSD = ('Interleave_PSD_'+power)
-P1_file_Number = np.arange(0, 100, 1)
+P1_file_Number = np.arange(0, 10, 1)
 PSD_file_Number = P1_file_Number
 P1_file = [QP_path.format(date, experiment_name_P1, experiment_name_P1) + '_{:03d}.mat'.format(i) for i in P1_file_Number]
 P1CleanDirty = OneStateCleanDirty()
