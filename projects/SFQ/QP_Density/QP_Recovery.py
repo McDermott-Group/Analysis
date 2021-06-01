@@ -4,6 +4,7 @@ import noiselib
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.constants import *
+from scipy.stats import linregress
 
 """First import matlab data to python"""
 
@@ -55,11 +56,104 @@ class QP_Recover(object):
         plt.show()
 
 
-QP_path = ('Z:/mcdermott-group/data/sfq/MCM_NIST/LIU/MCM08/05-06-21'
-           '/T1_SFQ_Poison_Recover_Sweep/MATLABData'
-           '/T1_SFQ_Poison_Recover_Sweep_003_Weighted_Occupation_expfit.mat')
+class Phaseslip(object):
 
-QP_file = [QP_path]
-QP = QP_Recover()
-QP.add_data_from_matlab(QP_file)
-QP.plot()
+    def __init__(self):
+        self.occ_2D = []
+        self.poison_t = []
+        self.idle_t = []
+        self.phaseslip = []
+        self.T1 = []
+        self.C = self.getC()
+        self.f_SFQ=2e9
+
+    def add_data_from_matlab(self, file_path,
+                             data_type1='Weighted_Occupation',
+                             data_type2='QB_Idle_Gate_Time',
+                             data_type3='SFQ_Pulse_Duration'):
+
+        for f in file_path:
+            data = noiselib.loadmat(f)
+            occ_2D = np.array(data[data_type1])
+            idle_t = np.array(data[data_type2])
+            poison_t = np.array(data[data_type3])
+
+        """Update parameters and units"""
+        # print('2D=', occ_2D)
+        # print('time=', poison_t)
+        self.occ_2D = occ_2D
+        self.idle_t = idle_t*1e-9
+        self.poison_t = poison_t*1e-9
+        self.phaseslip = poison_t*1e-9*self.f_SFQ*3
+        self.getT1()
+
+    def getT1(self):
+        T1 = []
+        occ2D = self.occ_2D
+        Idle_array = self.idle_t[:10]
+        for P1Idle in occ2D:
+            # print('P1Idle=', P1Idle)
+            P1_array = P1Idle[:10]
+            t1 = self.fitToT1(P1_array, Idle_array)
+            # print('t1=', t1)
+            # T1.append(2e-6/(0.93-P1Idle[0]))
+            T1.append(t1)
+        self.T1 = np.array(T1)
+
+    def fitToT1(self, P1_array, Idle_array):
+        # T1 = 1
+        # print('P1_array=', P1_array)
+        # print('Idle_array=', Idle_array)
+        slope, intercept, r_value, p_value, std_err = linregress(Idle_array, P1_array)
+        # print('slope=', slope)
+        T1 = -1/slope
+        return T1
+
+    def getC(self):
+        Delta = 180*10**(-6)*e
+        fq = 5*10**(9)
+        C = (8*fq*Delta/h)**(1/2)
+        return C
+
+    def plot(self, mode='PhaseSlip_T1'):
+        # Get common units
+        poison_t  = self.poison_t * 10**6 # us
+        # T1 = self.T1  # us
+        T1 = self.T1 * 10**6 # us
+        phase_slips = self.phaseslip
+
+        if mode =='PoisonTime_T1':
+            plt.plot(poison_t, T1, label='None')
+            plt.xlabel('Poison time (us)')
+            plt.ylabel('T1(us)')
+
+        elif mode =='PhaseSlip_T1':
+            plt.plot(phase_slips, T1, label='None')
+            plt.xlabel('Phase Slips')
+            plt.ylabel('T1(us)')
+
+        plt.grid()
+        plt.legend()
+        plt.show()
+
+
+# QP_path = ('Z:/mcdermott-group/data/sfq/MCM_NIST/LIU/MCM08/05-06-21'
+#            '/T1_SFQ_Poison_Recover_Sweep/MATLABData'
+#            '/T1_SFQ_Poison_Recover_Sweep_003_Weighted_Occupation_expfit.mat')
+#
+# QP_file = [QP_path]
+# QP = QP_Recover()
+# QP.add_data_from_matlab(QP_file)
+# QP.plot()
+
+# Z:\mcdermott-group\data\sfq\MCM_NIST\LIU\MCM08\05-06-21\T1_SFQ_Poison_Time_Sweep\MATLABData
+
+phase_path = ('Z:/mcdermott-group/data/sfq/MCM_NIST/LIU/MCM08/05-06-21'
+           '/T1_SFQ_Poison_Time_Sweep/MATLABData'
+           '/T1_SFQ_Poison_Time_Sweep_006.mat')
+
+phase_file = [phase_path]
+phase = Phaseslip()
+phase.add_data_from_matlab(phase_file)
+phase.plot()
+

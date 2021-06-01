@@ -111,14 +111,15 @@ Gamma_pa_scale = [np.log(1/G) for G in Gamma_pa]
 # plt.show()
 
 """Plot rate"""
-plt.plot(Temp_array, Gamma_up_QP, label='1/Up')
-plt.plot(Temp_array, Gamma_down_QP, label='1/T1_QP')
-plt.plot(Temp_array, Gamma_down_total, label='1/T1_tot')
-plt.plot(Temp_array[15:38], Gamma_PSD[15:38], label='PSD')
-plt.plot(Temp_array, Gamma_pa, label='Photon Assisted')
+# plt.plot(Temp_array, Gamma_up_QP, label='1/Up')
+# plt.plot(Temp_array, Gamma_down_QP, label='1/T1_QP')
+# plt.plot(Temp_array, Gamma_down_total, label='1/T1_tot')
+plt.plot(np.array([186, 305, 365, 425])*10**(-3), [766, 1701, 2184, 2891], label='QB Up Rate')
+plt.plot(Temp_array[15:38], Gamma_PSD[15:38], label='PSD Measured')
+plt.plot(Temp_array, Gamma_pa, label='Photon Assisted Prediction')
 plt.yscale("log")
 plt.xlabel('Temp (Kelvin)')
-plt.ylabel('Rate (1/sec)')
+plt.ylabel('Rate (Hz)')
 plt.grid()
 plt.legend()
 plt.show()
@@ -135,14 +136,20 @@ plt.show()
 
 
 """Processed data and function fit"""
+T_Pre = np.array([186, 305, 365, 425])*10**(-3)
+Gamma_Pre = np.array([766, 1701, 2184, 2891])*1.0
+# Gamma_pa_scale = [np.log(1/G) for G in Gamma_pa]
+
+plt.scatter([1/T for T in T_Pre], [np.log(1/G) for G in Gamma_Pre], label='QB_Up_Pre')
+plt.scatter([1/T for T in T_Pre], [0.45/T-9 for T in T_Pre], label='Fit, f0=9.4GHz')
 # plt.scatter([1/T for T in Temp_array], Gamma_down_QP_scale, label='QP_down')
 # plt.scatter([1/T for T in Temp_array], Gamma_up_QP_scale, label='QP_Up')
 # plt.scatter([1/T for T in Temp_array], [0.06/T-7.5 for T in Temp_array], label='QP_fit')
 # # plt.scatter([1/T for T in Temp_array], [0.5/T-10.5 for T in Temp_array], label='QP_fit')
-# # plt.scatter([1/T for T in Temp_array[:27]], Gamma_PSD_scale[:27], label='PSD')
+# plt.scatter([1/T for T in Temp_array[:27]], Gamma_PSD_scale[:27], label='PSD')
 # # plt.scatter([1/T for T in Temp_array], Gamma_pa_scale, label='Photon Assisted')
-# plt.xlabel('1/Temp(Kelvin)')
-# plt.ylabel('ln(df/Gamma)')
-# plt.grid()
-# plt.legend()
-# plt.show()
+plt.xlabel('1/Temp(Kelvin)')
+plt.ylabel('ln(df/Gamma)')
+plt.grid()
+plt.legend()
+plt.show()
