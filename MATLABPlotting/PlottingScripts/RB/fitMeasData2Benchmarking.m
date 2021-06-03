@@ -18,18 +18,18 @@ dep_rels = data.rels.Interleaved_Probability;
 
 % analyze and plot 1D data
 if length(dep_rels) == 1
-    %Find P1 for Interleaved and no interleave for each number of Cliffords
-    p1_array = zeros(length(data.Number_of_Cliffords), 3);%NoInter, Inter, NoC
-    p1_array(:,1) = 1 - data.No_Interleaved_Probability;
-    p1_array(:,2) = 1 - data.Interleaved_Probability;
-    p1_array(:,3) = data.Number_of_Cliffords;
+    %Find P0 for Interleaved and no interleave for each number of Cliffords
+    p0_array = zeros(length(data.Number_of_Cliffords), 3);%NoInter, Inter, NoC
+    p0_array(:,1) = 1 - data.No_Interleaved_Probability;
+    p0_array(:,2) = 1 - data.Interleaved_Probability;
+    p0_array(:,3) = data.Number_of_Cliffords;
     
     % Fit the two curves for depolarizing parameter
     
-    [out.no_int_x, out.no_int_y]=prepareCurveData(p1_array(:,3), p1_array(:,1));
+    [out.no_int_x, out.no_int_y]=prepareCurveData(p0_array(:,3), p0_array(:,1));
     [out.fr_No_Interleave, ~] = fidelityFit(out.no_int_x, out.no_int_y);
     
-    [out.int_x, out.int_y]=prepareCurveData(p1_array(:,3), p1_array(:,2));
+    [out.int_x, out.int_y]=prepareCurveData(p0_array(:,3), p0_array(:,2));
     [out.fr_Interleave, ~] = fidelityFit(out.int_x, out.int_y);
     
     r_c_est = 0.5*(1-out.fr_Interleave.b/out.fr_No_Interleave.b);
