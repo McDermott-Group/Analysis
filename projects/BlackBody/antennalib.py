@@ -23,7 +23,8 @@ class QP_Up(object):
         self.occ_1D_avg_error_band = []
         self.Pre_to_RO_Time = []
         self.GammaUp = None
-        self.temp = ''
+        self.GammaUp_std_err = None
+        self.temp = None  # units mK
 
     def add_data_from_matlab(self, file_path, temp,
                              data_type1='Weighted_Occupation_Filtered',
@@ -58,9 +59,10 @@ class QP_Up(object):
         time = self.Pre_to_RO_Time
         P1 = self.occ_1D_avg
         slope, intercept, r_value, p_value, std_err = linregress(time, P1)
-        # print('slope=', slope)
+        # print('std_err=', std_err)
         self.GammaUp = slope  # units in Hz
         self.occ_1D_avg_fit = slope * time + intercept
+        self.GammaUp_std_err = std_err
         return None
 
     def plot(self):
@@ -69,9 +71,11 @@ class QP_Up(object):
         occ_fit = self.occ_1D_avg_fit
         error = self.occ_1D_avg_error_band
         GammaUp = self.GammaUp
+        temp = str(self.temp) + 'mK'
 
-        plt.plot(time, occ_fit, 'o-', label=self.temp+'_GammaUp={0:.4g} Hz'.format(GammaUp))
-        plt.plot(time, occ, 'k-', label=self.temp)
+        plt.plot(time, occ_fit, 'o-',
+                 label=temp + '_GammaUp={0:.4g} Hz'.format(GammaUp))
+        plt.plot(time, occ, 'k-', label=temp)
         plt.fill_between(time, occ - error, occ + error, alpha=0.2)
         plt.xlabel('time (us)')
         plt.ylabel('P1')
@@ -79,6 +83,62 @@ class QP_Up(object):
         plt.grid()
         plt.legend()
         plt.show()
+
+
+class Up_array(object):
+    """
+    This is for collecting Temp, Up_rate, Up_rate_error array
+    and plot them
+    """
+
+    def __init__(self):
+        # self.temp = np.array([])    # units mK
+        self.temp = []  # units mK
+        self.GammaUp = []  # units Hz
+        self.GammaUp_std_err = []  # units Hz
+
+    def insert_data(self, array_tempUpUpError):
+        self.temp = np.append(self.temp, array_tempUpUpError[0])
+        self.GammaUp = np.append(self.GammaUp, array_tempUpUpError[1])
+        self.GammaUp_std_err = np.append(self.GammaUp_std_err, array_tempUpUpError[2])
+
+    def plot(self):
+        #
+        Temp = self.temp * 10 ** (-3)
+        Gamma = self.GammaUp
+        GammaErrorMinus = self.GammaUp-self.GammaUp_std_err
+        GammaErrorPlus = self.GammaUp+self.GammaUp_std_err
+        # plt.scatter([1 / T for T in T_Pre],
+        #             [np.log(1 / G) for G in Gamma_Pre_Q3], label='Q3_Up_Pre')
+        # plt.plot([1/T for T in T_Pre_Q4], [np.log(1/G) for G in Gamma_Pre_Q4], label='Q4_Up_Pre')
+        # plt.plot([1 / T for T in T_Pre], [0.2 / T - 8.7 for T in T_Pre],
+        #          label='Fit, f0=4GHz')
+        plt.plot([1 / T for T in Temp], [np.log(1 / G) for G in Gamma], label='Q3_Up_Pre')
+
+        plt.fill_between([1 / T for T in Temp], [np.log(1 / G) for G in GammaErrorMinus],
+                         [np.log(1 / G) for G in GammaErrorPlus], alpha=0.2)
+
+        plt.plot([1 / T for T in Temp], [0.2 / T - 8.7 for T in Temp],
+                 label='Fit, f0=4GHz')
+
+        plt.xlabel('1/Temp(Kelvin)')
+        plt.ylabel('ln(df/Gamma)')
+        plt.grid()
+        plt.legend()
+        plt.show()
+
+        """
+                plt.plot(time, occ_fit, 'o-',
+                 label=temp + '_GammaUp={0:.4g} Hz'.format(GammaUp))
+        plt.plot(time, occ, 'k-', label=temp)
+        plt.fill_between(time, occ - error, occ + error, alpha=0.2)
+        plt.xlabel('time (us)')
+        plt.ylabel('P1')
+        # plt.yscale('log')
+        plt.grid()
+        plt.legend()
+        plt.show()
+        """
 
 
 def getGamma_pa(T, dfn=2e9, f0=120e9):

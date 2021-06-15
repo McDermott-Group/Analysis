@@ -114,15 +114,15 @@ Gamma_pa_scale = [np.log(1/G) for G in Gamma_pa]
 # plt.plot(Temp_array, Gamma_up_QP, label='1/Up')
 # plt.plot(Temp_array, Gamma_down_QP, label='1/T1_QP')
 # plt.plot(Temp_array, Gamma_down_total, label='1/T1_tot')
-plt.plot(np.array([186, 305, 365, 425])*10**(-3), [766, 1701, 2184, 2891], label='QB Up Rate')
-plt.plot(Temp_array[15:38], Gamma_PSD[15:38], label='PSD Measured')
-plt.plot(Temp_array, Gamma_pa, label='Photon Assisted Prediction')
-plt.yscale("log")
-plt.xlabel('Temp (Kelvin)')
-plt.ylabel('Rate (Hz)')
-plt.grid()
-plt.legend()
-plt.show()
+# plt.plot(np.array([186, 305, 365, 425])*10**(-3), [766, 1701, 2184, 2891], label='QB Up Rate')
+# plt.plot(Temp_array[15:38], Gamma_PSD[15:38], label='PSD Measured')
+# plt.plot(Temp_array, Gamma_pa, label='Photon Assisted Prediction')
+# plt.yscale("log")
+# plt.xlabel('Temp (Kelvin)')
+# plt.ylabel('Rate (Hz)')
+# plt.grid()
+# plt.legend()
+# plt.show()
 
 # """Plot Up/PSD ratio"""
 # Up_PSD_ratio = np.divide(Gamma_up_QP, Gamma_PSD)
@@ -136,12 +136,22 @@ plt.show()
 
 
 """Processed data and function fit"""
-T_Pre = np.array([186, 305, 365, 425])*10**(-3)
-Gamma_Pre = np.array([766, 1701, 2184, 2891])*1.0
+# T_Pre = np.array([186, 305, 365, 425])*10**(-3)
+# Gamma_Pre = np.array([766, 1701, 2184, 2891])*1.0
+T_Pre = np.array([236, 253, 267, 280, 293, 307, 318, 332, 343, 355, 366, 378,
+                  403, 414, 426, 437, 451, 463, 475, 488, 501])\
+        *10**(-3)
+Gamma_Pre = np.array([874, 1065, 1251, 1325, 1191, 1391, 1518, 1723, 1681,
+                      1696, 2029, 2051, 2369, 2970, 2878, 3444, 3411, 3568, 3915,
+                      4061, 3952])\
+            *1.0
 # Gamma_pa_scale = [np.log(1/G) for G in Gamma_pa]
 
 plt.scatter([1/T for T in T_Pre], [np.log(1/G) for G in Gamma_Pre], label='QB_Up_Pre')
-plt.scatter([1/T for T in T_Pre], [0.45/T-9 for T in T_Pre], label='Fit, f0=9.4GHz')
+# plt.scatter([1/T for T in T_Pre], [0.45/T-8.7 for T in T_Pre], label='Fit, f0=9.4GHz')
+plt.plot([1/T for T in T_Pre], [0.45/T-8.75 for T in T_Pre], label='Fit, f0=9.4GHz')
+# plt.scatter([1/T for T in T_Pre], [1.2/T-10.8 for T in T_Pre], label='Fit, f0=9.4GHz')
+plt.plot([1/T for T in T_Pre], [1.2/T-10.8 for T in T_Pre], label='Fit, f0=25GHz')
 # plt.scatter([1/T for T in Temp_array], Gamma_down_QP_scale, label='QP_down')
 # plt.scatter([1/T for T in Temp_array], Gamma_up_QP_scale, label='QP_Up')
 # plt.scatter([1/T for T in Temp_array], [0.06/T-7.5 for T in Temp_array], label='QP_fit')

@@ -64,8 +64,12 @@ class Phaseslip(object):
         self.idle_t = []
         self.phaseslip = []
         self.T1 = []
+        self.x_QP = []
+        self.n_QP = []
         self.C = self.getC()
         self.f_SFQ=2e9
+        self.T1_R=40e-6
+        self.T1_QP=100e-6
 
     def add_data_from_matlab(self, file_path,
                              data_type1='Weighted_Occupation',
@@ -89,16 +93,25 @@ class Phaseslip(object):
 
     def getT1(self):
         T1 = []
+        x_QP = []
+        n_QP = []
+        C = self.C
         occ2D = self.occ_2D
-        Idle_array = self.idle_t[:10]
+        Idle_array = self.idle_t[:50]
         for P1Idle in occ2D:
             # print('P1Idle=', P1Idle)
-            P1_array = P1Idle[:10]
+            P1_array = P1Idle[:50]
             t1 = self.fitToT1(P1_array, Idle_array)
             # print('t1=', t1)
             # T1.append(2e-6/(0.93-P1Idle[0]))
+            n_qp = (1/t1 - 1/self.T1_R)*self.T1_QP
+            # print('n_QP', n_QP)
             T1.append(t1)
+            x_QP.append(1/(t1*C))
+            n_QP.append(n_qp)
         self.T1 = np.array(T1)
+        self.x_QP = np.array(x_QP)
+        self.n_QP = np.array(n_QP)
 
     def fitToT1(self, P1_array, Idle_array):
         # T1 = 1
@@ -111,16 +124,24 @@ class Phaseslip(object):
 
     def getC(self):
         Delta = 180*10**(-6)*e
+        # print('Delta=', Delta)
         fq = 5*10**(9)
-        C = (8*fq*Delta/h)**(1/2)
+        # X = 8*fq*Delta/h
+        # print('X=', X)
+        C = np.sqrt(8*fq*Delta/h)
+        # C = np.sqrt(X)
+        # C = X**(1/2)
+        # print('C=', C)
         return C
 
-    def plot(self, mode='PhaseSlip_T1'):
+    def plot(self, mode='PhaseSlip_n_QP'):
         # Get common units
         poison_t  = self.poison_t * 10**6 # us
         # T1 = self.T1  # us
         T1 = self.T1 * 10**6 # us
         phase_slips = self.phaseslip
+        x_QP = self.x_QP
+        n_QP = self.n_QP
 
         if mode =='PoisonTime_T1':
             plt.plot(poison_t, T1, label='None')
@@ -131,6 +152,16 @@ class Phaseslip(object):
             plt.plot(phase_slips, T1, label='None')
             plt.xlabel('Phase Slips')
             plt.ylabel('T1(us)')
+
+        elif mode =='x_QP_T1':
+            plt.plot(phase_slips, x_QP, label='None')
+            plt.xlabel('Phase Slips')
+            plt.ylabel('x_QP')
+
+        elif mode =='PhaseSlip_n_QP':
+            plt.plot(phase_slips, n_QP, label='None')
+            plt.xlabel('Phase Slips')
+            plt.ylabel('n_QP')
 
         plt.grid()
         plt.legend()
@@ -148,9 +179,11 @@ class Phaseslip(object):
 
 # Z:\mcdermott-group\data\sfq\MCM_NIST\LIU\MCM08\05-06-21\T1_SFQ_Poison_Time_Sweep\MATLABData
 
-phase_path = ('Z:/mcdermott-group/data/sfq/MCM_NIST/LIU/MCM08/05-06-21'
+phase_path = ('Z:/mcdermott-group/data/sfq/MCM_NIST/LIU/MCM08/06-04-21'
            '/T1_SFQ_Poison_Time_Sweep/MATLABData'
-           '/T1_SFQ_Poison_Time_Sweep_006.mat')
+           '/T1_SFQ_Poison_Time_Sweep_003.mat')
+
+# Z:\mcdermott-group\data\sfq\MCM_NIST\LIU\MCM08\06-04-21\T1_SFQ_Poison_Time_Sweep\MATLABData
 
 phase_file = [phase_path]
 phase = Phaseslip()

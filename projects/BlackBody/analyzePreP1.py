@@ -103,8 +103,8 @@ QP_path = ('Z:/mcdermott-group/data/BlackBody/Circmon/LIU/CW20180514A_Ox2/{}/{}/
 # QP.add_data_from_matlab(QP_file, temp)
 # QP.plot()
 
-date = '05-17-21'
-experiment_name_global = 'Q4_P1_'
+# date = '05-17-21'
+# experiment_name_global = 'Q4_P1_'
 
 # temp = '425mK'
 # experiment_name = experiment_name_global + temp
@@ -142,10 +142,37 @@ experiment_name_global = 'Q4_P1_'
 # QP.add_data_from_matlab(QP_file, temp)
 # QP.plot()
 
-temp = '186mK'
+# temp = '186mK'
+# experiment_name = experiment_name_global + temp
+#
+# file_Number_Tot = np.arange(0, 20, 1)
+# file_Number_Extract = np.array([])
+# file_Number = np.setdiff1d(file_Number_Tot, file_Number_Extract)
+# #
+# QP_file = [QP_path.format(date, experiment_name, experiment_name) + '_{:03d}.mat'.format(i) for i in file_Number]
+# QP = QP_Up()
+# QP.add_data_from_matlab(QP_file, temp)
+# QP.plot()
+
+# temp = '75mK'
+# experiment_name = experiment_name_global + temp
+#
+# file_Number_Tot = np.arange(0, 10, 1)
+# file_Number_Extract = np.array([])
+# file_Number = np.setdiff1d(file_Number_Tot, file_Number_Extract)
+# #
+# QP_file = [QP_path.format(date, experiment_name, experiment_name) + '_{:03d}.mat'.format(i) for i in file_Number]
+# QP = QP_Up()
+# QP.add_data_from_matlab(QP_file, temp)
+# QP.plot()
+
+date = '06-07-21'
+experiment_name_global = 'Q4_P1_'
+
+temp = '236mK'
 experiment_name = experiment_name_global + temp
 
-file_Number_Tot = np.arange(0, 20, 1)
+file_Number_Tot = np.arange(5, 55, 1)
 file_Number_Extract = np.array([])
 file_Number = np.setdiff1d(file_Number_Tot, file_Number_Extract)
 #
@@ -154,10 +181,76 @@ QP = QP_Up()
 QP.add_data_from_matlab(QP_file, temp)
 QP.plot()
 
-# temp = '75mK'
+# temp = '253mK'
 # experiment_name = experiment_name_global + temp
 #
-# file_Number_Tot = np.arange(0, 10, 1)
+# file_Number_Tot = np.arange(0, 50, 1)
+# file_Number_Extract = np.array([])
+# file_Number = np.setdiff1d(file_Number_Tot, file_Number_Extract)
+# #
+# QP_file = [QP_path.format(date, experiment_name, experiment_name) + '_{:03d}.mat'.format(i) for i in file_Number]
+# QP = QP_Up()
+# QP.add_data_from_matlab(QP_file, temp)
+# QP.plot()
+
+# temp = '267mK'
+# experiment_name = experiment_name_global + temp
+#
+# file_Number_Tot = np.arange(0, 50, 1)
+# file_Number_Extract = np.array([])
+# file_Number = np.setdiff1d(file_Number_Tot, file_Number_Extract)
+# #
+# QP_file = [QP_path.format(date, experiment_name, experiment_name) + '_{:03d}.mat'.format(i) for i in file_Number]
+# QP = QP_Up()
+# QP.add_data_from_matlab(QP_file, temp)
+# QP.plot()
+
+date = '06-08-21'
+experiment_name_global = 'Q4_P1_'
+
+# temp = '280mK'
+# experiment_name = experiment_name_global + temp
+#
+# file_Number_Tot = np.arange(0, 50, 1)
+# file_Number_Extract = np.array([])
+# file_Number = np.setdiff1d(file_Number_Tot, file_Number_Extract)
+# #
+# QP_file = [QP_path.format(date, experiment_name, experiment_name) + '_{:03d}.mat'.format(i) for i in file_Number]
+# QP = QP_Up()
+# QP.add_data_from_matlab(QP_file, temp)
+# QP.plot()
+
+# temp = '293mK'
+# temp = '307mK'
+# temp = '318mK'
+# temp = '332mK'
+# temp = '343mK'
+# temp = '355mK'
+# temp = '366mK'
+# temp = '378mK'
+# temp = '391mK'
+# temp = '403mK'
+# temp = '414mK'
+# temp = '426mK'
+# temp = '437mK'
+# experiment_name = experiment_name_global + temp
+#
+# file_Number_Tot = np.arange(0, 50, 1)
+# file_Number_Extract = np.array([])
+# file_Number = np.setdiff1d(file_Number_Tot, file_Number_Extract)
+# #
+# QP_file = [QP_path.format(date, experiment_name, experiment_name) + '_{:03d}.mat'.format(i) for i in file_Number]
+# QP = QP_Up()
+# QP.add_data_from_matlab(QP_file, temp)
+# QP.plot()
+
+# date = '06-09-21'
+# experiment_name_global = 'Q4_P1_'
+#
+# temp = '525mK'
+# experiment_name = experiment_name_global + temp
+#
+# file_Number_Tot = np.arange(0, 50, 1)
 # file_Number_Extract = np.array([])
 # file_Number = np.setdiff1d(file_Number_Tot, file_Number_Extract)
 # #
