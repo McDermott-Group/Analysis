@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.optimize import curve_fit
+from scipy.signal import periodogram
 import noiselib
 reload(noiselib)
 import matplotlib.pyplot as plt
@@ -25,12 +26,14 @@ dP = np.random.rand(n, N) < cycle_time/T_qp
 parity = 2 * np.mod(np.cumsum(dP,-1),2) - 1
 detuning = offset + charge_dispersion/2. * parity * np.abs(np.sin(np.pi*ng)) # this is just using a sin instead of the actual fn for parity bands
 rotation = 2. * np.pi * detuning * idle_time
-M = np.random.rand(n, N) < (0.3 + 0.3*np.sin(rotation))
+M = np.random.rand(n, N) < (0.5 + 0.3*np.sin(rotation))
 print('n=', n)
 print('N=', N)
 print (len(M))
 
-avg_cpsd, f = noiselib.partition_and_avg_psd(M, fs)
+# avg_cpsd, f = noiselib.partition_and_avg_psd(M, fs)
+f, avg_cpsd = periodogram(M, fs=fs, return_onesided=True, axis=1)
+avg_cpsd = np.mean(avg_cpsd, axis=0)
 window_avg_psd = noiselib.window_averaging(avg_cpsd)
 
 # Fit
@@ -56,4 +59,4 @@ ax.set_xlabel('Frequency (Hz)')
 ax.set_ylabel('S_\eta (\eta^2/Hz)')
 plt.draw()
 plt.pause(0.05)
-plt.show()
+# plt.show()

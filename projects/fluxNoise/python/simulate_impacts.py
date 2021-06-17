@@ -3,131 +3,200 @@ import matplotlib.cm as cm
 from pyqtgraph.Qt import QtCore, QtGui
 import pyqtgraph as pg
 import pyqtgraph.opengl as gl
-import sys
+import sys, os
 import threading
 from scipy.special import ellipk
 from scipy.interpolate import interp2d, griddata
+from scipy import constants
 import matplotlib.pyplot as plt
 import noiselib
-from numba import jit
+from importlib import reload
+# from numba import jit
 import time
 import impact_lib
 reload(impact_lib)
 from impact_lib import *
 import pickle
 import gc
+import ChargeJumps
+reload(ChargeJumps)
+from ChargeJumps import *
+import itertools
 
 path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data'
-calc_all = False
-thresh = 0.12
+dump_path = 'Z:/mcdermott-group/data/fluxNoise2/sim_data/python_dumps/'
+thresh = 0.1
+hit_type = 'muons'
+L_list = [100,200,300,400,500,600,700,800,900,1000]
+fq_list = [ 1.,0.5,0.2,0.1 ]
 
 
-# # for L in [100, 200, 300, 400, 500, 600, 700, 800]:
-# for L in [800]:
-    # for fq in [ 0.01 ]:
+def load_pdfs(L):
+    # load charge pdf
+    if type(L) in (list,tuple):
+        pdfs_file = ['{}/ChargePDFs_{}r_vhs_fine.npy'.format(path,l) for l in L]
+    else:
+        pdfs_file = '{}/ChargePDFs_{}r_vhs_fine.npy'.format(path,L)
+    return pdfs_file
+
+def load_hits(hit_type):
+    # load generated hits
+    if hit_type == 'gammas':
+        efiles = [path+'/Gamma.txt', 
+                  path+'/Gamma_10deg.txt',
+                  path+'/Gamma_10deg_pt2.txt']
+    elif hit_type == 'muons':
+        efiles = [path+'/Muons.txt', path+'/Muons2.txt']
+    return efiles
+
+def start_file_lock():
+    while pickle.load( open(dump_path+'dump_saveInProgress.dat','rb') ):
+        print '.',
+        time.sleep(1)
+    pickle.dump( True, open(dump_path+'dump_saveInProgress.dat','wb') )
     
-        # ### SIMULATE
-        # print('Gammas:  L = {}  fQ = {}'.format(L, fq))
+def end_file_lock():
+    pickle.dump( False, open(dump_path+'dump_saveInProgress.dat','wb') )
+
+def L_fq_iter():
+    while True:
+        try:
+            with open(dump_path+'dump_sim_queue.dat', 'rb') as f:
+                L_fq,i = pickle.load(f)
+        except IOError:
+            L_fq = list(itertools.product(L_list,fq_list))
+            i = -1
+        i += 1
+        with open(dump_path+'dump_sim_queue.dat', 'wb') as f:
+            pickle.dump((L_fq,i), f)
+        if i >= len(L_fq):
+            # os.remove(dump_path+'dump_sim_queue.dat')
+            raise StopIteration
+        else:
+            yield L_fq[i]
+
+def simulate_impacts():
+    for L,fq in L_fq_iter():
         
-        # if type(L) in (list,tuple):
-            # pdfs_file = ['{}/ChargePDFs_{}.npy'.format(path,l) for l in L]
-        # else:
-            # pdfs_file = '{}/ChargePDFs_{}.npy'.format(path,L)
-        # app = Controller(sys.argv, fQ=fq, calc_all=calc_all, plot=False,
-                         # pdfs_file=pdfs_file,
-                         # event_files=[path+'/Gamma.txt', 
-                                      # path+'/Gamma_10deg.txt',
-                                      # path+'/Gamma_10deg_pt2.txt'])
-                         # # event_files=[path+'/Muons.txt', path+'sim_data/Muons2.txt'])
-        # if hasattr(app, 'view'):
-            # sys.exit(app.exec_())
-        # if not calc_all:
-            # with open('dump_sim_impacts.dat', 'rb') as f:
-                # q_induced, corr, assym = pickle.load(f)
-            # app.q_induced = q_induced[L,fq]
-        # else:
-            # while hasattr(app, 'thread') and app.thread.is_alive():
-                # time.sleep(1)
+        print('Simulating: {}  L = {}  fQ = {}'.format(hit_type, L, fq))
+        
+        pdfs_file = load_pdfs(L)
+        efiles = load_hits(hit_type)
             
-        # ### PLOT QQ, CALC ERROR
-        # while pickle.load( open('dump_saveInProgress.dat','rb') ):
-            # print '.',
-            # time.sleep(1)
-        # pickle.dump( True, open('dump_saveInProgress.dat','wb') )
-        # with open('dump_sim_impacts.dat', 'rb') as f:
-            # q_induced, corr, assym = pickle.load(f)
-        # print( 'total events: {}'.format(app.q_induced.shape[0]) )
-        # fig, axs = plt.subplots(1, 3, figsize=(15,6))
-        # fig.suptitle('Gammas:  L = {}  fQ = {}'.format(L, fq))
-        # for i,(q1,q2) in enumerate( ((1,2), (3,4), (1,3)) ):
-            # app.plot_qq(q1,q2, axs[i])
-            # qq1 = app.count(q1,q2,1,thresh=thresh)
-            # qq2 = app.count(q1,q2,2,thresh=thresh)
-            # qq3 = app.count(q1,q2,3,thresh=thresh)
-            # qq4 = app.count(q1,q2,4,thresh=thresh)
-            # corr[L,fq,(q1,q2)] = app.get_correlation(q1,q2,thresh)
-            # try:
-                # a = 1. * (qq1+qq3) / (qq2+qq4)
-            # except ZeroDivisionError:
-                # a = np.nan
-            # try:
-                # da = a * np.sqrt( 1./(qq1+qq3) + 1./(qq2+qq4) )
-            # except ZeroDivisionError:
-                # da = np.nan
-            # assym[L,fq,(q1,q2)] = a, da
-            # q_induced[L,fq] = np.array(app.q_induced)
-            # print( 'Q{} - Q{}'.format(q1,q2) )
-            # print( '    quadrants 1,2,3,4: {}, {}, {}, {}'.format( qq1, qq2, qq3, qq4 ) )
-            # try:
-                # print( '    quadrants 1,2,3,4: {:.2f}, {:.2f}, {:.2f}, {:.2f} %'.format( 
-                             # *np.array((qq1, qq2, qq3, qq4))/float(qq1+qq2+qq3+qq4) ) )
-            # except ZeroDivisionError:
-                # pass
-            # print( u'    correlation: {:.2f} \u00B1 {:.3f}'.format( 
-                            # *corr[L,fq,(q1,q2)] ) )
-            # print( u'    13/24 asymmetry: {:.2f} \u00B1 {:.3f}'.format( 
-                            # *assym[L,fq,(q1,q2)]  ) )
-        # with open('dump_sim_impacts.dat', 'wb') as f:
-            # pickle.dump((q_induced,corr,assym), f)
-        # for q in (1,2,3,4):
-            # e = noiselib.alias(app.q_induced[:,q-1])
-            # try:
-                # print( 'Q{} charge asymmetry: {:.3f}'.format( q, 
-                                    # 1.*np.sum(e>thresh)/np.sum(np.abs(e)>thresh) ) )
-            # except ZeroDivisionError:
-                # pass
-        # pickle.dump( False, open('dump_saveInProgress.dat','wb') )
-        # fig.savefig('{}/qq_figs/L{}fq{}.pdf'.format(path,L,fq))
-        # plt.close(fig)
-        # del app
-        # gc.collect()
+        # run simulation
+        app = Controller(sys.argv, fQ=fq, calc_all=True, plot=False,
+                         pdfs_file=pdfs_file, event_files=efiles)
+        if hasattr(app, 'view'):
+            sys.exit(app.exec_())
+        while hasattr(app, 'thread') and app.thread.is_alive():
+            time.sleep(1)
 
-with open('dump_sim_impacts.dat', 'rb') as f:
-    q_induced, corr, assym = pickle.load(f)
-    
-    
-""" Plot +/- assymetry as a function of L,fq """
-data = np.full( (8,3,4), 0. )
-for i,L in enumerate((100, 200, 300, 400, 500, 600, 700, 800)):
-    for j,fq in enumerate((1., 0.1, 0.01)):
-        q5 = noiselib.alias(q_induced[L,fq],0.5)
-        data[i,j,:] = 1.*np.sum(q5>thresh,axis=0)/np.sum(np.abs(q5)>thresh,axis=0)
-fig, axs = plt.subplots(1,4,constrained_layout=True)
-for i in range(4):
-    p = axs[i].imshow(data[:,:,i], origin='lower', extent=(0.5,-2.5,50,850), 
-                      vmin=0.3, vmax = 0.7, aspect='auto', cmap='bwr')
-fig.colorbar(p, ax=axs)
-plt.draw()
-plt.pause(0.05)
-fig, ax = plt.subplots(1,1,constrained_layout=True)
-p = ax.imshow(np.mean(data,axis=2), origin='lower', extent=(0.5,-2.5,50,850), 
-                  aspect='auto', cmap='bwr')
-fig.colorbar(p, ax=ax)
-ax.set_ylabel('L')
-ax.set_xlabel('fq $10^x$')
-ax.set_title('Avg +/- assympetry')
-plt.draw()
-plt.pause(0.05)
+        # save data once sim has finished
+        start_file_lock()
+        try:
+            with open(dump_path+'dump_sim_impacts_{}.dat'.format(hit_type), 'rb') as f:
+                data = pickle.load(f)
+        except IOError:
+            data = { 'q_induced':{}, 'q_direct':{}, 'rot_induced':{},
+                'correlation':{}, 'assym1324':{}, 'assym':{}, 'thresh_fraction':{} }
+        data['q_induced'][L,fq] =  app.q_induced
+        data['q_direct'][L,fq] =  app.q_direct
+        data['rot_induced'][L,fq] = app.rot_induced
+        with open(dump_path+'dump_sim_impacts_{}.dat'.format(hit_type), 'wb') as f:
+            pickle.dump(data, f)
+        end_file_lock()
+
+        del app
+        gc.collect()
+
+def _add_noise(q):
+    sigma = [[0.02086807133980249, 0.04472867181129812, 0.008811574164510916, 0.011038152654827339]]
+    m_sigma = np.repeat(sigma, q.shape[0], axis=0)
+    return q + np.random.normal(0, m_sigma)
+
+def add_noise():
+    from_file = dump_path+'dump_sim_impacts_{}.dat'.format(hit_type)
+    to_file   = dump_path+'dump_sim_impacts_{}_noise.dat'.format(hit_type)
+    with open(from_file, 'rb') as f:
+        data = pickle.load(f)
+    for L in L_list:
+        for fq in fq_list:
+            data['q_induced'][L,fq] = _add_noise( data['q_induced'][L,fq] )
+    with open(to_file, 'wb') as f:
+        pickle.dump(data, f)
+
+def gen_qq_plots(fname):
+    with open(fname, 'rb') as f:
+        data = pickle.load(f)
+    for L,fq in data['q_induced'].keys():
+        q = data['q_induced'][L,fq]
+        fig, axs = plt.subplots(1, 3, figsize=(15,6))
+        fig.suptitle('{}:  L = {}  fQ = {}'.format(hit_type, L, fq))
+        for i,(q1,q2) in enumerate( ((1,2), (3,4), (1,3)) ):
+            ax = axs[i]
+            ax.plot( noiselib.alias(q[:,q1-1]),
+                     noiselib.alias(q[:,q2-1]), '.' )
+            ax.set_xlabel('Q{} aliased charge [e]'.format(q1))
+            ax.set_ylabel('Q{} aliased charge [e]'.format(q2))
+            ax.set_title('Q{} - Q{}'.format(q1,q2))
+            ax.set_aspect(1)
+            ax.set_xlim(-0.5,0.5)
+            ax.set_ylim(-0.5,0.5)
+        plt.draw()
+        plt.pause(0.05)
+        fig.savefig('{}/qq_figs/{}/L{}fq{}.pdf'.format(path,hit_type,L,fq))
+        plt.close(fig)
+
+def calc_corr_assym(fname):
+    with open(fname, 'rb') as f:
+        data = pickle.load(f)
+    CJ = ChargeJumps()
+    for L,fq in data['q_induced'].keys():
+        q = data['q_induced'][L,fq]
+        for i,(q1,q2) in enumerate( ((1,2), (3,4), (1,3)) ):
+            data['correlation'][L,fq,(q1,q2)] = \
+                    CJ.raw_correlation(q[:,q1-1], q[:,q2-1], thresh, thresh)
+            data['assym1324'][L,fq,(q1,q2)] = \
+                    CJ.assym1324(q[:,q1-1], q[:,q2-1], thresh, thresh)
+        data['assym'][L,fq] = [CJ.assym(q[:,i-1],thresh) for i in (1,2,3,4)]
+        data['thresh_fraction'][L,fq] = \
+                [CJ.thresh_fraction(q[:,i-1],thresh) for i in (1,2,3,4)]
+    with open(fname, 'wb') as f:
+        pickle.dump(data, f)
+
+
+for hit_type in ['gammas']:#,'muons']:
+    # simulate_impacts()
+    # add_noise()
+    # gen_qq_plots(dump_path+'dump_sim_impacts_{}.dat'.format(hit_type))
+    # gen_qq_plots(dump_path+'dump_sim_impacts_{}_noise.dat'.format(hit_type))
+    # calc_corr_assym( dump_path+'dump_sim_impacts_{}.dat'.format(hit_type) )
+    # calc_corr_assym( dump_path+'dump_sim_impacts_{}_noise.dat'.format(hit_type) )
+    pass
+
+
+""" Print stuff
+    print( 'Q{} - Q{}'.format(q1,q2) )
+    print( '    quadrants 1,2,3,4: {}, {}, {}, {}'.format( qq1, qq2, qq3, qq4 ) )
+    try:
+        print( '    quadrants 1,2,3,4: {:.2f}, {:.2f}, {:.2f}, {:.2f} %'.format(
+                     *np.array((qq1, qq2, qq3, qq4))/float(qq1+qq2+qq3+qq4) ) )
+    except ZeroDivisionError:
+        pass
+    print( u'    correlation: {:.2f} \u00B1 {:.3f}'.format(
+                    *corr[L,fq,(q1,q2)] ) )
+    print( u'    13/24 asymmetry: {:.2f} \u00B1 {:.3f}'.format(
+                    *assym[L,fq,(q1,q2)]  ) )
+        print( 'Q{} charge asymmetry: {:.3f}'.format( q,
+                            1.*np.sum(e>thresh)/np.sum(np.abs(e)>thresh) ) )
+"""
+
+
+
+plt.style.use('pub.mplstyle')
+fig_path = r'Z:\mcdermott-group\users\ChrisWilen\FluxNoise\figs'
+halfwidth = 3.5
+fullwidth = 7.2
 
 
 """ Plot corr, assym as function of L,fq """
@@ -135,84 +204,82 @@ def print_dict(d):
     print(u'{:>6}{:>6}{:>15}{:>15}{:>15}'.format('L','fq','(3,4)','(1,2)','(1,3)'))
     for L in (100, 200, 300, 400, 500, 600, 700, 800):
         for fq in (1., 0.1, 0.01):
-            print(u'{:>6}{:>6}{:>15}{:>15}{:>15}'.format(L, fq, 
+            print(u'{:>6}{:>6}{:>15}{:>15}{:>15}'.format(L, fq,
                 u'{:.2f} \u00B1 {:.3f}'.format(d[L,fq,(3,4)][0], d[L,fq,(3,4)][1]),
                 u'{:.2f} \u00B1 {:.3f}'.format(d[L,fq,(1,2)][0], d[L,fq,(1,2)][1]),
                 u'{:.2f} \u00B1 {:.3f}'.format(d[L,fq,(1,3)][0], d[L,fq,(1,2)][1]) ))
 
-def plot_dict(d, pair, range=(0.,1.), label='', measured=None):
-    L_list = np.array([100,200,300,400,500,600,700,800])# - 50
-    fq_list = np.array([0,-1,-2])# + 0.5
-    data = np.full( (len(L_list),len(fq_list)), 0. )
-    for i,L in enumerate([100,200,300,400,500,600,700,800]):
-        for j,fq in enumerate([1.,0.1,0.01]):
-            data[i,j] = d[L,fq,pair][0]
-    fig, ax = plt.subplots(1,1,constrained_layout=True)
+def plot_dict(d, pair, crange=(0.,1.), measured=None, ax=None, cbo='vertical'):
+
+    L_list = np.array([100,200,300,400,500,600,700,800,900,1000])
+    fq_list = np.array([1.,0.5,0.2,0.1])
+
+    a = np.array([[ d[(L,fq,pair) if pair else (L,fq)]
+                                    for fq in fq_list ]
+                                    for L in L_list ], dtype=float)
+    if a.ndim == 3:
+        a = np.mean(a, axis=-1)
+
     if measured is not None:
-        d = np.nanmax(np.abs(measured - data))
-        range = (measured - d, measured + d)
-    # p = ax.pcolormesh(L_list, fq_list, data.T, vmin=range[0], vmax=range[1])
-    p = ax.imshow(data, origin='lower', extent=(0.5,-2.5,50,850), aspect='auto', 
-                        vmin=range[0], vmax=range[1], cmap='bwr')
-    ax.set_ylabel('L')
-    ax.set_xlabel('fq $10^x$')
-    ax.set_title(label+str(pair))
-    fig.colorbar(p, ax=ax)
-    # fig.tight_layout()
+        m = np.nanmax(np.abs(measured - a))
+        crange = (measured - m, measured + m)
+    p = ax.imshow(a, origin='lower', extent=(-0.5,-0.5+len(fq_list),50,1050), aspect='auto',
+                        vmin=crange[0], vmax=crange[1], cmap='bwr')
+    ax.set_ylabel('$\lambda_\mathrm{trap}\ (\mathrm{\mu m})$')
+    ax.set_xlabel('$f_q$')
+    ax.set_xticks(np.arange(len(fq_list)))
+    ax.set_xticklabels(fq_list)
+    ar = 10 if cbo == 'horizontal' else 20
+    c = ax.figure.colorbar(p, ax=ax, orientation=cbo, aspect=ar)
+    c.ax.locator_params(axis='x', nbins=3)
     plt.draw()
     plt.pause(0.05)
-    return L_list, fq_list, data
-        
-print_dict(corr)
-print_dict(assym)
 
-plot_dict(corr, (3,4), label='Corr ', range=(0.,0.7), measured=0.52)
-plot_dict(corr, (1,2), label='Corr ', range=(0.,0.7), measured=0.43)
-plot_dict(corr, (1,3), label='Corr ', range=(0.,0.7), measured=0.0)
-plot_dict(assym, (3,4), label='13/24 Assym ', range=(0.,3.5), measured=1.03)
-plot_dict(assym, (1,2), label='13/24 Assym ', range=(0.,3.5), measured=1.38)
-plot_dict(assym, (1,3), label='13/24 Assym ', range=(0.,3.5), measured=1.5)
+def del_axes_add_title(axs):
+    for ax in axs:
+        ax.set_xlabel('')
+        ax.set_ylabel('')
+        ax.set_xticklabels([])
+        ax.set_yticklabels([])
+    axs[0].set_title('$340\ \mathrm{\mu m}$')
+    axs[1].set_title('$640\ \mathrm{\mu m}$')
+    axs[2].set_title('$3195\ \mathrm{\mu m}$')
+    plt.draw()
+    plt.pause(0.05)
 
-""" Overlay 1D histograms """
-# fig, axi = plt.subplots(1,1)
-# axi = plt.figure(1).axes[0]
-# axi.set_title('Charge Jumps')
-# axi.set_xlabel('Jump Size [e]')
-# axi.set_ylabel('')
-# for (L,fq),q in q_induced.items():
-    # for Q in [1]:
-        # e = noiselib.alias(q[:,Q-1])
-        # h, bins = np.histogram(e, bins=500, range=(-0.5,0.5))
-        # x = (bins[1:]+bins[:-1])/2
-        # center = (bins[:-1] + bins[1:])/2
-        # center2 = center**2 * np.sign(center)
-        # widths = np.diff(bins**2)
-        # bg = np.sum(np.abs(e)>0.2)
-        # axi.step(center2, 2553./bg*noiselib.movingmean(h,30),
-                    # label='L={} fq={}'.format(L,fq))
-# axi.set_yscale('log')
-# axi.set_ylim([10e-1, 1.5*h.max()])
-# noiselib.legend()
-# plt.draw()
-# plt.pause(0.05)
 
-# print event.get_induced_charge_on_qubits(np.full((1,3),(0,0,0)), [1])
+with open(dump_path+'dump_sim_impacts_{}_noise.dat'.format('gammas'), 'rb') as f:
+    data = pickle.load(f)
 
-# if __name__ == '__main__':
-    # import numpy as np
-    # import matplotlib.pyplot as plt
-    # import matplotlib as mpl
-    # import simulate_impacts
-    # reload(simulate_impacts)
-    # from simulate_impacts import ImpactEvent
-    # PDFs = np.load('sim_data/ChargePDFs_750.npy',allow_pickle=True).tolist()
-    # e = ImpactEvent(PDFs, np.array((0,0,0)).reshape(1,3), np.array((.1e6,)), 0, 1)
-    # v00 = e.getPDF(0)
-    # v10 = e.getPDF(0.1)
-    # v17 = e.getPDF(0.17)
-    # fig, (ax1,ax2,ax3) = plt.subplots(1,3)
-    # ax1.imshow(np.sum(v00.T, axis=1), norm=mpl.colors.LogNorm(), origin='lower')
-    # ax2.imshow(np.sum(v10.T, axis=1), norm=mpl.colors.LogNorm(), origin='lower')
-    # ax3.imshow(np.sum(v17.T, axis=1), norm=mpl.colors.LogNorm(), origin='lower')
-    # ax1.set_title('(0,0,0)'); ax2.set_title('(0,0,0.1)'); ax3.set_title('(0,0,0.17)');
-    # plt.draw(); plt.pause(0.05)
+
+""" Plot percentage of events > thresh as a function of L,fQ """
+if False:
+
+    L0, fq0 = 300, 0.2
+    L_list = [100,200,300,400,500,600,700,800,900,1000]
+    fq_list = [1,0.5,0.2,0.1]
+
+    fig, ax_fq = plt.subplots(1,1)
+    ax_fq.set_xlabel('L (um)')
+    ax_fq.set_ylabel('Thresh fraction')
+    fig, ax_L = plt.subplots(1,1)
+    ax_L.set_xlabel('fQ')
+    ax_L.set_ylabel('Thresh fraction')
+    ax_L.set_xscale('log')
+
+    for ext,c in [('','b'), ('_noise','r')]:
+
+        with open(dump_path+'dump_sim_impacts_{}{}.dat'.format('gammas',ext), 'rb') as f:
+            data = pickle.load(f)
+
+        d = data['thresh_fraction']
+        a = np.array([[ d[(L,fq)] for fq in fq_list ]
+                                  for L in L_list ], dtype=float)
+
+        fq_cut = a[:,fq_list.index(fq0),:]
+        L_cut = a[L_list.index(L0),:,:]
+        ax_fq.plot(L_list, fq_cut, c)
+        ax_L.plot(fq_list, L_cut, c)
+
+    plt.draw()
+    plt.pause(0.05)

@@ -26,13 +26,6 @@ class QPTunneling(object):
     def add_data(self, o):
         self.n_rows += 1 # don't divide by number of rows because these are already averaged in partition_and_avg_psd
         cpsd, f = noiselib.partition_and_avg_psd(o, self.fs)
-        # V
-        print('o=',o)
-        print('type(o)=',type(o))
-        print('type(o[0])=',type(o[0]))
-        print('len(o[0])=',len(o[0]))
-        print('o[0][:10]=',o[0][:10])
-        # V
         if not hasattr(self, 'cpsd'):
             self.cpsd, self.f = cpsd, f
         else:
@@ -47,18 +40,22 @@ class QPTunneling(object):
     def get_fit(self, window_averaging = True):
         def y(x, a, gamma):
             return gamma*a/(np.pi**2*x**2 + gamma**2)
+            # return gamma*a/(4.*np.pi**2*x**2 + gamma**2/4.)
         psd, f = self.get_psd(window_averaging)
         psd = psd[~np.isnan(f)]
         f = f[~np.isnan(f)]
         f = f[~np.isnan(psd)]
         psd = psd[~np.isnan(psd)]
-        popt, pcov = curve_fit(y, f, psd, bounds=(0,np.inf))
+        popt, pcov = curve_fit(y, f, psd, p0=(psd[0],1e3), bounds=(0,np.inf))
         print popt
         return popt[-1], y(f, *popt), f
         
     def plot_psd(self, window_averaging = True, figNum=None, label=None, fit=True):
         fig = plt.figure(figNum)
-        ax = fig.add_subplot(111)
+        if len(fig.axes) > 0:
+            ax = fig.axes[0]
+        else:
+            ax = fig.add_subplot(111)
         ax.set_title('PSD')
         ax.set_xlabel('Frequency [Hz]')
         ax.set_ylabel('$S_\eta (\eta^2/Hz)$')
@@ -73,7 +70,7 @@ class QPTunneling(object):
         
         ax.set_xscale('log')
         ax.set_yscale('log')
-        ax.legend()
+        noiselib.legend(ax)
         ax.grid()
         plt.draw()
         plt.pause(0.05)

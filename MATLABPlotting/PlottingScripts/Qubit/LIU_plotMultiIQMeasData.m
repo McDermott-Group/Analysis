@@ -31,25 +31,12 @@ plts_path = makeDirPlots(pathnames{1});
 
 for data_index = 1:length(data{1}.dep)
     I_name = data{1}.dep{data_index};
-    if ~isempty(strfind(I_name, '_Std_Dev')) ||...
-            isempty(strfind(I_name, 'I')) ||...
-            length(data{1}.rels.(I_name)) ~= 1
+    if ~contains(I_name, 'Is')
         continue
     end
     Q_name = strrep(I_name, 'I', 'Q');
     if ~isfield(data{1}, Q_name)
         continue
-    end
-
-    for k = 1:length(data)
-        % fprintf('k = %f\n', k )
-        if ~isfield(data{k}, I_name) ||...
-                ~isfield(data{k}, Q_name) ||...
-                length(data{k}.rels.(I_name)) ~= 1 ||...
-                length(data{k}.rels.(Q_name)) ~= 1 ||...
-                ~strcmp(data{k}.rels.(I_name){1}, data{k}.rels.(Q_name){1})
-            error('The selected files do not match.')
-        end
     end
 
     if length(data) > 1
@@ -76,8 +63,7 @@ for data_index = 1:length(data{1}.dep)
     % Plot a simple trajectories.
     createFigure([.01, .1, .88, .8]);
     hold on
-    I_name = 'Is';
-    Q_name = 'Qs';
+    
     for k = 1:length(data)
         scatter(data{k}.(I_name)(:), data{k}.(Q_name)(:), '.')
     end
