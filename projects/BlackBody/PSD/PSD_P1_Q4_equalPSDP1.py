@@ -28,8 +28,8 @@ P1CleanDirty.update_experiment_name(experiment_name_P1, experiment_name_PSD)
 P1CleanDirty.add_p1_data_from_matlab(P1_file, P1_threshold=P1)
 PSD_Clean_Files = P1CleanDirty.clean_files
 
-# QPT_Q4_Poison_Clean = QPTunneling_Liu(name='P1={:.3f} at temp={}'.format(P1CleanDirty.clean_P1, temp))
-QPT_Q4_Poison_Clean = QPTunneling_Wilen(name='P1={:.3f} at temp={}'.format(P1CleanDirty.clean_P1, temp))
+QPT_Q4_Poison_Clean = QPTunneling_Liu(name='P1={:.3f} at temp={}'.format(P1CleanDirty.clean_P1, temp))
+# QPT_Q4_Poison_Clean = QPTunneling_Wilen(name='P1={:.3f} at temp={}'.format(P1CleanDirty.clean_P1, temp))
 QPT_Q4_Poison_Clean.add_datasets(PSD_Clean_Files)
 
 QPT_List = [QPT_Q4_Poison_Clean]

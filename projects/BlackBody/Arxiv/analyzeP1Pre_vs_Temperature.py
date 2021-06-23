@@ -3,7 +3,7 @@ Used to analyze the up/down transition rate based on the T1, P1 as
 a function of blackbody temperature
 """
 
-from antennalib import getGamma_pa
+from projects.BlackBody.antennalib import getGamma_pa
 
 import numpy as np
 import matplotlib.pyplot as plt

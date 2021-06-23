@@ -1,6 +1,6 @@
 """
 Used to analyze the up/down transition rate based on the T1, P1 as
-a function of blackbody temperature
+a function of blackbody temperature. This data is Q4
 """
 
 from antennalib import getGamma_pa
@@ -43,6 +43,7 @@ T1_other = 25.0*1e-6
 # Temp_P1_T1_30 = [472, 21.9, 8.48, 0.3]
 # Temp_P1_T1_31 = [484, 23.2, 6.40, 0.3]
 
+# [temp, P1, T1, PSD]
 data_2d = np.asarray([
     [76.0, 1.629, 20.75, 10], [82.5, 1.790, 21.30, 10], [95.5, 1.768, 20.50, 10],
     [104.8, 1.838, 20.66, 10], [110.6, 2.098, 21.93, 10], [116.5, 1.976, 23.86, 10],
@@ -147,19 +148,19 @@ Gamma_Pre = np.array([874, 1065, 1251, 1325, 1191, 1391, 1518, 1723, 1681,
             *1.0
 # Gamma_pa_scale = [np.log(1/G) for G in Gamma_pa]
 
-plt.scatter([1/T for T in T_Pre], [np.log(1/G) for G in Gamma_Pre], label='QB_Up_Pre')
+# plt.scatter([1/T for T in T_Pre], [np.log(1/G) for G in Gamma_Pre], label='QB_Up_Pre')
 # plt.scatter([1/T for T in T_Pre], [0.45/T-8.7 for T in T_Pre], label='Fit, f0=9.4GHz')
-plt.plot([1/T for T in T_Pre], [0.45/T-8.75 for T in T_Pre], label='Fit, f0=9.4GHz')
+# plt.plot([1/T for T in T_Pre], [0.45/T-8.75 for T in T_Pre], label='Fit, f0=9.4GHz')
 # plt.scatter([1/T for T in T_Pre], [1.2/T-10.8 for T in T_Pre], label='Fit, f0=9.4GHz')
-plt.plot([1/T for T in T_Pre], [1.2/T-10.8 for T in T_Pre], label='Fit, f0=25GHz')
+# plt.plot([1/T for T in T_Pre], [1.2/T-10.8 for T in T_Pre], label='Fit, f0=25GHz')
 # plt.scatter([1/T for T in Temp_array], Gamma_down_QP_scale, label='QP_down')
 # plt.scatter([1/T for T in Temp_array], Gamma_up_QP_scale, label='QP_Up')
 # plt.scatter([1/T for T in Temp_array], [0.06/T-7.5 for T in Temp_array], label='QP_fit')
 # # plt.scatter([1/T for T in Temp_array], [0.5/T-10.5 for T in Temp_array], label='QP_fit')
 # plt.scatter([1/T for T in Temp_array[:27]], Gamma_PSD_scale[:27], label='PSD')
 # # plt.scatter([1/T for T in Temp_array], Gamma_pa_scale, label='Photon Assisted')
-plt.xlabel('1/Temp(Kelvin)')
-plt.ylabel('ln(df/Gamma)')
-plt.grid()
-plt.legend()
-plt.show()
+# plt.xlabel('1/Temp(Kelvin)')
+# plt.ylabel('ln(df/Gamma)')
+# plt.grid()
+# plt.legend()
+# plt.show()

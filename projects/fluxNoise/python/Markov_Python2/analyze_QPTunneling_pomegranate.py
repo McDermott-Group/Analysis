@@ -1,7 +1,6 @@
 """Model Pomegranate Author: Jacob Schreiber.
 Author Vincent Liu and Sohair Abdullah."""
 
-
 import numpy as np
 from pomegranate import *
 from numpy import *
@@ -11,7 +10,8 @@ import json
 import jsonpickle
 
 
-def generate_hidden_signal(length=10000, charge_burst_time=4000, p_QP=[0.01, 0.01]):
+def generate_hidden_signal(length=10000, charge_burst_time=4000,
+                           p_QP=[0.01, 0.01]):
     """
     Generate hidden signal from given parameters
     :param length: the length of the hidden signal, eg. 8192
@@ -28,26 +28,69 @@ def generate_hidden_signal(length=10000, charge_burst_time=4000, p_QP=[0.01, 0.0
     hidden_signal[0] = random.choice([0, 1], p=[0.5, 0.5])  # Initial parity
 
     for i in range(1, charge_burst_time):
-        hidden_signal[i] = random.choice([hidden_signal[i - 1], 1 - hidden_signal[i - 1]],
-                                         p=[1 - p_QP_before, p_QP_before])
+        hidden_signal[i] = random.choice(
+            [hidden_signal[i - 1], 1 - hidden_signal[i - 1]],
+            p=[1 - p_QP_before, p_QP_before])
     for i in range(charge_burst_time, length):
-        hidden_signal[i] = random.choice([hidden_signal[i - 1], 1 - hidden_signal[i - 1]],
-                                         p=[1 - p_QP_after, p_QP_after])
+        hidden_signal[i] = random.choice(
+            [hidden_signal[i - 1], 1 - hidden_signal[i - 1]],
+            p=[1 - p_QP_after, p_QP_after])
 
     return hidden_signal
 
-def generate_hidden_signal_two_freq(length=10000, t_meas=50e-6, t_base=10e-3, t_poison=1e-3):
 
-    p_base = 1-exp(-t_meas/t_base)
-    p_poison = 1-exp(-t_meas/t_poison)
+def generate_hidden_signal_highP1(length=10000, p_QP=0.01, P1=0.0):
+    """
+    Generate hidden signal from given parameters. And this is with high P1 to start with. ANd the high
+    P1 is due to QPs induced Qubit state transitions.
+    :param length: the length of the hidden signal, eg. 8192
+    :param charge_burst_time: the time where we have the charge burst, eg. 2456
+    :param p_QP: p_QP = [p_QP_before, p_QP_after], a two element list consists QP tunneling rate before and after the burst
+        p_QP = 1.0-np.exp(-t_meas/t_QP), e.g. t_meas = 100 us, t_QP = 10 ms, p_QP=0.01
+        P1 is the one state occupation
+    :return: the hidden signal [0,1,0,0,1,1,1,...]
+    """
+    hidden_signal = [0] * length
+    QB_state = [0] * length
+
+    hidden_signal[0] = random.choice([0, 1], p=[0.5, 0.5])  # Initial parity
+    for i in range(1, length):
+        hidden_signal[i] = random.choice(
+            [hidden_signal[i - 1], 1 - hidden_signal[i - 1]],
+            p=[1 - p_QP, p_QP])
+
+        # For correlated QB bit flip and parity flip
+        # if QB_state[i-1] == 1:
+        #     # find p1 is low, let's take T1 into consideration
+        #     QB_state[i] = random.choice([0, 1], p=[np.exp(-20/100), 1-np.exp(-20/100)])
+        # # if when there is parity jump, then 10% chance to flip a bit
+        # if hidden_signal[i] != hidden_signal[i-1]:
+        #     jump = random.choice([0, 1], p=[0.1, 0.9])
+        #     # jump=0, no bit flip, jump=1, bit flip
+        #     if jump == 1:
+        #         QB_state[i] = 1- QB_state[i]
+
+    for i in range(1, length):  # this is for incorrect parity measurement
+        if QB_state[i] == 1:
+            hidden_signal[i] = 1 - hidden_signal[i]
+    print('avg_p1=', np.mean(QB_state))
+    return hidden_signal
+
+def generate_hidden_signal_two_freq(length=10000, t_meas=50e-6, t_base=10e-3,
+                                    t_poison=1e-3):
+    """Under construction"""
+
+    p_base = 1 - exp(-t_meas / t_base)
+    p_poison = 1 - exp(-t_meas / t_poison)
     hidden_signal = [0] * length
     hidden_signal[0] = random.choice([0, 1], p=[0.5, 0.5])  # Initial parity
-    p_stay = 1-p_base-p_poison
+    p_stay = 1 - p_base - p_poison
     # p_stay = (1-p_base)(1-p_poison)+p_base*p_poison
 
     for i in range(1, length):
-        hidden_signal[i] = random.choice([hidden_signal[i - 1], 1 - hidden_signal[i - 1]],
-                                         p=[p_stay, 1-p_stay])
+        hidden_signal[i] = random.choice(
+            [hidden_signal[i - 1], 1 - hidden_signal[i - 1]],
+            p=[p_stay, 1 - p_stay])
     return hidden_signal
 
 
@@ -68,13 +111,18 @@ def hidden_to_observed_signal(hidden_signal, readout_fidelity=[0.9, 0.8]):
     p_0e = 1 - p_1e
 
     for i in range(len(hidden_signal)):
-        if hidden_signal[i] == 0: observed_signal[i] = random.choice([0, 1], p=[p_0g, p_1g])
-        if hidden_signal[i] == 1: observed_signal[i] = random.choice([0, 1], p=[p_0e, p_1e])
+        if hidden_signal[i] == 0: observed_signal[i] = random.choice([0, 1],
+                                                                     p=[p_0g,
+                                                                        p_1g])
+        if hidden_signal[i] == 1: observed_signal[i] = random.choice([0, 1],
+                                                                     p=[p_0e,
+                                                                        p_1e])
 
     return observed_signal
 
 
-def observed_to_recovered_signal(observed_signal, readout_fidelity=[0.9, 0.8], p_QP=0.01):
+def observed_to_recovered_signal(observed_signal, readout_fidelity=[0.9, 0.8],
+                                 p_QP=0.01):
     """
 
     :param observed_signal: observed signal for parity from given readout fidelity
@@ -111,7 +159,8 @@ def observed_to_recovered_signal(observed_signal, readout_fidelity=[0.9, 0.8], p
     model.add_transition(e, model.end, 0.5)
     model.bake()
 
-    recovered_signal = ", ".join(state.name for i, state in model.viterbi(observed_sequence)[1])
+    recovered_signal = ", ".join(
+        state.name for i, state in model.viterbi(observed_sequence)[1])
 
     # Data post-processing
     recovered_signal = recovered_signal.split(',')
@@ -145,7 +194,8 @@ def observed_to_recovered_signal_BW(observed_signal, seed=0):
     temp1 = np.random.uniform(low=0.5, high=1)  # indicates P[g|g]
     temp2 = np.random.uniform(low=0.5, high=1)  # indicates P[e|e]
     dists = [DiscreteDistribution({'0': temp1, '1': 1 - temp1}),
-             DiscreteDistribution({'0': 1 - temp2, '1': temp2})]    # random initial guess for transition matrix, we can polish if we know rough ranges for this
+             DiscreteDistribution({'0': 1 - temp2,
+                                   '1': temp2})]  # random initial guess for transition matrix, we can polish if we know rough ranges for this
     # trans_mat_guess = np.array(np.random.rand(2, 2))
     trans_mat_guess = [[0.9, 0.1], [0.1, 0.9]]
     # print('trans_mat_guess=', trans_mat_guess)
@@ -170,15 +220,18 @@ def observed_to_recovered_signal_BW(observed_signal, seed=0):
     state_dicts1e = json.loads(empJSON1)
 
     emis0g = \
-    state_dicts0g['py/reduce'][1]['py/tuple'][0]['py/reduce'][1]['py/tuple'][
-        0]['0']
+        state_dicts0g['py/reduce'][1]['py/tuple'][0]['py/reduce'][1][
+            'py/tuple'][
+            0]['0']
     emis1e = \
-    state_dicts1e['py/reduce'][1]['py/tuple'][0]['py/reduce'][1]['py/tuple'][
-        0]['1']
+        state_dicts1e['py/reduce'][1]['py/tuple'][0]['py/reduce'][1][
+            'py/tuple'][
+            0]['1']
     return np.asarray(recovered_seq), emis0g, emis1e, traneg, trange
 
 
-def observed_to_recovered_signal_LIU(observed_signal, readout_fidelity=[0.8, 0.8], p_QP=0.01):
+def observed_to_recovered_signal_LIU(observed_signal,
+                                     readout_fidelity=[0.8, 0.8], p_QP=0.01):
     """
 
     :param observed_signal:
@@ -208,13 +261,13 @@ def observed_to_recovered_signal_LIU(observed_signal, readout_fidelity=[0.8, 0.8
 
     # Initial Probabilities, also known as the prior probability, calculated from Transition matrix
     p_e_VTB = np.log(0.5)
-    p_g_VTB = np.log(1.0-p_e_VTB)
+    p_g_VTB = np.log(1.0 - p_e_VTB)
 
     # Emission Probabilities, this is the human choice and needs to be optimized, the p_0g_VTB is the most important one
     p_0g_VTB = np.log(readout_fidelity[0])
-    p_1g_VTB = np.log(1.0-readout_fidelity[0])
+    p_1g_VTB = np.log(1.0 - readout_fidelity[0])
     p_1e_VTB = np.log(readout_fidelity[1])
-    p_0e_VTB = np.log(1.0-readout_fidelity[1])
+    p_0e_VTB = np.log(1.0 - readout_fidelity[1])
 
     print p_0g_VTB, p_1g_VTB, p_0e_VTB, p_1e_VTB
 
@@ -227,15 +280,19 @@ def observed_to_recovered_signal_LIU(observed_signal, readout_fidelity=[0.8, 0.8
     for i in range(len(observed_signal)):
         prev_e, prev_g = probabilities[-1]
         if observed_signal[i] == 0:
-            curr_e = max(prev_e + p_ee_VTB + p_1e_VTB, prev_g + p_ge_VTB + p_1e_VTB)
-            curr_g = max(prev_e + p_eg_VTB + p_1g_VTB, prev_g + p_gg_VTB + p_1g_VTB)
+            curr_e = max(prev_e + p_ee_VTB + p_1e_VTB,
+                         prev_g + p_ge_VTB + p_1e_VTB)
+            curr_g = max(prev_e + p_eg_VTB + p_1g_VTB,
+                         prev_g + p_gg_VTB + p_1g_VTB)
             probabilities.append((curr_e, curr_g))
         else:
-            curr_e = max(prev_e + p_ee_VTB + p_0e_VTB, prev_g + p_ge_VTB + p_0e_VTB)
-            curr_g = max(prev_e + p_eg_VTB + p_0g_VTB, prev_g + p_gg_VTB + p_0g_VTB)
+            curr_e = max(prev_e + p_ee_VTB + p_0e_VTB,
+                         prev_g + p_ge_VTB + p_0e_VTB)
+            curr_g = max(prev_e + p_eg_VTB + p_0g_VTB,
+                         prev_g + p_gg_VTB + p_0g_VTB)
             probabilities.append((curr_e, curr_g))
 
-    for p_index in range(len(probabilities)-1):
+    for p_index in range(len(probabilities) - 1):
         p = probabilities[p_index]
         if p[0] < p[1]:
             recovered_signal[p_index] = 0

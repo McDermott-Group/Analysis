@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from dataChest import *
 from scipy.optimize import curve_fit
 from scipy.signal import periodogram
-from Markov_Python2.analyze_QPTunneling_pomegranate import observed_to_recovered_signal_BW, generate_hidden_signal, hidden_to_observed_signal, generate_hidden_signal_two_freq
+from Markov_Python2.analyze_QPTunneling_pomegranate import observed_to_recovered_signal_BW, generate_hidden_signal, hidden_to_observed_signal, generate_hidden_signal_highP1
 
 reload(noiselib)
 
@@ -27,7 +27,7 @@ class QPTunneling_Wilen(object):
         self.f_or_t = 'f'  # the PSD extraction is frequency or time
         self.T_parity = None
 
-    def add_datasets(self, file_path, data_str='Charge_Parity_Trace'):
+    def add_datasets(self, file_path, data_str='Charge_Parity_Trace', simulate=False):
         if type(file_path) == str:
             file_path = [file_path]
         f_l = file_path[0]
@@ -44,7 +44,33 @@ class QPTunneling_Wilen(object):
                 for j in range(len(o)):
                     o[j] = map(int, o[j])
                 # o = o * 0.5 + 0.5
+            if simulate:
+                T_parity = 2 * 10 ** (-3)  # parity switching time
+                p_QP = 1 - np.exp(-sample_rate / T_parity)  # converted to Poisson probability
+                signal = generate_hidden_signal_highP1(p_QP=p_QP, P1=0.2)
+                signal = hidden_to_observed_signal(signal, [0.9, 0.9])
+                for i in range(len(o)):
+                    o[i]=signal
+            # print('o=', len(o[1]))
             self.add_data(o)
+
+        """
+                for f in file_path:
+            data = noiselib.loadmat(f)
+            ps_list = np.array(data[data_type])
+            for ps in ps_list:
+                if simulate:
+                    T_parity = 2*10**(-3)   # parity switching time
+                    p_QP = 1 - np.exp(-sample_rate/T_parity) # converted to Poisson probability
+                    # signal = generate_hidden_signal(p_QP=[p_QP, p_QP])
+                    signal = generate_hidden_signal_highP1(p_QP=p_QP)
+                    # signal = generate_hidden_signal_two_freq()
+                    signal = hidden_to_observed_signal(signal, [0.9, 0.9])
+                    ps = [(ps - 0.5) * 2 for ps in signal]
+                if HMM:
+                    ps = self.apply_HMM(ps)
+                self.parity_string_array.append(ps)
+        """
 
     def add_data(self, o):
         self.n_rows += 1  # don't divide by number of rows because these are already averaged in partition_and_avg_psd
@@ -122,6 +148,7 @@ class QPTunneling_Liu(object):
         f_l = file_path[0]
         sample_rate = noiselib.loadmat_ExptVars(f_l)['Total_Time']
         sample_rate = sample_rate * 10**(-6)
+        # print('sample_rate=', sample_rate)
         # sample_rate = 50 * 10**(-6)
         self.fs = 1.0/sample_rate
 
@@ -130,10 +157,11 @@ class QPTunneling_Liu(object):
             ps_list = np.array(data[data_type])
             for ps in ps_list:
                 if simulate:
-                    T_parity = 5*10**(-3)   # parity switching time
+                    T_parity = 2*10**(-3)   # parity switching time
                     p_QP = 1 - np.exp(-sample_rate/T_parity) # converted to Poisson probability
                     # signal = generate_hidden_signal(p_QP=[p_QP, p_QP])
-                    signal = generate_hidden_signal_two_freq()
+                    signal = generate_hidden_signal_highP1(p_QP=p_QP)
+                    # signal = generate_hidden_signal_two_freq()
                     signal = hidden_to_observed_signal(signal, [0.9, 0.9])
                     ps = [(ps - 0.5) * 2 for ps in signal]
                 if HMM:
