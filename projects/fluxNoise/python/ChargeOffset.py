@@ -1,7 +1,8 @@
 import os
 import numpy as np
 import noiselib
-reload(noiselib)
+import importlib
+importlib.reload(noiselib)
 from dataChest import *
 import matplotlib.pyplot as plt
 from scipy import asarray as ar,exp
@@ -102,8 +103,8 @@ class ChargeOffset(object):
     def get_jump_sizes(self, datasets = None, plot=False, ax=None, qubits=None):
         time, offset = self.get_charge_offset(datasets)
         if qubits is None:
-            qubits = offset.keys()
-        jumps = {l: offset[l][1:] - offset[l][:-1] for l in offset.keys() if l in qubits}
+            qubits = list(offset.keys())
+        jumps = {l: offset[l][1:] - offset[l][:-1] for l in list(offset.keys()) if l in qubits}
         
         # find 2*sigma jump size for each label
         # def gaus(x, b, A, mu, sigma):#, A2, mu2, sigma2):
@@ -112,7 +113,7 @@ class ChargeOffset(object):
             mu = 0
             return b + A * exp(-(x-mu)**2/(2*sigma**2))
         sigma = {}
-        for l in jumps.keys():
+        for l in list(jumps.keys()):
             if l not in qubits:
                 continue
             h, bins = np.histogram(jumps[l][~np.isnan(jumps[l])], bins=500, range=(-0.5,0.5))
@@ -152,14 +153,14 @@ class ChargeOffset(object):
         jumps, sigma = self.get_jump_sizes(datasets)
         largeJumps = {l: np.append(self._above(jumps[l], 2*sigma[l]), True) | 
                          np.append(True, self._above(jumps[l], 2*sigma[l]))
-                        for l in jumps.keys()}
+                        for l in list(jumps.keys())}
         
         if ax is None:
             fig, ax = plt.subplots(1,1)
         ax.set_title('Charge Offset')
         ax.set_xlabel('Time [s]')
         ax.set_ylabel('Charge Offset [e]')
-        for l in offset.keys():
+        for l in list(offset.keys()):
             ax.plot(time, offset[l], label=l)
             ax.plot(time, np.ma.masked_where(~largeJumps[l], offset[l]), label=l)
         ax.legend()
@@ -169,19 +170,19 @@ class ChargeOffset(object):
     def plot_jump_sizes(self, datasets = None, ax=None):
         jumps, sigma = self.get_jump_sizes(datasets)
         
-        for l in jumps.keys():
+        for l in list(jumps.keys()):
             n_tot = np.sum(~np.isnan(jumps[l]))
             n_big = np.sum(self._above(jumps[l], 2*sigma[l]))
             print('{}: {} / {} = {:.2f}% = {:.2f}*T between jumps'.format(
                     l, n_big, n_tot, 100.*n_big/n_tot, 1.*n_tot/n_big))
-        print( {l: '{:.3f}'.format(2*s) for l,s in sigma.items()} )
+        print( {l: '{:.3f}'.format(2*s) for l,s in list(sigma.items())} )
         
         if ax is None:
             fig, ax = plt.subplots(1,1)
         ax.set_title('Jump Sizes')
         ax.set_xlabel('N')
         ax.set_ylabel('Jump Size ($e$)')
-        for l in jumps.keys():
+        for l in list(jumps.keys()):
             ax.plot(np.abs(jumps[l], jumps[l], where=~np.isnan(jumps[l])), label=l)
         ax.legend()
         plt.draw()
@@ -239,7 +240,7 @@ class ChargeOffset(object):
                     self._above(-jumps2,thresh[1],abs=False))
         a1324 = 1.*(q1+q3)/(q2+q4)
         d_a1324 = a1324 * np.sqrt( 1./(q1+q3) + 1./(q2+q4) )
-        print(u'    13/24 = ({}+{})/({}+{}) = {:.2f} \u00B1 {:.3f}'.format(
+        print('    13/24 = ({}+{})/({}+{}) = {:.2f} \u00B1 {:.3f}'.format(
                     q1, q3, q2, q4, a1324, d_a1324  ))
         
         # nA, nB = np.sum(np.isfinite(jumps1)), np.sum(np.isfinite(jumps2))
@@ -271,17 +272,17 @@ class ChargeOffset(object):
         d_gC = gC * np.sqrt( (d_pCp/pCp)**2 + (d_gAB/gAB)**2 )
         
         # print('    pA,pB,p_obs = {:.2f},{:.2f},{:.2f}'.format(pA,pB,p_obs))
-        print(u'    pA = {}/{} = {:.5f} \u00B1 {:.5f}'.format( jA, nA, pA, d_pA ))
-        print(u'    pB = {}/{} = {:.5f} \u00B1 {:.5f}'.format( jB, nB, pB, d_pB ))
-        print(u"    pA' = {:.4f} \u00B1 {:.3f}".format(pAp,d_pAp))
-        print(u"    pB' = {:.4f} \u00B1 {:.3f}".format(pBp,d_pBp))
-        print(u'    p_obs = {}/{} = {:.4f} \u00B1 {:.3f}'.format( (q1 + q2 + q3 + q4),
-                                             np.sum( bothMeas ), p_obs, d_p_obs ))
-        print(u'    pC = {:.3f} \u00B1 {:.4f}'.format(pC, d_pC))
-        print(u'    pC/mean(pA,pB) = {:.3f} \u00B1 {:.4f}'.format( pCp, d_pCp ))
-        print(u'    gA,gB = {:.3f} \u00B1 {:.4f} mHz, {:.3f} \u00B1 {:.4f} mHz'.format( 
-                            1e3*gA, 1e3*d_gA, 1e3*gB, 1e3*d_gB ))
-        print(u'    gC = {:.3f} \u00B1 {:.4f} mHz'.format( 1e3*gC, 1e3*d_gC ))
+        print('    pA = {}/{} = {:.5f} \u00B1 {:.5f}'.format( jA, nA, pA, d_pA ))
+        print('    pB = {}/{} = {:.5f} \u00B1 {:.5f}'.format( jB, nB, pB, d_pB ))
+        print("    pA' = {:.4f} \u00B1 {:.3f}".format(pAp,d_pAp))
+        print("    pB' = {:.4f} \u00B1 {:.3f}".format(pBp,d_pBp))
+        print('    p_obs = {}/{} = {:.4f} \u00B1 {:.3f}'.format( (q1 + q2 + q3 + q4),
+                                            np.sum( bothMeas ), p_obs, d_p_obs ))
+        print('    pC = {:.3f} \u00B1 {:.4f}'.format(pC, d_pC)))
+        print('    pC/mean(pA,pB) = {:.3f} \u00B1 {:.4f}'.format( pCp, d_pCp ))
+        print('    gA,gB = {:.3f} \u00B1 {:.4f} mHz, {:.3f} \u00B1 {:.4f} mHz'.format( 
+                           1e3*gA, 1e3*d_gA, 1e3*gB, 1e3*d_gB ))
+        print('    gC = {:.3f} \u00B1 {:.4f} mHz'.format( 1e3*gC, 1e3*d_gC ))
         
         if plot:
             if ax is None:
@@ -338,9 +339,9 @@ class ChargeOffset(object):
         for path in paths:
             all_files += glob.glob(path+'*.mat')
         all_times = [os.path.getctime(f) for f in all_files]
-        all = zip(all_times, all_files)
+        all = list(zip(all_times, all_files))
         all.sort()
-        all_times, all_files = zip(*all) # undoes zip, now sorted
+        all_times, all_files = list(zip(*all)) # undoes zip, now sorted
         closest_time_index = np.searchsorted(all_times, times)
         return [all_files[i] for i in closest_time_index]
         

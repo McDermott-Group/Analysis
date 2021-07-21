@@ -1,11 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import noiselib
-reload(noiselib)
+import importlib
+importlib.reload(noiselib)
 from noiselib import matpaths
 from QPTunneling import *
 import ChargeOffset
-reload(ChargeOffset)
+importlib.reload(ChargeOffset)
 from ChargeOffset import *
 from datasets import *
 
@@ -15,7 +16,7 @@ def get_averaged_P1(files, label=''):
         try:
             data = noiselib.loadmat(f)
         except:
-            print 'corrupted:', f
+            print('corrupted:', f)
             data = { 'Single_Shot_Occupation{}'.format(label): np.nan }
         o = np.array(data['Single_Shot_Occupation{}'.format(label)])
         P1_avg = np.append(P1_avg, o)
@@ -30,9 +31,9 @@ def get_averaged_flips(files, fidelity, label='',axis=None):
         try:
             o = noiselib.apply_infidelity_correction_HMM(o, fidelity=fidelity[i])
         except:
-            print 'failed to correct'
-            print f
-            print fidelity[i]
+            print('failed to correct')
+            print(f)
+            print(fidelity[i])
         flip_avg = np.append(flip_avg, np.mean(np.abs(np.diff(o, axis=1)),axis=axis))
     return flip_avg
 
@@ -92,8 +93,8 @@ def plot_data(data, xlabel='', ylabel='', title=''):
 # fileCharge = 'fluxNoise2\DR1 - 2019-12-17\CorrFar\Q3\General\Parameter\cwx0615mbj_charge_offset.hdf5'
 
 date, Q = '05-04-20', 'Q1'
-filesP1, fName = range(0,552+1), ['P1_I','P1_X']
-filesQP = range(0,552+1) #552
+filesP1, fName = list(range(0,552+1)), ['P1_I','P1_X']
+filesQP = list(range(0,552+1)) #552
 fileCharge = 'fluxNoise2\DR1 - 2019-12-17\CorrFar\Q1\General\Parameter\cxa1458apn_charge_offset.hdf5'
 
 #####################################
@@ -115,7 +116,7 @@ flip_avg[flip_avg < 10./8192] = np.nan
 CO = ChargeOffset()
 CO.add_dataset(fileCharge)
 charge_jumps, sigma = CO.get_jump_sizes()
-charge_jumps = np.abs(charge_jumps.values()[0])
+charge_jumps = np.abs(list(charge_jumps.values())[0])
 
 fig, axs = plt.subplots(4, sharex=True) #, gridspec_kw={'hspace':5})
 fig.suptitle(ds['Q']+'\n'+str(ds['date']))

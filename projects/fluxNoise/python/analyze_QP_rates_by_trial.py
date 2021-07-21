@@ -1,16 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import noiselib
-reload(noiselib)
+import importlib
+importlib.reload(noiselib)
 from noiselib import movingmean
 import QPTunneling
-reload(QPTunneling)
+importlib.reload(QPTunneling)
 from QPTunneling import *
 import ChargeOffset
-reload(ChargeOffset)
+importlib.reload(ChargeOffset)
 from ChargeOffset import *
 import TwoMeasDataFile
-reload(TwoMeasDataFile)
+importlib.reload(TwoMeasDataFile)
 from TwoMeasDataFile import *
 from dataChest import dataChest
 from random import randrange
@@ -35,7 +36,7 @@ QPT.plot_psd()
 
 jumps,sigma = CO.get_jump_sizes()
 large_jumps = np.argwhere(jumps['Q1'] > 3*sigma['Q1'])
-flip_rates_at_jumps = flip_rates[ np.repeat(large_jumps,10) + range(10)*len(large_jumps) ]
+flip_rates_at_jumps = flip_rates[ np.repeat(large_jumps,10) + list(range(10))*len(large_jumps) ]
 indicies = np.arange(len(flip_rates))
 
 fig = plt.figure()

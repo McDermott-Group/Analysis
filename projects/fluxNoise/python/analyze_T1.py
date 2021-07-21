@@ -1,14 +1,15 @@
 import os
 import numpy as np
 import noiselib
-reload(noiselib)
+import importlib
+importlib.reload(noiselib)
 from noiselib import matpaths
 from dataChest import *
 import general.calibration as cal
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 import datasets
-reload(datasets)
+importlib.reload(datasets)
 from datasets import *
 
 # q, date, files, thresh = 'Q2', '03-24-20', range(251+1)
@@ -39,7 +40,7 @@ P1 = { 'I':np.array([]),
        'X': np.array([]) }
 
 if 'recalibrate' in ds and ds['recalibrate']:
-    print 'recalibrating...'
+    print('recalibrating...')
     data = noiselib.loadmat( fP1_I[0] )
     iq0 = np.array((data['Is'],data['Qs']))
     data = noiselib.loadmat( fP1_X[0] )
@@ -51,7 +52,7 @@ for files, gate in [ (fP1_I,'I'), (fP1_X,'X') ]:
         try:
             data = noiselib.loadmat( f )
         except:
-            print 'corrupted file:', f
+            print('corrupted file:', f)
             data = { 'Single_Shot_Occupations': [np.nan],
                      'Single_Shot_Occupation': [np.nan]}
         if 'recalibrate' in ds and ds['recalibrate']:
@@ -79,7 +80,7 @@ elif 'thresh_T1' in ds:
 
 # plot P1
 fig, ax = plt.subplots()
-x = range(len(fP1_I))
+x = list(range(len(fP1_I)))
 ax.plot(x, P1['I'], linewidth=0.5)
 ax.scatter(x, P1['I'], c=filter, cmap='bwr', s=4)
 ax.plot(x, P1['X'], linewidth=0.5)

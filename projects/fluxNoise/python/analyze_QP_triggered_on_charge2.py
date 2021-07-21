@@ -1,14 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import noiselib
-reload(noiselib)
+import importlib
+importlib.reload(noiselib)
 from noiselib import movingmean
 from QPTunneling import *
 import ChargeOffset
-reload(ChargeOffset)
+importlib.reload(ChargeOffset)
 from ChargeOffset import *
 import TwoMeasDataFile
-reload(TwoMeasDataFile)
+importlib.reload(TwoMeasDataFile)
 from TwoMeasDataFile import *
 from dataChest import dataChest
 from random import randrange
@@ -56,11 +57,11 @@ for k,f in [(i,files[i]) for i in whitelist[:]]:
     DF.apply_infidelity_correction_HMM(fidelity=[0.95, 0.75])
     # DF.apply_infidelity_correction(9)
     trigs = DF.get_triggers()
-    trigs = [(t,r) for t,r in trigs if k not in blacklist.keys() 
+    trigs = [(t,r) for t,r in trigs if k not in list(blacklist.keys()) 
                                     or t not in blacklist[k]]
     if len(trigs) > 0:
         data_files[f] = DF
-    print k, trigs
+    print(k, trigs)
     for trial, rep in trigs:
         DF.plot(trial, plot='Flips', smoothing=500)
         DF.plot_adj_file(path.format(num+Q_A-3), 0)

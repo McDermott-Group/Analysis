@@ -11,8 +11,9 @@ from dataChest import *
 from scipy.optimize import curve_fit
 from scipy.signal import periodogram
 from Markov_Python2.analyze_QPTunneling_pomegranate import observed_to_recovered_signal_BW, generate_hidden_signal, hidden_to_observed_signal, generate_hidden_signal_highP1
+import importlib
 
-reload(noiselib)
+importlib.reload(noiselib)
 
 
 class QPTunneling_Wilen(object):
@@ -43,7 +44,7 @@ class QPTunneling_Wilen(object):
             if convertto10:
                 o = o * 0.5 + 0.5
                 for j in range(len(o)):
-                    o[j] = map(int, o[j])
+                    o[j] = list(map(int, o[j]))
                 # o = o * 0.5 + 0.5
             if simulate:
                 T_parity = 2 * 10 ** (-3)  # parity switching time

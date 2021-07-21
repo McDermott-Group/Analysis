@@ -1,11 +1,12 @@
 from sklearn import mixture
 import dataChest
-reload(dataChest)
+import importlib
+importlib.reload(dataChest)
 from dataChest import *
 import numpy as np
 import matplotlib.pyplot as plt
 import general.calibration as calkit
-reload(calkit)
+importlib.reload(calkit)
 from general.calibration import *
 
 # dc = dataChest(['fluxNoise2','DR1 - 2019-12-17','CorrFar','Q1Q2Q3Q4Corr','General','04-15-20','Charge_resetting','HDF5Data'])

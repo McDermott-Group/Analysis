@@ -34,19 +34,19 @@ def stoneyStress(Ebiaxial, tWafer, tFilm, DeltaR):
 def analyzeScans(scans, minX=-1E10, maxX=+1E10, minIntensity=0, wafer=''):
     nScans = len(scans)
     sampleId = scans[0].sampleId
-    print "Sample ID:", sampleId
+    print("Sample ID:", sampleId)
     assert(nScans > 0)
     waferThickness = scans[0].waferThickness
     #waferThickness = 3E-4  # Hack!!!
-    print "Wafer thickness:", waferThickness / 1E-6, 'um'
+    print("Wafer thickness:", waferThickness / 1E-6, 'um')
     modulus = scans[0].modulus
-    print "Modulus:", modulus
+    print("Modulus:", modulus)
 
     for scan in scans:
         if scan.waferThickness != waferThickness:
-            print 'Wafer thickness does not match!'
+            print('Wafer thickness does not match!')
         if scan.modulus != modulus:
-            print 'Wafer modulus does not match!'
+            print('Wafer modulus does not match!')
 
     colors = ['r', 'g', 'b', 'y', 'm']
 
@@ -71,7 +71,7 @@ def analyzeScans(scans, minX=-1E10, maxX=+1E10, minIntensity=0, wafer=''):
    # mpl.xlabel('x [mm]')
 
     for i, scan in enumerate(scans):
-        print 'Film', i, 'Bow:', scan.maxBow / 1E-6, 'um'
+        print('Film', i, 'Bow:', scan.maxBow / 1E-6, 'um')
         iFit = (scan.x >= minX) & (scan.x <= maxX) & (scan.intensity > minIntensity)
         fit,pcov = np.polyfit(scan.x[iFit], scan.deflection[iFit], 1, cov=True)
         slope = fit[0]
@@ -104,15 +104,15 @@ def analyzeScans(scans, minX=-1E10, maxX=+1E10, minIntensity=0, wafer=''):
         DeltaR=1./(2*a)
         DeltaRStd = R*(aStd/a)
         #scanB.filmThickness=400E-10
-        print "Substrate modulus:", modulus
+        print("Substrate modulus:", modulus)
         if scanB.filmThickness == 0:
-            print "### Warning: film thickness was 0!"
+            print("### Warning: film thickness was 0!")
             scanB.filmThickness = 7654.0
 
-        print "Film %i thickness: %.1f A" % (i, scanB.filmThickness / 1E-10)
+        print("Film %i thickness: %.1f A" % (i, scanB.filmThickness / 1E-10))
         stress = stoneyStress(modulus, waferThickness, scanB.filmThickness, DeltaR)
         stressStd = stress*(aStd/a)
-        print 'Film %i stress: %.2f MPa' % (i, 1E-6*stress)
+        print('Film %i stress: %.2f MPa' % (i, 1E-6*stress))
         mpl.plot(1E3*x, 1E6*y, '.', color='k', label = 'scan %i - %i' % (i+2, i+1)) # Have to add an extra one here because humans count from 1
         mpl.plot(1E3*x[iFit], 1E6*np.polyval(fit,x[iFit]), '-', color='k', label='$\Delta R=%.2f\pm%.2f m$' % (DeltaR, DeltaRStd) )
         legend = mpl.legend(loc='lower right')
@@ -133,7 +133,7 @@ if __name__ == '__main__':
     if case == 1:
         fileName = 'KLK/2501.SCN'
         scans = ScanImporter(fileName)
-        print "Number of scans in file:", scans.numberOfScans()
+        print("Number of scans in file:", scans.numberOfScans())
         minX = 30E-3
         maxX = 70E-3
         #analyzeScans(scans, minX, maxX)
@@ -144,12 +144,12 @@ if __name__ == '__main__':
         scans = scans['1013']
     elif case == 3:
         scans = ScanImporter('KLK2/Stress20140710/2422_180.SCN')
-        print "Number of scans in file:", scans.numberOfScans()
+        print("Number of scans in file:", scans.numberOfScans())
     elif case == 4: # When all the scans are together in one file
         wafer = '2699'
         fileName = '/Volumes/smb/mcdermott-group/data/filmStress/KLK_testData/%s.SCN' % wafer
         scans = ScanImporter(fileName)
-        print "Number of scans in file:", scans.numberOfScans()
+        print("Number of scans in file:", scans.numberOfScans())
         sampleIds = scans.sampleIds
         uniqueIds = set(sampleIds)
         angles = np.asarray([float(uid) for uid in uniqueIds])
@@ -159,7 +159,7 @@ if __name__ == '__main__':
             scansForAngle = []
             for i in iForAngle:
                 scan = scans[int(i)]
-                print "Scan angle:", scan.angle
+                print("Scan angle:", scan.angle)
                 scansForAngle.append(scan)
             if True: #'27' in uid:
                 #scansForAngle = [scansForAngle[0], scansForAngle[1], scansForAngle[3]]
@@ -171,6 +171,6 @@ if __name__ == '__main__':
 
         filmStress = np.asarray(filmStress)
         iSort = np.argsort(angles)
-        print "Angles:", angles[iSort]
-        print "Film stress (MPa):", '\t'.join(['%.3f' % x for x in filmStress[iSort]/1E6])
+        print("Angles:", angles[iSort])
+        print("Film stress (MPa):", '\t'.join(['%.3f' % x for x in filmStress[iSort]/1E6]))
 

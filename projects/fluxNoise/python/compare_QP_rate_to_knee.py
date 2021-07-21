@@ -1,21 +1,22 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import noiselib
-reload(noiselib)
+import importlib
+importlib.reload(noiselib)
 from noiselib import movingmean
 import QPTunneling
-reload(QPTunneling)
+importlib.reload(QPTunneling)
 from QPTunneling import *
 import ChargeOffset
-reload(ChargeOffset)
+importlib.reload(ChargeOffset)
 from ChargeOffset import *
 import TwoMeasDataFile
-reload(TwoMeasDataFile)
+importlib.reload(TwoMeasDataFile)
 from TwoMeasDataFile import *
 from dataChest import dataChest
 from random import randrange
 import datasets
-reload(datasets)
+importlib.reload(datasets)
 import datasets as ds
 
 
@@ -56,7 +57,7 @@ XIY_lower = []
 flips0 = np.array([])
 flips = np.array([])
 
-print len(files)
+print(len(files))
 for k,f in enumerate(files_charge[:50]):
     path, num = noiselib.path_to_num(f)
     # num = num + Q_A

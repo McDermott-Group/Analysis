@@ -14,12 +14,13 @@ from importlib import reload
 # from numba import jit
 import time
 import impact_lib
-reload(impact_lib)
+import importlib
+importlib.reload(impact_lib)
 from impact_lib import *
 import pickle
 import gc
 import ChargeJumps
-reload(ChargeJumps)
+importlib.reload(ChargeJumps)
 from ChargeJumps import *
 import itertools
 
@@ -51,7 +52,7 @@ def load_hits(hit_type):
 
 def start_file_lock():
     while pickle.load( open(dump_path+'dump_saveInProgress.dat','rb') ):
-        print '.',
+        print('.', end=' ')
         time.sleep(1)
     pickle.dump( True, open(dump_path+'dump_saveInProgress.dat','wb') )
     
@@ -128,7 +129,7 @@ def add_noise():
 def gen_qq_plots(fname):
     with open(fname, 'rb') as f:
         data = pickle.load(f)
-    for L,fq in data['q_induced'].keys():
+    for L,fq in list(data['q_induced'].keys()):
         q = data['q_induced'][L,fq]
         fig, axs = plt.subplots(1, 3, figsize=(15,6))
         fig.suptitle('{}:  L = {}  fQ = {}'.format(hit_type, L, fq))
@@ -151,7 +152,7 @@ def calc_corr_assym(fname):
     with open(fname, 'rb') as f:
         data = pickle.load(f)
     CJ = ChargeJumps()
-    for L,fq in data['q_induced'].keys():
+    for L,fq in list(data['q_induced'].keys()):
         q = data['q_induced'][L,fq]
         for i,(q1,q2) in enumerate( ((1,2), (3,4), (1,3)) ):
             data['correlation'][L,fq,(q1,q2)] = \
@@ -183,9 +184,9 @@ for hit_type in ['gammas']:#,'muons']:
                      *np.array((qq1, qq2, qq3, qq4))/float(qq1+qq2+qq3+qq4) ) )
     except ZeroDivisionError:
         pass
-    print( u'    correlation: {:.2f} \u00B1 {:.3f}'.format(
+    print( u'    correlation: {:.2f} \\u00B1 {:.3f}'.format(
                     *corr[L,fq,(q1,q2)] ) )
-    print( u'    13/24 asymmetry: {:.2f} \u00B1 {:.3f}'.format(
+    print( u'    13/24 asymmetry: {:.2f} \\u00B1 {:.3f}'.format(
                     *assym[L,fq,(q1,q2)]  ) )
         print( 'Q{} charge asymmetry: {:.3f}'.format( q,
                             1.*np.sum(e>thresh)/np.sum(np.abs(e)>thresh) ) )
@@ -201,13 +202,13 @@ fullwidth = 7.2
 
 """ Plot corr, assym as function of L,fq """
 def print_dict(d):
-    print(u'{:>6}{:>6}{:>15}{:>15}{:>15}'.format('L','fq','(3,4)','(1,2)','(1,3)'))
+    print('{:>6}{:>6}{:>15}{:>15}{:>15}'.format('L','fq','(3,4)','(1,2)','(1,3)'))
     for L in (100, 200, 300, 400, 500, 600, 700, 800):
         for fq in (1., 0.1, 0.01):
-            print(u'{:>6}{:>6}{:>15}{:>15}{:>15}'.format(L, fq,
-                u'{:.2f} \u00B1 {:.3f}'.format(d[L,fq,(3,4)][0], d[L,fq,(3,4)][1]),
-                u'{:.2f} \u00B1 {:.3f}'.format(d[L,fq,(1,2)][0], d[L,fq,(1,2)][1]),
-                u'{:.2f} \u00B1 {:.3f}'.format(d[L,fq,(1,3)][0], d[L,fq,(1,2)][1]) ))
+            print('{:>6}{:>6}{:>15}{:>15}{:>15}'.format(L, fq,
+                '{:.2f} \u00B1 {:.3f}'.format(d[L,fq,(3,4)][0], d[L,fq,(3,4)][1]),
+                '{:.2f} \u00B1 {:.3f}'.format(d[L,fq,(1,2)][0], d[L,fq,(1,2)][1]),
+                '{:.2f} \u00B1 {:.3f}'.format(d[L,fq,(1,3)][0], d[L,fq,(1,2)][1]) ))
 
 def plot_dict(d, pair, crange=(0.,1.), measured=None, ax=None, cbo='vertical'):
 

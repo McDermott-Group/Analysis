@@ -1,7 +1,8 @@
 import os
 import numpy as np
 import noiselib
-reload(noiselib)
+import importlib
+importlib.reload(noiselib)
 from dataChest import *
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
@@ -47,7 +48,7 @@ class QPTunneling(object):
         f = f[~np.isnan(psd)]
         psd = psd[~np.isnan(psd)]
         popt, pcov = curve_fit(y, f, psd, p0=(psd[0],1e3), bounds=(0,np.inf))
-        print popt
+        print(popt)
         return popt[-1], y(f, *popt), f
         
     def plot_psd(self, window_averaging = True, figNum=None, label=None, fit=True):

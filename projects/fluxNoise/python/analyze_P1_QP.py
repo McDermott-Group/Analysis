@@ -1,9 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import noiselib
-reload(noiselib)
+import importlib
+importlib.reload(noiselib)
 import QPTunneling
-reload(QPTunneling)
+importlib.reload(QPTunneling)
 from QPTunneling import *
 from ChargeOffset import *
 
