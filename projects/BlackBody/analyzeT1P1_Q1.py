@@ -1,6 +1,6 @@
 """
 Used to analyze the up/down transition rate based on the T1, P1 as
-a function of blackbody temperature. This data is Q4
+a function of blackbody temperature. This data is Q1
 """
 
 from antennalib import getGamma_pa
@@ -64,7 +64,7 @@ Temp_kelvin = Temp_array
 # plt.show()
 
 # """Plot Up/PSD ratio"""
-plt.scatter([1/T for T in Temp_array], [np.log(1/G) for G in Gamma_up], label='QB_Up_Pre')
+plt.scatter([1/T for T in Temp_array], [np.log(1/G) for G in Gamma_up], label='QB_Up')
 plt.fill_between([1 / T for T in Temp_array],
                  [np.log(1 / G) for G in GammaErrorMinus],
                  [np.log(1 / G) for G in GammaErrorPlus], alpha=0.2)
