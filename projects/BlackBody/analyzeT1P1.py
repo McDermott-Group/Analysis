@@ -7,9 +7,11 @@ import matplotlib.pyplot as plt
 file_path = ('Z:/mcdermott-group/data/BlackBody/Circmon/LIU/CW20180514A_Ox2/{}/{}/MATLABData/{}')
 
 # date = 'P1T12021Jun19'
-date = '06-22-21'
-experiment_name_T1_global = 'Q1_T1_'
-experiment_name_P1_global = 'Q1_P1_'
+date = '04-14-21'
+# experiment_name_T1_global = 'Q1_T1_'
+# experiment_name_P1_global = 'Q1_P1_'
+experiment_name_T1_global = 'T1_'
+experiment_name_P1_global = 'P1_'
 # experiment_name_T1_global = 'T1_Q1_Stats'
 
 
@@ -17,15 +19,17 @@ GammaUp = GammaUp()
 # temp_list = [72, 79, 94, 103, 116, 124, 138, 145, 150, 160, 170, 178, 186,
 #              193, 200, 205, 210, 216, 220, 225, 229, 234, 238]
 
-temp_list = [80]
+# temp_list = [85,127,185,238,305,365,425,485,545]
+temp_list=[238]
+gammaUp_list=[]
 for temp in temp_list:
-    experiment_name_T1 = experiment_name_T1_global + str(temp) + 'mk'
-    experiment_name_P1 = experiment_name_P1_global + str(temp) + 'mk'
-    file_Number = np.arange(0, 25, 1)
+    experiment_name_T1 = experiment_name_T1_global + str(temp) + 'mK'
+    experiment_name_P1 = experiment_name_P1_global + str(temp) + 'mK'
+    file_Number = np.arange(0, 10, 1)
     #
     T1_file = [file_path.format(date, experiment_name_T1, experiment_name_T1) + '_{:03d}.mat'.format(i) for i in file_Number]
     T1_data = T1()
-    T1_data.add_data_from_matlab(T1_file, temp)
+    T1_data.add_data_from_matlab(T1_file, temp,fit_type='Linear')
 
     P1_file = [file_path.format(date, experiment_name_P1, experiment_name_P1) + '_{:03d}.mat'.format(i) for i in file_Number]
     P1_data = P1()
@@ -33,6 +37,7 @@ for temp in temp_list:
     # print('Gamma', T1_data.Gamma_fit_parameters)
     # print('P1', P1_data.occ_1D_avg)
     GammaUp.add_data(temp, P1_data.occ_1D_avg, T1_data.Gamma_fit_parameters)
+    T1_data.plot()
     # QP.plot_Chi()
     # QP.plot()
     # QP.plot_histogram()
@@ -62,7 +67,7 @@ print('P1_1D=', P1_1D)
 # print('Gamma_down_avg=', Gamma_down_avg, 'Gamma_down_std=', Gamma_down_std)
 # print('P1_avg=', P1_avg, 'P1_std=', P1_std)
 
-iteration = np.arange(0, 25, 1)
+iteration = np.arange(0, 10, 1)
 plt.plot(iteration, Gamma_Down_1D/Gamma_down_avg, label='Gamma Down')
 plt.plot(iteration, Gamma_Up_1D/Gamma_up_avg, label='Gamma Up')
 plt.plot(iteration, P1_1D/P1_avg, label='P1')

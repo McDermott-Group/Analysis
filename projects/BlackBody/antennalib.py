@@ -244,9 +244,9 @@ class T1(object):
         self.T1_list = []
 
     def add_data_from_matlab(self, file_path, temp,
-                             # data_type1='Weighted_Occupation',
-                             data_type1='Projected_Occupation',
-                             data_type2='QB_Idle_Gate_Time'):
+                             data_type1='Weighted_Occupation',
+                             # data_type1='Projected_Occupation',
+                             data_type2='QB_Idle_Gate_Time', fit_type='Exponential',num_points=5):
         f_l = file_path[0]
         occ_2D = np.array([])
         Gamma_fit_parameters = np.array([])
@@ -262,7 +262,11 @@ class T1(object):
             data = noiselib.loadmat(f)
             occ_1D = np.array(data[data_type1])
 
-            fit_params = self.fitToExponential(occ_1D)[1]
+            if fit_type == 'Exponential':
+                fit_params = self.fitToExponential(occ_1D)[1]
+            else: #fit_type='Linear'
+                fit_params = self.fitLinear(occ_1D, slice(0, num_points))[1]
+
             Gamma_fit_parameters = np.hstack((Gamma_fit_parameters, fit_params))
 
             occ_2D = np.vstack((occ_2D, occ_1D))
@@ -274,6 +278,14 @@ class T1(object):
         self.occ_1D_avg = occ_1D
         self.temp = temp
         self.Gamma_fit_parameters = Gamma_fit_parameters
+
+
+    def fitLinear(self,occ_1D,pts):
+        time = self.QB_Idle_Gate_Time[pts]
+        P1 = occ_1D[pts]
+        params, covariance = curve_fit(self.f_lin, time, P1, p0=[0.9, 30e4])
+        self.params = params
+        return params
 
     def fitToExponential(self, occ_1D):
         """
@@ -289,6 +301,9 @@ class T1(object):
         # print('covariance=', covariance)
         self.params = params
         return params
+
+    def f_lin(self, t, intercept, Gamma):
+        return intercept-t*Gamma
 
     def f_exp(self, t, amp, Gamma):
         return amp * np.exp(-t*Gamma)+0.09
@@ -308,7 +323,7 @@ class T1(object):
         amp, Gamma = self.params[0], self.params[1]
         temp = str(self.temp) + 'mK'
         plt.figure(1)
-        plt.plot(time, occ, 'k-', label=temp)
+        plt.plot(time, occ, '.', label=temp)
         # plt.plot(time, [amp*np.exp(-t*Gamma/(10**6)) for t in time], '--', label='fit')
         plt.xlabel('time (us)')
         plt.ylabel('P1')
@@ -328,8 +343,8 @@ class P1(object):
         self.temp = None  # units mK
 
     def add_data_from_matlab(self, file_path, temp,
-                             # data_type1='Weighted_Occupation'):
-                             data_type1='Projected_Occupation'):
+                             data_type1='Weighted_Occupation'):
+                             # data_type1='Projected_Occupation'):
         occ_1D_avg = []
         for f in file_path:
             data = noiselib.loadmat(f)
