@@ -96,13 +96,16 @@ class QPTunneling_Wilen(object):
         f = f[~np.isnan(psd)]
         psd = psd[~np.isnan(psd)]
         # print('len(f)=', len(f))
-        # print('f=[500:]', f[500:])
-
-        # l = 300
+        #
+        l = 5
+        r = 500
+        # print('f[l]', f[l])
+        # print('f[r]', f[r])
         # f = f[l:]
         # psd = psd[l:]
 
-        # params, covariance = curve_fit(y, f[500:], psd[500:], p0=[0.1, 5000],
+
+        # params, covariance = curve_fit(y, f[l:r], psd[l: r], p0=[2000, 0.1],
         params, covariance = curve_fit(y, f, psd, p0=[5000, 0.1],
                                        bounds=[(1e1, 0), (1e6, 1)])# method='trf')
 
@@ -112,6 +115,7 @@ class QPTunneling_Wilen(object):
         f_RO = self.params[1]
         self.f_or_t = 'f'
         self.T_parity = 1/f_QP
+        # f = f[l:r]  # for partial fit
         return y(f, f_QP, f_RO), f
 
     # def get_fit_one_over_f(self, window_averaging=True):

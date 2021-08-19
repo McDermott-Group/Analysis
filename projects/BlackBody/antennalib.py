@@ -705,6 +705,9 @@ class BB_Radiation(object):
         plt.legend()
         plt.show()
 
+def getBBTensity(f, T):
+    Intensity = (2*h*f**3/c**2)*(1/(np.exp(h*f/(k*T))-1))
+    return Intensity
 
 def getGamma_pa(T, dfn=2e9, f0=120e9):
     """

@@ -4,6 +4,7 @@ PSD for Q1, Q2, Q4 at different temps
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.constants import *
+import copy
 # from antennalib import getGamma_pa
 
 
@@ -61,4 +62,26 @@ plt.ylabel('QPT (Hz)')
 plt.yscale('log')
 plt.grid()
 plt.legend()
+plt.draw()
+
+### the added part from Q3
+# Extract the added channel
+Q2_added = copy.deepcopy(Temp_QPT_Q2)
+Q4_added = copy.deepcopy(Temp_QPT_Q4)
+
+Data_Added_list = [Q2_added, Q4_added]
+for d in Data_Added_list:
+    d[:, 1] = d[:, 1] - d[0][1]
+
+# print('Q2_20us_added=', Q2_20us_added)
+
+plt.figure()
+plt.plot(Q2_added[1:, 0], Q2_added[1:, 1], label='Q2_added')
+plt.plot(Q4_added[1:, 0], Q4_added[1:, 1], label='Q4_added')
+plt.xlabel('Temp (Kelvin)')
+plt.ylabel('QPT (Hz)')
+plt.yscale('log')
+plt.grid()
+plt.legend()
 plt.show()
+
