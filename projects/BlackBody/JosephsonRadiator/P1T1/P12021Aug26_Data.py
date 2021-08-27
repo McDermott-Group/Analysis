@@ -6,9 +6,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import copy
 
-# file_path = ('Z:/mcdermott-group/data/BlackBody/Circmon/LIU/CW20180514A_Ox2/{}/{}/MATLABData/{}')
-
-# date = 'JJRadiatorP1_2021Aug25_HighDensity'
 
 J2_Bias_Q1 = np.array([
     0., 4., 8., 12., 15., 15.5, 16., 16.5, 17., 17.5, 18.,
