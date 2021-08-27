@@ -499,7 +499,7 @@ class OneStateCleanDirty(object):
         print('clean avg=', self.clean_P1)
         print('dirty avg=', self.dirty_P1)
 
-def plotMultiFittedPSD(QPT_List, one_over_f=False):
+def plotMultiFittedPSD(QPT_List, one_over_f=False, save=False, name=''):
     """
     plot multi fitted PSD for comparison
     :param QPT_List: a list of QPT object, e.g. [QPT_NoPoison, QPT_Neg10dBmPoison]
@@ -546,7 +546,11 @@ def plotMultiFittedPSD(QPT_List, one_over_f=False):
     plt.grid()
     plt.grid()
     plt.legend()
-    plt.show()
+    if save:
+        plt.savefig(name+'.png')
+    else:
+        plt.show()
     # plt.pause(1)
     # plt.draw()
+
 

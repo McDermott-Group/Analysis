@@ -269,8 +269,8 @@ class T1(object):
         self.T1_list = []
 
     def add_data_from_matlab(self, file_path, temp,
-                             # data_type1='Weighted_Occupation',
-                             data_type1='Projected_Occupation',
+                             data_type1='Weighted_Occupation',
+                             # data_type1='Projected_Occupation',
                              data_type2='QB_Idle_Gate_Time'):
         f_l = file_path[0]
         occ_2D = np.array([])
@@ -382,6 +382,42 @@ class P1(object):
         self.occ_1D_avg = np.array(occ_1D_avg)
         # self.occ_std = np.mean(occ_1D_std)
         self.temp = temp
+
+class P1_JSweep(object):
+    """
+    This is for extract P1 value from the matlab data with Josephson Radiator's bias
+    """
+
+    def __init__(self):
+        self.occ_1D_avg = []
+        self.J2_Bias = []
+        self.J2_Freq = []
+
+    def add_data_from_matlab(self, file_path,
+                             data_type1='Projected_Occupation',
+                             # data_type1='Phase',
+                             # data_type1='Weighted_Occupation',
+                             data_type2='J2_Bias'):
+
+        occ_2D = []
+        J2_Bias = []
+        f0 = file_path[0]
+        data0 = noiselib.loadmat(f0)
+        occ_2D = data0[data_type1]
+        # print('occ_2D=', occ_2D)
+        J2_Bias = data0[data_type2]
+        J2_Freq = J2_Bias*0.48
+        for f in file_path[1:]:
+            data = noiselib.loadmat(f)
+            occ_1D = np.array(data[data_type1])
+            occ_2D = np.vstack((occ_2D, occ_1D))
+
+        """Update parameters"""
+        # print('occ_1D_avg=', occ_1D_avg)
+
+        self.occ_1D_avg = np.average(occ_2D, axis=0)
+        self.J2_Bias = np.array(J2_Bias)
+        self.J2_Freq = np.array(J2_Freq)
 
 
 class GammaUp(object):
