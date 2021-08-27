@@ -1,4 +1,5 @@
-from projects.BlackBody.antennalib import T1
+# from projects.BlackBody.antennalib import T1
+from antennalib import T1
 import numpy as np
 
 # Q3_data_array = Up_array()
