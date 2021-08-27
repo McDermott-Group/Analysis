@@ -56,9 +56,3 @@ plt.ylabel(' Log(1/Gamma)')
 plt.grid()
 plt.legend()
 plt.show()
-
-for temp in temp_list:
-    print(temp)
-
-for rate in GammaUp_list:
-    print(np.log(np.divide(1.0,rate)))
