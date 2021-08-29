@@ -7,9 +7,9 @@ import numpy as np
 
 """Q2"""
 QP_path = ('Z:/mcdermott-group/data/BlackBody/Circmon/LIU/CW20180514A_Ox2/{}/{}/MATLABData/{}')
-date = 'JJRadiatorQPT_2021Aug19_HighDensity'
+date = 'JJRadiatorQPT_HighFreq_2021Aug27'
 QB_id = 'Q4'
-J2Q2Biaslist = np.arange(66000, 80500, 500)
+J2Q2Biaslist = np.arange(60000, 150000, 5000)
 J2_QPT_2D = []
 for J2Bias in J2Q2Biaslist:
     experiment_name_PSD = (QB_id+'_PSD_'+str(J2Bias)+'uDACJ2')
