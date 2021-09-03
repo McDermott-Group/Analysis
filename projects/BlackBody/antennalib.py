@@ -32,7 +32,7 @@ class QP_Up(object):
         self.fit_number_list = []
         self.GammaUp_list = []
 
-    def add_data_from_matlab(self, file_path, temp,
+    def add_data_from_matlab(self, file_path, temp=None,
                              data_type1='Weighted_Occupation_Filtered',
                              # data_type1='Single_Shot_Occupation_Filtered',
                              data_type2='RO_Pre_Drive_to_RO'):
@@ -133,7 +133,7 @@ class QP_Up(object):
             # print('P1_fit[:n]=', P1_fit[:n])
             for i in range(n):
                 Chi_Square = Chi_Square + ((P1_fit[i] - P1[i]) ** 2) / (
-                            P1_sig[i] ** 2)
+                        P1_sig[i] ** 2)
             Chi_nu_Square = Chi_Square / (n - 2)
             Chi_nu_Square_list.append(Chi_nu_Square)
             fit_number_list.append(n)
@@ -201,23 +201,26 @@ class Up_array(object):
         temp = np.append(self.temp, array_tempUpUpError[0])
         GammaUp = np.append(self.GammaUp, array_tempUpUpError[1])
         GammaUp_std_err = np.append(self.GammaUp_std_err,
-                                         array_tempUpUpError[2])
+                                    array_tempUpUpError[2])
 
         zipped_lists_temp = zip(temp, temp)
         print('zipped_lists_temp=', zipped_lists_temp)
         sorted_zipped_lists_temp = sorted(zipped_lists_temp)
         print('sorted_zipped_lists_temp=', sorted_zipped_lists_temp)
-        sorted_temp = np.array([element for _, element in sorted_zipped_lists_temp])
+        sorted_temp = np.array(
+            [element for _, element in sorted_zipped_lists_temp])
         print('sorted_temp=', sorted_temp)
 
-
         zipped_lists_GammaUp_std_err = zip(temp, GammaUp_std_err)
-        sorted_zipped_lists_GammaUp_std_err = sorted(zipped_lists_GammaUp_std_err)
-        sorted_temp_std_err = np.array([element for _, element in sorted_zipped_lists_GammaUp_std_err])
+        sorted_zipped_lists_GammaUp_std_err = sorted(
+            zipped_lists_GammaUp_std_err)
+        sorted_temp_std_err = np.array(
+            [element for _, element in sorted_zipped_lists_GammaUp_std_err])
 
         zipped_lists_GammaUp = zip(temp, GammaUp)
         sorted_zipped_lists_GammaUp = sorted(zipped_lists_GammaUp)
-        sorted_temp = np.array([element for _, element in sorted_zipped_lists_GammaUp])
+        sorted_temp = np.array(
+            [element for _, element in sorted_zipped_lists_GammaUp])
 
         self.temp = sorted_temp
         self.GammaUp = sorted_GammaUp
@@ -271,7 +274,8 @@ class T1(object):
     def add_data_from_matlab(self, file_path, temp,
                              data_type1='Weighted_Occupation',
                              # data_type1='Projected_Occupation',
-                             data_type2='QB_Idle_Gate_Time', fit_type='Exponential',num_points=5):
+                             data_type2='QB_Idle_Gate_Time',
+                             fit_type='Exponential', num_points=5):
         f_l = file_path[0]
         occ_2D = np.array([])
         Gamma_fit_parameters = np.array([])
@@ -289,10 +293,11 @@ class T1(object):
 
             if fit_type == 'Exponential':
                 fit_params = self.fitToExponential(occ_1D)[1]
-            else: #fit_type='Linear'
+            else:  # fit_type='Linear'
                 fit_params = self.fitLinear(occ_1D, slice(0, num_points))[1]
 
-            Gamma_fit_parameters = np.hstack((Gamma_fit_parameters, fit_params))
+            Gamma_fit_parameters = np.hstack(
+                (Gamma_fit_parameters, fit_params))
 
             occ_2D = np.vstack((occ_2D, occ_1D))
 
@@ -304,8 +309,7 @@ class T1(object):
         self.temp = temp
         self.Gamma_fit_parameters = Gamma_fit_parameters
 
-
-    def fitLinear(self,occ_1D,pts):
+    def fitLinear(self, occ_1D, pts):
         time = self.QB_Idle_Gate_Time[pts]
         P1 = occ_1D[pts]
         params, covariance = curve_fit(self.f_lin, time, P1, p0=[0.9, 30e4])
@@ -329,7 +333,7 @@ class T1(object):
         return params
 
     def f_lin(self, t, intercept, Gamma):
-        return intercept-t*Gamma
+        return intercept - t * Gamma
 
     def f_exp(self, t, amp, Gamma):
         return amp * np.exp(-t * Gamma) + 0.05
@@ -397,6 +401,7 @@ class P1(object):
         # self.occ_std = np.mean(occ_1D_std)
         self.temp = temp
 
+
 class P1_JSweep(object):
     """
     This is for extract P1 value from the matlab data with Josephson Radiator's bias
@@ -404,32 +409,66 @@ class P1_JSweep(object):
 
     def __init__(self):
         self.occ_1D_avg = []
+        self.occ_1D_std = []
         self.J2_Bias = []
         self.J2_Freq = []
 
     def add_data_from_matlab(self, file_path,
                              data_type1='Projected_Occupation',
-                             # data_type1='Phase',
-                             # data_type1='Weighted_Occupation',
                              data_type2='J2_Bias'):
-
-        occ_2D = []
-        J2_Bias = []
         f0 = file_path[0]
         data0 = noiselib.loadmat(f0)
         occ_2D = data0[data_type1]
-        # print('occ_2D=', occ_2D)
         J2_Bias = data0[data_type2]
-        J2_Freq = J2_Bias*0.48
+        J2_Freq = J2_Bias * 0.48
         for f in file_path[1:]:
             data = noiselib.loadmat(f)
             occ_1D = np.array(data[data_type1])
             occ_2D = np.vstack((occ_2D, occ_1D))
 
         """Update parameters"""
-        # print('occ_1D_avg=', occ_1D_avg)
 
         self.occ_1D_avg = np.average(occ_2D, axis=0)
+        self.occ_1D_std = np.std(occ_2D, axis=0)
+        self.J2_Bias = np.array(J2_Bias)
+        self.J2_Freq = np.array(J2_Freq)
+
+
+class P1_JSweep_Q2(object):
+    """
+    This is for extract P1 value from the matlab data with Josephson Radiator's bias
+    Q2 taken at different times
+    """
+
+    def __init__(self):
+        self.occ_1D_avg = []
+        self.occ_1D_std = []
+        self.J2_Bias = []
+        self.J2_Freq = []
+
+    def add_data_from_matlab(self, file_path1, file_path2,
+                             data_type1='Projected_Occupation',
+                             data_type2='J2_Bias'):
+
+        f0 = file_path1[0]
+        data0 = noiselib.loadmat(f0)
+        occ_2D = data0[data_type1][18:]
+        J2_Bias = data0[data_type2][18:]
+        J2_Freq = J2_Bias * 0.48
+        for f in file_path1[1:]:
+            data = noiselib.loadmat(f)
+            occ_1D = np.array(data[data_type1][18:])
+            occ_2D = np.vstack((occ_2D, occ_1D))
+
+        for f in file_path2:
+            data = noiselib.loadmat(f)
+            occ_1D = np.array(data[data_type1])
+            occ_2D = np.vstack((occ_2D, occ_1D))
+
+        """Update parameters"""
+
+        self.occ_1D_avg = np.average(occ_2D, axis=0)
+        self.occ_1D_std = np.std(occ_2D, axis=0)
         self.J2_Bias = np.array(J2_Bias)
         self.J2_Freq = np.array(J2_Freq)
 
@@ -483,7 +522,8 @@ class GammaUp(object):
         # print('sorted_Gamma_Up_1D=', sorted_Gamma_Up_1D)
 
         zipped_lists_Gamma_Up_1D_error = zip(temp, Gamma_Up_1D_error)
-        sorted_zipped_lists_Gamma_Up_1D_error = sorted(zipped_lists_Gamma_Up_1D_error)
+        sorted_zipped_lists_Gamma_Up_1D_error = sorted(
+            zipped_lists_Gamma_Up_1D_error)
         # print('sorted_zipped_lists_Gamma_Up_1D_error=', sorted_zipped_lists_Gamma_Up_1D_error)
         sorted_Gamma_Up_1D_error = np.array(
             [element for _, element in sorted_zipped_lists_Gamma_Up_1D_error])
@@ -570,7 +610,7 @@ class GammaUp_New(object):
 
     def getGammaUpStd(self, P1_mean, P1_std, Gamma_Down_mean, Gamma_Down_std):
         x = (Gamma_Down_std / (1 / P1_mean - 1)) ** 2 + (
-                    Gamma_Down_mean * P1_std / ((P1_mean - 1) ** 2)) ** 2
+                Gamma_Down_mean * P1_std / ((P1_mean - 1) ** 2)) ** 2
         GammaUp_std = np.sqrt(x)
         # print('GammaUp_std=', GammaUp_std)
         return GammaUp_std
@@ -600,7 +640,8 @@ class GammaUp_New(object):
         # print('sorted_Gamma_Up_1D=', sorted_Gamma_Up_1D)
 
         zipped_lists_Gamma_Up_1D_error = zip(temp, Gamma_Up_1D_error)
-        sorted_zipped_lists_Gamma_Up_1D_error = sorted(zipped_lists_Gamma_Up_1D_error)
+        sorted_zipped_lists_Gamma_Up_1D_error = sorted(
+            zipped_lists_Gamma_Up_1D_error)
         # print('sorted_zipped_lists_Gamma_Up_1D_error=', sorted_zipped_lists_Gamma_Up_1D_error)
         sorted_Gamma_Up_1D_error = np.array(
             [element for _, element in sorted_zipped_lists_Gamma_Up_1D_error])
@@ -749,15 +790,144 @@ class BB_Radiation(object):
         temp_range = self.temp_range
         density_range = self.density_range
         plt.plot(temp_range, density_range / (1e9 * h),
-                 label='Mode freq={} GHz'.format(self.freq/1e9))
+                 label='Mode freq={} GHz'.format(self.freq / 1e9))
         plt.xlabel('Temp (Kelvin)')
         plt.ylabel('Scaled density')
         plt.legend()
         plt.show()
 
+
+class Blackbox(object):
+    """
+    Understand the coupling between the 80 GHz mode to Qubit
+    """
+
+    def __init__(self):
+        self.Antenna_mode = {
+            "omega": None,
+            "R": None,
+            "C": None,
+            "L": None,
+            "Q": None,
+            "T1": None
+        }
+
+        self.J = {
+            "C": None,
+            "L": None,
+            "Ec": None
+        }
+
+        self.QB_mode = {
+            "omega": None,
+            "R": None,
+            "C": None,
+            "L": None,
+            "Ec": None,
+            "Q": None,
+            "T1": None
+        }
+        self.Chi_QQ = None
+        self.Chi_AA = None
+        self.Chi_QA = None
+
+        self.g = None
+
+    def Input_update(self, AntennaInput, QBInput):
+        self._Antenna_update(AntennaInput[0], AntennaInput[1], AntennaInput[2])
+        self._QB_update(QBInput[0], QBInput[1], QBInput[2])
+        self._getChi()
+        self._getg()
+
+    def _Antenna_update(self, f, C, R):
+        """
+
+        :param f: frequency
+        :param C: effective capacitance; (1/2) ImY'(omega)
+        :param R: effective resistance; 1/ReY(omega)
+        :return: None; update the pole parameters
+        """
+        omega = 2 * pi * f
+        L = 1 / (C * omega ** 2)
+        Q = omega * C * R
+        T1 = Q / omega
+        self.Antenna_mode["omega"] = omega
+        self.Antenna_mode["R"] = R
+        self.Antenna_mode["C"] = C
+        self.Antenna_mode["L"] = L
+        self.Antenna_mode["Q"] = Q
+        self.Antenna_mode["T1"] = T1
+
+    def _QB_update(self, f, C, L):
+        """
+
+        :param f: frequency
+        :param C: Total capcitance
+        :param L: Josephson inductance
+        :return: None; update the QB parameters
+        """
+        omega = 2 * pi * f
+        C_J = 3.5*10**(-15)
+        Ec_J = e ** 2 / (hbar * (2 * C_J))  # in units of omega
+        Ec_QB = e ** 2 / (hbar * (2 * C))  # in units of omega
+        self.QB_mode["omega"] = omega
+        self.QB_mode["C"] = C
+        self.QB_mode["L"] = L
+        self.QB_mode["Ec"] = Ec_QB
+        self.J["L"] = L
+        self.J["C"] = C_J
+        self.J["Ec"] = Ec_J
+
+
+    def _getChi(self):
+        Cj = self.J["C"]
+        Lj = self.J["L"]
+        Ec = self.J["Ec"]
+
+        print('Ec=', Ec/(2*pi*1e9))
+
+        C_Q = self.QB_mode["C"]
+        L_Q = self.QB_mode["L"]
+        C_A = self.Antenna_mode["C"]
+        L_A = self.Antenna_mode["L"]
+
+        Chi_QQ = -(L_Q / Lj) * (Cj / C_Q) * Ec
+        Chi_AA = -(L_A / Lj) * (Cj / C_A) * Ec
+        Chi_QA = -2 * np.sqrt(Chi_QQ * Chi_AA)
+
+        self.Chi_QQ = Chi_QQ
+        self.Chi_AA = Chi_AA
+        self.Chi_QA = Chi_QA
+        print("Chi_QQ=", Chi_QQ/(2*pi*1e9))
+        print("Chi_AA=", Chi_AA/(2*pi*1e9))
+        print("Chi_QA=", Chi_QA/(2*pi*1e9))
+
+    def _getg(self):
+        """
+        We have Chi_QA = (g^2/Delta)*(alpha/(alpha+Delta))~= (g/Delta)^2 * alpha
+        T_Q = (Delta/g)^2 * T_A Purcell limitation
+        :return:
+        """
+        Chi_QA = self.Chi_QA
+        Delta = self.Antenna_mode["omega"] - self.QB_mode["omega"]
+        alpha = self.QB_mode["Ec"]
+        T1_A = self.Antenna_mode["T1"]
+
+        print("Delta=", Delta/(2*pi*1e9))
+        print("alpha=", alpha/(2*pi*1e9))
+        print("T1_A=", T1_A)
+
+        factor = abs(Chi_QA/alpha) # g^2/Delta^2
+        g = np.sqrt(factor*Delta**2)
+        T_Q = T1_A/factor
+
+        self.QB_mode["T1"] = T_Q
+        self.g = g
+
 def getBBTensity(f, T):
-    Intensity = (2*h*f**3/c**2)*(1/(np.exp(h*f/(k*T))-1))
+    Intensity = (2 * h * f ** 3 / c ** 2) * (1 / (np.exp(h * f / (k * T)) - 1))
     return Intensity
+
 
 def getGamma_pa(T, dfn=2e9, f0=120e9):
     """

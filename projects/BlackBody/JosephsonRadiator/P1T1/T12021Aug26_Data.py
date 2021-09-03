@@ -1,5 +1,5 @@
 ### To analyze the P1 vs J2 Bias data
-### src: Z:\mcdermott-group\data\BlackBody\Circmon\LIU\CW20180514A_Ox2\JJRadiatorP1_2021Aug25_HighDensity\
+### src: Z:\mcdermott-group\data\BlackBody\Circmon\LIU\CW20180514A_Ox2\JJRadiatorT1_2021Aug26_HighDensity\
 
 from antennalib import P1_JSweep
 import matplotlib.pyplot as plt
@@ -18,15 +18,6 @@ T1_J2_Q3 = np.array([78.560401202877273, 64.598890712547359, 64.598890712547359,
 T1_J2_Q4 = np.array([19.111808698967319, 15.773058618831827, 19.933397089893784, 15.95495797415297, 16.18903524110166, 22.116299895512036, 18.201922921793638, 17.847687755539827, 20.568712459255153, 17.482288558107307, 19.476738350010297, 16.678390202477498, 15.346711892518899, 18.661051010085046, 17.184775818080638, 17.095030614122589, 17.916100020928805, 16.909962242936718, 18.428055233613229, 16.119263159582758, 17.854631716105157, 18.219723888576841, 17.357015888411482, 18.026604945484173, 17.669564961307749, 19.320084445633675, 18.552422178444619, 18.412166721279657])
 
 
-# print('J2_Bias_Q1=', J2_Bias_Q1)
-# print('J2_Bias_Q2=', J2_Bias_Q2)
-# print('J2_Bias_Q3=', J2_Bias_Q3)
-# print('J2_Bias_Q4=', J2_Bias_Q4)
-# print('P1_J2_Q1=', P1_J2_Q1)
-# print('P1_J2_Q2=', P1_J2_Q2)
-# print('P1_J2_Q3=', P1_J2_Q3)
-# print('P1_J2_Q4=', P1_J2_Q4)
-
 plt.plot(J2_Bias_Q1, T1_J2_Q1, label='Q1')
 plt.plot(J2_Bias_Q2, T1_J2_Q2, label='Q2')
 # plt.plot(J2_Bias_Q3, T1_J2_Q3, label='Q3')
@@ -37,14 +28,3 @@ plt.ylabel('T1 (us)')
 plt.grid()
 plt.legend()
 plt.show()
-
-# plt.plot(J2_Bias_Q1*4.8, P1_J2_Q1, 'b', label='Q1')
-# plt.plot(J2_Bias_Q2*4.8, P1_J2_Q2, 'r', label='Q2')
-# plt.plot(J2_Bias_Q3*4.8, P1_J2_Q3, 'k', label='Q3')
-# plt.plot(J2_Bias_Q4*4.8, P1_J2_Q4, 'y', label='Q4')
-# plt.xlabel('J2 Bias (GHz)')
-# plt.ylabel('P1')
-# # plt.yscale('log')
-# plt.grid()
-# plt.legend()
-# plt.show()

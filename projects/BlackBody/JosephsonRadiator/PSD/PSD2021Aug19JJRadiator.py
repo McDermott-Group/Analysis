@@ -1,12 +1,9 @@
 """
-PSD for Q1, Q2, Q4 at different temps
+PSD for Q1, Q2, Q4 at different J2 Bias
+Z:\mcdermott-group\data\BlackBody\Circmon\LIU\CW20180514A_Ox2\JJRadiatorQPT_2021Aug19
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.constants import *
-from scipy.optimize import curve_fit
-import copy
-# from antennalib import getGamma_pa
 
 Q1 = np.array([
     [40, 2235.5179104863346], [42, 2981.0616813309734], [44, 5950.149229218026],

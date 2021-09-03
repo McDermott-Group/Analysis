@@ -166,20 +166,20 @@ QP_path = ('Z:/mcdermott-group/data/BlackBody/Circmon/LIU/CW20180514A_Ox2/{}/{}/
 # QP.add_data_from_matlab(QP_file, temp)
 # QP.plot()
 
-date = '06-07-21'
-experiment_name_global = 'Q4_P1_'
-
-temp = '236mK'
-file_Number_Tot = np.arange(5, 55, 1)
-
-temp = '253mK'
-file_Number_Tot = np.arange(0, 50, 1)
-
-temp = '267mK'
-file_Number_Tot = np.arange(0, 50, 1)
-
-date = '06-08-21'
-experiment_name_global = 'Q4_P1_'
+# date = '06-07-21'
+# experiment_name_global = 'Q4_P1_'
+#
+# temp = '236mK'
+# file_Number_Tot = np.arange(5, 55, 1)
+#
+# temp = '253mK'
+# file_Number_Tot = np.arange(0, 50, 1)
+#
+# temp = '267mK'
+# file_Number_Tot = np.arange(0, 50, 1)
+#
+# date = '06-08-21'
+# experiment_name_global = 'Q4_P1_'
 
 # temp = '280mK'
 # experiment_name = experiment_name_global + temp

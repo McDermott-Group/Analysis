@@ -38,6 +38,7 @@ class QPTunneling_Wilen(object):
         for f in file_path:
             data = noiselib.loadmat(f)
             o = np.array(data[data_str])
+            Serniak = True # This is used for fast measurement, M1 and M2's product
             # convertto10 = False   # This is for 1, -1 data to 0, 1 value conversion
             convertto10 = True
             if convertto10:
@@ -45,6 +46,16 @@ class QPTunneling_Wilen(object):
                 for j in range(len(o)):
                     o[j] = map(int, o[j])
                 # o = o * 0.5 + 0.5
+            if Serniak:
+                for j in range(len(o)):
+                    innerProduct = [(2*o[j][k-1]-1)*(2*o[j][k]-1) for k in range(len(o[j]))]
+                    # innerProduct = np.array(innerProduct)
+                    innerProduct = map(int, innerProduct)
+                    # print('type(innerProduct)=', type(innerProduct))
+                    # o[j] = map(int, innerProduct)
+                    o[j] = innerProduct
+                # print('len(o[j])-1=', len(o[j])-1)
+                # print('len(o[0])=', len(o[0]))
             if simulate:
                 T_parity = 2 * 10 ** (-3)  # parity switching time
                 p_QP = 1 - np.exp(-sample_rate / T_parity)  # converted to Poisson probability
