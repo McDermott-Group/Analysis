@@ -1,7 +1,8 @@
 """
 2021Jul
 """
-from QPTunneling_LIU import QPTunneling_Wilen, plotMultiFittedPSD, QPTunneling_Liu, QPTunneling_Harrison, OneStateCleanDirty
+from QPTunneling_LIU import QPTunneling_Wilen, plotMultiFittedPSD, QPTunneling_Liu, QPTunneling_Harrison, \
+    OneStateCleanDirty, plotMultiFittedPSD_Harrison
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -28,7 +29,7 @@ for J2Bias in J2Q2Biaslist:
 
     QPT_List = [QPT_Q]
     plotMultiFittedPSD_Harrison(QPT_List, save=False, name='{} with J2 ={} mDAC {}GHz'.
-                              format(QB_id, str(J2Bias), str(J2Bias*4.8)))
+                              format(QB_id, str(J2Bias), str(J2Bias*4.8)),excludedPoints=4,concatenateRecords=1,number=125)
 
     QPT_Q.get_fit()
     # print(QB_id)

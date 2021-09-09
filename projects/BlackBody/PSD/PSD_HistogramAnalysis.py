@@ -74,8 +74,8 @@ n=10
 # n=10
 # temp = '375mK'
 # temp='396mK'
-cr=0.2
-temp='428mK'
+# cr=0.2
+# temp='428mK'
 
 # qubit ='Q4'
 # user = 'LIU'
@@ -129,9 +129,9 @@ temp='428mK'
 # temp = '284mK' #Breaking everything up into 1 part instead of 20 gives something reasonable-ish but I do not trust it.
 # temp = '199mK' #Same --giving up on these.
 
-# qubit ='Q1'
-# user = 'LIU'
-# date = 'PSD2021Jun28'
+qubit ='Q1'
+user = 'LIU'
+date = 'PSD2021Jun28'
 # temp='501mK' #NOGO
 # temp='451mK'  #This looks OK when set up like this. Fits still questionable, though
 # cr=0.05
@@ -152,8 +152,8 @@ temp='428mK'
 # temp = '372mK'
 # temp = '331mK'
 #--------
-# ep=10
-# n=20
+ep=1
+n=20
 # excludedFiles=range(90,100)
 # temp = '310mK' #^^^ exclude files ^^^ Data and fits good
 # ep = 10
@@ -268,23 +268,34 @@ for i in range(50):
 
 fitBool=True
 fidelity = []
-psd, f = QPT.get_psd(number=n,window_averaging=True,concatenateRecords=cr)
-if fitBool:
-    psd_fit, f_fit = QPT.get_fit(excludedPoints=ep,ignoreFidelity=igf)
-    fidelity=QPT.fidelity
-
-for i in range(n):
-    if fitBool:
-        plt.title('Loop #{:03d} f_parity={:.2e}'.format(i,1/QPT.T_parity[i]))
-    else:
-        plt.title('Loop #{:03d}'.format(i))
-    plt.loglog(f,psd[i],'--')
-    if fitBool:
-        plt.loglog(f_fit, psd_fit[i], '-')
+psd, f1 = QPT.get_psd(number=n,window_averaging=True,concatenate_records=0.1)
+fit,f2 = QPT.get_fit(excluded_points=1,ignore_fidelity=False)
+for i in range(0,len(psd)):
+    plt.loglog(f1, psd[i], '--')
+    plt.loglog(f2, fit[i], '-')
     plt.show()
-if fitBool:
-    f_parity=np.reciprocal(QPT.T_parity)
-    print('{:.2e}'.format(np.mean(f_parity)))
-    print('{:.2e}'.format(np.std(f_parity)/np.sqrt(len(f_parity))))
-    print('{:.2e}'.format(np.mean(fidelity)))
+
+print(len(psd))
+print(n)
+
+# if fitBool:
+#     psd_fit, f_fit = QPT.get_fit(excluded_points=ep,ignore_fidelity=igf)
+#     fidelity=QPT.fidelity
+#
+# for i in range(n):
+#     if fitBool:
+#       #  plt.title('Loop #{:03d} f_parity={:.2e}'.format(i,1/QPT.T_parity[i]))
+#         pass
+#     else:
+#       #  plt.title('Loop #{:03d}'.format(i))
+#         pass
+#     plt.loglog(f,psd[i],'--')
+#     if fitBool:
+#         plt.loglog(f_fit, psd_fit[i], '-')
+#     plt.show()
+# if fitBool:
+#     f_parity=np.reciprocal(QPT.T_parity)
+#     print('{:.2e}'.format(np.mean(f_parity)))
+#     print('{:.2e}'.format(np.std(f_parity)/np.sqrt(len(f_parity))))
+#     print('{:.2e}'.format(np.mean(fidelity)))
 
