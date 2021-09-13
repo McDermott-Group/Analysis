@@ -5,7 +5,9 @@ file_path = ('Z:/mcdermott-group/data/BlackBody/Circmon/LIU/CW20180514A_Ox2/{}/{
 
 date = 'JJRadiatorP1Pre_2021Sep01'
 
-experiment_name = ('Q1_P1_0uDACJ2')
+experiment_name = ('Q1_P1_28300uDACJ2')
+# experiment_name = ('Q2_P1_85800uDACJ2')
+# experiment_name = ('Q2_P1_0uDACJ2')
 # experiment_name = ('Q4_P1_54300uDACJ2')
 
 file_Number_Tot = np.arange(0, 20, 1)

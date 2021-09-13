@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from scipy.constants import *
 from scipy.stats import linregress
 from scipy.stats import sem
+from sklearn.mixture import GaussianMixture
 
 from scipy.optimize import curve_fit
 
@@ -402,9 +403,103 @@ class P1(object):
         self.temp = temp
 
 
+class AntennaCoupling(object):
+    """
+    This is analyze the CST simulation
+    """
+
+    def __init__(self):
+        self.Antenna = {
+            "f": [],
+            "Z_Re": [],
+            "Z_Im": [],
+            "Z_rad": [],
+            "Gamma": [],
+        }
+
+        self.Junction = {
+            "R": None,
+            "L": None,
+            "C": None,
+            "Area": None,
+            "Z_j": None
+        }
+        Gamma = None
+        e_c = None
+        e_c_dB = None
+
+    def import_data(self, file, JJ):
+        self._add_data_from_txt(file)
+        self._JJ_Update(JJ)
+        self._get_e_c()
+
+    def _add_data_from_txt(self, file):
+        f = np.loadtxt(file, usecols=[0], skiprows=3)
+        Z_Re = np.loadtxt(file, usecols=[1], skiprows=3)
+        Z_Im = np.loadtxt(file, usecols=[2], skiprows=3)
+        Z_rad = Z_Re + 1j * Z_Im
+        self.Antenna["f"] = f * 1e9
+        self.Antenna["Z_Re"] = Z_Re
+        self.Antenna["Z_Im"] = Z_Im
+        self.Antenna["Z_rad"] = Z_rad
+
+    def _JJ_Update(self, JJ):
+        R = JJ[0]
+        L = JJ[1]
+        C = JJ[2]
+        A = JJ[3]  # nm*nm
+        C_eff = 10 * 1e-21
+        # C_eff = 87.5*1e-21
+        tau = R * C
+        omega = 2 * pi * self.Antenna["f"]
+        if not C:
+            C = A * C_eff
+            Z_j = [(1 - 1j * w * tau) / (1 + w ** 2 * tau ** 2) * R for w in
+                   omega]
+        else:
+            print('Q3')
+            Z_j = [-1j / (w * C - 1 / (w * L)) for w in omega]
+        self.Junction["R"] = R
+        self.Junction["L"] = L
+        self.Junction["C"] = C
+        self.Junction["A"] = A
+        self.Junction["Z_j"] = Z_j
+
+    def _get_e_c(self):
+        Z_j = self.Junction["Z_j"]
+        Z_rad = self.Antenna["Z_rad"]
+        Gamma = []
+        for i in range(len(Z_rad)):
+            Gamma.append((Z_rad[i] - np.conj(Z_j[i])) / (Z_rad[i] + Z_j[i]))
+        e_c = 1 - (np.abs(Gamma)) ** 2
+        e_c_dB = 10 * np.log10(e_c)
+        self.Gamma = Gamma
+        self.e_c = e_c
+        self.e_c_dB = e_c_dB
+
+    def plot(self):
+        f = self.Antenna["f"]
+        e_c_dB = self.e_c_dB
+        plt.plot(f, e_c_dB)
+        plt.show()
+
+    def plot_Q3Mode(self):
+        f = self.Antenna["f"]
+        Z_j = self.Junction["Z_j"]
+        Z_rad = self.Antenna["Z_rad"]
+        Y_j = [1 / Z for Z in Z_j]
+        Y_rad = [1 / Z for Z in Z_rad]
+        Y_tot = np.add(Y_j, Y_rad)
+        plt.plot(f, Y_tot.real, label='Re')
+        plt.plot(f, Y_tot.imag, label='Im')
+        plt.grid()
+        plt.legend()
+        plt.show()
+
+
 class P1_JSweep(object):
     """
-    This is for extract P1 value from the matlab data with Josephson Radiator's bias
+    This is for extract P1 value from the matlab data with Josephson radiator's bias
     """
 
     def __init__(self):
@@ -436,7 +531,7 @@ class P1_JSweep(object):
 
 class P1_JSweep_Q2(object):
     """
-    This is for extract P1 value from the matlab data with Josephson Radiator's bias
+    This is for extract P1 value from the matlab data with Josephson radiator's bias
     Q2 taken at different times
     """
 
@@ -580,6 +675,259 @@ class GammaUp(object):
         plt.legend()
         plt.ylim([0.5, 2])
         plt.show()
+
+
+class TiedSphericalGaussianMixture(GaussianMixture):
+    def _m_step(self, X, log_resp):
+        super(TiedSphericalGaussianMixture, self)._m_step(X, log_resp)
+        self.covariances_.fill(self.covariances_.mean())
+        if np.any(np.less_equal(self.covariances_, 0.0)):
+            raise ValueError(estimate_precision_error_message)
+        self.precisions_cholesky_ = 1. / np.sqrt(self.covariances_)
+
+
+class GMMFit(object):
+    """
+    For QB3 with 80 GHz mode, multiple higher states. Try to get a rate
+    """
+
+    def __init__(self):
+        # self.statesCal = {
+        #     "0Center": [0, 0],
+        #     "0CenterStd": [0, 0],
+        #     "1Center": [0, 0],
+        #     "1CenterStd": [0, 0],
+        #     "2Center": [0, 0],
+        #     "2CenterStd": [0, 0],
+        # }
+        # self.time = []
+        # self.IQ_I_Gate = []
+        # self.IQ_X_Gate = []
+        # self.IQ_pre = []
+        # # 2D array [(time1)[I, Q], [I, Q], ...,
+        # #           (time2)[I, Q], [I, Q], ...,
+        # #           ...]
+        # self.IQ = []    # same format as IQ_pre
+        # self.IQ_filtered = [] # same format as IQ_pre
+
+        self.I_Cal = {
+            'iq_bucket': np.array([]),
+            'gmm': None,
+            'scale_factor': None,
+            'means': None,
+            'covs': None,
+            'weights': None,
+            'states': [0, 1, 2, 3, 4]
+        }
+
+        self.X_Cal = {
+            'iq_bucket': np.array([]),
+            'gmm': None,
+            'scale_factor': None,
+            'means': None,
+            'covs': None,
+            'weights': None,
+            'states': [0, 1, 2, 3, 4]
+        }
+
+        self.J = {
+            'iq_bucket': np.array([]),
+            'gmm': None,
+            'scale_factor': None,
+            'means': None,
+            'covs': None,
+            'weights': None,
+            'states': [0, 1, 2, 3, 4]
+        }
+
+        self.iq_bucket_I_Cal = None  # from Chris' fitting code
+        self.iq_bucket_X_Cal = None  # from Chris' fitting code
+        self.iq_bucket_J = None  # from Chris' fitting code
+
+        # self.gmm = None
+        # self.scale_factor = None
+        # self.means = None
+        # self.covs = None
+        # self.weights = None
+
+    def add_data_and_process_data(self, path):
+        self._add_IQ_data_from_matlab(path=path)
+        # self._fit_clusters(s='I')
+        # self._fit_clusters(s='X')
+        # self._fit_clusters(s='J')
+        self._add_means_stds_weights_by_hand()
+
+    def _add_IQ_data_from_matlab(self, path):
+        data_I_Gate = noiselib.loadmat(path[0][0])
+        data_X_Gate = noiselib.loadmat(path[1][0])
+        data_J = noiselib.loadmat(path[2][0])
+
+        IQ_I_Gate_I = data_I_Gate['Is']
+        IQ_I_Gate_Q = data_I_Gate['Qs']
+        IQ_X_Gate_I = data_X_Gate['Is']
+        IQ_X_Gate_Q = data_X_Gate['Qs']
+        IQ_J_I = data_J['Is']
+        IQ_J_Q = data_J['Qs']
+        iq_bucket_I_Cal = []
+        iq_bucket_X_Cal = []
+        iq_bucket_J = []
+
+        for i in range(len(IQ_I_Gate_I)):
+            iq_bucket_I_Cal.append([IQ_I_Gate_I[i], IQ_I_Gate_Q[i]])
+            iq_bucket_X_Cal.append([IQ_X_Gate_I[i], IQ_X_Gate_Q[i]])
+            iq_bucket_J.append([IQ_J_I[i], IQ_J_Q[i]])
+
+        self.I_Cal['iq_bucket'] = np.array(iq_bucket_I_Cal)
+        self.X_Cal['iq_bucket'] = np.array(iq_bucket_X_Cal)
+        self.J['iq_bucket'] = np.array(iq_bucket_J)
+
+    def _add_means_stds_weights_by_hand(self):
+        means_I_Cal = np.array([
+            [-4.98032745e-04, -5.29814968e-04],
+            [-1.53501438e-05, -1.04117590e-03],
+            [-1.18892628e-03, -7.60596566e-04],
+            [-1.52127127e-05, -1.04145841e-03],
+            [-1.29168464e-03, -1.36032532e-03]])
+        covs_I_Cal = np.array([0.00018037, 0.00018037, 0.00018037, 0.00018037, 0.00018037])
+        weights_I_Cal = np.array([0.20402284, 0.26886805, 0.0921508, 0.37787216, 0.05708614])
+
+        means_X_Cal = np.array([
+            [-8.12703158e-04, -5.26449187e-04],
+            [-1.66068565e-05, -1.03175647e-03],
+            [-1.27736318e-03, -1.40798388e-03],
+            [-3.74014506e-04, -5.58047708e-04],
+            [-1.25843911e-03, -8.65741341e-04]])
+        covs_X_Cal = np.array([0.00016722, 0.00016722, 0.00016722, 0.00016722, 0.00016722])
+        weights_X_Cal = np.array([0.107186, 0.2848422, 0.05143376, 0.46494838, 0.09158966])
+
+        means_J = np.array([
+            [-8.57133125e-04, -5.05998758e-04],
+            [-2.14617765e-05, -1.03643611e-03],
+            [-1.29915411e-03, -1.35906093e-03],
+            [-4.29009115e-04, -5.40244316e-04],
+            [-1.26567318e-03, -8.88872815e-04]])
+
+        covs_J = np.array([0.00016538, 0.00016538, 0.00016538, 0.00016538, 0.00016538])
+        weights_J = np.array([0.66665995, 0.05284824, 0.07662717, 0.07785456, 0.12601009])
+
+        self.I_Cal['means'] = means_I_Cal
+        self.I_Cal['covs'] = covs_I_Cal
+        self.I_Cal['weights'] = weights_I_Cal
+
+        self.X_Cal['means'] = means_X_Cal
+        self.X_Cal['covs'] = covs_X_Cal
+        self.X_Cal['weights'] = weights_X_Cal
+
+        self.J['means'] = means_J
+        self.J['covs'] = covs_J
+        self.J['weights'] = weights_J
+
+    def _fit_clusters(self, N=5, s='X'):
+        """Fits N gaussian clouds to the N IQ blobs."""
+
+        state = None
+        if s == 'I':
+            state = self.I_Cal
+        elif s == 'X':
+            state = self.X_Cal
+        elif s == 'J':
+            state = self.J
+
+        combined_bucket = state['iq_bucket']
+        # print('combined_bucket=', combined_bucket)  # LIU
+        scale_factor = np.abs(combined_bucket.max())
+        combined_bucket = combined_bucket / scale_factor
+        minit = None  # np.array([np.mean(iq_bucket['Ground%s'%chan],axis=0),np.mean(iq_bucket['Excited%s'%chan],axis=0)])
+
+        # init_means = np.array([
+        #     [-3.74013889e-04, -5.58047925e-04],
+        #     [-1.25843829e-03, -8.65740035e-04],
+        #     [-1.66068104e-05, -1.03175658e-03],
+        #     [-8.12700137e-04, -5.26448428e-04],
+        #     [-1.27736337e-03, -1.40798313e-03]
+        # ])
+        #
+        # init_covariances = np.array([0.00016722, 0.00016722, 0.00016722, 0.00016722, 0.00016722])
+
+        gmm = TiedSphericalGaussianMixture(
+            n_components=N,
+            covariance_type='spherical',
+            max_iter=300, tol=5e-7,
+            means_init=minit, n_init=5)\
+            .fit(combined_bucket)
+
+        state['gmm'] = gmm
+        state['scale_factor'] = scale_factor
+        state['means'] = scale_factor * gmm.means_
+        state['covs'] = scale_factor * np.sqrt(gmm.covariances_)
+        state['weights'] = gmm.weights_
+
+        print('means=', state['means'])
+        print('covs=', state['covs'])
+        print('weights', state['weights'])
+
+        if s == 'I':
+            self.I_Cal = state
+        elif s == 'X':
+            self.X_Cal = state
+        elif s == 'J':
+            self.J = state
+
+    # def _get_gaus_means(self):
+    #     means = self.scale_factor * self.gmm.means_
+    #     return means
+    #
+    # #     ordered_states = self._id_centers_with_state_data(means
+    # #     return {ordered_states[i]: means[i] for i in range(len(means))}
+    # #
+    # def _get_gaus_std(self):
+    #     cov = self.scale_factor * np.sqrt(self.gmm.covariances_)
+    #     return cov
+
+    #     ordered_states = self._id_centers_with_state_data(means)
+    #     return {ordered_states[i]: self.scale_factor * np.sqrt(
+    #         self.gmm.covariances_[i])
+    #             for i in range(len(means))}
+
+    def _getCircle(self, IQCenter, std):
+        """Returns points for state circle."""
+        n = 50
+        rxy = np.zeros((2, n))
+        r0 = IQCenter
+        r = std
+        rxy[0] = r0[0] + r * np.cos(np.linspace(0, 2 * np.pi, n))
+        rxy[1] = r0[1] + r * np.sin(np.linspace(0, 2 * np.pi, n))
+        return rxy
+
+    def plot_data(self, s='X', show=False):
+        state = None
+        if s == 'I':
+            state = self.I_Cal
+        elif s == 'X':
+            state = self.X_Cal
+        elif s == 'J':
+            state = self.J
+
+        IQCenters = state['means']
+        stds = state['covs']
+        I = state['iq_bucket'][:, 0]
+        Q = state['iq_bucket'][:, 1]
+        plt.figure(figsize=(7, 7))
+        plt.scatter(I, Q, label='{}'.format(s), s=1)
+        for i in range(len(IQCenters)):
+            rxy = self._getCircle(IQCenters[i], stds[i])
+            plt.scatter(rxy[0], rxy[1], marker='.')
+        plt.xlabel('I')
+        plt.ylabel('Q')
+        plt.xlim(min(I) - 0.1 * (max(I) - min(I)),
+                 max(I) + 0.1 * (max(I) - min(I)))
+        plt.ylim(min(Q) - 0.1 * (max(Q) - min(Q)),
+                 max(Q) + 0.1 * (max(Q) - min(Q)))
+        plt.grid()
+        plt.legend()
+        plt.draw()
+        if show:
+            plt.show()
 
 
 class GammaUp_New(object):
@@ -744,7 +1092,7 @@ class calibration_debug(object):
         self.temp = temp
 
 
-class BB_Radiation(object):
+class BB_radiation(object):
     """
     To Understand more of the Blackbody radiation
     """
@@ -867,7 +1215,7 @@ class Blackbox(object):
         :return: None; update the QB parameters
         """
         omega = 2 * pi * f
-        C_J = 3.5*10**(-15)
+        C_J = 3.5 * 10 ** (-15)
         Ec_J = e ** 2 / (hbar * (2 * C_J))  # in units of omega
         Ec_QB = e ** 2 / (hbar * (2 * C))  # in units of omega
         self.QB_mode["omega"] = omega
@@ -878,13 +1226,12 @@ class Blackbox(object):
         self.J["C"] = C_J
         self.J["Ec"] = Ec_J
 
-
     def _getChi(self):
         Cj = self.J["C"]
         Lj = self.J["L"]
         Ec = self.J["Ec"]
 
-        print('Ec=', Ec/(2*pi*1e9))
+        print('Ec=', Ec / (2 * pi * 1e9))
 
         C_Q = self.QB_mode["C"]
         L_Q = self.QB_mode["L"]
@@ -898,9 +1245,9 @@ class Blackbox(object):
         self.Chi_QQ = Chi_QQ
         self.Chi_AA = Chi_AA
         self.Chi_QA = Chi_QA
-        print("Chi_QQ=", Chi_QQ/(2*pi*1e9))
-        print("Chi_AA=", Chi_AA/(2*pi*1e9))
-        print("Chi_QA=", Chi_QA/(2*pi*1e9))
+        print("Chi_QQ=", Chi_QQ / (2 * pi * 1e9))
+        print("Chi_AA=", Chi_AA / (2 * pi * 1e9))
+        print("Chi_QA=", Chi_QA / (2 * pi * 1e9))
 
     def _getg(self):
         """
@@ -913,16 +1260,17 @@ class Blackbox(object):
         alpha = self.QB_mode["Ec"]
         T1_A = self.Antenna_mode["T1"]
 
-        print("Delta=", Delta/(2*pi*1e9))
-        print("alpha=", alpha/(2*pi*1e9))
+        print("Delta=", Delta / (2 * pi * 1e9))
+        print("alpha=", alpha / (2 * pi * 1e9))
         print("T1_A=", T1_A)
 
-        factor = abs(Chi_QA/alpha) # g^2/Delta^2
-        g = np.sqrt(factor*Delta**2)
-        T_Q = T1_A/factor
+        factor = abs(Chi_QA / alpha)  # g^2/Delta^2
+        g = np.sqrt(factor * Delta ** 2)
+        T_Q = T1_A / factor
 
         self.QB_mode["T1"] = T_Q
         self.g = g
+
 
 def getBBTensity(f, T):
     Intensity = (2 * h * f ** 3 / c ** 2) * (1 / (np.exp(h * f / (k * T)) - 1))
