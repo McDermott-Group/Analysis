@@ -163,16 +163,17 @@ class QP_Up(object):
         plt.grid()
         plt.legend()
         plt.plot(time[3:], GammaUp_list, 'k-', label='GammaUp')
-        # plt.show(block=False)
+        #plt.show(block=False)
 
-    def plot(self):
+    def plot(self,name='',save=False):
         time = self.Pre_to_RO_Time * 10 ** 6
         occ = self.occ_1D_avg
         occ_fit = self.occ_1D_avg_fit
         error = self.occ_1D_avg_error_band
         GammaUp = self.GammaUp
         temp = str(self.temp) + 'mK'
-        plt.figure(3)
+        if not save:
+            plt.figure(3)
         plt.plot(time, occ_fit, 'o-',
                  label=temp + '_GammaUp={0:.4g} Hz'.format(GammaUp))
         plt.plot(time, occ, 'k-', label=temp)
@@ -182,7 +183,11 @@ class QP_Up(object):
         # plt.yscale('log')
         plt.grid()
         plt.legend()
-        plt.show()
+        if save:
+            plt.savefig(name)
+            plt.show()
+        else:
+            plt.show()
 
 
 class Up_array(object):

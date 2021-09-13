@@ -361,7 +361,6 @@ class QPTunneling_Harrison(object):
     def get_psd(self, window_averaging=False, number=1, concatenate_records=1):
         parity_string_array = self.parity_string_array
         numRecords = len(parity_string_array)
-        print(numRecords)
         if concatenate_records < 1:
             #this means to DIVIDE each record into 1/concatenate_records parts
             temp = []
@@ -378,8 +377,6 @@ class QPTunneling_Harrison(object):
                     temp[len(temp)-1] = np.concatenate([temp[len(temp)-1], parity_string_array[i+j]])
             parity_string_array=temp
         numRecords = len(parity_string_array)
-        print(numRecords)
-
         #now we have a resized parity_string_array.  Now, we can computer the PSD of each string.
         #we will then divide the array into 'number" parts and  take each part and average.
         #We will return an array (length 'number') containing all of the PSDs
@@ -393,12 +390,11 @@ class QPTunneling_Harrison(object):
             if(firstLoop):
                 firstLoop = False
                 self.f_data = freq
-                print(len(self.f_data))
-
 
         #this averages the proper number of psds and puts the averaged values into psd_ave
         psd_avg = []
-        for i in np.arange(0, numRecords, int(1.0*numRecords/number)):
+        #print(int(np.floor(1.0*numRecords/number)))
+        for i in np.arange(0, numRecords-int(np.floor(1.0*numRecords/number))+1, int(np.floor(1.0*numRecords/number))):
             psd_avg.append(np.zeros(len(psds[0])))
             for j in range(0, int(1.0*numRecords/number)):
                 psd_avg[len(psd_avg) - 1] = np.add(psd_avg[len(psd_avg) - 1], psds[i + j])
@@ -461,8 +457,6 @@ class QPTunneling_Harrison(object):
                     # if params_covariance_curr[0][0] < covariance:
                         rs = r_squared
                         best_params=params_curr
-                        print(r_squared)
-                        print(params_curr)
             #need to convert these to 2d
             self.params.append(best_params)
             self.T_parity.append(self.params[len(self.params)-1][0])
@@ -615,7 +609,7 @@ def plotMultiFittedPSD(QPT_List, one_over_f=False, save=False, name=''):
     # plt.draw()
 
 
-def plotMultiFittedPSD_Harrison(QPT_List, one_over_f=False, save=False, name='', concatenateRecords=1, excludedPoints=1, number=25):
+def plotFittedPSD_Harrison(QPT, one_over_f=False, save=False, name='', concatenate_records=1, excluded_points=1,ylim=[]):
     """
     plot multi fitted PSD for comparison
     :param QPT_List: a list of QPT object, e.g. [QPT_NoPoison, QPT_Neg10dBmPoison]
@@ -623,48 +617,51 @@ def plotMultiFittedPSD_Harrison(QPT_List, one_over_f=False, save=False, name='',
     """
     plt.figure(figsize=(8, 6))
     linestyle = ['--', '+', 'o', 'v', 's', 'p', '*', 'h', 'x', 'D']
-    for i, QPT in enumerate(QPT_List):
-        # wa = False
-        print('QPT=', QPT)
-        wa = True
-        psd, f = QPT.get_psd(number=number,window_averaging=wa,concatenateRecords=concatenateRecords)
-        plt.loglog(f, psd, linestyle[i], label=r"{} PSD".format(QPT.name))
-        # fit = False
-        fit = True
-        if fit:
-            if one_over_f:
-                print('oneoverf')
-                psd_fit, f_fit = QPT.get_fit_one_over_f()
-                F_map = QPT.params[1]
-                if QPT.f_or_t == 't':
-                    T_parity = QPT.params[0]
-                else:
-                    T_parity = (1/QPT.params[0])
-                print('T_parity=', T_parity)
-                print(psd_fit)
-                plt.loglog(f_fit, psd_fit, '-',
-                           label='{} fit [{:.5f} ms], fidelity={:.2f}'.format(
-                               QPT.name, (T_parity)*10**3, F_map))
-            else:
-                psd_fit, f_fit = QPT.get_fit(excludedPoints=excludedPoints)
-                F_map = QPT.params[1]
-                if QPT.f_or_t == 't':
-                    T_parity = QPT.params[0]
-                else:
-                    T_parity = (1/QPT.params[0])
-                print('T_parity=', T_parity)
-                plt.loglog(f_fit, psd_fit, '-',
-                           label='{} fit [{:.5f} ms], fidelity={:.2f}'.format(
-                               QPT.name, (T_parity)*10**3, F_map))
-    plt.xlabel('Frequency (Hz)')
-    plt.ylabel('S (1/Hz)')
-    plt.grid()
-    plt.grid()
-    plt.grid()
-    plt.legend()
+    # wa = False
+
+    psd, f1 = QPT.get_psd(number=25, window_averaging=True, concatenate_records=concatenate_records)
+    fit, f2 = QPT.get_fit(excluded_points=excluded_points, ignore_fidelity=False)
+    avg_fidelity=np.mean(QPT.fidelity)
+    avg_parity=np.mean(np.true_divide(1.0, QPT.T_parity))
+    parity_uncertainty=np.std(np.true_divide(1.0/np.sqrt(25),QPT.T_parity))
+    for i in range(0, len(psd)):
+        plt.loglog(f1, psd[i], label=r"{} PSD".format(QPT.name))
+        plt.loglog(f2, fit[i], '-')
+        plt.title(name+' (Fidelity = {:.2f} and Parity = {:.5f} +/- {:.5f} Hz)'.format(avg_fidelity, avg_parity, parity_uncertainty))
+        plt.grid(axis='both')
+        if ylim != []:
+            plt.ylim(ylim)
+        plt.xlabel('Frequency (Hz)')
+        plt.ylabel('S (1/Hz)')
     if save:
-        plt.savefig(name+'.png')
+        plt.savefig('Figures/'+name + '_multi.png')
+        plt.show()
     else:
         plt.show()
-    # plt.pause(1)
-    # plt.draw()
+
+    plt.figure(figsize=(8, 6))
+    linestyle = ['--', '+', 'o', 'v', 's', 'p', '*', 'h', 'x', 'D']
+    # wa = False
+
+    psd, f1 = QPT.get_psd(number=1, window_averaging=True, concatenate_records=concatenate_records)
+    fit, f2 = QPT.get_fit(excluded_points=excluded_points, ignore_fidelity=False)
+    fidelity = np.mean(QPT.fidelity)
+    parity = np.mean(np.true_divide(1.0, QPT.T_parity))
+    for i in range(0, len(psd)):
+        plt.loglog(f1, psd[i], label=r"{} PSD".format(QPT.name))
+        plt.loglog(f2, fit[i], '-')
+        plt.title(name + ' (Fidelity = {:.2f} and Parity = {:.5f} Hz)'.format(fidelity, parity))
+        plt.grid(axis='both')
+        if ylim != []:
+            plt.ylim(ylim)
+        plt.xlabel('Frequency (Hz)')
+        plt.ylabel('S (1/Hz)')
+    if save:
+        plt.savefig('Figures/'+name + '.png')
+        plt.show()
+    else:
+        plt.show()
+
+
+
+    return avg_fidelity,avg_parity,parity_uncertainty

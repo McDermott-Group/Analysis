@@ -162,7 +162,7 @@ n=20
 # temp = '284mK' # ^^^ exclude files ^^^ Data and fits good
 # ep=10
 # n=25
-# temp = '251mK'  #Data and fits good
+temp = '251mK'  #Data and fits good
 # temp = '199mK' #Data and fits good
 # temp = '102mK' #Data and fits good
 # temp = '76mK' #Data and fits good
@@ -268,15 +268,17 @@ for i in range(50):
 
 fitBool=True
 fidelity = []
-psd, f1 = QPT.get_psd(number=n,window_averaging=True,concatenate_records=0.1)
+psd, f1 = QPT.get_psd(number=1,window_averaging=True,concatenate_records=0.5)
+print(psd)
+print(f1)
 fit,f2 = QPT.get_fit(excluded_points=1,ignore_fidelity=False)
 for i in range(0,len(psd)):
     plt.loglog(f1, psd[i], '--')
     plt.loglog(f2, fit[i], '-')
     plt.show()
 
-print(len(psd))
-print(n)
+# print(len(psd))
+# print(n)
 
 # if fitBool:
 #     psd_fit, f_fit = QPT.get_fit(excluded_points=ep,ignore_fidelity=igf)
