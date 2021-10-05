@@ -4,10 +4,11 @@ function [window_avg_psd, psd_freq] = Plot_QP_Tunneling(CDdate, samples, ...
     %PARAMETERS
 %     reps = 8192;
 %     trials = 5;
-    refreshTime = 4*100e-6;
+    n_avg = 1; % number of samples to average together before taking PSD
+    refreshTime = n_avg*100e-6;
 
     dataType = 'QP_Tunneling_PSD';
-    path = strcat(['Z:\mcdermott-group\data\fluxNoise2\',CDdate,samples, ...
+    path = strcat(['Z:\mcdermott-group\data\fluxNoise\',CDdate,samples, ...
               qubit,'General\',date,dataType,'\MATLABData']);
 
     Fs = 1/refreshTime; %samples per second
@@ -20,12 +21,14 @@ function [window_avg_psd, psd_freq] = Plot_QP_Tunneling(CDdate, samples, ...
     for i = fileIndicies
         ldata = noiselib.load_file(path, [dataType '_' num2str(i,'%03d') '.mat']);
         o = ldata.Single_Shot_Occupations;
-        oo = zeros(5,8192/4);
-        for k = 1:5
-            oo(k,:) = mean(reshape(o(k,:), 4, 8192/4)) > 0.1;
-        end
-        o = oo;
+        oo = zeros(5,8192/n_avg);
+        if n_avg > 1
+            for k = 1:5
+                oo(k,:) = mean(reshape(o(k,:), n_avg, 8192/n_avg)) > 0.1;
+            end
+            o = oo;
 %         o = movmean(o,5,2)>0.1;
+        end
         if j == 0
             trials = size(o,1);
             reps = size(o,2);
@@ -49,7 +52,7 @@ function [window_avg_psd, psd_freq] = Plot_QP_Tunneling(CDdate, samples, ...
     % figure(12);hold on;plot(f,lor)
 
     %Plot
-    figure(111);hold on
+    figure(113);hold on
     title('1/f Averaged PSD')
     plot(psd_freq,abs(window_avg_psd), 'DisplayName', [samples(1:end-1),qubit(1:end-1)])
     % plot(fr, x, y);

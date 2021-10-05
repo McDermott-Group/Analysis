@@ -18,19 +18,21 @@ dep_rels = data.rels.Interleaved_Probability;
 
 % analyze and plot 1D data
 if length(dep_rels) == 1
-    %Find P1 for Interleaved and no interleave for each number of Cliffords
-    p1_array = zeros(length(data.Number_of_Cliffords), 3);%NoInter, Inter, NoC
-    p1_array(:,1) = 1 - data.No_Interleaved_Probability;
-    p1_array(:,2) = 1 - data.Interleaved_Probability;
-    p1_array(:,3) = data.Number_of_Cliffords;
+    %Find P0 for Interleaved and no interleave for each number of Cliffords
+    p0_array = zeros(length(data.Number_of_Cliffords), 3);%NoInter, Inter, NoC
+    p0_array(:,1) = 1 - data.No_Interleaved_Probability;
+    p0_array(:,2) = 1 - data.Interleaved_Probability;
+    p0_array(:,3) = data.Number_of_Cliffords;
     
     % Fit the two curves for depolarizing parameter
     
-    [out.no_int_x, out.no_int_y]=prepareCurveData(p1_array(:,3), p1_array(:,1));
+    [out.no_int_x, out.no_int_y]=prepareCurveData(p0_array(:,3), p0_array(:,1));
     [out.fr_No_Interleave, ~] = fidelityFit(out.no_int_x, out.no_int_y);
+    out.no_int_avg_fidelity=(1-out.fr_No_Interleave.b)/2;
     
-    [out.int_x, out.int_y]=prepareCurveData(p1_array(:,3), p1_array(:,2));
+    [out.int_x, out.int_y]=prepareCurveData(p0_array(:,3), p0_array(:,2));
     [out.fr_Interleave, ~] = fidelityFit(out.int_x, out.int_y);
+    out.int_avg_fidelity=(1-out.fr_Interleave.b)/2;
     
     r_c_est = 0.5*(1-out.fr_Interleave.b/out.fr_No_Interleave.b);
     out.fidelity_gate = 1 - r_c_est;
@@ -76,13 +78,12 @@ if length(dep_rels) == 1
         fid_str});
     xlabel('Number of Cliffords')
     ylabel('Sequence Fidelity')
-    leg=legend('Interleaved Gate: None',...
-        ['Interleaved Gate: ',data.Interleaving_Gate]);
+    leg=legend(['Interleaved Gate: None, AvgError:', num2str(out.no_int_avg_fidelity)],...
+        ['Interleaved Gate: ',data.Interleaving_Gate, ' AvgError:',  num2str(out.int_avg_fidelity)]);
     set(leg,'Location','best')
     
 % analyze and plot 2D data
 elseif length(dep_rels) == 2
-    
     % figure out what the swept variable is aside from number of cliffords
     if ~isempty(strfind(dep_rels{1}, 'Cliffords'))
         indep_name1 = dep_rels{2};
