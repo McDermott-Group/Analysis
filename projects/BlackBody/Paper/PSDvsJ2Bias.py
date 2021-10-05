@@ -215,9 +215,12 @@ Q4 = np.concatenate((Q4_Low, Q4_dense, Q4_Hi))
 
 
 # offset = 19.2
-print('Q1[:, 0]=', Q1[:, 0])
-print('Q2[:, 0]=', Q2[:, 0])
-print('Q4[:, 0]=', Q4[:, 0])
+# print('Q1[:, 0]=', Q1[:, 0])
+# print('Q2[:, 0]=', Q2[:, 0])
+# print('Q4[:, 0]=', Q4[:, 0])
+# print('Q1=', Q1)
+# print('Q2=', Q2)
+# print('Q4=', Q4)
 # plt.plot(Q1[:, 0], Q1[:, 1], color='b', label='Q1')
 # plt.plot(Q2[:, 0], Q2[:, 1], color='r', label='Q2')
 # plt.plot(Q4[:, 0], Q4[:, 1], color='y', label='Q4')
@@ -228,16 +231,16 @@ print('Q4[:, 0]=', Q4[:, 0])
 # plt.legend(loc=1)
 # plt.show()
 
-# f = 4.604
-# plt.plot(Q1[:, 0]*f, Q1[:, 1], color='b', label='Q1')
-# plt.plot(Q2[:, 0]*f, Q2[:, 1], color='r', label='Q2')
-# plt.plot(Q4[:, 0]*f, Q4[:, 1], color='y', label='Q4')
-# plt.xlabel('Radiator Josephson Frequency (GHz)')
-# plt.ylabel('PSD')
-# plt.yscale('log')
-# # plt.grid()
-# plt.legend(loc=1)
-# plt.show()
+f = 4.604
+plt.plot(Q1[:, 0]*f, Q1[:, 1], color='b', label='Q1')
+plt.plot(Q2[:, 0]*f, Q2[:, 1], color='r', label='Q2')
+plt.plot(Q4[:, 0]*f, Q4[:, 1], color='y', label='Q4')
+plt.xlabel('Radiator Josephson Frequency (GHz)')
+plt.ylabel('PSD')
+plt.yscale('log')
+plt.grid()
+plt.legend(loc=1)
+plt.show()
 
 
 

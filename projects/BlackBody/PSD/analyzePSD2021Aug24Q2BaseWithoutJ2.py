@@ -9,8 +9,9 @@ import numpy as np
 QP_path = ('Z:/mcdermott-group/data/BlackBody/Circmon/LIU/CW20180514A_Ox2/{}/{}/MATLABData/{}')
 date = '08-24-21'
 QB_id = 'Q2'
-J2Q2Biaslist = np.arange(0, 1, 500)
-J2_QPT_2D = []
+# J2Q2Biaslist = np.arange(0, 1, 500)
+J2Q2Biaslist = [0]
+# J2_QPT_2D = []
 for J2Bias in J2Q2Biaslist:
     experiment_name_PSD = (QB_id+'_PSD_'+str(J2Bias)+'uDACJ2')
     PSD_file_Number = np.arange(0, 25, 1)

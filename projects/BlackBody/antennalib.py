@@ -453,12 +453,13 @@ class AntennaCoupling(object):
         L = JJ[1]
         C = JJ[2]
         A = JJ[3]  # nm*nm
-        C_eff = 10 * 1e-21
-        # C_eff = 87.5*1e-21
-        tau = R * C
+        C_eff = 75*1e-21
         omega = 2 * pi * self.Antenna["f"]
         if not C:
+            # print('here!')
             C = A * C_eff
+            tau = R * C
+            # print('tau=', tau)
             Z_j = [(1 - 1j * w * tau) / (1 + w ** 2 * tau ** 2) * R for w in
                    omega]
         else:
@@ -515,7 +516,7 @@ class P1_JSweep(object):
 
     def add_data_from_matlab(self, file_path,
                              data_type1='Projected_Occupation',
-                             data_type2='J2_Bias'):
+                             data_type2='JB_Bias'):
         f0 = file_path[0]
         data0 = noiselib.loadmat(f0)
         occ_2D = data0[data_type1]

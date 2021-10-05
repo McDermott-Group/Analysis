@@ -38,7 +38,7 @@ class QPTunneling_Wilen(object):
         for f in file_path:
             data = noiselib.loadmat(f)
             o = np.array(data[data_str])
-            Serniak = True # This is used for fast measurement, M1 and M2's product
+            Serniak = False # This is used for fast measurement, M1 and M2's product
             # convertto10 = False   # This is for 1, -1 data to 0, 1 value conversion
             convertto10 = True
             if convertto10:
@@ -258,7 +258,7 @@ class QPTunneling_Liu(object):
             sigma = f**1
             params_curr, params_covariance_curr = curve_fit(
                 fit_PSD_target_function, f, psd,
-                bounds=[(0.5*10**(-3), 0), (5*10**(-3), 1.0)], p0=[1.5*10**(-3), ig], method='trf',
+                bounds=[(0.5*10**(-3), 0), (50*10**(-3), 1.0)], p0=[1.5*10**(-3), ig], method='trf',
                 sigma=sigma)
             if params_covariance_curr[0][0] < covariance:
                 self.params = params_curr
@@ -579,8 +579,8 @@ def plotMultiFittedPSD(QPT_List, one_over_f=False, save=False, name=''):
                     T_parity = QPT.params[0]
                 else:
                     T_parity = (1/QPT.params[0])
-                print('T_parity=', T_parity)
-                print(psd_fit)
+                # print('T_parity=', T_parity)
+                # print(psd_fit)
                 plt.loglog(f_fit, psd_fit, '-',
                            label='{} fit [{:.5f} ms], fidelity={:.2f}'.format(
                                QPT.name, (T_parity)*10**3, F_map))
@@ -591,7 +591,7 @@ def plotMultiFittedPSD(QPT_List, one_over_f=False, save=False, name=''):
                     T_parity = QPT.params[0]
                 else:
                     T_parity = (1/QPT.params[0])
-                print('T_parity=', T_parity)
+                # print('T_parity=', T_parity)
                 plt.loglog(f_fit, psd_fit, '-',
                            label='{} fit [{:.5f} ms], fidelity={:.2f}'.format(
                                QPT.name, (T_parity)*10**3, F_map))
