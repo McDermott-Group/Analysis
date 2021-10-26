@@ -1,24 +1,24 @@
 """
-2021Sep
+2021Oct
 """
 from QPTunneling_LIU import QPTunneling_Wilen, plotMultiFittedPSD, QPTunneling_Liu, QPTunneling_Harrison
 import matplotlib.pyplot as plt
 import numpy as np
 
-QP_path = ('Z:/mcdermott-group/data/Antenna/Circmon/LIU/CW20180514A_Ox2/{}/{}/MATLABData/{}')
-# date = 'J6Radiator_2021Sep28_Q124'
-date = 'J6Radiator_2021Sep28_Q2_Retake_2'
-QB_id = 'Q2'
+QP_path = ('Z:/mcdermott-group/data/Antenna/GapEngineering/LIU/GapEngineering/{}/{}/MATLABData/{}')
+date = '10-14-21'
+# date = '2021Oct13Test'
+QB_id = 'Q4'
 # a1 = np.arange(0, 16000, 5000)
 # a2 = np.arange(16000, 44000, 2000)
 # JBlist = np.concatenate((a1, a2))
 # JBlist = np.arange(34000, 64000, 2000)
-JBlist = [240000]
+JBlist = [0]
 J_QPT_2D = []
 
 for JB in JBlist:
-    experiment_name_PSD = (QB_id+'_PSD_'+str(JB)+'uDACJB')
-    PSD_file_Number = np.arange(20, 25, 1)
+    experiment_name_PSD = (QB_id+'_PSD_'+str(JB)+'uDACJ6')
+    PSD_file_Number = np.arange(10, 15, 1)
     PSD_file = [QP_path.format(date, experiment_name_PSD, experiment_name_PSD) + '_{:03d}.mat'.format(i) for i in PSD_file_Number]
     QPT_Q = QPTunneling_Wilen(name='{} with J6 = {} uDAC, {}GHz'.
                               format(QB_id, str(JB), str(JB*4.6)))

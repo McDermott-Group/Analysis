@@ -7,12 +7,12 @@ JQ2 = [13.2*1e3, 14.6*1e-9, 0, 350*126.6]   #
 JQ3 = [19*1e3, 21*1e-9, 0, 310*126]   #    some issue with Q3
 JQ4 = [15*1e3, 19.9*1e-9, 0, 184.4*122.5*2]   #    some issue with Q3
 
-fileSFQ = "SFQ_JJRadiator.txt"
+fileSFQ = "testpad_1.5THz.txt"
 # fileQ1 = "Q1.txt"
-fileQ1 = "Q1_leads.txt"
-fileQ2 = "Q2.txt"
-fileQ3 = "Q3.txt"
-fileQ4 = "Q4.txt"
+fileQ1 = "Q1_with-leads_1.5THz.txt"
+fileQ2 = "Q2_1.5THz.txt"
+fileQ3 = "Q3_with-leads_1.5THz.txt"
+fileQ4 = "Q4_1.5THz.txt"
 
 SFQ = AntennaCoupling()
 SFQ.import_data(fileSFQ, JSFQ)

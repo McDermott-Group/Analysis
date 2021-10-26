@@ -1,8 +1,8 @@
 from antennalib import AntennaCoupling
 import matplotlib.pyplot as plt
 import numpy as np
-# JJ2 = [4*1e3, None, 0, 1000*150]   #[R, L, C, A]
-JJ2 = [28*1e3, None, 0, 150*150]   #[R, L, C, A]
+JJ2 = [4*1e3, None, 0, 1000*150]   #[R, L, C, A]
+# JJ2 = [28*1e3, None, 0, 150*150]   #[R, L, C, A]
 JQ1 = [14*1e3, 18.3*1e-9, 0, 300*150]
 JQ2 = [14*1e3, 14.6*1e-9, 0, 300*150]
 
@@ -38,14 +38,15 @@ Z_ReQ2 = Q2.Antenna["Z_Re"]
 # print(omega/(6.28*1e9))
 # Q3.plot_Q3Mode()
 
-ecJ2 = ecJ2*1.0
+ecJ2 = ecJ2
 k = 1
 
 plt.plot(f, ecQ1+ecJ2*k, color='b', label='Q1')
-plt.plot(f, ecQ2+ecJ2*k, color='r', label='Q2')
+plt.plot(f, ecQ1+ecJ2*0, color='b', label='Q1 bare')
+# plt.plot(f, ecQ2+ecJ2*k, color='r', label='Q2')
 # plt.plot(f, ecQ3+ecJ2*k, color='k', label='Q3')
 # plt.plot(f, ecQ4+ecJ2*k, color='y', label='Q4')
-plt.plot(f, ecJ2, color='y', label='J2')
+plt.plot(f, ecJ2, color='y', label='J7')
 plt.xlabel('Freq')
 plt.ylabel('Coupling efficiency')
 plt.legend()

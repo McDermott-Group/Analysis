@@ -29,6 +29,7 @@ class QPTunneling_Wilen(object):
         self.one_over_f = False
 
     def add_datasets(self, file_path, data_str='Charge_Parity_Trace', simulate=False):
+    # def add_datasets(self, file_path, data_str='Single_Shot_Occupations', simulate=False):
         if type(file_path) == str:
             file_path = [file_path]
         f_l = file_path[0]
@@ -108,7 +109,7 @@ class QPTunneling_Wilen(object):
         psd = psd[~np.isnan(psd)]
         # print('len(f)=', len(f))
         #
-        l = 5
+        l = 50
         r = 500
         # print('f[l]', f[l])
         # print('f[r]', f[r])

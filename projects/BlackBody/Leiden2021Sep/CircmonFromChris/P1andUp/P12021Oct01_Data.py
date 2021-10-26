@@ -29,7 +29,7 @@ Q4_UpRate = np.array([390.4563444084148, 520.1561489919309, 529.6753572459689, 4
 # plt.show()
 
 plt.semilogy(J6_Bias*1000*4.8, Q1_UpRate, label='Q1')
-# plt.semilogy(J6_Bias*1000*4.8, Q2_UpRate, label='Q2')
+plt.semilogy(J6_Bias*1000*4.8, Q2_UpRate, label='Q2')
 plt.semilogy(J6_Bias*1000*4.8, Q4_UpRate, label='Q4')
 plt.xlabel('J2 Bias (GHz)')
 plt.ylabel('Gamma Up (Hz)')

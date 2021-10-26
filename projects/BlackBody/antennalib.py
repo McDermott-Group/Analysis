@@ -453,7 +453,7 @@ class AntennaCoupling(object):
         L = JJ[1]
         C = JJ[2]
         A = JJ[3]  # nm*nm
-        C_eff = 75*1e-21
+        C_eff = 100*1e-21
         omega = 2 * pi * self.Antenna["f"]
         if not C:
             # print('here!')
@@ -511,17 +511,18 @@ class P1_JSweep(object):
     def __init__(self):
         self.occ_1D_avg = []
         self.occ_1D_std = []
-        self.J2_Bias = []
-        self.J2_Freq = []
+        self.J_Bias = []
+        self.J_Freq = []
 
     def add_data_from_matlab(self, file_path,
                              data_type1='Projected_Occupation',
+                             # data_type1='Weighted_Occupation',
                              data_type2='JB_Bias'):
         f0 = file_path[0]
         data0 = noiselib.loadmat(f0)
         occ_2D = data0[data_type1]
-        J2_Bias = data0[data_type2]
-        J2_Freq = J2_Bias * 0.48
+        J_Bias = data0[data_type2]
+        J_Freq = J_Bias * 0.48
         for f in file_path[1:]:
             data = noiselib.loadmat(f)
             occ_1D = np.array(data[data_type1])
@@ -531,8 +532,8 @@ class P1_JSweep(object):
 
         self.occ_1D_avg = np.average(occ_2D, axis=0)
         self.occ_1D_std = np.std(occ_2D, axis=0)
-        self.J2_Bias = np.array(J2_Bias)
-        self.J2_Freq = np.array(J2_Freq)
+        self.J_Bias = np.array(J_Bias)
+        self.J_Freq = np.array(J_Freq)
 
 
 class P1_JSweep_Q2(object):
