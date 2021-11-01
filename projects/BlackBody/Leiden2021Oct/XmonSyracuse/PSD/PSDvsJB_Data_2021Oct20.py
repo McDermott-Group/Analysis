@@ -131,11 +131,11 @@ plt.axvline(x=DAC_Al * f, color='k', linestyle='--', linewidth=4, label='JJ Al G
 plt.xlabel('Radiator Josephson Frequency (GHz)')
 plt.ylabel('PSD (Hz)')
 plt.yscale('log')
-# plt.xscale('log')
-plt.grid()
-plt.legend(loc=1)
+plt.xscale('log')
+plt.grid(True, which="both")
+plt.legend(loc=4)
 plt.xlim([0, 1200])
-plt.ylim([50, 20000])
+plt.ylim([50, 50000])
 plt.show()
 
 

@@ -9,11 +9,10 @@ import noiselib
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 Q1 = np.array([
     [0.0, 0.17537, 0.02111], [0.0025, 0.17721, 0.02161], [0.005, 0.17672, 0.02198],
     [0.0075, 0.1753, 0.02159], [0.01, 0.17783, 0.02128], [0.0125, 0.17746, 0.02189],
-    [0.015, 0.17612, 0.02284],[0.016, 0.17908, 0.02315], [0.017, 0.17804, 0.02412],
+    [0.015, 0.17612, 0.02284], [0.016, 0.17908, 0.02315], [0.017, 0.17804, 0.02412],
     [0.018, 0.17605, 0.02338], [0.019, 0.17621, 0.01921], [0.02, 0.17569, 0.01849],
     [0.021, 0.17472, 0.0171], [0.022, 0.177, 0.01961], [0.023, 0.176, 0.02226],
     [0.024, 0.17542, 0.02301], [0.025, 0.17955, 0.02207], [0.026, 0.17624, 0.02208],
@@ -136,7 +135,8 @@ Q2[:, 0] = (Q2[:, 0])*1000
 Q3[:, 0] = (Q3[:, 0])*1000
 
 
-f = 4.604
+# f = 4.604
+f = 1
 Al_gap = 380e-6
 DAC_Al = 1e5*Al_gap/0.952
 plt.errorbar(Q1[:, 0]*f, Q1[:, 1], yerr=Q1[:, 2]/np.sqrt(100), color='b', label='Q1')
@@ -145,7 +145,8 @@ plt.errorbar(Q3[:, 0]*f, Q3[:, 1], yerr=Q3[:, 2]/np.sqrt(100), color='y', label=
 
 plt.axvline(x=DAC_Al * f, color='k', linestyle='--', linewidth=4, label='JJ Al Gap')
 
-plt.xlabel('Radiator Josephson Frequency (GHz)')
+# plt.xlabel('Radiator Josephson Frequency (GHz)')
+plt.xlabel('Radiator Josephson Bias (mDAC)')
 plt.ylabel('P1')
 plt.yscale('log')
 plt.grid()

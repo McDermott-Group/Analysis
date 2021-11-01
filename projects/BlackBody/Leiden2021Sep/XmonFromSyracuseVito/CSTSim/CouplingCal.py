@@ -1,20 +1,20 @@
 from antennalib import AntennaCoupling
 import matplotlib.pyplot as plt
 import numpy as np
-JJ2 = [4*1e3, None, 0, 1000*150]   #[R, L, C, A]
-# JJ2 = [28*1e3, None, 0, 150*150]   #[R, L, C, A]
-JQ1 = [14*1e3, 18.3*1e-9, 0, 300*150]
-JQ2 = [14*1e3, 14.6*1e-9, 0, 300*150]
+JJ7 = [4*1e3, None, 0, 1000*150]   #[R, L, C, A]
+# JJ7 = [28*1e3, None, 0, 150*150]   #[R, L, C, A]
+JQ1 = [14*1e3, None, 0, 300*150]
+JQ2 = [14*1e3, None, 0, 300*150]
 
-fileJ2 = "Z_syracuse_injector.txt"
+fileJ7 = "Z_syracuse_injector.txt"
 fileQ1 = "Z_syracuse_xmon_4.9GHz.txt"
 fileQ2 = "Z_syracuse_xmon_5.1GHz.txt"
 
-J2 = AntennaCoupling()
-J2.import_data(fileJ2, JJ2)
-f = J2.Antenna["f"]
-ecJ2 = J2.e_c_dB
-# J2.plot()
+J7 = AntennaCoupling()
+J7.import_data(fileJ7, JJ7)
+f = J7.Antenna["f"]
+ecJ7 = J7.e_c_dB
+# J7.plot()
 
 Q1 = AntennaCoupling()
 Q1.import_data(fileQ1, JQ1)
@@ -38,15 +38,15 @@ Z_ReQ2 = Q2.Antenna["Z_Re"]
 # print(omega/(6.28*1e9))
 # Q3.plot_Q3Mode()
 
-ecJ2 = ecJ2
+ecJ7 = ecJ7
 k = 1
 
-plt.plot(f, ecQ1+ecJ2*k, color='b', label='Q1')
-plt.plot(f, ecQ1+ecJ2*0, color='b', label='Q1 bare')
-# plt.plot(f, ecQ2+ecJ2*k, color='r', label='Q2')
-# plt.plot(f, ecQ3+ecJ2*k, color='k', label='Q3')
-# plt.plot(f, ecQ4+ecJ2*k, color='y', label='Q4')
-plt.plot(f, ecJ2, color='y', label='J7')
+plt.plot(f, ecQ1+ecJ7*k, color='b', label='Q1')
+plt.plot(f, ecQ1+ecJ7*0, color='b', label='Q1 bare')
+# plt.plot(f, ecQ2+ecJ7*k, color='r', label='Q2')
+# plt.plot(f, ecQ3+ecJ7*k, color='k', label='Q3')
+# plt.plot(f, ecQ4+ecJ7*k, color='y', label='Q4')
+plt.plot(f, ecJ7, color='y', label='J7')
 plt.xlabel('Freq')
 plt.ylabel('Coupling efficiency')
 plt.legend()
@@ -56,7 +56,7 @@ plt.show()
 # plt.plot(f, Z_ReQ2, color='r', label='Q2')
 # plt.plot(f, Z_ReQ3, color='k', label='Q3')
 # plt.plot(f, Z_ReQ4, color='y', label='Q4')
-# # plt.plot(f, ecJ2, color='y', label='J2')
+# # plt.plot(f, ecJ7, color='y', label='J7')
 # plt.xlabel('Freq')
 # plt.ylabel('Coupling efficiency')
 # plt.legend()

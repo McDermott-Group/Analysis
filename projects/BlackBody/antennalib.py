@@ -515,8 +515,8 @@ class P1_JSweep(object):
         self.J_Freq = []
 
     def add_data_from_matlab(self, file_path,
-                             data_type1='Projected_Occupation',
-                             # data_type1='Weighted_Occupation',
+                             # data_type1='Projected_Occupation',
+                             data_type1='Weighted_Occupation',
                              data_type2='JB_Bias'):
         f0 = file_path[0]
         data0 = noiselib.loadmat(f0)
@@ -535,6 +535,36 @@ class P1_JSweep(object):
         self.J_Bias = np.array(J_Bias)
         self.J_Freq = np.array(J_Freq)
 
+
+class P1_Avg_vs_Any(object):
+    """
+    This is for extract P1 value as function of any dependent
+    """
+
+    def __init__(self):
+        self.p1_1D_avg = []
+        self.p1_1D_std = []
+        self.var = []
+        self.var_name = []
+
+    def add_data_from_matlab(self, file_path,
+                             data_type1='Weighted_Occupation',
+                             data_type2='J1_Duration'):
+        f0 = file_path[0]
+        data0 = noiselib.loadmat(f0)
+        p1_2D = data0[data_type1]
+        var = data0[data_type2]
+        for f in file_path[1:]:
+            data = noiselib.loadmat(f)
+            p1_1D = np.array(data[data_type1])
+            p1_2D = np.vstack((p1_2D, p1_1D))
+
+        """Update parameters"""
+
+        self.p1_1D_avg = np.average(p1_2D, axis=0)
+        self.p1_1D_std = np.std(p1_2D, axis=0)
+        self.var = np.array(var)
+        self.var_name = data_type2
 
 class P1_JSweep_Q2(object):
     """
