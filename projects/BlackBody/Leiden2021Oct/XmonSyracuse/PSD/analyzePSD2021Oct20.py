@@ -2,13 +2,15 @@
 2021Oct
 Z:\mcdermott-group\data\Antenna\SUXmon\Liu\VitoChip1\10-20-21
 Z:\mcdermott-group\data\Antenna\SUXmon\Liu\VitoChip1\PSD2021Oct20_Q123WithJ7
+Z:\mcdermott-group\data\Antenna_Temporary\SUXmon\Liu\VitoChip1\11-01-21\Q2_PSD_0uDACJB_Transient\MATLABData
 """
 from QPTunneling_LIU import QPTunneling_Wilen, plotMultiFittedPSD, QPTunneling_Liu, QPTunneling_Harrison
 import matplotlib.pyplot as plt
 import numpy as np
 
-QP_path = ('Z:/mcdermott-group/data/Antenna/SUXmon/LIU/VitoChip1/{}/{}/MATLABData/{}')
-date = '10-29-21'
+QP_path = ('Z:/mcdermott-group/data/Antenna_Temporary/SUXmon/LIU/VitoChip1/{}/{}/MATLABData/{}')
+# date = '10-29-21'
+date = '11-01-21'
 # date = 'PSD2021Oct20_Q123WithJ7'
 QB_id = 'Q2'
 # a1 = np.arange(0.0, 0.025, 0.005)
@@ -25,7 +27,7 @@ J_QPT_2D = []
 
 for JB in a:
     experiment_name_PSD = (QB_id+'_PSD_'+str(int(1000000*JB))+'uDACJB'+'_Transient')
-    PSD_file_Number = np.arange(15, 20, 1)
+    PSD_file_Number = np.arange(0, 10, 1)
     PSD_file = [QP_path.format(date, experiment_name_PSD, experiment_name_PSD) + '_{:03d}.mat'.format(i) for i in PSD_file_Number]
     QPT_Q = QPTunneling_Wilen(name='{} with J7 = {} uDAC, {}GHz'.
                               format(QB_id, str(JB), str(JB*4.6)))

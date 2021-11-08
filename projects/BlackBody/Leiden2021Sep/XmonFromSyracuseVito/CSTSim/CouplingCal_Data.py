@@ -1,15 +1,53 @@
-"""
-PSD for Q1, Q2, Q3 at different J7 Bias
-Data:
-Z:\mcdermott-group\data\Antenna\SUXmon\Liu\VitoChip1\PSD2021Oct20_Q123WithJ7
-Fitting method Chris' no white noise verison
-
-"""
-import noiselib
+from antennalib import AntennaCoupling
 import matplotlib.pyplot as plt
 import numpy as np
 
-Q1 = np.array([
+### parameters to be tuned
+e_eff = 6 # limit (1, 6.5), the voltage can also be built in to have a larger range
+C_eff = 100*1e-21   # Commonly used (50-100)
+Jbias_offset = 1    # mDAC should be +-1 mDAC basically +-5 GHz
+k = 1   # Coupling between radiator and receiver, this could be larger than one due to the
+        # fact we can generate QPs locally at the recevier's test pad
+
+k1 = 0.0   # coupling between on chip phonon mitigation
+f_DAC = 4.604*1.1
+### parameteres tuned done
+
+JJ7 = [4.2*1e3, None, 0, 1000*150]   #[R, L, C, A]
+JJ1 = [33*1e3, None, 0, 180*150]   #[R, L, C, A]
+JQ1 = [15.67*1e3, None, 0, 360*150]
+
+# fileJ7 = "Z_syracuse_injector.txt"
+# fileJ7_noleads = "Z_syracuse_injector_no_leads.txt"
+fileJ1 = "Z_syracuse_injector_with_leads.txt"
+fileJ7 = "Z_syracuse_injector_with_leads.txt"
+# fileQ1 = "Z_syracuse_xmon_5.1GHz.txt"
+# fileQ1 = "Z_syracuse_xmon_5.1GHz_withRO_ChargeCoupler.txt"
+# fileQ1 = "Z_syracuse_xmon_5.1GHz_withRO_ChargeCoupler_short.txt"
+fileQ1 = "Z_syracuse_xmon_5.1GHz_withROCoupler.txt"
+# fileQ1 = "Z_syracuse_xmon_5.1GHz_no_Coupler.txt"
+
+J1 = AntennaCoupling()
+J1.import_data(fileJ1, JJ1)
+ecJ1 = J1.e_c_dB
+
+J7 = AntennaCoupling()
+J7.import_data(fileJ7, JJ7)
+f = J7.Antenna["f"]
+ecJ7 = J7.e_c_dB
+
+# J7_noleads = AntennaCoupling()
+# # J7_noleads.import_data(fileJ7_noleads, JJ7)
+# J7_noleads.import_data(fileJ7_noleads, JJ7_highR)
+# ecJ7_noleads = J7_noleads.e_c_dB
+
+Q1 = AntennaCoupling()
+Q1.import_data(fileQ1, JQ1)
+f_Q1 = Q1.Antenna["f"]
+ecQ1 = Q1.e_c_dB
+Z_ReQ1 = Q1.Antenna["Z_Re"]
+
+Q1_PSD = np.array([
     [0.0, 100.56], [0.005, 95.14], [0.01, 93.09], [0.015, 105.55], [0.02, 290.07],
     [0.025, 464.17], [0.0275, 389.05], [0.03, 580.15], [0.0325, 1755.69],
     [0.0349, 2195.63], [0.0374, 2354.61], [0.04, 1303.42], [0.041, 1706.05],
@@ -35,7 +73,7 @@ Q1 = np.array([
     [0.225, 17334.14], [0.23, 14653.09], [0.235, 27709.83], [0.24, 28095.84],
     [0.245, 39425.95]
 ])
-Q2 = np.array([
+Q2_PSD = np.array([
     [0.0, 118.5], [0.005, 119.1], [0.01, 121.42], [0.015, 121.03], [0.02, 209.13],
     [0.025, 460.9],[0.0275, 514.62], [0.03, 544.43], [0.0325, 2226.0],
     [0.034999999999999996, 1983.08], [0.03749999999999999, 3576.29],
@@ -71,8 +109,7 @@ Q2 = np.array([
     [0.21, 14076.17], [0.215, 16301.69], [0.22, 18397.19], [0.225, 11487.74],
     [0.23, 35110.89], [0.235, 30132.43], [0.24, 35185.73], [0.245, 35453.78]
 ])
-
-Q3 = np.array([
+Q3_PSD = np.array([
     [0.0, 111.71], [0.005, 113.28], [0.01, 118.51], [0.015, 120.27],
     [0.02, 202.89], [0.025, 328.07], [0.0275, 745.28], [0.03, 707.93],
     [0.0325, 1528.62], [0.0349, 1463.74], [0.0374, 3177.34], [0.04, 4445.66],
@@ -98,45 +135,59 @@ Q3 = np.array([
     [0.22, 9053.94], [0.225, 12644.08], [0.23, 11473.66], [0.235, 18689.07],
     [0.24, 27486.9], [0.245, 22777.21]
 ])
+Q1_PSD[:, 0] = (Q1_PSD[:, 0])*1000-Jbias_offset
+Q2_PSD[:, 0] = (Q2_PSD[:, 0])*1000-Jbias_offset
+Q3_PSD[:, 0] = (Q3_PSD[:, 0])*1000-Jbias_offset
 
-### J6 Bias Conversion
-Q1[:, 0] = (Q1[:, 0])*1000
-Q2[:, 0] = (Q2[:, 0])*1000
-Q3[:, 0] = (Q3[:, 0])*1000
+f_scale = np.sqrt(e_eff/6.0)
+f = f/1e9
+f = f*f_scale
+f_Q1 = f_Q1/1e9
+f_Q1 = f_Q1*f_scale
 
+### two vertical plots
+fig, axs = plt.subplots(5)
+# axs[0].plot(f, ecJ1, color="red")
+axs[0].plot(f, ecJ7, color="black")
+# axs[0].plot(f, ecJ7_noleads, color="red")
+axs[0].set_ylabel("Radiator (dB)",color="black", fontsize=10)
+axs[0].set_xlim([50, 600])
+axs[0].set_ylim([-60, 0])
 
-# plt.plot(Q1[:, 0], Q1[:, 1], color='b', label='Q1')
-# plt.plot(Q2[:, 0], Q2[:, 1], color='r', label='Q2')
-# plt.plot(Q3[:, 0], Q3[:, 1], color='y', label='Q3')
-# plt.xlabel('Radiator Josephson Frequency (mDAC)')
-# plt.ylabel('PSD (Hz)')
-# plt.yscale('log')
-# plt.grid()
-# plt.legend(loc=1)
-# plt.show()
+axs[1].plot(f_Q1, ecQ1, color="green", marker="o")
+axs[1].set_ylabel("Receiver QB (dB)",color="green", fontsize=10)
+axs[1].set_xlim([50, 600])
+# axs[1].set_ylim([-60, -30])
 
-f = 4.604
-# f = 1
-Al_gap = 380e-6
-DAC_Al = 1e5*Al_gap/0.952
-# plt.plot(Q1[::2, 0]*f, Q1[::2, 1], color='b', label='Q1')
-# plt.plot(Q2[::2, 0]*f, Q2[::2, 1], color='r', label='Q2')
-# plt.plot(Q3[::2, 0]*f, Q3[::2, 1], color='y', label='Q3')
-plt.plot(Q1[:, 0]*f, Q1[:, 1], color='b', label='Q1')
-plt.plot(Q2[:, 0]*f, Q2[:, 1], color='r', label='Q2')
-plt.plot(Q3[:, 0]*f, Q3[:, 1], color='y', label='Q3')
+# axs[2].plot(f, ecJ1, color="green", marker="o")
+# axs[2].set_ylabel("Receiver J1 (dB)",color="green", fontsize=10)
+# axs[2].set_xlim([50, 600])
 
-plt.axvline(x=DAC_Al * f, color='k', linestyle='--', linewidth=4, label='JJ Al Gap')
+axs[3].plot(f_Q1, ecQ1+ecJ7*k+ecJ1*k*k1, color="red", marker="o")
+axs[3].set_ylabel("Sum (dB)", color="red", fontsize=10)
+axs[3].set_xlim([50, 600])
+axs[3].set_ylim([-60, -30])
 
-plt.xlabel('Radiator Josephson Frequency (GHz)')
-plt.ylabel('PSD (Hz)')
-plt.yscale('log')
-# plt.xscale('log')
-plt.grid(True, which="both")
-plt.legend(loc=4)
-plt.xlim([0, 1200])
-plt.ylim([50, 50000])
+axs[4].plot(Q1_PSD[:, 0]*f_DAC, Q1_PSD[:, 1], color='b', label='Q1_PSD')
+# axs[3].plot(Q2_PSD[:, 0]*f_DAC, Q2_PSD[:, 1], color='r', label='Q2_PSD')
+# axs[3].plot(Q3_PSD[:, 0]*f_DAC, Q3_PSD[:, 1], color='k', label='Q3_PSD')
+axs[4].set_xlabel("Freq (GHz)", color="black", fontsize=10)
+axs[4].set_ylabel("PSD (Hz)", color="blue", fontsize=10)
+axs[4].set_yscale('log')
+axs[4].set_xlim([50, 600])
+axs[4].set_ylim([100, 10000])
+
+### same plot
+# fig, ax = plt.subplots()
+# ax.plot(f_Q1, ecQ1+ecJ7*k, color="red", marker="o")
+# # ax.plot(f, ecJ7, color="blue", marker="o")
+# ax.set_xlabel("freq",fontsize=14)
+# ax.set_ylabel("ec (dB)",color="red",fontsize=14)
+#
+# # ax2=ax.twinx()
+# # ax2.plot(Q1_PSD[:, 0]*4.604, Q1_PSD[:, 1], color='b', label='Q1_PSD')
+# # ax2.set_ylabel("PSD (Hz)", color="blue", fontsize=14)
+# # ax2.set_yscale('log')
+# # ax2.set_ylim([100, 10000])
+plt.grid()
 plt.show()
-
-
-

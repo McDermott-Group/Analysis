@@ -432,8 +432,10 @@ class AntennaCoupling(object):
         Gamma = None
         e_c = None
         e_c_dB = None
+        C_eff = 150*1e-21    # F/nm^2
 
-    def import_data(self, file, JJ):
+    def import_data(self, file, JJ, C_eff=150*1e-21):
+        self.C_eff = C_eff
         self._add_data_from_txt(file)
         self._JJ_Update(JJ)
         self._get_e_c()
@@ -453,7 +455,7 @@ class AntennaCoupling(object):
         L = JJ[1]
         C = JJ[2]
         A = JJ[3]  # nm*nm
-        C_eff = 100*1e-21
+        C_eff = self.C_eff
         omega = 2 * pi * self.Antenna["f"]
         if not C:
             # print('here!')
@@ -515,8 +517,8 @@ class P1_JSweep(object):
         self.J_Freq = []
 
     def add_data_from_matlab(self, file_path,
-                             # data_type1='Projected_Occupation',
-                             data_type1='Weighted_Occupation',
+                             data_type1='Projected_Occupation',
+                             # data_type1='Weighted_Occupation',
                              data_type2='JB_Bias'):
         f0 = file_path[0]
         data0 = noiselib.loadmat(f0)

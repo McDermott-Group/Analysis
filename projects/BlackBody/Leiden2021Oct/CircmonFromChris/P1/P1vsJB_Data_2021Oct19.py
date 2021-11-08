@@ -137,6 +137,7 @@ Q4[:, 0] = (Q4[:, 0])*1000
 
 
 f = 4.604
+# f = 1
 Al_gap = 380e-6
 DAC_Al = 1e5*Al_gap/0.952
 plt.errorbar(Q1[:, 0]*f, Q1[:, 1], yerr=Q1[:, 2]/np.sqrt(150), color='b', label='Q1')

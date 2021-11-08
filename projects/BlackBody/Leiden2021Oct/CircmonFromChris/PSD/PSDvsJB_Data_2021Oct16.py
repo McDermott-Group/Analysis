@@ -142,7 +142,8 @@ Q4[:, 0] = (Q4[:, 0])/1000
 # plt.legend(loc=1)
 # plt.show()
 
-f = 4.604
+# f = 4.604
+f = 1
 Al_gap = 380e-6
 DAC_Al = 1e5*Al_gap/0.952
 # plt.plot(Q1[::2, 0]*f, Q1[::2, 1], color='b', label='Q1')

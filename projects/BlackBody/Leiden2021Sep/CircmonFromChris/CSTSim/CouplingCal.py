@@ -71,6 +71,7 @@ plt.plot(f_SFQ, ecSFQ, color='y', label='SFQ')
 plt.xlabel('Freq')
 plt.ylabel('Coupling efficiency')
 plt.legend()
+plt.ylim([-40, -10])
 plt.show()
 
 # plt.plot(f, Z_ReQ1, color='b', label='Q1')

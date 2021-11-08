@@ -12,18 +12,19 @@ import copy
 file_path = ('Z:/mcdermott-group/data/Antenna/Circmon/LIU/CW20180514A_Ox2/{}/{}/MATLABData/{}')
 # date = '2021Oct16_QB124_P1_J6Radiator'
 # date = '2021Nov02_QB124_P1_J6Radiator_Sim'
-date = '2021Nov02_QB2_P1_J6Radiator_Sim'
-file_Number = np.arange(0, 15, 1)
+date = '2021Nov04_QB124_P1PSD_J8Radiator_Sim'
+file_Number = np.arange(0, 50, 1)
 
 J_P1_2D = []
 
 QB_Name = 'Q2'
 
 for k in range(5):
-    experiment_name = ('P1_J6Slow_{}_Chunk{}'.format(QB_Name, str(k)))
+    print('k=', k)
+    experiment_name = ('P1_J8Slow_{}_Chunk{}'.format(QB_Name, str(k)))
     file_list = [file_path.format(date, experiment_name, experiment_name) + '_{:03d}.mat'.format(i) for i in file_Number]
     P1 = P1_JSweep()
-    P1.add_data_from_matlab(file_list, data_type2='J6_Slow_Bias')
+    P1.add_data_from_matlab(file_list, data_type2='J8_Slow_Bias')
     # J_Bias_P1 = copy.deepcopy(P1.J2_Bias)
 
     for i in range(len(P1.J_Bias)):

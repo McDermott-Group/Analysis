@@ -3,33 +3,34 @@
 ### Z:\mcdermott-group\data\Antenna\SUXmon\Liu\VitoChip1\P12021Oct22_Q1WithJ7
 ### Z:\mcdermott-group\data\Antenna\SUXmon2\Liu\VitoChip2\10-27-21\P1_J1_Q2\MATLABData
 ### Z:\mcdermott-group\data\Antenna_Temporary\SUXmon2\Liu\VitoChip2\11-02-21
+### Z:\mcdermott-group\data\Antenna_Temporary\Circmon\Liu\CW20180514A_Ox2\11-02-21\P1_J6Slow_Q4
 
 from antennalib import P1_JSweep
 import matplotlib.pyplot as plt
 import numpy as np
 import copy
 
-file_path = ('Z:/mcdermott-group/data/Antenna_Temporary/SUXmon2/LIU/VitoChip2/{}/{}/MATLABData/{}')
+file_path = ('Z:/mcdermott-group/data/Antenna/Circmon/LIU/CW20180514A_Ox2/{}/{}/MATLABData/{}')
 
-date = '11-02-21'
+date = '11-04-21'
 # date = 'P12021Oct26_Q123WithJ7_V2'
 # date = 'P12021Oct26_Q123WithJ7'
-file_Number = np.arange(12, 17, 1)
+file_Number = np.arange(15, 20, 1)
 
 J_P1_2D = []
 
-QB_Name = 'Q4'
+QB_Name = 'Q1'
 
 # for k in range(5):
 # experiment_name = ('P1_J7_{}_Chunk{}'.format(QB_Name, str(k)))
-experiment_name = ('P1_J1_{}'.format(QB_Name))
+experiment_name = ('P1_J8Slow_{}'.format(QB_Name))
 file_list = [file_path.format(date, experiment_name, experiment_name) + '_{:03d}.mat'.format(i) for i in file_Number]
 
 # experiment_name = ('P1_J7_{}'.format(QB_Name))
 # file_list = [file_path.format(date, experiment_name, experiment_name) + '_{:03d}.mat'.format(i) for i in file_Number]
 
 P1 = P1_JSweep()
-P1.add_data_from_matlab(file_list, data_type2='J1_Bias')
+P1.add_data_from_matlab(file_list, data_type2='J8_Slow_Bias')
 # J_Bias_P1 = copy.deepcopy(P1.J2_Bias)
 
 for i in range(len(P1.J_Bias)):
@@ -44,7 +45,8 @@ print('J_P1_2D=', J_P1_2D)
 
 plt.plot(P1.J_Bias, P1.occ_1D_avg, label=QB_Name)
 # plt.plot(P1.J_Bias, P1.occ_1D_avg[::-1]-0.005, label='Reversed')
-plt.xlabel('J7 Bias (mDAC)')
+# plt.xlabel('J8 Bias (mDAC)')
+plt.xlabel('J8 Bias (mV)')
 
 # plt.plot(4604*P1.J_Bias, P1.occ_1D_avg, label=QB_Name)
 # plt.xlabel('J7 Bias (GHz)')
