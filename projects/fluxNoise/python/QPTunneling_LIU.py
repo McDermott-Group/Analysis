@@ -394,7 +394,8 @@ class QPTunneling_Harrison(object):
 
         #this averages the proper number of psds and puts the averaged values into psd_ave
         psd_avg = []
-        #print(int(np.floor(1.0*numRecords/number)))
+        if numRecords < number:
+            number = numRecords
         for i in np.arange(0, numRecords-int(np.floor(1.0*numRecords/number))+1, int(np.floor(1.0*numRecords/number))):
             psd_avg.append(np.zeros(len(psds[0])))
             for j in range(0, int(1.0*numRecords/number)):
@@ -422,7 +423,7 @@ class QPTunneling_Harrison(object):
         :return:
         """
         def fit_PSD_target_function(f, T_parity, F_map):
-            return (4 * 1 * F_map ** 2 / T_parity) / ((2 / T_parity) ** 2 + (2 * np.pi * f) ** 2) + 1 * (1 - F_map ** 2) / self.fs
+            return ((4 * 1 * F_map ** 2 / T_parity) / ((2 / T_parity) ** 2 + (2 * np.pi * f) ** 2) + 1 * (1 - F_map ** 2) / self.fs)
         self.T_parity=[]
         self.fidelity=[]
         toReturn = []
@@ -437,14 +438,15 @@ class QPTunneling_Harrison(object):
 
             f=f[excluded_points:len(f)]
             psd=psd[excluded_points:len(psd)]
-            initial_guess_knee = np.logspace(-5,-1,50)
-            initial_guess_fidelity = np.linspace(0.2,1,8)
+            initial_guess_knee = np.logspace(-4,-1,50)
+            # initial_guess_fidelity = np.linspace(0.2,1,8)
+            initial_guess_fidelity =np.linspace(0.0,1,10)
             # initial_guess = [0.7]
             rs = np.NINF #negative infinity is the lowest r2 value
             best_params=None
             for ig_knee in initial_guess_knee:
                 for ig_fidelity in initial_guess_fidelity:
-                    sigma = f**1
+                    sigma = None#f**-2
                     params_curr, params_covariance_curr = curve_fit(
                         fit_PSD_target_function, f, psd,
                         bounds=[(10**(-5), 0), (10**(-1), 1.0)], p0=[ig_knee, ig_fidelity],
@@ -454,7 +456,7 @@ class QPTunneling_Harrison(object):
                     ss_res = np.sum(residuals**2)
                     ss_tot = np.sum((psd - np.mean(psd)) ** 2)
                     r_squared = 1 - (ss_res / ss_tot)
-                    if rs < r_squared:
+                    if rs < r_squared and r_squared <= 1:
                     # if params_covariance_curr[0][0] < covariance:
                         rs = r_squared
                         best_params=params_curr
@@ -620,15 +622,41 @@ def plotFittedPSD_Harrison(QPT, one_over_f=False, save=False, name='', concatena
     linestyle = ['--', '+', 'o', 'v', 's', 'p', '*', 'h', 'x', 'D']
     # wa = False
 
-    psd, f1 = QPT.get_psd(number=25, window_averaging=True, concatenate_records=concatenate_records)
+    psd, f1 = QPT.get_psd(number=9, window_averaging=True, concatenate_records=concatenate_records)
     fit, f2 = QPT.get_fit(excluded_points=excluded_points, ignore_fidelity=False)
+
     avg_fidelity=np.mean(QPT.fidelity)
-    avg_parity=np.mean(np.true_divide(1.0, QPT.T_parity))
-    parity_uncertainty=np.std(np.true_divide(1.0/np.sqrt(25),QPT.T_parity))
-    for i in range(0, len(psd)):
-        plt.loglog(f1, psd[i], label=r"{} PSD".format(QPT.name))
-        plt.loglog(f2, fit[i], '-')
-        plt.title(name+' (Fidelity = {:.2f} and Parity = {:.5f} +/- {:.5f} Hz)'.format(avg_fidelity, avg_parity, parity_uncertainty))
+
+    filtered_fidelity = []
+    filtered_parity = []
+    filtered_psd =[]
+    filtered_fit =[]
+    average_log_ratio = np.mean([np.log10(single_fit[0]/single_fit[-1]) for single_fit in fit])
+    for i in range(0,len(QPT.fidelity)):
+        #are we seeing a reaonable size jump? This should not vary by very much
+        if np.log10(fit[i][0]/fit[i][-1]) < 0.75*average_log_ratio:
+            continue
+        else:
+            filtered_fidelity.append(QPT.fidelity[i])
+            filtered_parity.append(QPT.T_parity[i])
+            filtered_psd.append(psd[i])
+            filtered_fit.append(fit[i])
+
+    # #goal is to only remove outliers
+    if len(filtered_psd) < 0.7*len(psd):
+        filtered_fidelity = QPT.fidelity
+        filtered_parity = QPT.T_parity
+        filtered_psd = psd
+        filtered_fit = fit
+
+    avg_fidelity = np.mean(filtered_fidelity)
+    avg_parity=np.mean(np.true_divide(1.0, filtered_parity))
+
+    parity_uncertainty=np.std(np.true_divide(1.0/np.sqrt(len(filtered_parity)),filtered_parity))
+    for i in range(0, len(filtered_psd)):
+        plt.loglog(f1, filtered_psd[i], label=r"{} PSD".format(QPT.name))
+        plt.loglog(f2, filtered_fit[i], '-')
+        plt.title(name+' \n(Fidelity = {:.2f} and Parity = {:.5f} +/- {:.5f} Hz)'.format(avg_fidelity, avg_parity, parity_uncertainty))
         plt.grid(axis='both')
         if ylim != []:
             plt.ylim(ylim)
@@ -636,7 +664,7 @@ def plotFittedPSD_Harrison(QPT, one_over_f=False, save=False, name='', concatena
         plt.ylabel('S (1/Hz)')
     if save:
         plt.savefig('Figures/'+name + '_multi.png')
-        plt.show()
+        #plt.show()
     else:
         plt.show()
 
@@ -644,22 +672,27 @@ def plotFittedPSD_Harrison(QPT, one_over_f=False, save=False, name='', concatena
     linestyle = ['--', '+', 'o', 'v', 's', 'p', '*', 'h', 'x', 'D']
     # wa = False
 
-    psd, f1 = QPT.get_psd(number=1, window_averaging=True, concatenate_records=concatenate_records)
-    fit, f2 = QPT.get_fit(excluded_points=excluded_points, ignore_fidelity=False)
-    fidelity = np.mean(QPT.fidelity)
-    parity = np.mean(np.true_divide(1.0, QPT.T_parity))
-    for i in range(0, len(psd)):
-        plt.loglog(f1, psd[i], label=r"{} PSD".format(QPT.name))
-        plt.loglog(f2, fit[i], '-')
-        plt.title(name + ' (Fidelity = {:.2f} and Parity = {:.5f} Hz)'.format(fidelity, parity))
-        plt.grid(axis='both')
-        if ylim != []:
-            plt.ylim(ylim)
-        plt.xlabel('Frequency (Hz)')
-        plt.ylabel('S (1/Hz)')
+    psd = np.average(filtered_psd,axis=0)
+    fit = [(4 * avg_fidelity ** 2 * avg_parity) / ((2 * avg_parity) ** 2 + (2 * np.pi * f) ** 2) + (1 - avg_fidelity ** 2) / QPT.fs for f in f2]
+
+    # psd, f1 = QPT.get_psd(number=1, window_averaging=True, concatenate_records=concatenate_records)
+    # fit, f2 = QPT.get_fit(excluded_points=excluded_points, ignore_fidelity=False)
+    # fidelity = np.mean(QPT.fidelity)
+    # parity = np.mean(np.true_divide(1.0, QPT.T_parity))
+
+    plt.loglog(f1, psd, label=r"{} PSD".format(QPT.name))
+    plt.loglog(f2, fit, '-')
+    plt.title(name + ' \n(Fidelity = {:.2f} and Parity = {:.5f} Hz)'.format(avg_fidelity, avg_parity))
+    plt.grid(axis='both')
+    if ylim != []:
+        plt.ylim(ylim)
+    plt.xlabel('Frequency (Hz)')
+    plt.ylabel('S (1/Hz)')
+
+
     if save:
         plt.savefig('Figures/'+name + '.png')
-        plt.show()
+        # plt.show()
     else:
         plt.show()
 
