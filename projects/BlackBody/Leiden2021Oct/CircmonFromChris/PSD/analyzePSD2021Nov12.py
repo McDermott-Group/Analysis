@@ -1,18 +1,21 @@
 """
 2021Oct
+Z:\mcdermott-group\data\Antenna\Circmon\Liu\CW20180514A_Ox2\2021Nov12_QB12_PSD_J6Radiator_Sim
 """
 from QPTunneling_LIU import QPTunneling_Wilen, plotMultiFittedPSD, QPTunneling_Liu, QPTunneling_Harrison
 import matplotlib.pyplot as plt
 import numpy as np
-QP_path = ('Z:/mcdermott-group/data/Antenna/SUXmon/LIU/VitoChip1/{}/{}/MATLABData/{}')
+QP_path = ('Z:/mcdermott-group/data/Antenna/Circmon/LIU/CW20180514A_Ox2/{}/{}/MATLABData/{}')
 # date = '11-08-21'
-# date = '2021Nov08_Q3_PSD_J1Radiator'
-# date = '2021Nov09_Q12_PSD_J1Radiator'
-date = '2021Nov18_P1PSD_J1Sim_HighFreq'
-# date = '2021Nov02_QB124_PSD_J1Radiator_Sim'
-# date = '2021Oct19_QB2_PSD_J1Radiator_HiFreq_10usRep'
+# date = '2021Nov08_Q3_PSD_J6Radiator'
+# date = '2021Nov12_QB12_PSD_J6Radiator_Sim'
+# date = '2021Nov12_QB14_PSD_Flux_J6Radiator_Sim'
+# date = '2021Nov15_QB4_PSD_J6Radiator_Sim'
+date = '2021Nov16_QB4_PSD_J6Radiator_Sim'
+# date = '2021Nov02_QB124_PSD_J6Radiator_Sim'
+# date = '2021Oct19_QB2_PSD_J6Radiator_HiFreq_10usRep'
 # date = '2021Oct19_QB4_PSD_RepRate'
-QB_id = 'Q3'
+QB_id = 'Q2'
 # a1 = np.arange(83000, 100000, 1000)
 # a2 = np.arange(100000, 150000, 2500)
 # JBlist = np.concatenate((a1, a2))
@@ -28,28 +31,32 @@ QB_id = 'Q3'
 # a = np.concatenate((a1, a2))
 # a = np.arange(0.5, 0.7, 0.005)
 # a = np.arange(0.511, 0.530, 0.001)
-a = np.arange(0.7, 1.5, 0.05)
+# a = np.arange(0.0, 0.5, 0.01)
 # a = -np.arange(0.24, 0.285, 0.01)
-# a = [0]
+# a1 = np.arange(0.100, 0.190, 0.001)
+a = np.arange(0.190, 0.260, 0.001)
+# a = np.arange(0.605, 0.7, 0.005)
+# a = np.concatenate((a1, a2))
+# a = a2
 JBlist = [int(j*1000) for j in a]
 # JBlist = [0]
 J_QPT_2D = []
 
 for JB in JBlist:
-    experiment_name_PSD = (QB_id+'_PSD_'+str(JB)+'mVJ1')
+    experiment_name_PSD = (QB_id+'_PSD_'+str(JB)+'mVJ6_HighDensity')
     # experiment_name_PSD = (QB_id+'_PSD_Q1Q4LSS')
     PSD_file_Number = np.arange(0, 25, 1)
     PSD_file = [QP_path.format(date, experiment_name_PSD, experiment_name_PSD) + '_{:03d}.mat'.format(i) for i in PSD_file_Number]
-    QPT_Q = QPTunneling_Wilen(name='{} with J1 = {} mV, {}GHz'.
+    QPT_Q = QPTunneling_Wilen(name='{} with J6 = {} mV, {}GHz'.
                               format(QB_id, str(JB), str(JB*0.97)))
-    # QPT_Q = QPTunneling_Liu(name='{} with J1 = {} uDAC, {}GHz'.
+    # QPT_Q = QPTunneling_Liu(name='{} with J6 = {} uDAC, {}GHz'.
     #                           format(QB_id, str(JB), str(JB*4.6)))
     # QPT_Q = QPTunneling_Wilen(name='{}_USS'.format(QB_id))
     QPT_Q.add_datasets(PSD_file)
     QPT_List = [QPT_Q]
     # plotMultiFittedPSD(QPT_List, save=True, name='{} with J2 ={} uDAC {}GHz'.
-    #                         format(QB_id, str(JB), str(JB*4.6)))
-    plotMultiFittedPSD(QPT_List, save=True, name='{} with J1 = {} mV, {}GHz'.
+    #                           format(QB_id, str(JB), str(JB*4.6)))
+    plotMultiFittedPSD(QPT_List, save=True, name='{} with J6 = {} mV, {}GHz'.
                               format(QB_id, str(JB), str(JB*0.97)))
 
     QPT_Q.get_fit()

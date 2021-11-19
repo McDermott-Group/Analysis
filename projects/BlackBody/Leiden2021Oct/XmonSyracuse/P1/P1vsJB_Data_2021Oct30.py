@@ -185,10 +185,10 @@ plt.errorbar(Q4_Chip2[:, 0]*f, Q4_Chip2[:, 1], yerr=Q4_Chip2[:, 2]/np.sqrt(50), 
 
 plt.axvline(x=DAC_Al * f, color='k', linestyle='--', linewidth=4, label='JJ Al Gap')
 
-plt.xlabel('Radiator Josephson Frequency (GHz)')
+plt.xlabel('J7 Strong Radiator Josephson Frequency (GHz)')
 # plt.xlabel('Radiator Josephson Bias (mDAC)')
 plt.ylabel('P1')
-# plt.xscale('log')
+plt.xscale('log')
 plt.yscale('log')
 plt.grid(True, which="both")
 plt.legend(loc=2)

@@ -449,8 +449,9 @@ plt.plot(Q4[:, 0]*f, Q4[:, 1], color='y', label='Q4')
 plt.xlabel('Radiator Josephson Frequency (GHz)')
 plt.ylabel('PSD')
 plt.yscale('log')
-plt.grid()
-plt.legend(loc=1)
+plt.xscale('log')
+plt.grid(True, which="both")
+plt.legend(loc=2)
 plt.show()
 
 

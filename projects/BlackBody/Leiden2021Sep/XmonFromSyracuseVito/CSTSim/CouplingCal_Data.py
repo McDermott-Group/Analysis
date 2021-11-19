@@ -24,8 +24,8 @@ fileJ7 = "Z_syracuse_injector_with_leads.txt"
 # fileQ1 = "Z_syracuse_xmon_5.1GHz.txt"
 # fileQ1 = "Z_syracuse_xmon_5.1GHz_withRO_ChargeCoupler.txt"
 # fileQ1 = "Z_syracuse_xmon_5.1GHz_withRO_ChargeCoupler_short.txt"
-fileQ1 = "Z_syracuse_xmon_5.1GHz_withROCoupler.txt"
-# fileQ1 = "Z_syracuse_xmon_5.1GHz_no_Coupler.txt"
+# fileQ1 = "Z_syracuse_xmon_5.1GHz_withROCoupler.txt"
+fileQ1 = "Z_syracuse_xmon_5.1GHz_no_Coupler.txt"
 
 J1 = AntennaCoupling()
 J1.import_data(fileJ1, JJ1)
@@ -35,6 +35,8 @@ J7 = AntennaCoupling()
 J7.import_data(fileJ7, JJ7)
 f = J7.Antenna["f"]
 ecJ7 = J7.e_c_dB
+pgJ7 = J7.p_g
+refJ7 = J7.ref
 
 # J7_noleads = AntennaCoupling()
 # # J7_noleads.import_data(fileJ7_noleads, JJ7)
@@ -45,6 +47,7 @@ Q1 = AntennaCoupling()
 Q1.import_data(fileQ1, JQ1)
 f_Q1 = Q1.Antenna["f"]
 ecQ1 = Q1.e_c_dB
+eQ1 = Q1.e_c
 Z_ReQ1 = Q1.Antenna["Z_Re"]
 
 Q1_PSD = np.array([
@@ -146,36 +149,56 @@ f_Q1 = f_Q1/1e9
 f_Q1 = f_Q1*f_scale
 
 ### two vertical plots
-fig, axs = plt.subplots(5)
-# axs[0].plot(f, ecJ1, color="red")
-axs[0].plot(f, ecJ7, color="black")
-# axs[0].plot(f, ecJ7_noleads, color="red")
-axs[0].set_ylabel("Radiator (dB)",color="black", fontsize=10)
-axs[0].set_xlim([50, 600])
-axs[0].set_ylim([-60, 0])
+# fig, axs = plt.subplots(4)
+# # axs[0].plot(f, ecJ1, color="red")
+# axs[0].plot(f, ecJ7, color="black", marker="o")
+# # axs[0].plot(f, ecJ7_noleads, color="red")
+# axs[0].set_ylabel("Radiator (dB)",color="black", fontsize=10)
+# axs[0].set_xlim([50, 600])
+# axs[0].set_ylim([-60, 0])
+#
+# axs[1].plot(f_Q1, ecQ1, color="green", marker="o")
+# axs[1].set_ylabel("Receiver QB (dB)",color="green", fontsize=10)
+# axs[1].set_xlim([50, 600])
+# axs[1].set_ylim([-50, 0])
+#
+# axs[2].plot(f_Q1, ecQ1+ecJ7*k, color="red", marker="o")
+# axs[2].set_ylabel("Sum (dB)", color="red", fontsize=10)
+# axs[2].set_xlim([50, 600])
+# axs[2].set_ylim([-70, -30])
+#
+# axs[3].plot(Q1_PSD[:, 0]*f_DAC, Q1_PSD[:, 1], color='b', label='Q1_PSD')
+# # axs[3].plot(Q2_PSD[:, 0]*f_DAC, Q2_PSD[:, 1], color='r', label='Q2_PSD')
+# # axs[3].plot(Q3_PSD[:, 0]*f_DAC, Q3_PSD[:, 1], color='k', label='Q3_PSD')
+# axs[3].set_xlabel("Freq (GHz)", color="black", fontsize=10)
+# axs[3].set_ylabel("PSD (Hz)", color="blue", fontsize=10)
+# axs[3].set_yscale('log')
+# axs[3].set_xlim([50, 600])
+# axs[3].set_ylim([100, 10000])
 
-axs[1].plot(f_Q1, ecQ1, color="green", marker="o")
-axs[1].set_ylabel("Receiver QB (dB)",color="green", fontsize=10)
-axs[1].set_xlim([50, 600])
-# axs[1].set_ylim([-60, -30])
+
+# axs[1].plot(f_Q1, ecQ1, color="green", marker="o")
+# axs[1].set_ylabel("Receiver QB (dB)",color="green", fontsize=10)
+# axs[1].set_xlim([50, 600])
+# # axs[1].set_ylim([-60, -30])
 
 # axs[2].plot(f, ecJ1, color="green", marker="o")
 # axs[2].set_ylabel("Receiver J1 (dB)",color="green", fontsize=10)
 # axs[2].set_xlim([50, 600])
-
-axs[3].plot(f_Q1, ecQ1+ecJ7*k+ecJ1*k*k1, color="red", marker="o")
-axs[3].set_ylabel("Sum (dB)", color="red", fontsize=10)
-axs[3].set_xlim([50, 600])
-axs[3].set_ylim([-60, -30])
-
-axs[4].plot(Q1_PSD[:, 0]*f_DAC, Q1_PSD[:, 1], color='b', label='Q1_PSD')
-# axs[3].plot(Q2_PSD[:, 0]*f_DAC, Q2_PSD[:, 1], color='r', label='Q2_PSD')
-# axs[3].plot(Q3_PSD[:, 0]*f_DAC, Q3_PSD[:, 1], color='k', label='Q3_PSD')
-axs[4].set_xlabel("Freq (GHz)", color="black", fontsize=10)
-axs[4].set_ylabel("PSD (Hz)", color="blue", fontsize=10)
-axs[4].set_yscale('log')
-axs[4].set_xlim([50, 600])
-axs[4].set_ylim([100, 10000])
+#
+# axs[3].plot(f_Q1, ecQ1+ecJ7*k+ecJ1*k*k1, color="red", marker="o")
+# axs[3].set_ylabel("Sum (dB)", color="red", fontsize=10)
+# axs[3].set_xlim([50, 600])
+# axs[3].set_ylim([-60, -30])
+#
+# axs[4].plot(Q1_PSD[:, 0]*f_DAC, Q1_PSD[:, 1], color='b', label='Q1_PSD')
+# # axs[3].plot(Q2_PSD[:, 0]*f_DAC, Q2_PSD[:, 1], color='r', label='Q2_PSD')
+# # axs[3].plot(Q3_PSD[:, 0]*f_DAC, Q3_PSD[:, 1], color='k', label='Q3_PSD')
+# axs[4].set_xlabel("Freq (GHz)", color="black", fontsize=10)
+# axs[4].set_ylabel("PSD (Hz)", color="blue", fontsize=10)
+# axs[4].set_yscale('log')
+# axs[4].set_xlim([50, 600])
+# axs[4].set_ylim([100, 10000])
 
 ### same plot
 # fig, ax = plt.subplots()
@@ -189,5 +212,44 @@ axs[4].set_ylim([100, 10000])
 # # ax2.set_ylabel("PSD (Hz)", color="blue", fontsize=14)
 # # ax2.set_yscale('log')
 # # ax2.set_ylim([100, 10000])
-plt.grid()
+# plt.grid()
+# plt.show()
+
+### Absolute photon rate
+fig, axs = plt.subplots(4)
+axs[0].plot(f, pgJ7, color="black", marker="o")
+axs[0].set_ylabel("Photons/Sec", color="black", fontsize=10)
+axs[0].set_xlim([50, 600])
+axs[0].set_ylim([1e7, 1e12])
+axs[0].set_yscale('log')
+axs[0].grid(True, which="both")
+
+axs[1].plot(f_Q1[100:], eQ1[100:], color="green", marker="o")
+axs[1].set_ylabel("Receiver QB Gamma", color="green", fontsize=10)
+axs[1].set_xlim([50, 600])
+axs[1].set_ylim([1e-5, 1e0])
+axs[1].set_yscale('log')
+axs[1].grid(True, which="both")
+
+
+pgJ1Q = []
+for i in range(len(pgJ7)):
+    pgJ1Q.append(pgJ7[i]*eQ1[i]*refJ7[i])
+# print(pgJ1Q)
+axs[2].plot(f_Q1[100:], pgJ1Q[100:], color="red", marker="o")
+# axs[2].plot(f_Q1[100:], refJ1[100:], color="red", marker="o")
+axs[2].set_ylabel("Photons/Sec", color="red", fontsize=10)
+axs[2].set_xlim([50, 600])
+# axs[2].set_ylim([1e3, 1e8])
+axs[2].set_yscale('log')
+axs[2].grid(True, which="both")
+
+axs[3].plot(Q3_PSD[:, 0]*f_DAC, Q3_PSD[:, 1], color='k', label='Q3_PSD')
+axs[3].set_xlabel("Freq (GHz)", color="black", fontsize=10)
+axs[3].set_ylabel("PSD (Hz)", color="blue", fontsize=10)
+axs[3].set_yscale('log')
+axs[3].set_xlim([50, 600])
+axs[3].set_ylim([100, 10000])
+axs[3].grid(True, which="both")
+
 plt.show()

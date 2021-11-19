@@ -427,11 +427,14 @@ class AntennaCoupling(object):
             "L": None,
             "C": None,
             "Area": None,
-            "Z_j": None
+            "Z_j": None,
+            "Ic": None
         }
         Gamma = None
         e_c = None
         e_c_dB = None
+        p_g = None  # photon generation rate
+        ref = None  # Al sample box reflection array
         C_eff = 150*1e-21    # F/nm^2
 
     def import_data(self, file, JJ, C_eff=150*1e-21):
@@ -439,6 +442,8 @@ class AntennaCoupling(object):
         self._add_data_from_txt(file)
         self._JJ_Update(JJ)
         self._get_e_c()
+        self._get_p_g()
+        self._get_ref()
 
     def _add_data_from_txt(self, file):
         f = np.loadtxt(file, usecols=[0], skiprows=3)
@@ -450,28 +455,64 @@ class AntennaCoupling(object):
         self.Antenna["Z_Im"] = Z_Im
         self.Antenna["Z_rad"] = Z_rad
 
-    def _JJ_Update(self, JJ):
+    # def _JJ_Update(self, JJ):
+    #     R = JJ[0]
+    #     L = JJ[1]
+    #     C = JJ[2]
+    #     A = JJ[3]  # nm*nm
+    #     Ic = (np.pi/4)*(380*(1e-6)/R)
+    #     C_eff = self.C_eff
+    #     omega = 2 * pi * self.Antenna["f"]
+    #     if not C:
+    #         # print('here!')
+    #         C = A * C_eff
+    #         tau = R * C
+    #         # print('tau=', tau)
+    #         Z_j = [(1 - 1j * w * tau) / (1 + w ** 2 * tau ** 2) * R for w in
+    #                omega]
+    #     else:
+    #         print('Q3')
+    #         Z_j = [-1j / (w * C - 1 / (w * L)) for w in omega]
+    #     self.Junction["R"] = R
+    #     self.Junction["L"] = L
+    #     self.Junction["C"] = C
+    #     self.Junction["A"] = A
+    #     self.Junction["Z_j"] = Z_j
+    #     self.Junction["Ic"] = Ic
+
+    def _JJ_Update(self, JJ):   # Wirebond included
         R = JJ[0]
         L = JJ[1]
         C = JJ[2]
         A = JJ[3]  # nm*nm
+        Ic = (np.pi/4)*(380*(1e-6)/R)
         C_eff = self.C_eff
         omega = 2 * pi * self.Antenna["f"]
-        if not C:
-            # print('here!')
-            C = A * C_eff
-            tau = R * C
-            # print('tau=', tau)
-            Z_j = [(1 - 1j * w * tau) / (1 + w ** 2 * tau ** 2) * R for w in
-                   omega]
-        else:
-            print('Q3')
-            Z_j = [-1j / (w * C - 1 / (w * L)) for w in omega]
+        # print('here!')
+        C = A * C_eff
+        tau = R * C
+        # print('tau=', tau)
+        length_wb_bias = 0.003   # units mm
+        L_wb_bias = mu_0*length_wb_bias   #wb = wirebond
+        C_wb_bias = epsilon_0*length_wb_bias    #wb = wirebond
+        length_wb_gnd = 0.0003   # units mm
+        L_wb_gnd = mu_0*length_wb_gnd   #wb = wirebond
+        C_wb_gnd = epsilon_0*length_wb_gnd    #wb = wirebond
+        Z_j = []
+        for w in omega:
+            Z_JJ = 1/(1/R+1j*w*C)
+            # Z_wirebonda_gnd = 1/(1/1j*w*L_wb_gnd+1j*w*C_wb_gnd)
+            # Z_wirebonda_bias = 1/(1/1j*w*L_wb_bias+1j*w*C_wb_bias)
+            # Z_wirebond = 0
+            # Z = 1/(1/(Z_JJ + Z_wirebonda_gnd)+1/(Z_wirebonda_bias+50))
+            Z = 1/(1/R+1j*w*C)    # no wirebond included
+            Z_j.append(Z)
         self.Junction["R"] = R
         self.Junction["L"] = L
         self.Junction["C"] = C
         self.Junction["A"] = A
         self.Junction["Z_j"] = Z_j
+        self.Junction["Ic"] = Ic
 
     def _get_e_c(self):
         Z_j = self.Junction["Z_j"]
@@ -485,24 +526,67 @@ class AntennaCoupling(object):
         self.e_c = e_c
         self.e_c_dB = e_c_dB
 
+    def _get_p_g(self):
+        e_c = self.e_c
+        f = self.Antenna["f"]
+        Ic = self.Junction["Ic"]
+        R = self.Junction["R"]
+        p_g = []
+
+        P = Ic**2*R
+        Pf = P * e_c
+        for i in range(len(f)):
+            p_g_f = Pf[i]/(h*f[i])
+            p_g.append(p_g_f)
+
+        # print("p_g_f=", p_g_f)
+        # print("P=", P)
+        # print("p_g[100:110]", p_g[100:110])
+        # print("f[100:110]", f[100:110])
+        # print(len(p_g))
+        self.p_g = p_g
+
+    def _get_ref(self):
+        f = self.Antenna["f"]
+        omega = 2*np.pi*f
+        sigma = 1e9
+        Z0 = 377    # vacuum impedance
+        # mu_0
+        # print("mu_0=", mu_0)
+        Gamma = []
+        Gamma_square = []
+        for i in range(len(omega)):
+            Z_Al = (1+1j)*np.sqrt((omega[i]*mu_0)/(2*sigma))
+            gamma = (Z_Al-Z0)/(Z_Al+Z0)
+            Gamma.append(gamma)
+            Gamma_square.append(np.abs(gamma))
+
+        # print(Gamma_square)
+        self.ref = Gamma_square
+
+        # Gamma = []
+        # for i in range(len(Z_rad)):
+        #     Gamma.append((Z_rad[i] - np.conj(Z_j[i])) / (Z_rad[i] + Z_j[i]))
+
+
     def plot(self):
         f = self.Antenna["f"]
         e_c_dB = self.e_c_dB
         plt.plot(f, e_c_dB)
         plt.show()
 
-    def plot_Q3Mode(self):
-        f = self.Antenna["f"]
-        Z_j = self.Junction["Z_j"]
-        Z_rad = self.Antenna["Z_rad"]
-        Y_j = [1 / Z for Z in Z_j]
-        Y_rad = [1 / Z for Z in Z_rad]
-        Y_tot = np.add(Y_j, Y_rad)
-        plt.plot(f, Y_tot.real, label='Re')
-        plt.plot(f, Y_tot.imag, label='Im')
-        plt.grid()
-        plt.legend()
-        plt.show()
+    # def plot_Q3Mode(self):
+    #     f = self.Antenna["f"]
+    #     Z_j = self.Junction["Z_j"]
+    #     Z_rad = self.Antenna["Z_rad"]
+    #     Y_j = [1 / Z for Z in Z_j]
+    #     Y_rad = [1 / Z for Z in Z_rad]
+    #     Y_tot = np.add(Y_j, Y_rad)
+    #     plt.plot(f, Y_tot.real, label='Re')
+    #     plt.plot(f, Y_tot.imag, label='Im')
+    #     plt.grid()
+    #     plt.legend()
+    #     plt.show()
 
 
 class P1_JSweep(object):
@@ -528,6 +612,10 @@ class P1_JSweep(object):
         for f in file_path[1:]:
             data = noiselib.loadmat(f)
             occ_1D = np.array(data[data_type1])
+            if np.mean(occ_1D) >= 0.05:
+                print('f=', f[-7: -4])
+                # print('occ_1D=', occ_1D)
+                print('occ_1D_avg=', np.mean(occ_1D))
             occ_2D = np.vstack((occ_2D, occ_1D))
 
         """Update parameters"""

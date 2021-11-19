@@ -4,8 +4,8 @@ import numpy as np
 
 ### parameters to be tuned
 e_eff = 6 # limit (1, 6.5), the voltage can also be built in to have a larger range
-C_eff = 50*1e-21   # Commonly used (50-100)
-Jbias_offset = 1    # mDAC should be +-1 mDAC basically +-5 GHz
+C_eff = 100*1e-21   # Commonly used (50-100)
+Jbias_offset = 0   # mDAC should be +-1 mDAC basically +-5 GHz
 k = 1   # Coupling between radiator and receiver, this could be larger than one due to the
         # fact we can generate QPs locally at the recevier's test pad
 
@@ -141,18 +141,18 @@ axs[0].set_xlim([50, 600])
 axs[0].set_ylim([-60, 0])
 axs[0].grid()
 
-axs[1].plot(f_Q1, ecQ1, color="green", marker="o", label='Q1')
-axs[1].plot(f_Q1, ecQ2, color="blue", marker="o", label='Q2')
-axs[1].plot(f_Q1, ecQ4, color="black", marker="o", label='Q4')
+axs[1].plot(f_Q1, ecQ1, color="blue", marker="o", label='Q1')
+axs[1].plot(f_Q1, ecQ2, color="red", marker="o", label='Q2')
+axs[1].plot(f_Q1, ecQ4, color="green", marker="o", label='Q4')
 axs[1].set_ylabel("Receiver QB (dB)",color="black", fontsize=10)
 axs[1].set_xlim([50, 600])
 axs[1].grid()
 axs[1].legend()
 axs[1].set_ylim([-40, -10])
 
-axs[2].plot(f_Q1, ecQ1+ecSFQ*k, color="green", marker="o", label='Q1')
-axs[2].plot(f_Q1, ecQ2+ecSFQ*k, color="blue", marker="o", label='Q2')
-axs[2].plot(f_Q1, ecQ4+ecSFQ*k, color="black", marker="o", label='Q4')
+axs[2].plot(f_Q1, ecQ1+ecSFQ*k, color="blue", marker="o", label='Q1')
+axs[2].plot(f_Q1, ecQ2+ecSFQ*k, color="red", marker="o", label='Q2')
+axs[2].plot(f_Q1, ecQ4+ecSFQ*k, color="green", marker="o", label='Q4')
 axs[2].set_ylabel("Receiver QB (dB)", color="black", fontsize=10)
 axs[2].set_xlim([50, 600])
 axs[2].grid()
@@ -160,9 +160,9 @@ axs[2].legend()
 axs[2].set_ylim([-60, -20])
 
 
-axs[3].plot(Q1_PSD[:, 0]*f_SIM, Q1_PSD[:, 1], color='g', label='Q1_PSD')
-axs[3].plot(Q2_PSD[:, 0]*f_SIM, Q2_PSD[:, 1], color='b', label='Q1_PSD')
-axs[3].plot(Q4_PSD[:, 0]*f_SIM, Q4_PSD[:, 1], color='k', label='Q1_PSD')
+axs[3].plot(Q1_PSD[:, 0]*f_SIM, Q1_PSD[:, 1], color='b', label='Q1_PSD')
+axs[3].plot(Q2_PSD[:, 0]*f_SIM, Q2_PSD[:, 1], color='r', label='Q1_PSD')
+axs[3].plot(Q4_PSD[:, 0]*f_SIM, Q4_PSD[:, 1], color='g', label='Q1_PSD')
 axs[3].set_xlabel("Freq (GHz)", color="black", fontsize=10)
 axs[3].set_ylabel("PSD (Hz)", color="blue", fontsize=10)
 axs[3].set_yscale('log')

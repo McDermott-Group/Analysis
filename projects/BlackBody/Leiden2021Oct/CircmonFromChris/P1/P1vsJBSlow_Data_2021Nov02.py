@@ -247,22 +247,23 @@ Q4[:, 0] = (Q4[:, 0])*1000
 
 
 # f = 4.604
-f = 0.97
+f = 0.968
 # f = 1
 Al_gap = 380e-6
 DAC_Al = 1e5*Al_gap/0.200
 plt.errorbar(Q1[:, 0]*f, Q1[:, 1], yerr=Q1[:, 2]/np.sqrt(50), color='b', label='Q1')
 plt.errorbar(Q2[:, 0]*f, Q2[:, 1], yerr=Q2[:, 2]/np.sqrt(50), color='r', label='Q2')
-plt.errorbar(Q2_More[:, 0]*f, Q2_More[:, 1], yerr=Q2_More[:, 2]/np.sqrt(50), color='k', label='Q2_More')
+# plt.errorbar(Q2_More[:, 0]*f, Q2_More[:, 1], yerr=Q2_More[:, 2]/np.sqrt(50), color='k', label='Q2_More')
 plt.errorbar(Q4[:, 0]*f, Q4[:, 1], yerr=Q4[:, 2]/np.sqrt(50), color='y', label='Q4')
 
 plt.axvline(x=DAC_Al * f, color='k', linestyle='--', linewidth=4, label='JJ Al Gap')
 
-plt.xlabel('Radiator Josephson Frequency (GHz)')
+plt.xlabel('J6 Weak Radiator Josephson Frequency (GHz)')
 plt.ylabel('P1')
+plt.xscale('log')
 plt.yscale('log')
-plt.grid()
-plt.legend(loc=1)
+plt.grid(True, which="both")
+plt.legend(loc=2)
 # plt.xlim([0, 1500])
 # plt.ylim([10, 100000])
 plt.show()

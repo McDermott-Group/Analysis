@@ -8,6 +8,7 @@ Fitting method Chris' no white noise verison
 import noiselib
 import matplotlib.pyplot as plt
 import numpy as np
+import copy
 
 
 Q1 = np.array([
@@ -93,6 +94,15 @@ Q1[:, 0] = (Q1[:, 0])
 Q2[:, 0] = (Q2[:, 0])
 Q4[:, 0] = (Q4[:, 0])
 
+Q1_pure = copy.deepcopy(Q1)
+Q2_pure = copy.deepcopy(Q2)
+Q4_pure = copy.deepcopy(Q4)
+e_Q41 = 0.0
+e_Q21 = 0.01
+e_Q24 = 0.035
+Q4_pure[:, 1] = Q4_pure[:, 1] - e_Q41*Q1_pure[:, 1]
+Q2_pure[:, 1] = Q2_pure[:, 1] - e_Q21*Q1_pure[:, 1]-e_Q24*Q4_pure[:, 1]
+
 
 # plt.plot(Q1[:, 0], Q1[:, 1], color='b', label='Q1')
 # plt.plot(Q2[:, 0], Q2[:, 1], color='r', label='Q2')
@@ -104,7 +114,8 @@ Q4[:, 0] = (Q4[:, 0])
 # plt.legend(loc=1)
 # plt.show()
 
-f = 0.97
+f = 0.968
+# f = 1
 Al_gap = 380e-6
 DAC_Al = 1e5*Al_gap/0.200
 # plt.plot(Q1[::2, 0]*f, Q1[::2, 1], color='b', label='Q1')
@@ -117,17 +128,21 @@ plt.plot(Q4[:, 0]*f, Q4[:, 1], color='y', label='Q4')
 # plt.plot(Q1[:, 0]*f, Q1[:, 1]*0.01, '-', label='Q2FromQ1')
 # plt.plot(Q4[:, 0]*f, Q4[:, 1]*0.04, '-', label='Q2FromQ4')
 # plt.plot(Q2[:, 0]*f, Q4[:, 1]*0.04+Q1[:, 1]*0.008, '--', label='Q2FromQ14')
-plt.plot(Q2[:, 0]*f, Q2[:, 1]-(Q4[:, 1]*0.04+Q1[:, 1]*0.008), '--', label='Q2-Q14')
+
+# plt.plot(Q1_pure[:, 0]*f, Q1_pure[:, 1]*e_Q21, 'b--', label='Q1_pure')
+# plt.plot(Q2_pure[:, 0]*f, Q2_pure[:, 1], 'r--', label='Q2_pure')
+# plt.plot(Q4_pure[:, 0]*f, Q4_pure[:, 1]*e_Q24, 'y--', label='Q4_pure')
 
 plt.axvline(x=DAC_Al * f, color='k', linestyle='--', linewidth=4, label='JJ Al Gap')
 
-plt.xlabel('Radiator Josephson Frequency (GHz)')
+plt.xlabel('J6 Weak Radiator Josephson Frequency (GHz)')
 plt.ylabel('PSD (Hz)')
 plt.yscale('log')
-plt.grid()
-plt.legend(loc=1)
+plt.xscale('log')
+plt.grid(True, which="both")
+plt.legend(loc=2)
 # plt.xlim([0, 1500])
-plt.ylim([10, 100000])
+# plt.ylim([10, 100000])
 plt.show()
 
 

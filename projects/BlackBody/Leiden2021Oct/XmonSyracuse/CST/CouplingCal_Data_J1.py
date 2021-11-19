@@ -1,16 +1,48 @@
-"""
-PSD for Q3 at different J1 Bias with Sim slow bias
-Data:
-Z:\mcdermott-group\data\Antenna\SUXmon\Liu\VitoChip1\2021Nov08_Q3_PSD_J1Radiator
-Fitting method Chris' no white noise verison
-
-"""
-import noiselib
+from antennalib import AntennaCoupling
 import matplotlib.pyplot as plt
 import numpy as np
 
+### parameters to be tuned
+e_eff = 6 # limit (1, 6.5), the voltage can also be built in to have a larger range
+C_eff = 75*1e-21   # Commonly used (50-100)
+Jbias_offset = 1    # mDAC should be +-1 mDAC basically +-5 GHz
+k = 1   # Coupling between radiator and receiver, this could be larger than one due to the
+        # fact we can generate QPs locally at the recevier's test pad
 
-Q1 = np.array([
+k1 = 0.0   # coupling between on chip phonon mitigation
+f_SIM = 0.9672
+# f_SIM = 0.955
+# f_SIM = 1
+### parameteres tuned done
+
+# JJ7 = [4.2*1e3, None, 0, 1000*150]   #[R, L, C, A]
+JJ1 = [33*1e3, None, 0, 180*150]   #[R, L, C, A]
+JQ1 = [17.1*1e3, None, 0, 360*150]
+JQ2 = [16*6*1e3, None, 0, 360*150] #
+
+fileJ1 = "xmon_full-chip_JJ1.txt"
+fileQ1 = "xmon_full-chip_Q1.txt"
+fileQ2 = "xmon_full-chip_Q2.txt"
+
+J1 = AntennaCoupling()
+J1.import_data(fileJ1, JJ1)
+f = J1.Antenna["f"]
+ecJ1 = J1.e_c_dB
+eJ1 = J1.e_c
+pgJ1 = J1.p_g
+refJ1 = J1.ref
+
+Q1 = AntennaCoupling()
+Q1.import_data(fileQ1, JQ1)
+f_Q1 = Q1.Antenna["f"]
+eQ1 = Q1.e_c
+
+Q2 = AntennaCoupling()
+Q2.import_data(fileQ2, JQ2)
+f_Q2 = Q2.Antenna["f"]
+eQ2 = Q2.e_c
+
+Q1_PSD = np.array([
  [0, 84.71], [10, 83.96], [20, 84.23], [30, 86.4], [40, 87.31], [50, 86.84],
  [60, 90.49], [70, 84.87], [80, 93.37], [90, 92.26], [100, 85.84], [105, 88.58],
  [110, 93.15], [115, 93.18], [120, 88.24], [125, 93.81], [130, 92.1],
@@ -39,7 +71,7 @@ Q1 = np.array([
  [685, 273.35], [690, 289.32], [695, 285.94]
 ])
 
-Q2 = np.array([
+Q2_PSD = np.array([
  [0, 110.14], [10, 111.85], [20, 114.09], [30, 116.76], [40, 107.05],
  [50, 112.69], [60, 114.63], [70, 113.18], [80, 110.73], [90, 113.29],
  [100, 106.33], [105, 112.73], [110, 114.87], [115, 115.11], [120, 113.82],
@@ -65,14 +97,10 @@ Q2 = np.array([
  [600, 235.64], [605, 232.36], [610, 247.02], [615, 252.35], [620, 251.32],
  [625, 256.81], [630, 277.58],[635, 271.4], [640, 276.76], [645, 290.74],
  [650, 300.61], [655, 297.27], [660, 304.96], [665, 314.33], [670, 322.21],
- [675, 332.47], [680,340.9], [685, 356.28], [690, 380.62], [695, 380.05],
- [700, 402.35], [750, 900.02], [800, 1690.46], [850, 2246.1], [900, 2199.74],
- [950, 2252.42], [1000, 2218.97], [1050, 2199.1], [1100, 2217.16],
- [1150, 2226.58], [1200, 2248.71], [1250, 2256.87], [1300, 2182.77],
- [1350, 2244.69], [1400, 2209.35], [1450, 2192.23]
+ [675, 332.47], [680,340.9], [685, 356.28], [690, 380.62], [695, 380.05]
 ])
 
-Q2_HighDensity = np.array([
+Q2_PSD_HighDensity = np.array([
  [180, 140.06], [181, 134.05], [182, 145.11], [183, 141.86], [184, 140.6],
  [185, 136.93], [186, 140.99], [187, 143.37], [188,147.55], [189, 158.44],
  [190, 141.82], [191, 145.11], [192, 151.52], [193, 155.54], [194, 156.24],
@@ -115,8 +143,8 @@ Q2_HighDensity = np.array([
  [513, 163.69], [514, 165.17], [515, 156.97], [516, 162.13], [517, 165.13],
  [518, 158.48], [519, 162.01], [520, 164.37], [521, 163.57], [522, 164.79],
  [523, 170.34], [524, 171.86], [525, 158.99], [526, 164.72], [527, 164.18],
- [528, 165.68], [529, 166.0], [530, 164.15],
- [600, 230.26], [601, 244.0], [602, 238.54],
+ [528, 165.68], [529, 166.0], [530, 164.15], [600, 230.26], [601, 244.0],
+ [602, 238.54],
  [603, 241.26], [604, 241.88], [605, 245.13], [606, 247.22], [607, 240.49],
  [608, 240.77], [609, 247.71], [610, 251.74], [611, 243.74], [612, 240.79],
  [613, 260.59], [614, 250.74], [615, 253.42], [616, 257.27], [617, 252.83],
@@ -129,7 +157,7 @@ Q2_HighDensity = np.array([
  [648, 292.51], [649, 283.97], [650, 297.54]
 ])
 
-Q3 = np.array([
+Q3_PSD = np.array([
  [0, 106.35], [10, 104.29], [20, 104.98], [30, 108.07], [40, 107.02],
  [50, 104.26], [60, 103.02], [70, 100.7], [80, 106.52], [90, 106.48],
  [100, 99.7], [105, 102.78], [110, 113.84], [115, 102.97], [120, 98.58],
@@ -155,14 +183,10 @@ Q3 = np.array([
  [600, 215.64], [605, 236.99], [610, 240.65], [615, 240.53], [620, 247.78],
  [625, 254.46], [630, 256.9], [635, 269.65], [640, 274.44], [645, 279.23],
  [650, 297.19], [655, 289.41], [660, 303.32], [665, 305.88], [670, 313.94],
- [675, 319.42], [680, 331.56], [685, 336.2], [690, 346.79], [695, 350.34],
- [700, 389.52], [750, 831.21], [800, 1733.92], [850, 2344.31], [900, 2111.31],
- [950, 2032.29], [1000, 2102.51], [1050, 2081.11], [1100, 2080.17],
- [1150, 1994.72], [1200, 2182.32], [1250, 2205.22], [1300, 2254.93],
- [1350, 2189.2], [1400, 2065.0], [1450, 2246.76]
+ [675, 319.42], [680, 331.56], [685, 336.2], [690, 346.79], [695, 350.34]
 ])
 
-Q3_HighDensity = np.array([
+Q3_PSD_HighDensity = np.array([
  [240, 135.0], [241, 135.34], [242, 143.32], [243, 150.62], [244, 151.47],
  [245, 146.06], [246, 145.57], [247, 151.73], [248,150.1], [249, 172.4],
  [250, 167.08], [251, 171.32], [252, 165.34], [253, 172.19], [254, 171.37],
@@ -181,40 +205,186 @@ Q3_HighDensity = np.array([
  [315, 207.31], [316, 191.55], [317, 186.66], [318, 166.34], [319, 168.01]
 ])
 
+f_scale = np.sqrt(e_eff/6.0)
+# f_list = [f, f_Q1, f_Q2]
+# for fi in f_list:
+#     fi = fi/1e9
+#     fi = fi*f_scale
+f = f/1e9
+f = f*f_scale
+f_Q1 = f_Q1/1e9
+f_Q1 = f_Q1*f_scale
+f_Q2 = f_Q2/1e9
+f_Q2 = f_Q2*f_scale
 
-### J1 Bias Conversion
-# Q3[:, 0] = (Q3[:, 0])
+### dB power
+# fig, axs = plt.subplots(4)
+# axs[0].plot(f, ecJ1, color="black", marker="o")
+# axs[0].set_ylabel("Radiator (dB)", color="black", fontsize=10)
+# axs[0].set_xlim([50, 700])
+# axs[0].set_ylim([-30, -10])
 
-# plt.plot(Q3[:, 0], Q3[:, 1], color='y', label='Q3')
-# plt.xlabel('Radiator Josephson Frequency (mDAC)')
-# plt.ylabel('PSD (Hz)')
-# plt.yscale('log')
+# axs[1].plot(f_Q1, ecQ1, color="green", marker="o")
+# axs[1].set_ylabel("Receiver QB (dB)", color="green", fontsize=10)
+# axs[1].set_xlim([50, 700])
+# axs[1].set_ylim([-50, 0])
+#
+# axs[2].plot(f_Q1, ecQ1+ecJ1*k, color="red", marker="o")
+# axs[2].set_ylabel("Sum (dB)", color="red", fontsize=10)
+# axs[2].set_xlim([50, 700])
+# axs[2].set_ylim([-70, -20])
+#
+# axs[3].plot(Q3_PSD[:, 0]*f_SIM, Q3_PSD[:, 1], color='k', label='Q3_PSD')
+# axs[3].set_xlabel("Freq (GHz)", color="black", fontsize=10)
+# axs[3].set_ylabel("PSD (Hz)", color="blue", fontsize=10)
+# axs[3].set_yscale('log')
+# axs[3].set_xlim([50, 700])
+# axs[3].set_ylim([100, 1000])
+#
 # plt.grid()
-# plt.legend(loc=1)
 # plt.show()
 
-# f = 1
-f = 0.9672
-Al_gap = 380e-6
-DAC_Al = 1e5*Al_gap/0.200
-d = 1 # for plotting purpose only
-plt.plot(Q1[:, 0]*f, Q1[:, 1]/d, color='b', label='Q1')
-plt.plot(Q2[:, 0]*f, Q2[:, 1], color='r', label='Q2')
-plt.plot(Q2_HighDensity[:, 0]*f, Q2_HighDensity[:, 1], color='r', marker="o", label='Q2')
-plt.plot(Q3[:, 0]*f, Q3[:, 1]*d, color='y', label='Q3')
-plt.plot(Q3_HighDensity[:, 0]*f, Q3_HighDensity[:, 1]*d, color='y', marker="o", label='Q3')
+### Absolute photon rate
+# fig, axs = plt.subplots(4)
+# # plt.title('J1 Sim Bias')
+# axs[0].plot(f, pgJ1, color="black", marker="o")
+# axs[0].set_ylabel("Photons/Sec", color="black", fontsize=10)
+# axs[0].set_xlim([50, 700])
+# axs[0].set_ylim([1e6, 1e10])
+# axs[0].set_yscale('log')
+# axs[0].grid(True, which="both")
+#
+# axs[1].plot(f_Q1[100:], eQ1[100:], color="green", marker="o")
+# axs[1].set_ylabel("Receiver QB Gamma", color="green", fontsize=10)
+# axs[1].set_xlim([50, 700])
+# axs[1].set_ylim([1e-5, 1e0])
+# axs[1].set_yscale('log')
+# axs[1].grid(True, which="both")
+#
+# pgJ1Q = []
+# for i in range(len(pgJ1)):
+#     pgJ1Q.append(pgJ1[i]*eQ1[i]*refJ1[i])
+# # print(pgJ1Q)
+# axs[2].plot(f_Q1[100:], pgJ1Q[100:], color="red", marker="o")
+# axs[2].set_ylabel("Photons/Sec", color="red", fontsize=10)
+# axs[2].set_xlim([50, 700])
+# # axs[2].set_ylim([1e3, 1e8])
+# axs[2].set_yscale('log')
+# axs[2].grid(True, which="both")
+#
+# axs[3].plot(Q3_PSD[:, 0]*f_SIM, Q3_PSD[:, 1], color='k', label='Q3_PSD')
+# axs[3].set_xlabel("Freq (GHz)", color="black", fontsize=10)
+# axs[3].set_ylabel("PSD (Hz)", color="blue", fontsize=10)
+# axs[3].set_yscale('log')
+# axs[3].set_xlim([50, 700])
+# axs[3].set_ylim([100, 1000])
+# axs[3].grid(True, which="both")
+#
+# plt.show()
 
-plt.axvline(x=DAC_Al * f, color='k', linestyle='--', linewidth=4, label='JJ Al Gap')
+# Q2
+# fig, axs = plt.subplots(4)
+# axs[0].plot(f, pgJ1, color="black", marker="o")
+# axs[0].set_ylabel("Photons/Sec", color="black", fontsize=10)
+# axs[0].set_xlim([50, 700])
+# axs[0].set_ylim([1e6, 1e10])
+# axs[0].set_yscale('log')
+# axs[0].grid(True, which="both")
+#
+# axs[1].plot(f_Q2[100:], eQ2[100:], color="green", marker="o")
+# axs[1].set_ylabel("Q2 Receiver QB Gamma", color="green", fontsize=10)
+# axs[1].set_xlim([50, 700])
+# axs[1].set_ylim([1e-5, 1e0])
+# axs[1].set_yscale('log')
+# axs[1].grid(True, which="both")
+#
+# pgJ1Q2 = []
+# for i in range(len(pgJ1)):
+#     pgJ1Q2.append(pgJ1[i]*eQ2[i])
+# # print(pgJ1Q)
+# axs[2].plot(f_Q2[100:], pgJ1Q2[100:], color="red", marker="o")
+# axs[2].set_ylabel("Photons/Sec", color="red", fontsize=10)
+# axs[2].set_xlim([50, 700])
+# # axs[2].set_ylim([1e3, 1e8])
+# axs[2].set_yscale('log')
+# axs[2].grid(True, which="both")
+#
+# axs[3].plot(Q2_PSD[:, 0]*f_SIM, Q2_PSD[:, 1], color='k', label='Q2_PSD')
+# axs[3].set_xlabel("Freq (GHz)", color="black", fontsize=10)
+# axs[3].set_ylabel("PSD (Hz)", color="blue", fontsize=10)
+# axs[3].set_yscale('log')
+# axs[3].set_xlim([50, 700])
+# axs[3].set_ylim([100, 1000])
+# axs[3].grid(True, which="both")
+#
+# plt.show()
 
-plt.xlabel('J1 Weak Radiator Josephson Frequency (GHz)')
-plt.ylabel('PSD (Hz)')
-plt.xscale('log')
-plt.yscale('log')
-plt.grid(True, which="both")
-plt.legend(loc=1)
-# plt.xlim([0, 1500])
-# plt.ylim([10, 100000])
+# Q2 # polished
+fig, axs = plt.subplots(2)
+pgJ1Q2 = []
+l_i = 1
+for i in range(len(pgJ1)):
+    pgJ1Q2.append(pgJ1[i]*eQ2[i])
+axs_02 = axs[0].twinx()
+
+axs_02.plot(f[l_i:], eJ1[l_i:], color="red", marker="o", label='Radiator Efficiency')
+axs_02.plot(f_Q2[l_i:], eQ2[l_i:], color="yellow", marker="o", label='Receiver Efficiency')
+axs_02.set_ylabel('Coupling Efficiency', color="black", fontsize=10)
+axs_02.set_yscale('log')
+axs_02.set_ylim([1e-8, 1e-1])
+axs_02.legend(loc=1)
+
+axs[0].plot(f_Q2[l_i:], pgJ1Q2[l_i:], color="orange", marker="o", label='Photon Rate')
+axs[0].set_ylabel("Photons/Sec", color="black", fontsize=10)
+axs[0].set_xlim([50, 700])
+axs[0].set_ylim([1e2, 1e9])
+axs[0].set_yscale('log')
+axs[0].grid(True, which="both")
+axs[0].legend(loc=4)
+axs[0].set_xlabel("Antenna Frequency (GHz)", color="black", fontsize=10)
+
+
+pgJ1Q2_scaled = []
+p2QP = 1e-3 # photon to QP conversion rate
+base = 110
+for i in range(len(pgJ1)):
+    pgJ1Q2_scaled.append(pgJ1[i]*eQ2[i]*p2QP+base)
+
+axs_12 = axs[1].twinx()
+axs_12.plot(f_Q2[l_i:], pgJ1Q2_scaled[l_i:], color="orange", linestyle='--', label='Photon Rate Scaled')
+axs_12.set_ylabel("Scaled Photons Rate (Hz)", color="black", fontsize=10)
+axs_12.set_xlim([50, 700])
+axs_12.set_ylim([100, 5000])
+axs_12.set_yscale('log')
+axs_12.legend(loc=1)
+
+axs[1].plot(Q2_PSD[:, 0]*f_SIM, Q2_PSD[:, 1], color='k', label='Q2 Measurement')
+axs[1].set_xlabel("Radiator Josephson Frequency (GHz)", color="black", fontsize=10)
+axs[1].set_ylabel("Parity Rate (Hz)", color="black", fontsize=10)
+axs[1].set_yscale('log')
+axs[1].set_xlim([50, 700])
+axs[1].set_ylim([100, 5000])
+axs[1].grid(True, which="both")
+axs[1].legend(loc=4)
+
 plt.show()
 
-
-
+### Q2 matching with CST
+# pgJ1Q2 = []
+# p2QP = 1e-3 # photon to QP conversion rate
+# base = 110
+# for i in range(len(pgJ1)):
+#     pgJ1Q2.append(pgJ1[i]*eQ2[i]*p2QP+base)
+# # print(pgJ1Q)
+# plt.plot(f_Q2[100:], pgJ1Q2[100:], color="red", marker="o", label='Photons generated scaled')
+# plt.plot(Q2_PSD_HighDensity[:, 0]*f_SIM, Q2_PSD_HighDensity[:, 1], color='k', label='Q2_PSD')
+# plt.plot(Q2_PSD[:, 0]*f_SIM, Q2_PSD[:, 1], color='b', label='Q2_PSD')
+# plt.xlabel("J6 Radiator Freq (GHz)", color="red", fontsize=10)
+# plt.ylabel("Rate (Hz)", color="red", fontsize=10)
+# plt.xlim([50, 700])
+# # axs[2].set_ylim([1e3, 1e8])
+# plt.yscale('log')
+# plt.grid(True, which="both")
+# plt.title('Q2 CST vs Meas')
+# plt.legend()
+# plt.show()
