@@ -4,13 +4,14 @@ import numpy as np
 
 ### parameters to be tuned
 e_eff = 6 # limit (1, 6.5), the voltage can also be built in to have a larger range
-C_eff = 100*1e-21   # Commonly used (50-100)
+C_eff = 180*1e-21   # Commonly used (50-100)
 Jbias_offset = 0   # mDAC should be +-1 mDAC basically +-5 GHz
 k = 1   # Coupling between radiator and receiver, this could be larger than one due to the
         # fact we can generate QPs locally at the recevier's test pad
 
 k1 = 0.0   # coupling between on chip phonon mitigation
-f_SIM = 0.97
+# f_SIM = 0.97
+f_SIM = 0.968
 ### parameteres tuned done
 
 JSFQ = [16*1e3, None, 0, 100*200]   #[R, L, C, A]
@@ -21,44 +22,51 @@ JQ4 = [15*1e3, 19.9*1e-9, 0, 184.4*122.5*2]   #    some issue with Q3
 
 fileSFQ = "testpad_1.5THz.txt"
 # fileQ1 = "Q1.txt"
-fileQ1 = "Q1_with-leads_1.5THz.txt"
-fileQ2 = "Q2_1.5THz.txt"
-fileQ3 = "Q3_with-leads_1.5THz.txt"
-fileQ4 = "Q4_1.5THz.txt"
+# fileQ1 = "Q1_with-leads_1.5THz.txt"
+# fileQ2 = "Q2_1.5THz.txt"
+# fileQ3 = "Q3_with-leads_1.5THz.txt"
+# fileQ4 = "Q4_1.5THz.txt"
+
+fileQ1 = "Q1_full-chip.txt"
+fileQ2 = "Q2_full-chip.txt"
+fileQ3 = "Q3_full-chip.txt"
+fileQ4 = "Q4_full-chip.txt"
 
 SFQ = AntennaCoupling()
-SFQ.import_data(fileSFQ, JSFQ)
+SFQ.import_data(fileSFQ, JSFQ, C_eff=100*1e-21)
 f_SFQ = SFQ.Antenna["f"]
 ecSFQ = SFQ.e_c_dB
+eSFQ = SFQ.e_c
+pgSFQ = SFQ.p_g
+refSFQ = SFQ.ref
+
 # SFQ.plot()
 
 Q1 = AntennaCoupling()
-Q1.import_data(fileQ1, JQ1)
-# Q1.plot()
+Q1.import_data(fileQ1, JQ1, C_eff=C_eff)
 ecQ1 = Q1.e_c_dB
+eQ1 = Q1.e_c
 Z_ReQ1 = Q1.Antenna["Z_Re"]
 f_Q1 = Q1.Antenna["f"]
 
 Q2 = AntennaCoupling()
-Q2.import_data(fileQ2, JQ2)
+Q2.import_data(fileQ2, JQ2, C_eff=C_eff)
 ecQ2 = Q2.e_c_dB
+eQ2 = Q2.e_c
 Z_ReQ2 = Q2.Antenna["Z_Re"]
 
 Q3 = AntennaCoupling()
-Q3.import_data(fileQ3, JQ3)
+Q3.import_data(fileQ3, JQ3, C_eff=C_eff)
 ecQ3 = Q3.e_c_dB
+eQ3 = Q3.e_c
 Z_ReQ3 = Q3.Antenna["Z_Re"]
 
 Q4 = AntennaCoupling()
-Q4.import_data(fileQ4, JQ4)
+Q4.import_data(fileQ4, JQ4, C_eff=C_eff)
 ecQ4 = Q4.e_c_dB
+eQ4 = Q4.e_c
 Z_ReQ4 = Q4.Antenna["Z_Re"]
 
-f_scale = np.sqrt(e_eff/6.0)
-f_SFQ = f_SFQ/1e9
-f_SFQ = f_SFQ*f_scale
-f_Q1 = f_Q1/1e9
-f_Q1 = f_Q1*f_scale
 
 Q1_PSD = np.array([
     [0, 1009.34], [10, 958.58], [20, 1145.83], [30, 1046.75], [40, 1160.41],
@@ -133,6 +141,12 @@ Q4_PSD = np.array([
 ])
 
 
+f_scale = np.sqrt(e_eff/6.0)
+f_SFQ = f_SFQ/1e9
+f_SFQ = f_SFQ*f_scale
+f_Q1 = f_Q1/1e9
+f_Q1 = f_Q1*f_scale
+
 ### two vertical plots
 fig, axs = plt.subplots(4)
 axs[0].plot(f_SFQ, ecSFQ, color="red", marker="o")
@@ -171,3 +185,56 @@ axs[3].set_ylim([10, 10000])
 
 plt.grid()
 plt.show()
+
+"""
+Polished
+"""
+
+# pgSFQQ1 = []
+# l_i = 1
+# for i in range(len(pgSFQ)):
+#     pgSFQQ1.append(pgSFQ[i]*eQ1[i])
+#
+# pgSFQQ1_scaled = []
+# p2QP = 8e-3 # photon to QP conversion rate
+# base = 1000
+# for i in range(len(pgSFQ)):
+#     pgSFQQ1_scaled.append(pgSFQQ1[i]*eQ1[i]*p2QP+base)
+#
+# fig, axs = plt.subplots(2)
+# axs_02 = axs[0].twinx()
+#
+# axs_02.plot(f_SFQ[l_i:], eSFQ[l_i:], color="red", marker="o", label='Radiator Efficiency')
+# axs_02.plot(f_Q1[l_i:], eQ1[l_i:], color="yellow", marker="o", label='Receiver Efficiency')
+# axs_02.set_ylabel('Coupling Efficiency', color="black", fontsize=10)
+# axs_02.set_yscale('log')
+# axs_02.set_ylim([1e-4, 1e-1])
+# axs_02.legend(loc=1)
+#
+# axs[0].plot(f_Q1[l_i:], pgSFQQ1[l_i:], color="orange", marker="o", label='Photon Rate')
+# axs[0].set_ylabel("Photons/Sec", color="black", fontsize=10)
+# axs[0].set_xlim([50, 700])
+# axs[0].set_ylim([1e5, 1e9])
+# axs[0].set_yscale('log')
+# axs[0].grid(True, which="both")
+# axs[0].legend(loc=4)
+# axs[0].set_xlabel("Antenna Frequency (GHz)", color="black", fontsize=10)
+#
+# axs_12 = axs[1].twinx()
+# axs_12.plot(f_Q1[l_i:], pgSFQQ1_scaled[l_i:], color="orange", linestyle='--', label='Photon Rate Scaled')
+# axs_12.set_ylabel("Scaled Photons Rate (Hz)", color="black", fontsize=10)
+# axs_12.set_xlim([50, 700])
+# axs_12.set_ylim([500, 10000])
+# axs_12.set_yscale('log')
+# axs_12.legend(loc=1)
+#
+# axs[1].plot(Q1_PSD[:, 0]*f_SIM, Q1_PSD[:, 1], color='k', label='Q1 Measurement 200fF')
+# axs[1].set_xlabel("Radiator Josephson Frequency (GHz)", color="black", fontsize=10)
+# axs[1].set_ylabel("Parity Rate (Hz)", color="black", fontsize=10)
+# axs[1].set_yscale('log')
+# axs[1].set_xlim([50, 700])
+# axs[1].set_ylim([500, 10000])
+# axs[1].grid(True, which="both")
+# axs[1].legend(loc=4)
+#
+# plt.show()

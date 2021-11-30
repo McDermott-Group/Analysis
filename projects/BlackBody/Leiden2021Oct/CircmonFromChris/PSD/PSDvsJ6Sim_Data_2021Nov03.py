@@ -90,9 +90,6 @@ Q4 = np.array([
 
 
 ### J6 Bias Conversion
-Q1[:, 0] = (Q1[:, 0])
-Q2[:, 0] = (Q2[:, 0])
-Q4[:, 0] = (Q4[:, 0])
 
 Q1_pure = copy.deepcopy(Q1)
 Q2_pure = copy.deepcopy(Q2)
@@ -125,20 +122,20 @@ plt.plot(Q1[:, 0]*f, Q1[:, 1], color='b', label='Q1')
 plt.plot(Q2[:, 0]*f, Q2[:, 1], color='r', label='Q2')
 plt.plot(Q4[:, 0]*f, Q4[:, 1], color='y', label='Q4')
 
-# plt.plot(Q1[:, 0]*f, Q1[:, 1]*0.01, '-', label='Q2FromQ1')
-# plt.plot(Q4[:, 0]*f, Q4[:, 1]*0.04, '-', label='Q2FromQ4')
-# plt.plot(Q2[:, 0]*f, Q4[:, 1]*0.04+Q1[:, 1]*0.008, '--', label='Q2FromQ14')
+plt.plot(Q1[:, 0]*f, Q1[:, 1]*0.01, '-', label='Q2FromQ1')
+plt.plot(Q4[:, 0]*f, Q4[:, 1]*0.04, '-', label='Q2FromQ4')
+plt.plot(Q2[:, 0]*f, Q4[:, 1]*0.04+Q1[:, 1]*0.008, '--', label='Q2FromQ14')
 
-# plt.plot(Q1_pure[:, 0]*f, Q1_pure[:, 1]*e_Q21, 'b--', label='Q1_pure')
-# plt.plot(Q2_pure[:, 0]*f, Q2_pure[:, 1], 'r--', label='Q2_pure')
-# plt.plot(Q4_pure[:, 0]*f, Q4_pure[:, 1]*e_Q24, 'y--', label='Q4_pure')
+plt.plot(Q1_pure[:, 0]*f, Q1_pure[:, 1]*e_Q21, 'b--', label='Q1_pure')
+plt.plot(Q2_pure[:, 0]*f, Q2_pure[:, 1], 'r--', label='Q2_pure')
+plt.plot(Q4_pure[:, 0]*f, Q4_pure[:, 1]*e_Q24, 'y--', label='Q4_pure')
 
 plt.axvline(x=DAC_Al * f, color='k', linestyle='--', linewidth=4, label='JJ Al Gap')
 
 plt.xlabel('J6 Weak Radiator Josephson Frequency (GHz)')
 plt.ylabel('PSD (Hz)')
 plt.yscale('log')
-plt.xscale('log')
+# plt.xscale('log')
 plt.grid(True, which="both")
 plt.legend(loc=2)
 # plt.xlim([0, 1500])

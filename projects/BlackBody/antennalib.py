@@ -432,6 +432,7 @@ class AntennaCoupling(object):
         }
         Gamma = None
         e_c = None
+        Ic_f = None   # as a function of freq
         e_c_dB = None
         p_g = None  # photon generation rate
         ref = None  # Al sample box reflection array
@@ -442,6 +443,7 @@ class AntennaCoupling(object):
         self._add_data_from_txt(file)
         self._JJ_Update(JJ)
         self._get_e_c()
+        self._get_Ic()
         self._get_p_g()
         self._get_ref()
 
@@ -526,27 +528,127 @@ class AntennaCoupling(object):
         self.e_c = e_c
         self.e_c_dB = e_c_dB
 
+    # def _get_p_g(self):
+    #     e_c = self.e_c
+    #     f = self.Antenna["f"]
+    #     Ic = self.Junction["Ic"]
+    #     R = self.Junction["R"]
+    #     p_g = []
+    #
+    #     P = Ic**2*R
+    #     Pf = P * e_c
+    #     for i in range(len(f)):
+    #         p_g_f = Pf[i]/(h*f[i])
+    #         p_g.append(p_g_f)
+    #
+    #     # print("p_g_f=", p_g_f)
+    #     # print("P=", P)
+    #     # print("p_g[100:110]", p_g[100:110])
+    #     # print("f[100:110]", f[100:110])
+    #     # print(len(p_g))
+    #     self.p_g = p_g
+
+    def _get_Ic(self):
+        """
+        get Ic as a function of radiation freq, consider critical current
+        as a function of temperature temp is a function of power dissipated on chip
+        :return:
+        """
+        Omega = 40*1e-6 * 1.6*1e-6 * 50*1e-15   # volume of the junction
+        Sigma = 2.4*1e9 # the single parameter from Wellstood and Clarke's 1994 paper
+
+        Ic_f = []
+        T_f = []
+        # Vb = []
+        P_heat_f = []
+
+        f = self.Antenna["f"]
+        R = self.Junction["R"]*1.0
+        phi_0 = h/(2*e)
+        # print('R=', R)
+
+        # for fi in f:
+        #     vb = fi * phi_0  # convert photon frequency to voltage bias
+        #     P_heat = vb**2.0 / R
+        #     T = (P_heat/(Omega*Sigma))**(0.2)   # cannot use 1/5, bust use 0.2
+        #     T_f.append(T)
+        #     ic = self._getIcFromTemp(T)
+        #     # Vb.append(vb)
+        #     P_heat_f.append(P_heat)
+        #     Ic_f.append(ic)
+
+        for fi in f:    # Tinkham
+            vb = fi * phi_0  # convert photon frequency to voltage bias
+            T_b = 10e-3 # base temp 20mK
+            if vb <= 0:
+                vb = 0
+            T = np.sqrt((T_b**2+3*(e*vb/(2*pi*k))))
+            T_f.append(T)
+            ic = self._getIcFromTemp(T)
+            # Vb.append(vb)
+            Ic_f.append(ic)
+
+        # print("Vb=", Vb)
+        # print("T_f=", T_f[0:10])
+        # print("T_f=", T_f[200:210])
+        # print("T_f=", T_f[900:910])
+        # print("Ic_f=", Ic_f[0:10])
+        # print("Ic_f=", Ic_f[200:210])
+        # print("Ic_f=", Ic_f[900:910])
+        # print("P_heat_f=", P_heat_f)
+
+        self.Ic_f = Ic_f
+
+    # def _get_p_g(self):
+    #     """
+    #     photons generated,
+    #     :return:
+    #     """
+    #     e_c = self.e_c
+    #     f = self.Antenna["f"]
+    #     Ic = self.Junction["Ic"]
+    #     R = self.Junction["R"]
+    #     p_g = []
+    #
+    #     P = Ic**2*R
+    #     Pf = P * e_c
+    #     for i in range(len(f)):
+    #         p_g_f = Pf[i]/(h*f[i])
+    #         p_g.append(p_g_f)
+    #
+    #     # print("p_g_f=", p_g_f)
+    #     # print("P=", P)
+    #     # print("p_g[100:110]", p_g[100:110])
+    #     # print("f[100:110]", f[100:110])
+    #     # print(len(p_g))
+    #     self.p_g = p_g
+
     def _get_p_g(self):
+        """
+        photons generated,
+        :return:
+        """
         e_c = self.e_c
         f = self.Antenna["f"]
         Ic = self.Junction["Ic"]
+        Ic_f = self.Ic_f
         R = self.Junction["R"]
         p_g = []
 
-        P = Ic**2*R
-        Pf = P * e_c
+        # P = Ic**2*R
+        # Pf = P * e_c
         for i in range(len(f)):
-            p_g_f = Pf[i]/(h*f[i])
+            P = Ic_f[i]**2 * e_c[i] * R
+            p_g_f = P/(h*f[i])
             p_g.append(p_g_f)
 
-        # print("p_g_f=", p_g_f)
-        # print("P=", P)
-        # print("p_g[100:110]", p_g[100:110])
-        # print("f[100:110]", f[100:110])
-        # print(len(p_g))
         self.p_g = p_g
 
     def _get_ref(self):
+        """
+        reflection coefficient
+        :return:
+        """
         f = self.Antenna["f"]
         omega = 2*np.pi*f
         sigma = 1e9
@@ -568,6 +670,22 @@ class AntennaCoupling(object):
         # for i in range(len(Z_rad)):
         #     Gamma.append((Z_rad[i] - np.conj(Z_j[i])) / (Z_rad[i] + Z_j[i]))
 
+    def _getIcFromTemp(self, T):
+        """
+        Get critical current from temperature
+        :param T:
+        :return:
+        """
+        Rn = self.Junction["R"]
+        Delta = 190.0*1e-6*e
+        IcRn = (pi/4)*(2*Delta/e)*np.tanh(Delta / (2 * k * T))
+        Ic = IcRn/Rn
+        # if T > 0.202 and T < 0.203:
+        #     print('T=', T)
+        #     print('IcRn=', IcRn)
+        #     print('Delta / (2 * k * T)=', Delta / (2 * k * T))
+        #     print('Ic=', Ic)
+        return Ic
 
     def plot(self):
         f = self.Antenna["f"]

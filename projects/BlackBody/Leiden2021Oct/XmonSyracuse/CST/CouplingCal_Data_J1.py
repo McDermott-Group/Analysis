@@ -1,4 +1,5 @@
 from antennalib import AntennaCoupling
+from scipy import interpolate
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -11,21 +12,21 @@ k = 1   # Coupling between radiator and receiver, this could be larger than one 
 
 k1 = 0.0   # coupling between on chip phonon mitigation
 f_SIM = 0.9672
-# f_SIM = 0.955
+# f_SIM = 0.935
 # f_SIM = 1
 ### parameteres tuned done
 
 # JJ7 = [4.2*1e3, None, 0, 1000*150]   #[R, L, C, A]
 JJ1 = [33*1e3, None, 0, 180*150]   #[R, L, C, A]
 JQ1 = [17.1*1e3, None, 0, 360*150]
-JQ2 = [16*6*1e3, None, 0, 360*150] #
+JQ2 = [16.6*1e3, None, 0, 360*150] #
 
 fileJ1 = "xmon_full-chip_JJ1.txt"
 fileQ1 = "xmon_full-chip_Q1.txt"
 fileQ2 = "xmon_full-chip_Q2.txt"
 
 J1 = AntennaCoupling()
-J1.import_data(fileJ1, JJ1)
+J1.import_data(fileJ1, JJ1, C_eff=C_eff)
 f = J1.Antenna["f"]
 ecJ1 = J1.e_c_dB
 eJ1 = J1.e_c
@@ -33,12 +34,12 @@ pgJ1 = J1.p_g
 refJ1 = J1.ref
 
 Q1 = AntennaCoupling()
-Q1.import_data(fileQ1, JQ1)
+Q1.import_data(fileQ1, JQ1, C_eff=C_eff)
 f_Q1 = Q1.Antenna["f"]
 eQ1 = Q1.e_c
 
 Q2 = AntennaCoupling()
-Q2.import_data(fileQ2, JQ2)
+Q2.import_data(fileQ2, JQ2, C_eff=C_eff)
 f_Q2 = Q2.Antenna["f"]
 eQ2 = Q2.e_c
 
@@ -319,12 +320,22 @@ f_Q2 = f_Q2*f_scale
 #
 # plt.show()
 
-# Q2 # polished
-fig, axs = plt.subplots(2)
+"""
+Q2 # polished
+"""
 pgJ1Q2 = []
 l_i = 1
 for i in range(len(pgJ1)):
     pgJ1Q2.append(pgJ1[i]*eQ2[i])
+
+pgJ1Q2_scaled = []
+p2QP = 2e-4 # photon to QP conversion rate
+base = 110
+for i in range(len(pgJ1)):
+    pgJ1Q2_scaled.append(pgJ1[i]*eQ2[i]*p2QP+base)
+
+fig, axs = plt.subplots(2)
+
 axs_02 = axs[0].twinx()
 
 axs_02.plot(f[l_i:], eJ1[l_i:], color="red", marker="o", label='Radiator Efficiency')
@@ -342,13 +353,6 @@ axs[0].set_yscale('log')
 axs[0].grid(True, which="both")
 axs[0].legend(loc=4)
 axs[0].set_xlabel("Antenna Frequency (GHz)", color="black", fontsize=10)
-
-
-pgJ1Q2_scaled = []
-p2QP = 1e-3 # photon to QP conversion rate
-base = 110
-for i in range(len(pgJ1)):
-    pgJ1Q2_scaled.append(pgJ1[i]*eQ2[i]*p2QP+base)
 
 axs_12 = axs[1].twinx()
 axs_12.plot(f_Q2[l_i:], pgJ1Q2_scaled[l_i:], color="orange", linestyle='--', label='Photon Rate Scaled')
@@ -369,22 +373,26 @@ axs[1].legend(loc=4)
 
 plt.show()
 
-### Q2 matching with CST
-# pgJ1Q2 = []
-# p2QP = 1e-3 # photon to QP conversion rate
-# base = 110
-# for i in range(len(pgJ1)):
-#     pgJ1Q2.append(pgJ1[i]*eQ2[i]*p2QP+base)
-# # print(pgJ1Q)
-# plt.plot(f_Q2[100:], pgJ1Q2[100:], color="red", marker="o", label='Photons generated scaled')
-# plt.plot(Q2_PSD_HighDensity[:, 0]*f_SIM, Q2_PSD_HighDensity[:, 1], color='k', label='Q2_PSD')
-# plt.plot(Q2_PSD[:, 0]*f_SIM, Q2_PSD[:, 1], color='b', label='Q2_PSD')
-# plt.xlabel("J6 Radiator Freq (GHz)", color="red", fontsize=10)
-# plt.ylabel("Rate (Hz)", color="red", fontsize=10)
-# plt.xlim([50, 700])
-# # axs[2].set_ylim([1e3, 1e8])
-# plt.yscale('log')
+### interpolate
+# x = np.linspace(50, 600, 5000)
+#
+# x_th = f_Q2[:]
+# y_th = pgJ1Q2_scaled[:]
+# interp_th = interpolate.interp1d(x_th, y_th, kind="linear")
+# y_th_inter = interp_th(x)
+#
+# x_ms = Q2_PSD[:, 0]*f_SIM
+# y_ms = Q2_PSD[:, 1]
+# interp_ms = interpolate.interp1d(x_ms, y_ms, kind="linear")
+# y_ms_inter = interp_ms(x)
+#
+# # plt.plot(x_th, y_th)
+# # plt.plot(x_ms, y_ms)
+# plt.plot(x, y_th_inter)
+# plt.plot(x, y_ms_inter)
+# plt.plot(x, y_th_inter/y_ms_inter)
 # plt.grid(True, which="both")
-# plt.title('Q2 CST vs Meas')
-# plt.legend()
+# plt.xlim([50, 700])
+# # plt.ylim([100, 5000])
+# plt.yscale('log')
 # plt.show()

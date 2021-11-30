@@ -115,8 +115,8 @@ Q3[:, 0] = (Q3[:, 0])*1000
 # plt.legend(loc=1)
 # plt.show()
 
-f = 4.604
-# f = 1
+# f = 4.604
+f = 1
 Al_gap = 380e-6
 DAC_Al = 1e5*Al_gap/0.952
 # plt.plot(Q1[::2, 0]*f, Q1[::2, 1], color='b', label='Q1')
@@ -131,7 +131,7 @@ plt.axvline(x=DAC_Al * f, color='k', linestyle='--', linewidth=4, label='JJ Al G
 plt.xlabel('J7 Strong Radiator Josephson Frequency (GHz)')
 plt.ylabel('PSD (Hz)')
 plt.yscale('log')
-plt.xscale('log')
+# plt.xscale('log')
 plt.grid(True, which="both")
 plt.legend(loc=4)
 plt.xlim([0, 1200])
