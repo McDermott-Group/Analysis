@@ -2,7 +2,7 @@
 A library for the antenna model
 """
 
-import noiselib
+# import noiselib
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.constants import *
