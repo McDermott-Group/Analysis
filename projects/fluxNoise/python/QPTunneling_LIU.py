@@ -618,7 +618,7 @@ def plotFittedPSD_Harrison(QPT, one_over_f=False, save=False, name='', concatena
     :param QPT_List: a list of QPT object, e.g. [QPT_NoPoison, QPT_Neg10dBmPoison]
     :return: plot
     """
-    plt.figure(figsize=(8, 6))
+    plt.ioff()
     linestyle = ['--', '+', 'o', 'v', 's', 'p', '*', 'h', 'x', 'D']
     # wa = False
 
@@ -653,6 +653,7 @@ def plotFittedPSD_Harrison(QPT, one_over_f=False, save=False, name='', concatena
     avg_parity=np.mean(np.true_divide(1.0, filtered_parity))
 
     parity_uncertainty=np.std(np.true_divide(1.0/np.sqrt(len(filtered_parity)),filtered_parity))
+    fig = plt.figure(figsize=(8, 6))
     for i in range(0, len(filtered_psd)):
         plt.loglog(f1, filtered_psd[i], label=r"{} PSD".format(QPT.name))
         plt.loglog(f2, filtered_fit[i], '-')
@@ -666,9 +667,12 @@ def plotFittedPSD_Harrison(QPT, one_over_f=False, save=False, name='', concatena
         plt.savefig('Figures/'+name + '_multi.png')
         #plt.show()
     else:
-        plt.show()
+        pass
+        #plt.show()
 
-    plt.figure(figsize=(8, 6))
+    plt.close(fig)
+
+    fig = plt.figure(figsize=(8, 6))
     linestyle = ['--', '+', 'o', 'v', 's', 'p', '*', 'h', 'x', 'D']
     # wa = False
 
@@ -679,7 +683,6 @@ def plotFittedPSD_Harrison(QPT, one_over_f=False, save=False, name='', concatena
     # fit, f2 = QPT.get_fit(excluded_points=excluded_points, ignore_fidelity=False)
     # fidelity = np.mean(QPT.fidelity)
     # parity = np.mean(np.true_divide(1.0, QPT.T_parity))
-
     plt.loglog(f1, psd, label=r"{} PSD".format(QPT.name))
     plt.loglog(f2, fit, '-')
     plt.title(name + ' \n(Fidelity = {:.2f} and Parity = {:.5f} Hz)'.format(avg_fidelity, avg_parity))
@@ -692,9 +695,11 @@ def plotFittedPSD_Harrison(QPT, one_over_f=False, save=False, name='', concatena
 
     if save:
         plt.savefig('Figures/'+name + '.png')
-        # plt.show()
     else:
-        plt.show()
+        pass
+        #plt.show()
+
+    plt.close(fig)
 
 
 
