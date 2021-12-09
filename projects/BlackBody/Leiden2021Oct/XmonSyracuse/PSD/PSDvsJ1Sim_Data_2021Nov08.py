@@ -5,7 +5,7 @@ Z:\mcdermott-group\data\Antenna\SUXmon\Liu\VitoChip1\2021Nov08_Q3_PSD_J1Radiator
 Fitting method Chris' no white noise verison
 
 """
-import noiselib
+# import noiselib
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -203,20 +203,20 @@ DAC_Al = 1e5*Al_gap/0.200
 d = 1 # for plotting purpose only
 plt.plot(Q1[:, 0]*f, Q1[:, 1]/d, color='b', label='Q1')
 plt.plot(Q2[:, 0]*f, Q2[:, 1], color='r', label='Q2')
-plt.plot(Q2_HighDensity[:, 0]*f, Q2_HighDensity[:, 1], color='r', marker="o", label='Q2')
+plt.plot(Q2_HighDensity[:, 0]*f, Q2_HighDensity[:, 1], color='r', marker="o")
 plt.plot(Q3[:, 0]*f, Q3[:, 1]*d, color='y', label='Q3')
-plt.plot(Q3_HighDensity[:, 0]*f, Q3_HighDensity[:, 1]*d, color='y', marker="o", label='Q3')
+plt.plot(Q3_HighDensity[:, 0]*f, Q3_HighDensity[:, 1]*d, color='y', marker="o")
 
-plt.axvline(x=DAC_Al * f, color='k', linestyle='--', linewidth=4, label='JJ Al Gap')
+# plt.axvline(x=DAC_Al * f, color='k', linestyle='--', linewidth=4, label='JJ Al Gap')
 
-plt.xlabel('J1 Weak Radiator Josephson Frequency (GHz)')
+plt.xlabel('Radiator Josephson Frequency (GHz)')
 plt.ylabel('$\Gamma _{P}$ ($s^{-1}$)')
 # plt.xscale('log')
 plt.yscale('log')
 plt.grid(True, which="both")
 plt.legend(loc=4)
-# plt.xlim([0, 1500])
-# plt.ylim([10, 100000])
+plt.xlim([50, 700])
+plt.ylim([8e1, 8e2])
 plt.show()
 
 

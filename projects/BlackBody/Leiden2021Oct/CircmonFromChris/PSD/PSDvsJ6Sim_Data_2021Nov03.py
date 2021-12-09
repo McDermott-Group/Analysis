@@ -5,7 +5,7 @@ Z:\mcdermott-group\data\Antenna\Circmon\Liu\CW20180514A_Ox2\2021Nov02_QB124_PSD_
 Fitting method Chris' no white noise verison
 
 """
-import noiselib
+# import noiselib
 import matplotlib.pyplot as plt
 import numpy as np
 import copy
