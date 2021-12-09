@@ -638,7 +638,8 @@ class AntennaCoupling(object):
         # P = Ic**2*R
         # Pf = P * e_c
         for i in range(len(f)):
-            P = Ic_f[i]**2 * e_c[i] * R
+            # P = Ic_f[i]**2 * e_c[i] * R
+            P = Ic**2 * e_c[i] * R
             p_g_f = P/(h*f[i])
             p_g.append(p_g_f)
 
@@ -1521,6 +1522,19 @@ def getBBTensity(f, T):
     Intensity = (2 * h * f ** 3 / c ** 2) * (1 / (np.exp(h * f / (k * T)) - 1))
     return Intensity
 
+def getXqp():
+    Vb = 1e-3   # bias voltage
+    Rn = 10e3   # normal resistance
+    E_Al = 190*e*1e-6   # one QP energy in Joule
+    Pin = Vb**2/Rn   # bias power
+    Gamma_e = 0.57*Pin/E_Al # number of QPs generated per second
+    Vol = 1 # Al leads volume in units of um^3
+    n_cp = 4e6  # cooper pair density in um^3
+    g = Gamma_e/(Vol*n_cp)  # normalized QP generation rate
+    print('g=', g)
+    r = 1/100e-9   # recombination rate
+    x_qp = (g/r)**(0.5)
+    return x_qp
 
 def getGamma_pa(T, dfn=2e9, f0=120e9):
     """

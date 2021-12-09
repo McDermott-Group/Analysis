@@ -3,10 +3,9 @@ P1 for Q1, Q2, Q4 at different J8 Bias with Sim
 Data:
 Z:\mcdermott-group\data\Antenna\Circmon\Liu\CW20180514A_Ox2\2021Nov04_QB124_P1PSD_J8Radiator_Sim
 """
-import noiselib
+# import noiselib
 import matplotlib.pyplot as plt
 import numpy as np
-
 
 Q1 = np.array([
  [0.0, 0.09298, 0.06221], [0.01, 0.08916, 0.06128], [0.02, 0.089, 0.06147],
@@ -72,7 +71,6 @@ Q1 = np.array([
  [1.16, 0.16672, 0.0904], [1.17, 0.1723,0.09603], [1.18, 0.18728, 0.09479],
  [1.19, 0.17253, 0.09148]
 ])
-
 
 Q2 = np.array([
  [0.0, 0.07422, 0.03946], [0.01, 0.07915, 0.03969], [0.02, 0.07552, 0.03911],
@@ -204,7 +202,6 @@ Q2_Weighted = np.array([
  [1.19, 0.07215, 0.03664]
 ])
 
-
 Q4 = np.array([
  [0.0, 0.05239, 0.00756], [0.01, 0.0539, 0.00995], [0.02, 0.05282, 0.008],
  [0.03, 0.05198, 0.00927], [0.04, 0.05126, 0.0085], [0.05, 0.05187, 0.0075],
@@ -291,7 +288,7 @@ plt.axvline(x=DAC_Al * f, color='k', linestyle='--', linewidth=4, label='JJ Al G
 plt.xlabel('J8 Strong Radiator Josephson Frequency (GHz)')
 plt.ylabel('P1')
 plt.yscale('log')
-plt.xscale('log')
+# plt.xscale('log')
 plt.grid(True, which="both")
 plt.legend(loc=2)
 # plt.xlim([0, 1500])
