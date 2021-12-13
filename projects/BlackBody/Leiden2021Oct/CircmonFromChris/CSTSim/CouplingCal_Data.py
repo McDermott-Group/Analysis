@@ -4,7 +4,7 @@ import numpy as np
 
 ### parameters to be tuned
 e_eff = 6 # limit (1, 6.5), the voltage can also be built in to have a larger range
-C_eff = 75*1e-21   # Commonly used (50-100)
+C_eff = 200*1e-21   # Commonly used (50-100)
 Jbias_offset = 0   # mDAC should be +-1 mDAC basically +-5 GHz
 k = 1   # Coupling between radiator and receiver, this could be larger than one due to the
         # fact we can generate QPs locally at the recevier's test pad
@@ -518,14 +518,18 @@ for i in range(len(pgSFQ)):
     pgSFQQ2.append(pgSFQ[i]*eQ2[i])
     pgSFQQ4.append(pgSFQ[i]*eQ4[i])
 
-fig, axs = plt.subplots(3)
+fig, axs = plt.subplots(2)
 
-axs[0].plot(f_SFQ, pgSFQQ1, color="blue", marker="o", label='Q1')
-axs[0].plot(f_SFQ, pgSFQQ2, color="red", marker="o", label='Q2')
-axs[0].plot(f_SFQ, pgSFQQ4, color="green", marker="o", label='Q4')
+axs[0].plot(f_SFQ, eQ1, color="blue", marker="o", label='Q1')
+axs[0].plot(f_SFQ, eQ2, color="red", marker="o", label='Q2')
+axs[0].plot(f_SFQ, eQ4, color="green", marker="o", label='Q4')
+axs[0].plot(f_SFQ, eSFQ, color="black", marker="o", label='SFQ')
+# axs[0].plot(f_SFQ, pgSFQQ1, color="blue", marker="o", label='Q1')
+# axs[0].plot(f_SFQ, pgSFQQ2, color="red", marker="o", label='Q2')
+# axs[0].plot(f_SFQ, pgSFQQ4, color="green", marker="o", label='Q4')
 axs[0].set_ylabel("Photon Generation Rate ($s^{-1}$)", color="black", fontsize=10)
 axs[0].set_xlim([50, 500])
-axs[0].set_ylim([1e3, 1e9])
+# axs[0].set_ylim([1e3, 1e9])
 axs[0].set_yscale('log')
 axs[0].grid()
 axs[0].legend()
@@ -542,17 +546,17 @@ axs[1].set_xlim([50, 500])
 axs[1].set_ylim([10, 10000])
 axs[1].grid(True, which="both")
 
-axs[2].errorbar(Q1_P1[:, 0]*f_SIM, Q1_P1[:, 1], yerr=Q1_P1[:, 2]/np.sqrt(50), color='b', label='Q1')
-axs[2].errorbar(Q2_P1[:, 0]*f_SIM, Q2_P1[:, 1], yerr=Q2_P1[:, 2]/np.sqrt(50), color='r', label='Q2')
-axs[2].errorbar(Q4_P1[:, 0]*f_SIM, Q4_P1[:, 1], yerr=Q4_P1[:, 2]/np.sqrt(50), color='g', label='Q4')
-
-axs[2].set_xlabel("Radiator Josephson Frequency (GHz)", color="black",
-                  fontsize=10)
-axs[2].set_ylabel("P1", color="black", fontsize=10)
-axs[2].set_yscale('log')
-axs[2].set_xlim([50, 500])
-axs[2].grid(True, which="both")
-axs[2].legend(loc=4)
+# axs[2].errorbar(Q1_P1[:, 0]*f_SIM, Q1_P1[:, 1], yerr=Q1_P1[:, 2]/np.sqrt(50), color='b', label='Q1')
+# axs[2].errorbar(Q2_P1[:, 0]*f_SIM, Q2_P1[:, 1], yerr=Q2_P1[:, 2]/np.sqrt(50), color='r', label='Q2')
+# axs[2].errorbar(Q4_P1[:, 0]*f_SIM, Q4_P1[:, 1], yerr=Q4_P1[:, 2]/np.sqrt(50), color='g', label='Q4')
+#
+# axs[2].set_xlabel("Radiator Josephson Frequency (GHz)", color="black",
+#                   fontsize=10)
+# axs[2].set_ylabel("P1", color="black", fontsize=10)
+# axs[2].set_yscale('log')
+# axs[2].set_xlim([50, 500])
+# axs[2].grid(True, which="both")
+# axs[2].legend(loc=4)
 
 plt.grid()
 plt.show()
