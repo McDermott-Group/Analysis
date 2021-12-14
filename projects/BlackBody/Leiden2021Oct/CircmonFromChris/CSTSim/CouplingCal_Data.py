@@ -1,6 +1,7 @@
-from antennalib import AntennaCoupling
+from antennalib import AntennaCoupling, getNoiseBandwidth, getTbb, getPhotonRate
 import matplotlib.pyplot as plt
 import numpy as np
+import copy
 
 ### parameters to be tuned
 e_eff = 6 # limit (1, 6.5), the voltage can also be built in to have a larger range
@@ -506,6 +507,34 @@ Polished
 #
 # plt.show()
 
+"""
+Calculate the noise bandwidth
+"""
+Tbb1 = 400e-3
+Tbb2 = 463e-3
+Tbb4 = 485e-3
+PRQ1 = getPhotonRate(eQ1, f_SFQ, Tbb1)
+PRQ2 = getPhotonRate(eQ2, f_SFQ, Tbb2)
+PRQ4 = getPhotonRate(eQ4, f_SFQ, Tbb4)
+print('PRQ1=', PRQ1)
+print('PRQ2=', PRQ2)
+print('PRQ4=', PRQ4)
+
+
+# DfQ1 = getNoiseBandwidth(eQ1, f_SFQ)
+# DfQ2 = getNoiseBandwidth(eQ2, f_SFQ)
+# DfQ4 = getNoiseBandwidth(eQ4, f_SFQ)
+# print('DfQ1=', DfQ1/1e9)
+# print('DfQ2=', DfQ2/1e9)
+# print('DfQ4=', DfQ4/1e9)
+
+# TQ1 = getTbb(3.21e9, 1000, 130e9)
+# TQ2 = getTbb(1.21e9, 12, 329e9)
+# TQ4 = getTbb(3.21e9, 190, 213e9)
+# print('TQ1=', TQ1)
+# print('TQ2=', TQ2)
+# print('TQ4=', TQ4)
+
 """Polished 2021Dec07"""
 
 ### Calculating the photons generated
@@ -524,9 +553,9 @@ axs[0].plot(f_SFQ, eQ1, color="blue", marker="o", label='Q1')
 axs[0].plot(f_SFQ, eQ2, color="red", marker="o", label='Q2')
 axs[0].plot(f_SFQ, eQ4, color="green", marker="o", label='Q4')
 axs[0].plot(f_SFQ, eSFQ, color="black", marker="o", label='SFQ')
-# axs[0].plot(f_SFQ, pgSFQQ1, color="blue", marker="o", label='Q1')
-# axs[0].plot(f_SFQ, pgSFQQ2, color="red", marker="o", label='Q2')
-# axs[0].plot(f_SFQ, pgSFQQ4, color="green", marker="o", label='Q4')
+# axs[0].plot(f_SFQ, pgSFQQ1, color="blue", marker="o", label='Q1_SFQ')
+# axs[0].plot(f_SFQ, pgSFQQ2, color="red", marker="o", label='Q2_SFQ')
+# axs[0].plot(f_SFQ, pgSFQQ4, color="green", marker="o", label='Q4_SFQ')
 axs[0].set_ylabel("Photon Generation Rate ($s^{-1}$)", color="black", fontsize=10)
 axs[0].set_xlim([50, 500])
 # axs[0].set_ylim([1e3, 1e9])
@@ -535,16 +564,29 @@ axs[0].grid()
 axs[0].legend()
 # axs[0].set_ylim([-60, -20])
 
+Q1_PSD_pure = copy.deepcopy(Q1_PSD)
+Q2_PSD_pure = copy.deepcopy(Q2_PSD)
+Q4_PSD_pure = copy.deepcopy(Q4_PSD)
+e_Q41 = 0.18 # from Q1 to Q4,  e_Q41<=0.18
+e_Q21 = 0.012 # from Q1 to Q2, e_Q21<=0.012
+e_Q24 = 0.032 # from Q4 to Q2, e_Q24<=
+Q4_PSD_pure[:, 1] = Q4_PSD_pure[:, 1] - e_Q41*Q1_PSD[:, 1]
+Q2_PSD_pure[:, 1] = Q2_PSD_pure[:, 1] - e_Q21*Q1_PSD[:, 1]-e_Q24*Q4_PSD[:, 1]
 
-axs[1].plot(Q1_PSD[:, 0]*f_SIM, Q1_PSD[:, 1], color='b', label='Q1_PSD')
-axs[1].plot(Q2_PSD[:, 0]*f_SIM, Q2_PSD[:, 1], color='r', label='Q1_PSD')
-axs[1].plot(Q4_PSD[:, 0]*f_SIM, Q4_PSD[:, 1], color='g', label='Q1_PSD')
+axs[1].plot(Q1_PSD[:, 0]*f_SIM, Q1_PSD[:, 1], color='b', label='Q1')
+axs[1].plot(Q2_PSD[:, 0]*f_SIM, Q2_PSD[:, 1], color='r', label='Q2')
+axs[1].plot(Q4_PSD[:, 0]*f_SIM, Q4_PSD[:, 1], color='g', label='Q4')
+axs[1].plot(Q1_PSD[:, 0]*f_SIM, Q1_PSD_pure[:, 1], 'b--', label='Q1_pure')
+axs[1].plot(Q2_PSD[:, 0]*f_SIM, Q2_PSD_pure[:, 1], 'r--', label='Q2_pure')
+axs[1].plot(Q4_PSD[:, 0]*f_SIM, Q4_PSD_pure[:, 1], 'g--', label='Q4_pure')
+
 axs[1].set_xlabel("Freq (GHz)", color="black", fontsize=10)
 axs[1].set_ylabel("PSD (Hz)", color="blue", fontsize=10)
 axs[1].set_yscale('log')
 axs[1].set_xlim([50, 500])
 axs[1].set_ylim([10, 10000])
 axs[1].grid(True, which="both")
+axs[1].legend(loc=4)
 
 # axs[2].errorbar(Q1_P1[:, 0]*f_SIM, Q1_P1[:, 1], yerr=Q1_P1[:, 2]/np.sqrt(50), color='b', label='Q1')
 # axs[2].errorbar(Q2_P1[:, 0]*f_SIM, Q2_P1[:, 1], yerr=Q2_P1[:, 2]/np.sqrt(50), color='r', label='Q2')

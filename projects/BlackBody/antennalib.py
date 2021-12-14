@@ -1536,6 +1536,68 @@ def getXqp():
     x_qp = (g/r)**(0.5)
     return x_qp
 
+def getNoiseBandwidth(ec, f):
+    """
+
+    :param ec: coupling efficiency array
+    :param f: frequency array
+    :return: noise bandwith
+    """
+    f = f*1.0e9 # convert things to GHz
+    # print('f[:10]=', f[:10])
+    # print('ec[:10]=', ec[:10])
+    ### get two index, the peak and the two 3dB points
+    i_l, i_max, i_right = find3dBValueandIndex(ec=ec)
+    Df = 0
+    print(i_l, i_max, i_right)
+    print(f[i_l]/1e9, f[i_max]/1e9, f[i_right]/1e9)
+    for i in range(i_l, i_right):
+        df = (f[i]-f[i-1])*ec[i]
+        Df = Df + df
+    return Df
+
+def getPhotonRate(ec, f, Tbb):
+    """
+
+    :param ec: coupling efficiency array
+    :param f: frequency array
+    :param Tbb: effective blackboday temperature
+    :return: Photon Assisted pair breaking rate
+    """
+    f = f*1.0e9 # convert things to GHz
+    # print('f[:10]=', f[:10])
+    # print('ec[:10]=', ec[:10])
+    ### get two index, the peak and the two 3dB points
+    i_l, i_right = 100, 1000    # integration boundary
+    PR = 0  # photon rate
+    # print(i_l, i_right)
+    # print(f[i_l]/1e9, f[i_right]/1e9)
+    for i in range(i_l, i_right):
+        dPR = (f[i]-f[i-1])*ec[i]/(np.exp(h*f[i]/(k*Tbb))-1)
+        PR = PR + dPR
+    return PR
+
+def find3dBValueandIndex(ec):
+    """
+
+    :param ec_array: Coupling efficiency array
+    :return: indices for two 3 dB points and max point, [i_l, i_max, i_right]
+    """
+    ec_max = max(ec[50:])
+    ec_3dB = 0.5*ec_max
+    i_max = np.where(ec == ec_max)
+    i_max = i_max[0][0]
+    # print('i_max=', i_max)
+    for i in range(i_max, len(ec)):
+        if ec[i] <= ec_3dB:
+            i_right = i
+            break
+    for i in range(i_max, 0, -1):
+        if ec[i] <= ec_3dB:
+            i_left = i
+            break
+    return i_left, i_max, i_right
+
 def getGamma_pa(T, dfn=2e9, f0=120e9):
     """
     To calculate the theoretic photon assisted QP poisoning events based on
@@ -1547,3 +1609,19 @@ def getGamma_pa(T, dfn=2e9, f0=120e9):
     """
     Gamma_pa = dfn / (np.exp(h * f0 / (k * T)) - 1)
     return Gamma_pa
+
+def getTbb(Dfn=2e9, Gamma=100, f0=200e9):
+    """
+
+    :param Dfn: Noisebandwidth
+    :param Gamma: measured parity rate
+    :param f0: mode frequency
+    :return: effective blackbody temperautre
+    """
+    r = Dfn/Gamma
+    r1 = np.log(r+1)
+    # print('r1=1', r1)
+    r2 = h*f0/k
+    # print('r2=1', r2)
+    Tbb = r2/r1
+    return Tbb

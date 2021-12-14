@@ -1,4 +1,4 @@
-from antennalib import AntennaCoupling
+from antennalib import AntennaCoupling, getNoiseBandwidth, getTbb, getPhotonRate
 from scipy import interpolate
 import matplotlib.pyplot as plt
 import numpy as np
@@ -866,6 +866,15 @@ f_Q2 = f_Q2 * f_scale
 # axs[3].grid(True, which="both")
 #
 # plt.show()
+
+"""
+Calculate the noise bandwidth
+"""
+
+Tbb2 = 540e-3
+PRQ2 = getPhotonRate(eQ2, f_Q2, Tbb2)
+print('PRQ2=', PRQ2)
+
 
 """
 Q2 # polished
