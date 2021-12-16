@@ -517,12 +517,17 @@ class AntennaCoupling(object):
         self.Junction["Ic"] = Ic
 
     def _get_e_c(self):
+        f = self.Antenna["f"]
+
         Z_j = self.Junction["Z_j"]
         Z_rad = self.Antenna["Z_rad"]
         Gamma = []
         for i in range(len(Z_rad)):
             Gamma.append((Z_rad[i] - np.conj(Z_j[i])) / (Z_rad[i] + Z_j[i]))
         e_c = 1 - (np.abs(Gamma)) ** 2
+        for i in range(len(f)):
+            # print('f[i]=', f[i])
+            e_c[i] = e_c[i]/((f[i]/1e11)**2)
         e_c_dB = 10 * np.log10(e_c)
         self.Gamma = Gamma
         self.e_c = e_c

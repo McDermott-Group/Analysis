@@ -114,7 +114,7 @@ Q2_PSD_HighDensity = np.array([
     [220, 134.65],
     [240, 165.11], [241, 176.0], [242, 184.17], [243, 203.9], [244, 204.67],
     [245, 200.25], [246, 192.05], [247, 177.63], [248, 166.81], [249, 176.7],
-    [250, 172.61], [251, 191.47], [252, 211.74], [252, 211.74], [253, 236.97],
+    [250, 172.61], [251, 191.47], [252, 211.74], [253, 236.97],
     [254, 264.3], [255, 320.9], [256, 342.0], [257, 336.47], [258, 322.06],
     [259, 314.75], [260, 306.93], [261, 295.03], [262, 327.24], [263, 349.96],
     [264, 400.97], [265, 474.02], [266, 533.97], [267, 502.98], [268, 430.93],
@@ -690,6 +690,156 @@ Q3_J1Fidelity = [0.5428159715582728, 0.5664827427208461, 0.5517896877877443,
                  0.45154827493185207, 0.42103560796476336, 0.4055042891154634,
                  0.4306065480587652, 0.436711770196297, 0.4292308920071897,
                  0.4253118183342798, 0.4434655554164612]
+### high freq data
+if True:
+    Q1_High_J1Bias = [700, 750, 800, 850, 900, 950, 1000, 1050, 1100, 1150, 1200, 1250, 1300, 1350, 1400, 1450]
+    Q1_High_J1ParityRate = [299.1083388056185, 521.4752957775546, 1253.8819073754817, 1785.8219911581373,
+                            1801.0012687173826, 1804.60482515575, 1801.9129014303815, 1815.9358525950563,
+                            1801.0636342612838, 1783.5595997719718, 1806.2465698816304, 1793.2603294910798,
+                            1793.6877197488081, 1799.6192968233315, 1806.4264074064542, 1808.8178481403359]
+    Q1_High_J1ParityUncertainty = [6.239285528546543, 10.006032619463578, 14.860977670386635, 15.475403900545848,
+                                   19.17977531629259, 16.36310717610817, 14.848922310755734, 20.058420590701186,
+                                   18.972431517311463, 14.032907144295502, 26.62285324190659, 12.762727427587215,
+                                   20.62624755385169, 21.923372651257395, 18.30849535499861, 12.171043677585056]
+    Q1_High_J1Fidelity = [0.5468672041617098, 0.5542536440126622, 0.5650229679903425, 0.5601808797716777,
+                          0.5541949621556143, 0.565804634063276, 0.5671908421696679, 0.5550096881673858,
+                          0.5498909652597064, 0.5419672868038835, 0.5486550557240135, 0.5281648936985326,
+                          0.529093796888767, 0.5266431332855618, 0.5290328635742159, 0.5317340154907901]
+    Q2_High_J1Bias = [700, 750, 800, 850, 900, 950, 1000, 1050, 1100, 1150, 1200, 1250, 1300, 1350, 1400, 1450]
+    Q2_High_J1ParityRate = [402.61718189180965, 922.2234561386144, 1776.2465626783405, 2488.4847461953227,
+                            2428.310880147114, 2490.885063953256, 2440.1444378122414, 2425.52589657817,
+                            2447.9398722045307, 2484.1507813736075, 2484.845685190905, 2490.8898370620564,
+                            2412.490783097242, 2477.1823764220635, 2419.701064889643, 2441.2200297466716]
+    Q2_High_J1ParityUncertainty = [5.181967150692182, 13.553253927991276, 23.42130130020503, 16.512532643154838,
+                                   16.32854344836296, 23.476936786047403, 20.473043129654993, 33.46391840870052,
+                                   18.974917671500883, 17.244767213442575, 21.46374455307914, 27.945691993875965,
+                                   22.64249137521582, 16.148987651279604, 33.281984178602215, 37.83728168250608]
+    Q2_High_J1Fidelity = [0.5516408899758848, 0.5491794107140628, 0.5164802833063774, 0.5097008069433432,
+                          0.5317729413498563, 0.5366456155921449, 0.5270998431937153, 0.5235851040827677,
+                          0.530214342415712, 0.5284324099639558, 0.5296363886507423, 0.5098671564730402,
+                          0.5084588438736043, 0.5173479110984023, 0.5133974250831363, 0.5060112968476956]
+    Q3_High_J1Bias = [700, 750, 800, 850, 900, 950, 1000, 1050, 1100, 1150, 1200, 1250, 1300, 1350, 1400, 1450]
+    Q3_High_J1ParityRate = [374.4513228998377, 816.9840703594349, 1773.0291317108695, 2512.1411391173187,
+                            2302.4795514980065, 2245.6735333596534, 2256.5048072336517, 2290.7580099662573,
+                            2270.7860704213967, 2193.013635350281, 2407.27987626553, 2375.974938409736,
+                            2419.4243828630442, 2362.6820122809618, 2255.208469054798, 2415.1333023418806]
+    Q3_High_J1ParityUncertainty = [4.932903736594791, 13.32626335172011, 38.37945321949355, 45.709980520441356,
+                                   46.58490845301481, 22.81536427512548, 33.14098022747364, 26.30696266891675,
+                                   19.69850149529912, 37.969616893156015, 46.57641881369682, 39.04729140125277,
+                                   39.68394440003983, 25.060371028283758, 42.13212287367267, 37.50035032971256]
+    Q3_High_J1Fidelity = [0.394361888725688, 0.3952350044642692, 0.39404867078790035, 0.4100645188672682,
+                          0.46406996701616077, 0.5471887987864722, 0.4765515651277164, 0.43205566364602793,
+                          0.46504148990124583, 0.4660603715179735, 0.4317511475011667, 0.4310039595655298,
+                          0.4096738344664267, 0.4238014583275217, 0.42602986211079075, 0.4223841582021776]
+### concatenate Low freq with high freq points
+if True:
+    Q1_J1Bias = Q1_J1Bias + Q1_High_J1Bias
+    Q1_J1ParityRate = Q1_J1ParityRate + Q1_High_J1ParityRate
+    Q1_J1ParityUncertainty = Q1_J1ParityUncertainty + Q1_High_J1ParityUncertainty
+    Q1_J1Fidelity = Q1_J1Fidelity + Q1_High_J1Fidelity
+
+    Q2_J1Bias = Q2_J1Bias + Q2_High_J1Bias
+    Q2_J1ParityRate = Q2_J1ParityRate + Q2_High_J1ParityRate
+    Q2_J1ParityUncertainty = Q2_J1ParityUncertainty + Q2_High_J1ParityUncertainty
+    Q2_J1Fidelity = Q2_J1Fidelity + Q2_High_J1Fidelity
+
+    Q3_J1Bias = Q3_J1Bias + Q3_High_J1Bias
+    Q3_J1ParityRate = Q3_J1ParityRate + Q3_High_J1ParityRate
+    Q3_J1ParityUncertainty = Q3_J1ParityUncertainty + Q3_High_J1ParityUncertainty
+    Q3_J1Fidelity = Q3_J1Fidelity + Q3_High_J1Fidelity
+### high freq density data
+Q2_HD_J1Bias = Q2_PSD_HighDensity[:, 0]
+Q2_HD_J1ParityRate = Q2_PSD_HighDensity[:, 1]
+Q2_HD_J1ParityUncertainty = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5]
+Q2_HD_J1Fidelity = [0.50, 0.51, 0.52, 0.53, 0.54, 0.55]
+
+Q3_HD_J1Bias = Q3_PSD_HighDensity[:, 0]
+Q3_HD_J1ParityRate = Q3_PSD_HighDensity[:, 1]
+Q3_HD_J1ParityUncertainty = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5]
+Q3_HD_J1Fidelity = [0.50, 0.51, 0.52, 0.53, 0.54, 0.55]
+### interpolate high freq data
+# print(Q2_HD_J1ParityRate)
+
+## 1st find the same bias index and remove them from the low density string
+## 2nd find the insert index left and right
+# i_l = 25
+# i_r = 26
+Q2_LD_l1 = 25
+Q2_LD_r1 = 33
+Q2_HD_l1 = 0
+Q2_HD_r1 = 40
+
+# print('Q2_LD_l1=', Q2_LD_l1, 'Q2_LD_r1=', Q2_LD_r1)
+# print('Q2_J1Bias[i_l]=', Q2_J1Bias[Q2_LD_l1], 'Q2_J1Bias[i_r]=', Q2_J1Bias[Q2_LD_r1])
+# print('Q2_HD_l1=', Q2_HD_l1, 'Q2_HD_r1=', Q2_HD_r1)
+# print('Q2_HD_J1Bias[i_l]=', Q2_HD_J1Bias[Q2_HD_l1], 'Q2_HD_J1Bias[i_r]=', Q2_HD_J1Bias[Q2_HD_r1])
+
+Q2_LD_l2 = 37
+Q2_LD_r2 = 57
+Q2_HD_l2 = 41
+Q2_HD_r2 = 141
+
+# print('Q2_LD_l2=', Q2_LD_l2, 'Q2_LD_r2=', Q2_LD_r2)
+# print('Q2_J1Bias[i_l]=', Q2_J1Bias[Q2_LD_l2], 'Q2_J1Bias[i_r]=', Q2_J1Bias[Q2_LD_r2])
+# print('Q2_HD_l2=', Q2_HD_l2, 'Q2_HD_rr=', Q2_HD_r2)
+# print('Q2_HD_J1Bias[i_l]=', Q2_HD_J1Bias[Q2_HD_l2], 'Q2_HD_J1Bias[i_r]=', Q2_HD_J1Bias[Q2_HD_r2])
+
+Q2_LD_l3 = 83
+Q2_LD_r3 = 95
+Q2_HD_l3 = 142
+Q2_HD_r3 = 202
+# print('Q2_LD_l3=', Q2_LD_l3, 'Q2_LD_r3=', Q2_LD_r3)
+# print('Q2_J1Bias[i_l]=', Q2_J1Bias[Q2_LD_l3], 'Q2_J1Bias[i_r]=', Q2_J1Bias[Q2_LD_r3])
+# print('Q2_HD_l3=', Q2_HD_l3, 'Q2_HD_r3=', Q2_HD_r3)
+# print('Q2_HD_J1Bias[i_l]=', Q2_HD_J1Bias[Q2_HD_l3], 'Q2_HD_J1Bias[i_r]=', Q2_HD_J1Bias[Q2_HD_r3])
+Q2_LD_l4 = 109
+Q2_LD_r4 = 119
+Q2_HD_l4 = 203
+Q2_HD_r4 = 253
+# print('Q2_LD_l4=', Q2_LD_l4, 'Q2_LD_r4=', Q2_LD_r4)
+# print('Q2_J1Bias[i_l]=', Q2_J1Bias[Q2_LD_l4], 'Q2_J1Bias[i_r]=', Q2_J1Bias[Q2_LD_r4])
+# print('Q2_HD_l4=', Q2_HD_l4, 'Q2_HD_r4=', Q2_HD_r4)
+# print('Q2_HD_J1Bias[i_l]=', Q2_HD_J1Bias[Q2_HD_l4], 'Q2_HD_J1Bias[i_r]=', Q2_HD_J1Bias[Q2_HD_r4])
+
+
+Q2_J1Bias[Q2_LD_l4:Q2_LD_r4+1] = Q2_HD_J1Bias[Q2_HD_l4:Q2_HD_r4+1]
+Q2_J1ParityRate[Q2_LD_l4:Q2_LD_r4+1] = Q2_HD_J1ParityRate[Q2_HD_l4:Q2_HD_r4+1]
+# Q2_J1ParityUncertainty[Q2_LD_l4:Q2_LD_r4+1] = Q2_HD_J1ParityUncertainty[Q2_HD_l4:Q2_HD_r4+1]
+# Q2_J1Fidelity[Q2_LD_l4:Q2_LD_r4+1] = Q2_HD_J1Fidelity[Q2_HD_l4:Q2_HD_r4+1]
+
+Q2_J1Bias[Q2_LD_l3:Q2_LD_r3+1] = Q2_HD_J1Bias[Q2_HD_l3:Q2_HD_r3+1]
+Q2_J1ParityRate[Q2_LD_l3:Q2_LD_r3+1] = Q2_HD_J1ParityRate[Q2_HD_l3:Q2_HD_r3+1]
+# Q2_J1ParityUncertainty[Q2_LD_l3:Q2_LD_r3+1] = Q2_HD_J1ParityUncertainty[Q2_HD_l3:Q2_HD_r3+1]
+# Q2_J1Fidelity[Q2_LD_l3:Q2_LD_r3+1] = Q2_HD_J1Fidelity[Q2_HD_l3:Q2_HD_r3+1]
+
+Q2_J1Bias[Q2_LD_l2:Q2_LD_r2+1] = Q2_HD_J1Bias[Q2_HD_l2:Q2_HD_r2+1]
+Q2_J1ParityRate[Q2_LD_l2:Q2_LD_r2+1] = Q2_HD_J1ParityRate[Q2_HD_l2:Q2_HD_r2+1]
+# Q2_J1ParityUncertainty[Q2_LD_l2:Q2_LD_r2+1] = Q2_HD_J1ParityUncertainty[Q2_HD_l2:Q2_HD_r2+1]
+# Q2_J1Fidelity[Q2_LD_l2:Q2_LD_r2+1] = Q2_HD_J1Fidelity[Q2_HD_l2:Q2_HD_r2+1]
+
+Q2_J1Bias[Q2_LD_l1:Q2_LD_r1+1] = Q2_HD_J1Bias[Q2_HD_l1:Q2_HD_r1+1]
+Q2_J1ParityRate[Q2_LD_l1:Q2_LD_r1+1] = Q2_HD_J1ParityRate[Q2_HD_l1:Q2_HD_r1+1]
+# Q2_J1ParityUncertainty[Q2_LD_l1:Q2_LD_r1+1] = Q2_HD_J1ParityUncertainty[Q2_HD_l1:Q2_HD_r1+1]
+# Q2_J1Fidelity[Q2_LD_l1:Q2_LD_r1+1] = Q2_HD_J1Fidelity[Q2_HD_l1:Q2_HD_r1+1]
+
+# Q2_J1ParityUncertainty[26:26]=Q2_HD_J1ParityUncertainty[Q2_HD_l3:Q2_HD_r3]
+# Q2_J1Fidelity[26:26]=Q2_HD_J1Fidelity[Q2_HD_l3:Q2_HD_r3]
+# print('Q2_J1Bias[i_l]=', Q2_J1Bias[Q2_LD_l3:])
+
+### Q3 insert
+Q3_LD_l1 = 37
+Q3_LD_r1 = 52
+Q3_HD_l1 = 0
+Q3_HD_r1 = 79
+
+# print('Q3_LD_l1=', Q3_LD_l1, 'Q3_LD_r1=', Q3_LD_r1)
+# print('Q3_J1Bias[i_l]=', Q3_J1Bias[Q3_LD_l1], 'Q3_J1Bias[i_r]=', Q3_J1Bias[Q3_LD_r1])
+# print('Q3_HD_l1=', Q3_HD_l1, 'Q3_HD_r1=', Q3_HD_r1)
+# print('Q3_HD_J1Bias[i_l]=', Q3_HD_J1Bias[Q3_HD_l1], 'Q3_HD_J1Bias[i_r]=', Q3_HD_J1Bias[Q3_HD_r1])
+Q3_J1Bias[Q3_LD_l1:Q3_LD_r1+1] = Q3_HD_J1Bias[Q3_HD_l1:Q3_HD_r1+1]
+Q3_J1ParityRate[Q3_LD_l1:Q3_LD_r1+1] = Q3_HD_J1ParityRate[Q3_HD_l1:Q3_HD_r1+1]
+
+
 """PSD Fit From Dave Ends"""
 
 """P1 Data Starts, Strong radiator with AWG Bias"""
@@ -870,10 +1020,10 @@ f_Q2 = f_Q2 * f_scale
 """
 Calculate the noise bandwidth
 """
-
-Tbb2 = 540e-3
-PRQ2 = getPhotonRate(eQ2, f_Q2, Tbb2)
-print('PRQ2=', PRQ2)
+#
+# Tbb2 = 540e-3
+# PRQ2 = getPhotonRate(eQ2, f_Q2, Tbb2)
+# print('PRQ2=', PRQ2)
 
 
 """
@@ -889,7 +1039,7 @@ if 1:
 
     pgJ1Q2_scaled = []
     pgJ1Q2_scaled_withBase = []
-    p2QP = 1e-4  # photon to QP conversion rate
+    p2QP = 2.5e-3  # photon to QP conversion rate
     base = 110
     for i in range(len(pgJ1)):
         pgJ1Q2_scaled.append(pgJ1[i] * eQ2[i] * p2QP)
@@ -947,11 +1097,12 @@ if 1:
     # axs_12.legend(loc=1)
 
     # axs[1].plot(Q2_PSD[:, 0] * f_SIM, Q2_PSD[:, 1], color='k', label='Q2 Measurement')
-    # axs[1].scatter([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, color='k', label='Q2 Measurement')
+    axs[1].plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, 'k-', label='Q2 Measurement')
+    # axs[1].plot([J * f_SIM for J in Q3_J1Bias], Q3_J1ParityRate, 'b-', label='Q3 Measurement')
 
-    axs[1].errorbar([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate,
-                    yerr=Q2_J1ParityUncertainty, ecolor='k',
-                    capthick=4, color='g', label='$\Gamma_{Measured}$')
+    # axs[1].errorbar([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate,
+    #                 yerr=Q2_J1ParityUncertainty, ecolor='k',
+    #                 capthick=4, color='g', label='$\Gamma_{Measured}$')
 
     # axs[1].plot(f_Q2[l_i:], pgJ1Q2_scaled[l_i:], color="purple", linestyle='--',
     #             label='Photon Rate Scaled')
@@ -979,15 +1130,15 @@ if 1:
     # axs[2].set_xlim([50, 700])
     # axs[2].set_ylim([1.5, 5])
     # axs[2].grid(True, which="both")
-    # axs[2].legend(loc=4)
+# axs[2].legend(loc=4)
 
-    # plt.show()
+# plt.show()
 
 """
 Zoom in Radiator No Wiggles
 """
 # plt.rcParams["figure.figsize"] = (3, 5)
-if 1:
+if 0:
     # plt.figure(1)
     freq_l = 175
     # freq_r = 215
@@ -1052,7 +1203,7 @@ if 1:
     # axs[1].set_ylim([100, 300])
     axs[1].set_ylim([110, 800])
     axs[1].grid(True, which="both")
-    axs[1].legend(loc=4)
+axs[1].legend(loc=4)
 
 """
 Zoom in RO Wiggles
@@ -1119,13 +1270,13 @@ if 0:
     axs[1].set_xlim([freq_l, freq_r])
     axs[1].set_ylim([150, 800])
     axs[1].grid(True, which="both")
-    axs[1].legend(loc=4)
+axs[1].legend(loc=4)
 
 
 """
 P1 Q2 and All PSD
 """
-if 1:
+if 0:
     # plt.figure(0)
     # plt.rcParams["figure.figsize"] = (6, 20)
 
