@@ -428,7 +428,8 @@ class AntennaCoupling(object):
             "C": None,
             "Area": None,
             "Z_j": None,
-            "Ic": None
+            "Ic": None,
+            "ReoRa": None,
         }
         Gamma = None
         e_c = None
@@ -487,6 +488,7 @@ class AntennaCoupling(object):
         L = JJ[1]
         C = JJ[2]
         A = JJ[3]  # nm*nm
+        ReoRa = JJ[4]
         Ic = (np.pi/4)*(380*(1e-6)/R)
         C_eff = self.C_eff
         omega = 2 * pi * self.Antenna["f"]
@@ -515,8 +517,10 @@ class AntennaCoupling(object):
         self.Junction["A"] = A
         self.Junction["Z_j"] = Z_j
         self.Junction["Ic"] = Ic
+        self.Junction["ReoRa"] = ReoRa
 
     def _get_e_c(self):
+
         f = self.Antenna["f"]
 
         Z_j = self.Junction["Z_j"]
@@ -525,9 +529,10 @@ class AntennaCoupling(object):
         for i in range(len(Z_rad)):
             Gamma.append((Z_rad[i] - np.conj(Z_j[i])) / (Z_rad[i] + Z_j[i]))
         e_c = 1 - (np.abs(Gamma)) ** 2
-        for i in range(len(f)):
-            # print('f[i]=', f[i])
-            e_c[i] = e_c[i]/((f[i]/1e11)**2)
+        if self.Junction["ReoRa"] == "Receiver":
+            for i in range(len(f)):
+                # print('f[i]=', f[i])
+                e_c[i] = e_c[i]/((f[i]/1e11)**2)
         e_c_dB = 10 * np.log10(e_c)
         self.Gamma = Gamma
         self.e_c = e_c
@@ -564,69 +569,42 @@ class AntennaCoupling(object):
 
         Ic_f = []
         T_f = []
-        # Vb = []
+        X_QP = []
         P_heat_f = []
 
         f = self.Antenna["f"]
         R = self.Junction["R"]*1.0
         phi_0 = h/(2*e)
-        # print('R=', R)
+        r = 1/(300e-9)   # recombination rate
 
-        # for fi in f:
-        #     vb = fi * phi_0  # convert photon frequency to voltage bias
-        #     P_heat = vb**2.0 / R
-        #     T = (P_heat/(Omega*Sigma))**(0.2)   # cannot use 1/5, bust use 0.2
-        #     T_f.append(T)
-        #     ic = self._getIcFromTemp(T)
-        #     # Vb.append(vb)
-        #     P_heat_f.append(P_heat)
-        #     Ic_f.append(ic)
-
-        for fi in f:    # Tinkham
+        for fi in f:    # x_QP and I_c calculation
             vb = fi * phi_0  # convert photon frequency to voltage bias
-            T_b = 10e-3 # base temp 20mK
-            if vb <= 0:
-                vb = 0
-            T = np.sqrt((T_b**2+3*(e*vb/(2*pi*k))))
-            T_f.append(T)
-            ic = self._getIcFromTemp(T)
-            # Vb.append(vb)
+            Delta_Al = 190e-6*e
+            v_Al = 190e-6
+            if vb <= 2*v_Al:
+                vb = vb*0.0
+            power_inj = 0.57*(vb**2/R)
+            n=1
+            r1 = power_inj/(1*4e6*r*Delta_Al)
+            p = [n, -1, 0, r1]
+            # p = [-1, 2, -1, 0, r1]
+            roots = np.roots(p)
+            # print('roots=', roots)
+            x_qp = np.real(roots[1])
+            Delta_Al_qp = Delta_Al*(1-n*x_qp)   # naive approximation
+            ic = (pi/4)*(2*Delta_Al_qp/e)*(1/R)
             Ic_f.append(ic)
-
-        # print("Vb=", Vb)
-        # print("T_f=", T_f[0:10])
-        # print("T_f=", T_f[200:210])
-        # print("T_f=", T_f[900:910])
-        # print("Ic_f=", Ic_f[0:10])
-        # print("Ic_f=", Ic_f[200:210])
-        # print("Ic_f=", Ic_f[900:910])
-        # print("P_heat_f=", P_heat_f)
+            X_QP.append(x_qp)
+        if self.Junction["ReoRa"] == "Radiator":
+            # plt.plot(Ic_f)
+            plt.plot(X_QP)
+            plt.xlabel('freq (GHz)')
+            plt.ylabel('x_qp')
+            # plt.ylabel('I_c')
+            plt.grid(True)
+            # plt.show()
 
         self.Ic_f = Ic_f
-
-    # def _get_p_g(self):
-    #     """
-    #     photons generated,
-    #     :return:
-    #     """
-    #     e_c = self.e_c
-    #     f = self.Antenna["f"]
-    #     Ic = self.Junction["Ic"]
-    #     R = self.Junction["R"]
-    #     p_g = []
-    #
-    #     P = Ic**2*R
-    #     Pf = P * e_c
-    #     for i in range(len(f)):
-    #         p_g_f = Pf[i]/(h*f[i])
-    #         p_g.append(p_g_f)
-    #
-    #     # print("p_g_f=", p_g_f)
-    #     # print("P=", P)
-    #     # print("p_g[100:110]", p_g[100:110])
-    #     # print("f[100:110]", f[100:110])
-    #     # print(len(p_g))
-    #     self.p_g = p_g
 
     def _get_p_g(self):
         """
@@ -643,8 +621,8 @@ class AntennaCoupling(object):
         # P = Ic**2*R
         # Pf = P * e_c
         for i in range(len(f)):
-            # P = Ic_f[i]**2 * e_c[i] * R
-            P = Ic**2 * e_c[i] * R
+            P = Ic_f[i]**2 * e_c[i] * R
+            # P = Ic**2 * e_c[i] * R
             p_g_f = P/(h*f[i])
             p_g.append(p_g_f)
 
@@ -668,6 +646,11 @@ class AntennaCoupling(object):
             gamma = (Z_Al-Z0)/(Z_Al+Z0)
             Gamma.append(gamma)
             Gamma_square.append(np.abs(gamma))
+
+        # plt.plot(Gamma_square)
+        # plt.xlabel('freq (GHz)')
+        # plt.ylabel('Gamma_square')
+        # plt.show()
 
         # print(Gamma_square)
         self.ref = Gamma_square
@@ -715,7 +698,7 @@ class AntennaCoupling(object):
 
 class P1_JSweep(object):
     """
-    This is for extract P1 value from the matlab data with Josephson radiator's bias
+    This is for extract P1 value from the matlab data with Josephson Receiver's bias
     """
 
     def __init__(self):
@@ -782,7 +765,7 @@ class P1_Avg_vs_Any(object):
 
 class P1_JSweep_Q2(object):
     """
-    This is for extract P1 value from the matlab data with Josephson radiator's bias
+    This is for extract P1 value from the matlab data with Josephson Receiver's bias
     Q2 taken at different times
     """
 
