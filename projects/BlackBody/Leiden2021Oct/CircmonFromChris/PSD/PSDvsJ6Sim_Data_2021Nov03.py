@@ -37,7 +37,6 @@ Q1 = np.array([
     [575, 7547.52], [580, 7821.21]
 ])
 
-
 Q2 = np.array([
     [0, 12.86], [10, 11.36], [20, 13.26], [30, 12.21], [40, 12.7], [50, 12.83],
     [60, 12.84], [65, 11.72], [70, 12.77], [75, 13.46], [80,14.29], [85, 11.23],
@@ -60,8 +59,6 @@ Q2 = np.array([
     [540, 128.8], [545, 118.93], [550, 126.27], [555, 128.9], [560, 135.61],
     [565, 144.21], [570, 151.43], [575, 153.62], [580, 156.3]
 ])
-
-
 
 Q4 = np.array([
     [0, 201.33], [10, 191.95], [20, 185.84], [30, 184.72], [40, 190.91], [50, 192.32],
@@ -94,12 +91,12 @@ Q4 = np.array([
 Q1_pure = copy.deepcopy(Q1)
 Q2_pure = copy.deepcopy(Q2)
 Q4_pure = copy.deepcopy(Q4)
-e_Q41 = 0.0
-e_Q21 = 0.01
-e_Q24 = 0.035
+e_Q41 = 0.01 # from Q1 to Q4,  e_Q41<=0.18
+e_Q21 = 0.006 # from Q1 to Q2, e_Q21<=0.012
+e_Q24 = 0.02 # from Q4 to Q2, e_Q24<=
+# e_Q24 = 0.0 # from Q4 to Q2, e_Q24<=
 Q4_pure[:, 1] = Q4_pure[:, 1] - e_Q41*Q1_pure[:, 1]
-Q2_pure[:, 1] = Q2_pure[:, 1] - e_Q21*Q1_pure[:, 1]-e_Q24*Q4_pure[:, 1]
-
+Q2_pure[:, 1] = Q2_pure[:, 1] - e_Q21*Q1[:, 1]-e_Q24*Q4[:, 1]
 
 # plt.plot(Q1[:, 0], Q1[:, 1], color='b', label='Q1')
 # plt.plot(Q2[:, 0], Q2[:, 1], color='r', label='Q2')
@@ -115,20 +112,17 @@ f = 0.968
 # f = 1
 Al_gap = 380e-6
 DAC_Al = 1e5*Al_gap/0.200
-# plt.plot(Q1[::2, 0]*f, Q1[::2, 1], color='b', label='Q1')
-# plt.plot(Q2[::2, 0]*f, Q2[::2, 1], color='r', label='Q2')
-# plt.plot(Q4[::2, 0]*f, Q4[::2, 1], color='y', label='Q4')
 plt.plot(Q1[:, 0]*f, Q1[:, 1], color='b', label='Q1')
 plt.plot(Q2[:, 0]*f, Q2[:, 1], color='r', label='Q2')
-plt.plot(Q4[:, 0]*f, Q4[:, 1], color='y', label='Q4')
+plt.plot(Q4[:, 0]*f, Q4[:, 1], color='k', label='Q4')
+plt.plot(Q1[:, 0]*f, Q1[:, 1]*e_Q21, 'b--', label='Q2FromQ1')
+plt.plot(Q4[:, 0]*f, Q4[:, 1]*e_Q24, 'k--', label='Q2FromQ4')
+# plt.plot(Q4[:, 0]*f, Q4_pure[:, 1]*0.032, '-', label='Q2FromQ4')
+plt.plot(Q2[:, 0]*f, Q4[:, 1]*e_Q24+Q1[:, 1]*e_Q21, 'r--', label='Q2FromQ1+Q4')
 
-plt.plot(Q1[:, 0]*f, Q1[:, 1]*0.01, '-', label='Q2FromQ1')
-plt.plot(Q4[:, 0]*f, Q4[:, 1]*0.04, '-', label='Q2FromQ4')
-plt.plot(Q2[:, 0]*f, Q4[:, 1]*0.04+Q1[:, 1]*0.008, '--', label='Q2FromQ14')
-
-plt.plot(Q1_pure[:, 0]*f, Q1_pure[:, 1]*e_Q21, 'b--', label='Q1_pure')
-plt.plot(Q2_pure[:, 0]*f, Q2_pure[:, 1], 'r--', label='Q2_pure')
-plt.plot(Q4_pure[:, 0]*f, Q4_pure[:, 1]*e_Q24, 'y--', label='Q4_pure')
+# plt.plot(Q1_pure[:, 0]*f, Q1_pure[:, 1], 'b--', label='Q1_pure')
+# plt.plot(Q2_pure[:, 0]*f, Q2_pure[:, 1], 'r--', label='Q2_pure')
+# plt.plot(Q4_pure[:, 0]*f, Q4_pure[:, 1], 'y--', label='Q4_pure')
 
 plt.axvline(x=DAC_Al * f, color='k', linestyle='--', linewidth=4, label='JJ Al Gap')
 
@@ -139,7 +133,7 @@ plt.yscale('log')
 plt.grid(True, which="both")
 plt.legend(loc=2)
 # plt.xlim([0, 1500])
-# plt.ylim([10, 100000])
+# plt.ylim([10, 10000])
 plt.show()
 
 

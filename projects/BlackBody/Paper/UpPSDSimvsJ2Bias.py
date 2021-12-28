@@ -14,11 +14,11 @@ import numpy as np
 from antennalib import AntennaCoupling
 
 for _ in range(1):   # CST Sim
-    JJ2 = [4.8 * 1e3, None, 0, 320 * 123 * 2]  # [R, L, C, A]
-    JQ1 = [16.6 * 1e3, 18.3 * 1e-9, 0, 193.8 * 121.8 * 2]  #
-    JQ2 = [13.2 * 1e3, 14.6 * 1e-9, 0, 350 * 126.6]  #
-    JQ3 = [19 * 1e3, 21 * 1e-9, 0, 310 * 126]  # some issue with Q3
-    JQ4 = [15 * 1e3, 19.9 * 1e-9, 0, 184.4 * 122.5 * 2]  # some issue with Q3
+    JJ2 = [4.8 * 1e3, None, 0, 320 * 123 * 2, "Radiator"]  # [R, L, C, A]
+    JQ1 = [16.6 * 1e3, 18.3 * 1e-9, 0, 193.8 * 121.8 * 2, "Receiver"]  #
+    JQ2 = [13.2 * 1e3, 14.6 * 1e-9, 0, 350 * 126.6, "Receiver"]  #
+    JQ3 = [19 * 1e3, 21 * 1e-9, 0, 310 * 126, "Receiver"]  # some issue with Q3
+    JQ4 = [15 * 1e3, 19.9 * 1e-9, 0, 184.4 * 122.5 * 2, "Receiver"]  # some issue with Q3
 
     fileJ2 = "J2.txt"
     # fileQ1 = "Q1.txt"
@@ -539,8 +539,8 @@ fig, (ax1, ax2) = plt.subplots(2)
 # plt.show()
 
 fk = 4.604
-ax1.plot(Q1[:, 0] * fk, Q1[:, 1], color='b', label='Q1_PSD')
-ax1.plot(Q2[:, 0] * fk, Q2[:, 1], color='r', label='Q2_PSD')
+# ax1.plot(Q1[:, 0] * fk, Q1[:, 1], color='b', label='Q1_PSD')
+# ax1.plot(Q2[:, 0] * fk, Q2[:, 1], color='r', label='Q2_PSD')
 ax1.plot(Q4[:, 0] * fk, Q4[:, 1], color='y', label='Q4_PSD')
 # ax1.set_xlabel('Radiator Josephson Frequency (GHz)')
 ax1.set_ylabel('Rate (Hz)')
@@ -562,8 +562,8 @@ ax1.grid()
 
 # plt.figure(2)
 fk = 4.604
-ax1.plot(J2_Bias_Q1 * fk, GammaUp_J2_Q1, '--', color='b', label='Q1_Up')
-ax1.plot(J2_Bias_Q2 * fk, GammaUp_J2_Q2, '--', color='r', label='Q2_Up')
+# ax1.plot(J2_Bias_Q1 * fk, GammaUp_J2_Q1, '--', color='b', label='Q1_Up')
+# ax1.plot(J2_Bias_Q2 * fk, GammaUp_J2_Q2, '--', color='r', label='Q2_Up')
 ax1.plot(J2_Bias_Q4 * fk, GammaUp_J2_Q4, '--', color='y', label='Q4_Up')
 # ax1.xlabel('J2 Radiation (GHz)')
 # ax1.ylabel('Gamma Up (Hz)')
