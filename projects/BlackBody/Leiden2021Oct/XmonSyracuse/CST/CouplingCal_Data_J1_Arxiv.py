@@ -1060,9 +1060,8 @@ if 1:
         pgJ1Q2_scaled_withBase.append(pgJ1[i] * eQ2[i] * p2QP + base)
         x_qp2photon.append(x_qpJ1[i]**2*5000)
 
-    fig, axs = plt.subplots(2, 2, sharex='col', figsize=(12, 8),
-                            gridspec_kw={'width_ratios': [3, 2], 'height_ratios': [2, 3],
-                                         'hspace': 0.1, 'wspace': 0.05})
+    # fig, axs = plt.subplots(2, figsize=(5, 8))
+    fig, axs = plt.subplots(2, 2)
     # (axs[0, 0], axs[1, 0]), (axs[0, 1], axs[1, 1]) =
 
     axs[0, 0].plot(f[l_i:], eJ1[l_i:], color="red", marker="o", markersize=4,
@@ -1076,9 +1075,13 @@ if 1:
     axs[0, 0].set_xlim([50, 600])
     axs[0, 0].set_ylim([1e-7, 1e-1])
     axs[0, 0].legend(loc=4)
-    # axs[0, 0].set_xlabel("Antenna Frequency (GHz)", color="black", fontsize=10)
+    # axs[0].grid(True, which="both")
+    # axs[0, 0].grid(True)
+    axs[0, 0].set_xlabel("Antenna Frequency (GHz)", color="black", fontsize=10)
+
 
     axs[1, 0].plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, 'k-', label='$\Gamma_{Measured}$')
+
     axs[1, 0].axhline(y=base, color="blue", linestyle='--', label='$\Gamma_{0}$')
     axs[1, 0].plot(f_Q2[l_i:], pgJ1Q2_scaled_withBase[l_i:], color="grey", linestyle='-',
                 label='$\Gamma_{0}+\Gamma_{PAT}$')
@@ -1091,12 +1094,32 @@ if 1:
     axs[1, 0].set_yscale('log')
     axs[1, 0].set_xlim([50, 600])
     axs[1, 0].set_ylim([100, 1000])
-    axs[1, 0].legend(loc=3)
-    # axs[1, 0].share
+    # axs[1, 0].grid(True)
+    axs[1, 0].legend(loc=1)
 
     freq_l = 175
     freq_r = 310
+    pgJ1Q2 = []
+    l_i = 1
+    for i in range(len(pgJ1)):
+        pgJ1Q2.append(pgJ1[i] * eQ2[i])
 
+    # pgJ1Q2_scaled = []
+    # p2QP = 1e-4  # photon to QP conversion rate
+    # base = 110
+    # for i in range(len(pgJ1)):
+    #     pgJ1Q2_scaled.append(pgJ1[i] * eQ2[i] * p2QP + base)
+
+    # fig, axs = plt.subplots(2, figsize=(5, 8))
+
+    # axs_02 = axs[0].twinx()
+    #
+    # axs_02.plot(f_Q2[l_i:], pgJ1Q2[l_i:], color="purple", linestyle='--',
+    #             label='Photon Rate (Constant power vs freq)')
+    # axs_02.set_ylabel("Photon Generation Rate ($s^{-1}$)", color="black", fontsize=10)
+    # axs_02.set_xlim([freq_l, freq_r])
+    # axs_02.set_ylim([1e4, 1e9])
+    # axs_02.set_yscale('log')
 
     axs[0, 1].plot(f[l_i:], eJ1[l_i:], color="red", marker="o", markersize=4,
                 label='Radiator Efficiency')
@@ -1104,25 +1127,94 @@ if 1:
                 label='Receiver Efficiency')
     axs[0, 1].plot(f_Q2[l_i:], eJ1[l_i:] * eQ2[l_i:], color="purple", marker="o", markersize=4,
                 label='Total Efficiency')
+    # axs[0].set_ylabel('Coupling Efficiency', color="black", fontsize=10)
     axs[0, 1].set_yscale('log')
     axs[0, 1].set_xlim([freq_l, freq_r])
     axs[0, 1].set_ylim([1e-7, 1e-1])
-    axs[0, 1].yaxis.tick_right()
-    # axs[0, 1].set_xlabel("Antenna Frequency (GHz)", color="black", fontsize=10)
+    # axs[0, 1].grid(True)
+    axs[0, 1].set_xlabel("Antenna Frequency (GHz)", color="black", fontsize=10)
 
-    axs[1, 1].plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, 'k-', label='$\Gamma_{Measured}$')
-    # axs[1, 1].plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, color="black", marker="o", label='$\Gamma_{Measured}$')
+    axs[1, 1].plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, color="black", marker="o", label='$\Gamma_{Measured}$')
 
     # axs[1].errorbar([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate,
     #                 yerr=Q2_J1ParityUncertainty, label='Q2', ecolor='k',
     #                 capthick=4, color='g')
     axs[1, 1].set_xlabel("Radiator Josephson Frequency (GHz)", color="black",
                       fontsize=10)
+    # axs[1].set_ylabel("Parity Rate (Hz)", color="black", fontsize=10)
     axs[1, 1].set_yscale('log')
     axs[1, 1].set_xlim([freq_l, freq_r])
     axs[1, 1].set_ylim([100, 1000])
-    axs[1, 1].yaxis.tick_right()
-    # axs[1, 1].legend(loc=4)
+    # axs[1, 1].grid(True, which="both")
+    axs[1, 1].legend(loc=4)
+
+"""
+Zoom in RO Wiggles
+"""
+if 0:
+    # plt.figure(1)
+    freq_l = 230
+    freq_r = 310
+    pgJ1Q2 = []
+    l_i = 1
+    for i in range(len(pgJ1)):
+        pgJ1Q2.append(pgJ1[i] * eQ2[i])
+
+    pgJ1Q2_scaled = []
+    p2QP = 1e-4  # photon to QP conversion rate
+    base = 110
+    for i in range(len(pgJ1)):
+        pgJ1Q2_scaled.append(pgJ1[i] * eQ2[i] * p2QP + base)
+
+    fig, axs = plt.subplots(2, figsize=(4, 7))
+
+    # axs_02 = axs[0].twinx()
+    #
+    # axs_02.plot(f_Q2[l_i:], pgJ1Q2[l_i:], color="purple", linestyle='--',
+    #             label='Photon Rate (Constant power vs freq)')
+    # axs_02.set_ylabel("Photon Generation Rate ($s^{-1}$)", color="black", fontsize=10)
+    # axs_02.set_xlim([freq_l, freq_r])
+    # axs_02.set_ylim([1e5, 1e9])
+    # axs_02.set_yscale('log')
+
+    axs[0].plot(f[l_i:], eJ1[l_i:], color="red", marker="o", markersize=4,
+                label='Radiator Efficiency')
+    axs[0].plot(f_Q2[l_i:], eQ2[l_i:], color="blue", marker="o", markersize=4,
+                label='Receiver Efficiency')
+    axs[0].plot(f_Q2[l_i:], eJ1[l_i:] * eQ2[l_i:], color="purple", marker="o", markersize=4,
+                label='Total Efficiency')
+    # axs[0].set_ylabel('Coupling Efficiency', color="black", fontsize=10)
+    axs[0].set_yscale('log')
+    axs[0].set_xlim([freq_l, freq_r])
+    axs[0].set_ylim([1e-5, 1e-1])
+    # axs[0].legend(loc=4)
+    # axs[0].grid(True, which="both")
+    axs[0].grid(True)
+    axs[0].set_xlabel("Antenna Frequency (GHz)", color="black", fontsize=10)
+
+    # axs_12 = axs[1].twinx()
+    # axs_12.plot(f_Q2[l_i:], pgJ1Q2_scaled[l_i:], color="purple", marker="o",
+    #             label='Photon Rate Scaled')
+    # axs_12.set_ylabel("Simulation Total Rate (Hz)", color="black", fontsize=10)
+    # axs_12.set_xlim([freq_l, freq_r])
+    # axs_12.set_ylim([100, 1000])
+    # axs_12.set_yscale('log')
+    # axs_12.legend(loc=1)
+
+    axs[1].scatter(Q2_PSD_HighDensity[:, 0] * f_SIM, Q2_PSD_HighDensity[:, 1], color="green", marker="o", label='Q2 Measurement')
+
+    # axs[1].errorbar([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate,
+    #                 yerr=Q2_J1ParityUncertainty, label='Q2', ecolor='k',
+    #                 capthick=4, color='g')
+    axs[1].set_xlabel("Radiator Josephson Frequency (GHz)", color="black",
+                      fontsize=10)
+    # axs[1].set_ylabel("Parity Rate (Hz)", color="black", fontsize=10)
+    axs[1].set_yscale('log')
+    axs[1].set_xlim([freq_l, freq_r])
+    axs[1].set_ylim([150, 800])
+    axs[1].grid(True, which="both")
+    axs[1].legend(loc=4)
+
 
 """
 P1 Q2 and All PSD

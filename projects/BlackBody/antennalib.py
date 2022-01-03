@@ -438,6 +438,7 @@ class AntennaCoupling(object):
         p_g = None  # photon generation rate
         ref = None  # Al sample box reflection array
         C_eff = 150*1e-21    # F/nm^2
+        X_QP = None
 
     def import_data(self, file, JJ, C_eff=150*1e-21):
         self.C_eff = C_eff
@@ -538,26 +539,6 @@ class AntennaCoupling(object):
         self.e_c = e_c
         self.e_c_dB = e_c_dB
 
-    # def _get_p_g(self):
-    #     e_c = self.e_c
-    #     f = self.Antenna["f"]
-    #     Ic = self.Junction["Ic"]
-    #     R = self.Junction["R"]
-    #     p_g = []
-    #
-    #     P = Ic**2*R
-    #     Pf = P * e_c
-    #     for i in range(len(f)):
-    #         p_g_f = Pf[i]/(h*f[i])
-    #         p_g.append(p_g_f)
-    #
-    #     # print("p_g_f=", p_g_f)
-    #     # print("P=", P)
-    #     # print("p_g[100:110]", p_g[100:110])
-    #     # print("f[100:110]", f[100:110])
-    #     # print(len(p_g))
-    #     self.p_g = p_g
-
     def _get_Ic(self):
         """
         get Ic as a function of radiation freq, consider critical current
@@ -570,12 +551,13 @@ class AntennaCoupling(object):
         Ic_f = []
         T_f = []
         X_QP = []
+        G0 = []
         P_heat_f = []
 
         f = self.Antenna["f"]
         R = self.Junction["R"]*1.0
         phi_0 = h/(2*e)
-        r = 1/(300e-9)   # recombination rate
+        r = 1/(350e-9)   # recombination rate
 
         for fi in f:    # x_QP and I_c calculation
             vb = fi * phi_0  # convert photon frequency to voltage bias
@@ -585,6 +567,7 @@ class AntennaCoupling(object):
                 vb = vb*0.0
             power_inj = 0.57*(vb**2/R)
             n=1
+            g0 = power_inj/(1*4e6*Delta_Al)
             r1 = power_inj/(1*4e6*r*Delta_Al)
             p = [n, -1, 0, r1]
             # p = [-1, 2, -1, 0, r1]
@@ -595,13 +578,19 @@ class AntennaCoupling(object):
             ic = (pi/4)*(2*Delta_Al_qp/e)*(1/R)
             Ic_f.append(ic)
             X_QP.append(x_qp)
+            G0.append(g0)
         if self.Junction["ReoRa"] == "Radiator":
-            # plt.plot(Ic_f)
-            plt.plot(X_QP)
-            plt.xlabel('freq (GHz)')
-            plt.ylabel('x_qp')
-            # plt.ylabel('I_c')
-            plt.grid(True)
+            self.X_QP = X_QP
+            # # plt.plot([i*1e9 for i in Ic_f])
+            # plt.plot(X_QP)
+            # # plt.plot(g0)
+            # plt.xlabel('freq (GHz)')
+            # plt.ylabel('x_qp')
+            # # plt.ylabel('Ic (nA)')
+            # plt.xlim([50, 600])
+            # # plt.ylim([5.5, 9.5])
+            # plt.ylim([-0.05, 0.45])
+            # # plt.grid(True)
             # plt.show()
 
         self.Ic_f = Ic_f
@@ -630,7 +619,7 @@ class AntennaCoupling(object):
 
     def _get_ref(self):
         """
-        reflection coefficient
+        reflection coefficient for Al sample box
         :return:
         """
         f = self.Antenna["f"]
