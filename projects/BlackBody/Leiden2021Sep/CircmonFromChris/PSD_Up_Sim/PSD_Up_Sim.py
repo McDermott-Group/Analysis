@@ -116,7 +116,7 @@ ax1.plot(Q1[:, 0]*f, Q1[:, 1], color='b', label='Q1')
 ax1.plot(Q2[:, 0]*f, Q2[:, 1], color='r', label='Q2')
 ax1.plot(Q4[:, 0]*f, Q4[:, 1], color='y', label='Q4')
 
-# ax1.plot(J6_Bias*1000 * f, Q1_UpRate, '--', color='b', label='Q1_Up')
+ax1.plot(J6_Bias*1000 * f, Q1_UpRate, '--', color='b', label='Q1_Up')
 # ax1.plot(J6_Bias*1000 * f, Q2_UpRate, '--', color='r', label='Q2_Up')
 ax1.plot(J6_Bias*1000 * f, Q4_UpRate, '--', color='y', label='Q4_Up')
 
@@ -125,7 +125,7 @@ ax1.set_yscale('log')
 ax1.set_xlabel('J2 Radiation (GHz)')
 ax1.legend()
 ax1.grid()
-ax1.set_xlim([0, 800])
+ax1.set_xlim([0, 500])
 ax1.set_ylim([10, 50000])
 
 plt.show()

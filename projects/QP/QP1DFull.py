@@ -22,7 +22,8 @@ Dn = 6e-2  # units of um^2/ns -- want to use 6 here for aluminum
 
 nx = 100  # points in space grid
 ne = 300  # points in energy grid
-nt = 400  # time steps
+# nt = 400  # time steps
+nt = 100  # time steps
 
 s = 1e-3  # sets time step; units of tau0 -- try 1e-4
 dt = s * tau0
@@ -121,6 +122,7 @@ plt.ylabel(r"Position ($\mu$m)")
 
 # evolve in time
 for i in range(nt):
+    print('i=', i)
 
     for j in range(nx):
         if j == nx // 2:
@@ -133,9 +135,14 @@ for i in range(nt):
         D = Dn * np.sqrt(1 - (Delta / e[k]) ** 2)
         n[:, k] = diffuse(n[:, k], D, dx, dt)
 
-    if i % 100 == 0:
+    if i % 100 == 99:
+        print('i=', i)
+        print('plot movie')
         ax.imshow(np.log(n), cmap='bwr')  # np.log(n)
-        plt.pause(0.1)
+        plt.pause(0.1*100)
+
+ax.imshow(np.log(n), cmap='bwr')  # np.log(n)
+plt.show()
 
 
 
