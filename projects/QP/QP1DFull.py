@@ -22,8 +22,8 @@ Dn = 6e-2  # units of um^2/ns -- want to use 6 here for aluminum
 
 nx = 100  # points in space grid
 ne = 300  # points in energy grid
-# nt = 400  # time steps
-nt = 100  # time steps
+nt = 400  # time steps
+# nt = 100  # time steps
 
 s = 1e-3  # sets time step; units of tau0 -- try 1e-4
 dt = s * tau0
@@ -110,7 +110,7 @@ noinj.shape = (ne, 1)
 fig, ax = plt.subplots()
 distribution = ax.imshow(n, cmap='bwr')
 ax.set_title("QP Distribution")
-# mngr = plt.get_current_fig_manager()
+mngr = plt.get_current_fig_manager()
 # mngr.window.setGeometry(750, 100, 640, 545)
 plt.ion()
 
@@ -122,27 +122,28 @@ plt.ylabel(r"Position ($\mu$m)")
 
 # evolve in time
 for i in range(nt):
-    print('i=', i)
+    # print('i=', i)
 
     for j in range(nx):
-        if j == nx // 2:
+        if j == nx // 2.0:
             inj = delta_inj
         else:
             inj = noinj
         n[j, :] = scatter(n[j, :], inj, dt)
 
     for k in range(ne):
-        D = Dn * np.sqrt(1 - (Delta / e[k]) ** 2)
+        D = Dn * np.sqrt(1 - (Delta / e[k]) ** 2.0)
         n[:, k] = diffuse(n[:, k], D, dx, dt)
 
-    if i % 100 == 99:
+    if i % 100 == 0:
         print('i=', i)
         print('plot movie')
+        print('n=', n)
         ax.imshow(np.log(n), cmap='bwr')  # np.log(n)
-        plt.pause(0.1*100)
+        plt.pause(0.1)
 
-ax.imshow(np.log(n), cmap='bwr')  # np.log(n)
-plt.show()
+# ax.imshow(np.log(n), cmap='bwr')  # np.log(n)
+# plt.show()
 
 
 

@@ -21,28 +21,31 @@ JQ1 = [17.1 * 1e3, None, 0, 360 * 150, "Receiver"]
 JQ2 = [16.6 * 1e3, None, 0, 360 * 150, "Receiver"]  #
 
 fileJ1 = "xmon_full-chip_JJ1.txt"
+# fileJ1 = "Xmon_testpad_with_wirebonds.txt"
 fileQ1 = "xmon_full-chip_Q1.txt"
 fileQ2 = "xmon_full-chip_Q2.txt"
 
 J1 = AntennaCoupling()
 J1.import_data(fileJ1, JJ1, C_eff=C_eff)
 f = J1.Antenna["f"]
-ecJ1 = J1.e_c_dB
-eJ1 = J1.e_c
-pgJ1 = J1.p_g
-refJ1 = J1.ref
-x_qpJ1 = J1.X_QP
+ecJ1 = J1.Antenna["e_c_dB"]
+eJ1 = J1.Antenna["e_c"]
+pgJ1 = J1.Radiator["Gamma_rad"]
+refJ1 = J1.Al_Wall["Ref"]
+x_qpJ1 = J1.Radiator["X_QP"]
+PhotonFlux = J1.Al_Wall["PhotonFlux"]
 
 Q1 = AntennaCoupling()
 Q1.import_data(fileQ1, JQ1, C_eff=C_eff)
 f_Q1 = Q1.Antenna["f"]
-eQ1 = Q1.e_c
+eQ1 = Q1.Antenna["e_c"]
 
 Q2 = AntennaCoupling()
 Q2.import_data(fileQ2, JQ2, C_eff=C_eff)
 f_Q2 = Q2.Antenna["f"]
-ecQ2 = Q2.e_c_dB
-eQ2 = Q2.e_c
+ecQ2 = Q2.Antenna["e_c_dB"]
+eQ2 = Q2.Antenna["e_c"]
+Area = Q2.Receiver["Area"]
 
 Q1_PSD = np.array([
     [0, 84.71], [10, 83.96], [20, 84.23], [30, 86.4], [40, 87.31], [50, 86.84],
@@ -1047,18 +1050,24 @@ if 1:
     # plt.rcParams["figure.figsize"] = (6, 20)
     pgJ1Q2 = []
     x_qp2photon = []
+    Gamma_re = []
+    Gamma_withBase = []
     l_i = 50
-    for i in range(len(pgJ1)):
-        pgJ1Q2.append(pgJ1[i] * eQ2[i])
+    for i in range(len(Area)):
+        Gamma_re.append(0.5*PhotonFlux[i]*Area[i]*eQ2[i])
+    # for i in range(len(pgJ1)):
+    #     pgJ1Q2.append(pgJ1[i] * eQ2[i])
 
-    pgJ1Q2_scaled = []
-    pgJ1Q2_scaled_withBase = []
-    p2QP = 5.5e-4  # photon to QP conversion rate
+    # pgJ1Q2_scaled = []
+    # pgJ1Q2_scaled_withBase = []
+    # p2QP = 5.5e-4  # photon to QP conversion rate
+    ratio = 1/4.0
     base = 110
     for i in range(len(pgJ1)):
-        pgJ1Q2_scaled.append(pgJ1[i] * eQ2[i] * p2QP)
-        pgJ1Q2_scaled_withBase.append(pgJ1[i] * eQ2[i] * p2QP + base)
-        x_qp2photon.append(x_qpJ1[i]**2*5000)
+        # pgJ1Q2_scaled.append(pgJ1[i] * eQ2[i] * p2QP)
+        # pgJ1Q2_scaled_withBase.append(pgJ1[i] * eQ2[i] * p2QP + base)
+        Gamma_withBase.append(ratio*Gamma_re[i] + base)
+        # x_qp2photon.append(x_qpJ1[i]**2*5000)
 
     fig, axs = plt.subplots(2, 2, sharex='col', figsize=(12, 8),
                             gridspec_kw={'width_ratios': [3, 2], 'height_ratios': [2, 3],
@@ -1080,8 +1089,12 @@ if 1:
 
     axs[1, 0].plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, 'k-', label='$\Gamma_{Measured}$')
     axs[1, 0].axhline(y=base, color="blue", linestyle='--', label='$\Gamma_{0}$')
-    axs[1, 0].plot(f_Q2[l_i:], pgJ1Q2_scaled_withBase[l_i:], color="grey", linestyle='-',
+    # axs[1, 0].plot(f_Q2[l_i:], pgJ1Q2_scaled_withBase[l_i:], color="grey", linestyle='-',
+    #             label='$\Gamma_{0}+\Gamma_{PAT}$')
+    axs[1, 0].plot(f_Q2[l_i:], Gamma_withBase[l_i:], color="grey", linestyle='-',
                 label='$\Gamma_{0}+\Gamma_{PAT}$')
+    # axs[1, 0].plot(f_Q2[l_i:], pgJ1Q2_scaled[l_i:],
+    #             label='$photon generation rate$')
     # axs[1].plot(f_Q2[l_i:], x_qp2photon[l_i:], color="grey", linestyle='-',
     #             label='x_qp')
 
@@ -1090,7 +1103,7 @@ if 1:
     axs[1, 0].set_ylabel("$\Gamma_{p}$ ($s^{-1}$)", color="black", fontsize=10)
     axs[1, 0].set_yscale('log')
     axs[1, 0].set_xlim([50, 600])
-    axs[1, 0].set_ylim([100, 1000])
+    # axs[1, 0].set_ylim([100, 1000])
     axs[1, 0].legend(loc=3)
     # axs[1, 0].share
 
