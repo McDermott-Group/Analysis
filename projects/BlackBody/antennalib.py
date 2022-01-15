@@ -450,12 +450,6 @@ class AntennaCoupling(object):
             "S": None,  # poynting vector or related parameters
             "PhotonFlux": [],  #
         }
-        # Gamma = None
-        # e_c = None
-        # e_c_dB = None
-        # p_g = None  # photon generation rate
-        # ref = None  # Al sample box reflection array
-        # C_eff = 50 * 1e-21  # F/nm^2
 
     def import_data(self, file, JJ, C_eff=75 * 1e-21):
         self.C_eff = C_eff
