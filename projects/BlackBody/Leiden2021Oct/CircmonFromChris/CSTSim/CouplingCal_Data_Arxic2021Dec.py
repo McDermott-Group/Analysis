@@ -5,7 +5,7 @@ import copy
 
 ### parameters to be tuned
 e_eff = 6 # limit (1, 6.5), the voltage can also be built in to have a larger range
-C_eff = 100*1e-21   # Commonly used (50-100)
+C_eff = 200*1e-21   # Commonly used (50-100)
 Jbias_offset = 0   # mDAC should be +-1 mDAC basically +-5 GHz
 k = 1   # Coupling between radiator and receiver, this could be larger than one due to the
         # fact we can generate QPs locally at the recevier's test pad
@@ -15,11 +15,11 @@ k1 = 0.0   # coupling between on chip phonon mitigation
 f_SIM = 0.968
 ### parameteres tuned done
 
-JSFQ = [16*1e3, None, 0, 100*200, "Radiator"]   #[R, L, C, A]
-JQ1 = [16.6*1e3, 18.3*1e-9, 0, 193.8*121.8, "Receiver"]   #
-JQ2 = [13.2*1e3, 14.6*1e-9, 0, 350*126.6, "Receiver"]   #
-JQ3 = [19*1e3, 21*1e-9, 0, 310*126, "Receiver"]   #    some issue with Q3
-JQ4 = [15*1e3, 19.9*1e-9, 0, 184.4*122.5*2, "Receiver"]   #    some issue with Q3
+JSFQ = [16*1e3, None, 0, 100*200]   #[R, L, C, A]
+JQ1 = [16.6*1e3, 18.3*1e-9, 0, 193.8*121.8]   #
+JQ2 = [13.2*1e3, 14.6*1e-9, 0, 350*126.6]   #
+JQ3 = [19*1e3, 21*1e-9, 0, 310*126]   #    some issue with Q3
+JQ4 = [15*1e3, 19.9*1e-9, 0, 184.4*122.5*2]   #    some issue with Q3
 
 # fileSFQ = "testpad_1.5THz.txt"
 fileSFQ = "SFQ_1THz.txt"
@@ -37,37 +37,37 @@ fileQ4 = "Q4_full-chip.txt"
 SFQ = AntennaCoupling()
 SFQ.import_data(fileSFQ, JSFQ, C_eff=100*1e-21)
 f_SFQ = SFQ.Antenna["f"]
-ecSFQ = SFQ.Antenna["e_c_dB"]
-eSFQ = SFQ.Antenna["e_c"]
-pgSFQ = SFQ.Radiator["Gamma_rad"]
-refSFQ = SFQ.Al_Wall["Ref"]
-PhotonFlux = SFQ.Al_Wall["PhotonFlux"]
+ecSFQ = SFQ.e_c_dB
+eSFQ = SFQ.e_c
+pgSFQ = SFQ.p_g
+refSFQ = SFQ.ref
+
+# SFQ.plot()
 
 Q1 = AntennaCoupling()
 Q1.import_data(fileQ1, JQ1, C_eff=C_eff)
-# Z_ReQ1 = Q1.Antenna["Z_Re"]
+ecQ1 = Q1.e_c_dB
+eQ1 = Q1.e_c
+Z_ReQ1 = Q1.Antenna["Z_Re"]
 f_Q1 = Q1.Antenna["f"]
-eQ1 = Q1.Antenna["e_c"]
-ecQ1 = Q1.Antenna["e_c_dB"]
-AreaQ1 = Q1.Receiver["Area"]
 
 Q2 = AntennaCoupling()
 Q2.import_data(fileQ2, JQ2, C_eff=C_eff)
-eQ2 = Q2.Antenna["e_c"]
-ecQ2 = Q2.Antenna["e_c_dB"]
-AreaQ2 = Q2.Receiver["Area"]
+ecQ2 = Q2.e_c_dB
+eQ2 = Q2.e_c
+Z_ReQ2 = Q2.Antenna["Z_Re"]
 
 Q3 = AntennaCoupling()
 Q3.import_data(fileQ3, JQ3, C_eff=C_eff)
-eQ3 = Q3.Antenna["e_c"]
-ecQ3 = Q3.Antenna["e_c_dB"]
-AreaQ3 = Q3.Receiver["Area"]
+ecQ3 = Q3.e_c_dB
+eQ3 = Q3.e_c
+Z_ReQ3 = Q3.Antenna["Z_Re"]
 
 Q4 = AntennaCoupling()
 Q4.import_data(fileQ4, JQ4, C_eff=C_eff)
-eQ4 = Q4.Antenna["e_c"]
-ecQ4 = Q4.Antenna["e_c_dB"]
-AreaQ4 = Q4.Receiver["Area"]
+ecQ4 = Q4.e_c_dB
+eQ4 = Q4.e_c
+Z_ReQ4 = Q4.Antenna["Z_Re"]
 
 
 Q1_PSD = np.array([
@@ -507,19 +507,18 @@ Polished
 #
 # plt.show()
 
-
 """
-Calculate the noise bandwidth starts
+Calculate the noise bandwidth
 """
-# Tbb1 = 400e-3
-# Tbb2 = 463e-3
-# Tbb4 = 485e-3
-# PRQ1 = getPhotonRate(eQ1, f_SFQ, Tbb1)
-# PRQ2 = getPhotonRate(eQ2, f_SFQ, Tbb2)
-# PRQ4 = getPhotonRate(eQ4, f_SFQ, Tbb4)
-# print('PRQ1=', PRQ1)
-# print('PRQ2=', PRQ2)
-# print('PRQ4=', PRQ4)
+Tbb1 = 400e-3
+Tbb2 = 463e-3
+Tbb4 = 485e-3
+PRQ1 = getPhotonRate(eQ1, f_SFQ, Tbb1)
+PRQ2 = getPhotonRate(eQ2, f_SFQ, Tbb2)
+PRQ4 = getPhotonRate(eQ4, f_SFQ, Tbb4)
+print('PRQ1=', PRQ1)
+print('PRQ2=', PRQ2)
+print('PRQ4=', PRQ4)
 
 
 # DfQ1 = getNoiseBandwidth(eQ1, f_SFQ)
@@ -535,46 +534,18 @@ Calculate the noise bandwidth starts
 # print('TQ1=', TQ1)
 # print('TQ2=', TQ2)
 # print('TQ4=', TQ4)
-"""
-Calculate the noise bandwidth ends
-"""
 
-"""Polished 2022Jan15"""
+"""Polished 2021Dec07"""
 
-### Calculating the photons received
+### Calculating the photons generated
 
-# pgSFQQ1 = []
-# pgSFQQ2 = []
-# pgSFQQ4 = []
-# for i in range(len(pgSFQ)):
-#     pgSFQQ1.append(pgSFQ[i]*eQ1[i])
-#     pgSFQQ2.append(pgSFQ[i]*eQ2[i])
-#     pgSFQQ4.append(pgSFQ[i]*eQ4[i])
-
-Gamma_re_Q1 = []
-Gamma_re_Q2 = []
-Gamma_re_Q4 = []
-Gamma_re_withBase_Q1 = []
-Gamma_re_withBase_Q2 = []
-Gamma_re_withBase_Q4 = []
-ratioQ1 = 1.0/18
-ratioQ2 = 1.0/10
-ratioQ4 = 1.0/8
-base_Q1 = 1030.0
-base_Q2 = 12.8
-base_Q4 = 190.0
-for i in range(len(AreaQ1)):
-    gamma_re_Q1 = 0.5*PhotonFlux[i]*AreaQ1[i]*eQ1[i]
-    Gamma_re_Q1.append(gamma_re_Q1)
-    Gamma_re_withBase_Q1.append(gamma_re_Q1*ratioQ1 + base_Q1)
-
-    gamma_re_Q2 = 0.5*PhotonFlux[i]*AreaQ2[i]*eQ2[i]
-    Gamma_re_Q2.append(gamma_re_Q2)
-    Gamma_re_withBase_Q2.append(gamma_re_Q2*ratioQ2 + base_Q2)
-
-    gamma_re_Q4 = 0.5*PhotonFlux[i]*AreaQ4[i]*eQ4[i]
-    Gamma_re_Q4.append(gamma_re_Q4)
-    Gamma_re_withBase_Q4.append(gamma_re_Q4*ratioQ4 + base_Q4)
+pgSFQQ1 = []
+pgSFQQ2 = []
+pgSFQQ4 = []
+for i in range(len(pgSFQ)):
+    pgSFQQ1.append(pgSFQ[i]*eQ1[i])
+    pgSFQQ2.append(pgSFQ[i]*eQ2[i])
+    pgSFQQ4.append(pgSFQ[i]*eQ4[i])
 
 fig, axs = plt.subplots(2)
 
@@ -582,18 +553,15 @@ axs[0].plot(f_SFQ, eQ1, color="blue", marker="o", label='Q1')
 axs[0].plot(f_SFQ, eQ2, color="red", marker="o", label='Q2')
 axs[0].plot(f_SFQ, eQ4, color="green", marker="o", label='Q4')
 axs[0].plot(f_SFQ, eSFQ, color="black", marker="o", label='SFQ')
-# axs[0].plot(f_SFQ, eSFQ*eQ1, color="blue", marker="d", label='Q1 Total')
-# axs[0].plot(f_SFQ, eSFQ*eQ2, color="red", marker="d", label='Q2 Total')
-# axs[0].plot(f_SFQ, eSFQ*eQ4, color="green", marker="d", label='Q4 Total')
 # axs[0].plot(f_SFQ, pgSFQQ1, color="blue", marker="o", label='Q1_SFQ')
 # axs[0].plot(f_SFQ, pgSFQQ2, color="red", marker="o", label='Q2_SFQ')
 # axs[0].plot(f_SFQ, pgSFQQ4, color="green", marker="o", label='Q4_SFQ')
 axs[0].set_ylabel("Photon Generation Rate ($s^{-1}$)", color="black", fontsize=10)
 axs[0].set_xlim([50, 500])
-axs[0].set_ylim([1e-4, 2e-1])
+# axs[0].set_ylim([1e3, 1e9])
 axs[0].set_yscale('log')
 axs[0].grid()
-axs[0].legend(loc=3)
+axs[0].legend()
 # axs[0].set_ylim([-60, -20])
 
 Q1_PSD_pure = copy.deepcopy(Q1_PSD)
@@ -605,24 +573,18 @@ e_Q24 = 0.032 # from Q4 to Q2, e_Q24<=
 Q4_PSD_pure[:, 1] = Q4_PSD_pure[:, 1] - e_Q41*Q1_PSD[:, 1]
 Q2_PSD_pure[:, 1] = Q2_PSD_pure[:, 1] - e_Q21*Q1_PSD[:, 1]-e_Q24*Q4_PSD[:, 1]
 
-axs[1].plot(Q1_PSD[:, 0]*f_SIM, Q1_PSD[:, 1], 'b', label='Q1')
-axs[1].plot(f_SFQ, Gamma_re_withBase_Q1, 'b--', label='Q1 Total')
-axs[1].plot(Q2_PSD[:, 0]*f_SIM, Q2_PSD[:, 1], 'r', label='Q2')
-axs[1].plot(f_SFQ, Gamma_re_withBase_Q2, 'r--', label='Q2 Total')
-axs[1].plot(Q4_PSD[:, 0]*f_SIM, Q4_PSD[:, 1], 'g', label='Q4')
-axs[1].plot(f_SFQ, Gamma_re_withBase_Q4, 'g--', label='Q4 Total')
-# axs[1].plot(Q1_PSD[:, 0]*f_SIM, Q1_PSD_pure[:, 1], 'b--', label='Q1_pure')
-# axs[1].plot(Q2_PSD[:, 0]*f_SIM, Q2_PSD_pure[:, 1], 'r--', label='Q2_pure')
-# axs[1].plot(Q4_PSD[:, 0]*f_SIM, Q4_PSD_pure[:, 1], 'g--', label='Q4_pure')
+axs[1].plot(Q1_PSD[:, 0]*f_SIM, Q1_PSD[:, 1], color='b', label='Q1')
+axs[1].plot(Q2_PSD[:, 0]*f_SIM, Q2_PSD[:, 1], color='r', label='Q2')
+axs[1].plot(Q4_PSD[:, 0]*f_SIM, Q4_PSD[:, 1], color='g', label='Q4')
+axs[1].plot(Q1_PSD[:, 0]*f_SIM, Q1_PSD_pure[:, 1], 'b--', label='Q1_pure')
+axs[1].plot(Q2_PSD[:, 0]*f_SIM, Q2_PSD_pure[:, 1], 'r--', label='Q2_pure')
+axs[1].plot(Q4_PSD[:, 0]*f_SIM, Q4_PSD_pure[:, 1], 'g--', label='Q4_pure')
 
 axs[1].set_xlabel("Freq (GHz)", color="black", fontsize=10)
 axs[1].set_ylabel("PSD (Hz)", color="blue", fontsize=10)
 axs[1].set_yscale('log')
 axs[1].set_xlim([50, 500])
 axs[1].set_ylim([10, 10000])
-# axs[1].set_ylim([800, 8000]) # Q1
-# axs[1].set_ylim([10, 1000]) # Q2
-# axs[1].set_ylim([100, 5000]) # Q4
 axs[1].grid(True, which="both")
 axs[1].legend(loc=4)
 

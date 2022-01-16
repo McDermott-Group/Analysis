@@ -32,8 +32,8 @@ if 1: # import CST data
     ecJ1 = J1.Antenna["e_c_dB"]
     eJ1 = J1.Antenna["e_c"]
     pgJ1 = J1.Radiator["Gamma_rad"]
-    refJ1 = J1.Al_Wall["Ref"]
     x_qpJ1 = J1.Radiator["X_QP"]
+    refJ1 = J1.Al_Wall["Ref"]
     PhotonFlux = J1.Al_Wall["PhotonFlux"]
 
     Q1 = AntennaCoupling()
@@ -100,13 +100,13 @@ if 1:
     # plt.rcParams["figure.figsize"] = (6, 20)
     pgJ1Q2 = []
     x_qp2photon = []
-    Gamma_re = []
-    Gamma_withBase = []
+    Gamma_re = []   # photon received
+    Gamma_withBase = []  # total parity rate with baseline
     l_i = 50
     for i in range(len(Area)):
         Gamma_re.append(0.5*PhotonFlux[i]*Area[i]*eQ2[i])
 
-    ratio = 1.0/7   # for 190 GHz peak, 3.6, for 270 GHz, 7.0
+    ratio = 1.0/6   # for 190 GHz peak, 3.6, for 270 GHz, 7.0
     base = 110
     for i in range(len(pgJ1)):
         Gamma_withBase.append(ratio*Gamma_re[i] + base)
@@ -116,16 +116,16 @@ if 1:
                             gridspec_kw={'width_ratios': [3, 2], 'height_ratios': [2, 3],
                                          'hspace': 0.1, 'wspace': 0.05})
 
-    axs[0, 0].plot(f[l_i:], eJ1[l_i:], color="red", marker="o", markersize=4,
+    axs[0, 0].plot(f, eJ1, color="red", marker="o", markersize=4,
                 label='Radiator')
-    axs[0, 0].plot(f_Q2[l_i:], eQ2[l_i:], color="blue", marker="o", markersize=4,
+    axs[0, 0].plot(f_Q2, eQ2, color="blue", marker="o", markersize=4,
                 label='Receiver')
-    axs[0, 0].plot(f_Q2[l_i:], eJ1[l_i:]*eQ2[l_i:], color="purple", marker="o", markersize=4,
+    axs[0, 0].plot(f_Q2, eJ1*eQ2, color="purple", marker="o", markersize=4,
                 label='Total')
     axs[0, 0].set_ylabel('Coupling Efficiency', color="black", fontsize=10)
     axs[0, 0].set_yscale('log')
-    axs[0, 0].set_xlim([50, 600])
-    axs[0, 0].set_ylim([1e-6, 1e-1])
+    axs[0, 0].set_xlim([l_i, 600])
+    axs[0, 0].set_ylim([1e-6, 2e-1])
     axs[0, 0].legend(loc=4)
     # axs[0, 0].set_xlabel("Antenna Frequency (GHz)", color="black", fontsize=10)
 
@@ -144,28 +144,29 @@ if 1:
     axs[1, 0].set_yscale('log')
     axs[1, 0].set_xlim([50, 700])
     axs[1, 0].set_ylim([100, 1100])
-    axs[1, 0].legend(loc=3)
+    axs[1, 0].legend(loc=1)
     # axs[1, 0].share
 
     freq_l = 175
     freq_r = 310
 
 
-    axs[0, 1].plot(f[l_i:], eJ1[l_i:], color="red", marker="o", markersize=4,
+    axs[0, 1].plot(f, eJ1, color="red", marker="o", markersize=4,
                 label='Radiator Efficiency')
-    axs[0, 1].plot(f_Q2[l_i:], eQ2[l_i:], color="blue", marker="o", markersize=4,
+    axs[0, 1].plot(f_Q2, eQ2, color="blue", marker="o", markersize=4,
                 label='Receiver Efficiency')
-    axs[0, 1].plot(f_Q2[l_i:], eJ1[l_i:] * eQ2[l_i:], color="purple", marker="o", markersize=4,
+    axs[0, 1].plot(f_Q2, eJ1 * eQ2, color="purple", marker="o", markersize=4,
                 label='Total Efficiency')
     axs[0, 1].set_yscale('log')
     axs[0, 1].set_xlim([freq_l, freq_r])
-    axs[0, 1].set_ylim([1e-6, 1e-1])
+    axs[0, 1].set_ylim([1e-6, 2e-1])
     axs[0, 1].yaxis.tick_right()
     # axs[0, 1].set_xlabel("Antenna Frequency (GHz)", color="black", fontsize=10)
 
     axs[1, 1].plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, 'k-', label='$\Gamma_{Measured}$')
     # axs[1, 1].plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, color="black", marker="o", label='$\Gamma_{Measured}$')
-
+    axs[1, 1].plot(f_Q2, Gamma_withBase, color="grey", linestyle='-',
+                label='$\Gamma_{0}+\Gamma_{PAT}$')
     # axs[1].errorbar([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate,
     #                 yerr=Q2_J1ParityUncertainty, label='Q2', ecolor='k',
     #                 capthick=4, color='g')
@@ -211,7 +212,6 @@ if 0:
     # axs[1].grid(True, which="both")
     axs[1].grid(True, which="both")
     axs[1].legend(loc=4)
-
 
 plt.show()
 

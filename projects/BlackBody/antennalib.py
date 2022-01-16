@@ -410,7 +410,7 @@ class P1(object):
 
 class AntennaCoupling(object):
     """
-    This is analyze the CST simulation
+    This is to analyze the CST simulation
     """
 
     def __init__(self):
@@ -424,7 +424,6 @@ class AntennaCoupling(object):
             "e_c": [], # coupling efficiency
             "e_c_dB": [], # coupling efficiency in dB
         }
-
         self.Junction = {
             "R": None,
             "L": None,
@@ -434,7 +433,6 @@ class AntennaCoupling(object):
             "Ic": None,
             "ReoRa": None,
         }
-
         self.Receiver = {
             "Area": None,
         }
@@ -546,10 +544,18 @@ class AntennaCoupling(object):
         """
         f = self.Antenna["f"]
         e_eff = self.Antenna["e_eff"]
+        if 1: # Xmon
+            f_gap = 380e-6*e/h
+        else:   # Circmon
+            f_gap = 420e-6 * e / h
+        # print('f_gap=', f_gap)
         Area = []
         for fi in f:
             w = c / (fi * e_eff ** 0.5)  # wavelength
-            a = w**2/(4*pi)
+            if fi > f_gap:
+                a = w**2/(4*pi)
+            else:
+                a = 0.0
             Area.append(a)
         Area = np.asarray(Area)
         # print('f=', f[270:280])   # for 270 GHz, area=1.6*10^-8 m^2
@@ -562,10 +568,14 @@ class AntennaCoupling(object):
         QPs will be generated locally and suppress the energy and reduce the critical current
         :return:
         """
-        Vol = 40 * 1.6 * 0.1  # volume of the junction units um^3
+        if 1: # Xmon
+            Vol = 40 * 1.6 * 0.1  # volume of the junction units um^3
+            r = 1 / (350e-9)  # recombination rate sec^-1
+        else: # Circmon
+            Vol = 30 * 0.2 * 0.1  # volume of the junction units um^3
+            r = 1 / (400e-9)  # recombination rate sec^-1
         n_cp = 4e6  # cooper pair density, units /um^3
         phi_0 = h / (2 * e) # flux quantum
-        r = 1 / (350e-9)  # recombination rate sec^-1
 
         Ic_f = []
         X_QP = []
@@ -595,17 +605,17 @@ class AntennaCoupling(object):
             X_QP.append(x_qp)
             G0.append(g0)
 
-            # plt.plot([i*1e9 for i in Ic_f])
-            # # plt.plot(X_QP)
-            # # plt.plot(g0)
-            # plt.xlabel('freq (GHz)')
-            # # plt.ylabel('x_qp')
-            # plt.ylabel('Ic (nA)')
-            # # plt.xlim([50, 600])
-            # plt.ylim([5.5, 9.5])
-            # # plt.ylim([-0.05, 0.45])
-            # # plt.grid(True)
-            # plt.show()
+        # plt.plot([i*1e9 for i in Ic_f])
+        # plt.plot(X_QP)
+        # # # plt.plot(g0)
+        # plt.xlabel('freq (GHz)')
+        # plt.ylabel('x_qp')
+        # # plt.ylabel('Ic (nA)')
+        # plt.xlim([50, 600])
+        # # plt.ylim([5.5, 9.5])
+        # # # plt.ylim([-0.05, 0.45])
+        # # # plt.grid(True)
+        # plt.show()
 
         self.Radiator["X_QP"] = X_QP
         self.Radiator["Ic_f"] = Ic_f
@@ -687,18 +697,6 @@ class AntennaCoupling(object):
         # print('PhotonFlux=', P_f[265:275])
         self.Al_Wall["PhotonFlux"] = P_f
         self.Al_Wall["S"] = S_f
-
-    # def _getIcFromTemp(self, T):
-    #     """
-    #     Get critical current from temperature
-    #     :param T:
-    #     :return:
-    #     """
-    #     Rn = self.Junction["R"]
-    #     Delta = 190.0 * 1e-6 * e
-    #     IcRn = (pi / 4) * (2 * Delta / e) * np.tanh(Delta / (2 * k * T))
-    #     Ic = IcRn / Rn
-    #     return Ic
 
     def plot(self):
         f = self.Antenna["f"]
