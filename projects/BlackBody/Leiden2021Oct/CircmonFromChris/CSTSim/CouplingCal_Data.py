@@ -606,11 +606,11 @@ Q4_PSD_pure[:, 1] = Q4_PSD_pure[:, 1] - e_Q41*Q1_PSD[:, 1]
 Q2_PSD_pure[:, 1] = Q2_PSD_pure[:, 1] - e_Q21*Q1_PSD[:, 1]-e_Q24*Q4_PSD[:, 1]
 
 axs[1].plot(Q1_PSD[:, 0]*f_SIM, Q1_PSD[:, 1], 'b', label='Q1')
-axs[1].plot(f_SFQ, Gamma_re_withBase_Q1, 'b--', label='Q1 Total')
+# axs[1].plot(f_SFQ, Gamma_re_withBase_Q1, 'b--', label='Q1 Total')
 axs[1].plot(Q2_PSD[:, 0]*f_SIM, Q2_PSD[:, 1], 'r', label='Q2')
-axs[1].plot(f_SFQ, Gamma_re_withBase_Q2, 'r--', label='Q2 Total')
+# axs[1].plot(f_SFQ, Gamma_re_withBase_Q2, 'r--', label='Q2 Total')
 axs[1].plot(Q4_PSD[:, 0]*f_SIM, Q4_PSD[:, 1], 'g', label='Q4')
-axs[1].plot(f_SFQ, Gamma_re_withBase_Q4, 'g--', label='Q4 Total')
+# axs[1].plot(f_SFQ, Gamma_re_withBase_Q4, 'g--', label='Q4 Total')
 # axs[1].plot(Q1_PSD[:, 0]*f_SIM, Q1_PSD_pure[:, 1], 'b--', label='Q1_pure')
 # axs[1].plot(Q2_PSD[:, 0]*f_SIM, Q2_PSD_pure[:, 1], 'r--', label='Q2_pure')
 # axs[1].plot(Q4_PSD[:, 0]*f_SIM, Q4_PSD_pure[:, 1], 'g--', label='Q4_pure')
@@ -618,7 +618,7 @@ axs[1].plot(f_SFQ, Gamma_re_withBase_Q4, 'g--', label='Q4 Total')
 axs[1].set_xlabel("Freq (GHz)", color="black", fontsize=10)
 axs[1].set_ylabel("PSD (Hz)", color="blue", fontsize=10)
 axs[1].set_yscale('log')
-axs[1].set_xlim([50, 500])
+axs[1].set_xlim([50, 700])
 axs[1].set_ylim([10, 10000])
 # axs[1].set_ylim([800, 8000]) # Q1
 # axs[1].set_ylim([10, 1000]) # Q2

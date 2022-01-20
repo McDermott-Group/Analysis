@@ -570,10 +570,11 @@ class AntennaCoupling(object):
         """
         if 1: # Xmon
             Vol = 40 * 1.6 * 0.1  # volume of the junction units um^3
-            r = 1 / (350e-9)  # recombination rate sec^-1
+            r = 1 / (400e-9)  # recombination rate sec^-1
         else: # Circmon
             Vol = 30 * 0.2 * 0.1  # volume of the junction units um^3
             r = 1 / (400e-9)  # recombination rate sec^-1
+        Vol = Vol*0.17   # QP peak at the center, effective volume
         n_cp = 4e6  # cooper pair density, units /um^3
         phi_0 = h / (2 * e) # flux quantum
 
@@ -606,15 +607,21 @@ class AntennaCoupling(object):
             G0.append(g0)
 
         # plt.plot([i*1e9 for i in Ic_f])
-        # plt.plot(X_QP)
-        # # # plt.plot(g0)
+        X_QP = np.array(X_QP)
+
+        # plt.plot(X_QP*X_QP)
+        # plt.plot(f*f*5/1e25)
+        # plt.loglog(X_QP*X_QP)
+        # # # # plt.plot(g0)
         # plt.xlabel('freq (GHz)')
-        # plt.ylabel('x_qp')
-        # # plt.ylabel('Ic (nA)')
-        # plt.xlim([50, 600])
-        # # plt.ylim([5.5, 9.5])
-        # # # plt.ylim([-0.05, 0.45])
-        # # # plt.grid(True)
+        # plt.ylabel('x_qp^2')
+        # # # plt.ylabel('Ic (nA)')
+        # plt.xlim([100, 1000])
+        # # # plt.ylim([5.5, 9.5])
+        # # # # plt.ylim([-0.05, 0.45])
+        # plt.grid(True)
+        # # plt.xscale('log')
+        # # plt.yscale('log')
         # plt.show()
 
         self.Radiator["X_QP"] = X_QP

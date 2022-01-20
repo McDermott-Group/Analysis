@@ -6,7 +6,7 @@ import numpy as np
 if 1: # import CST data
     ### parameters to be tuned
     e_eff = 6  # limit (1, 6.5), the voltage can also be built in to have a larger range
-    C_eff = 90 * 1e-21  # Commonly used (50-100)
+    C_eff = 75 * 1e-21  # Commonly used (50-100) 75, 88
     Jbias_offset = 1  # mDAC should be +-1 mDAC basically +-5 GHz
     k = 1  # Coupling between radiator and receiver, this could be larger than one due to the
     # fact we can generate QPs locally at the recevier's test pad
@@ -106,8 +106,10 @@ if 1:
     for i in range(len(Area)):
         Gamma_re.append(0.5*PhotonFlux[i]*Area[i]*eQ2[i])
 
-    ratio = 1.0/6   # for 190 GHz peak, 3.6, for 270 GHz, 7.0
+    ratio = 1.0/4.6   # for 190 GHz peak, 3.6, for 270 GHz, 7.0
+    # ratio = 1.0/1  # for 190 GHz peak, 3.6, for 270 GHz, 7.0
     base = 110
+    # base = 0
     for i in range(len(pgJ1)):
         Gamma_withBase.append(ratio*Gamma_re[i] + base)
         # x_qp2photon.append(x_qpJ1[i]**2*5000)
@@ -127,16 +129,14 @@ if 1:
     axs[0, 0].set_xlim([l_i, 600])
     axs[0, 0].set_ylim([1e-6, 2e-1])
     axs[0, 0].legend(loc=4)
-    # axs[0, 0].set_xlabel("Antenna Frequency (GHz)", color="black", fontsize=10)
 
-    axs[1, 0].plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, 'k-', label='$\Gamma_{Measured}$')
-    axs[1, 0].axhline(y=base, color="blue", linestyle='--', label='$\Gamma_{0}$')
-    axs[1, 0].plot(f_Q2[l_i:], Gamma_withBase[l_i:], color="grey", linestyle='-',
+    axs[1, 0].plot(f_Q2, Gamma_withBase, color="grey", linestyle='-',  linewidth=2,
                 label='$\Gamma_{0}+\Gamma_{PAT}$')
-    # axs[1, 0].plot(f_Q2[l_i:], pgJ1Q2_scaled[l_i:],
-    #             label='$photon generation rate$')
-    # axs[1].plot(f_Q2[l_i:], x_qp2photon[l_i:], color="grey", linestyle='-',
-    #             label='x_qp')
+    axs[1, 0].plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, color="black", linewidth=2,
+                   marker="o", markersize=6, label='$\Gamma_{Measured}$')
+    # axs[1, 0].plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, color="black", linestyle='d', markersize=4, label='$\Gamma_{Measured}$')
+    axs[1, 0].axhline(y=base, color="blue", linestyle='-', label='$\Gamma_{0}$')
+
 
     axs[1, 0].set_xlabel("Radiator Josephson Frequency (GHz)", color="black",
                       fontsize=10)
@@ -163,10 +163,10 @@ if 1:
     axs[0, 1].yaxis.tick_right()
     # axs[0, 1].set_xlabel("Antenna Frequency (GHz)", color="black", fontsize=10)
 
-    axs[1, 1].plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, 'k-', label='$\Gamma_{Measured}$')
-    # axs[1, 1].plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, color="black", marker="o", label='$\Gamma_{Measured}$')
-    axs[1, 1].plot(f_Q2, Gamma_withBase, color="grey", linestyle='-',
+    axs[1, 1].plot(f_Q2, Gamma_withBase, color="grey", linestyle='-',  linewidth=4,
                 label='$\Gamma_{0}+\Gamma_{PAT}$')
+    axs[1, 1].plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, color="black", linewidth=4,
+                   marker="o", markersize=6, label='$\Gamma_{Measured}$')
     # axs[1].errorbar([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate,
     #                 yerr=Q2_J1ParityUncertainty, label='Q2', ecolor='k',
     #                 capthick=4, color='g')
