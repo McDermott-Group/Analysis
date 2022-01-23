@@ -260,11 +260,11 @@ plt.axvline(x=DAC_Al * f, color='k', linestyle='--', linewidth=4, label='JJ Al G
 
 plt.xlabel('J6 Weak Radiator Josephson Frequency (GHz)')
 plt.ylabel('P1')
-plt.xscale('log')
+# plt.xscale('log')
 plt.yscale('log')
 plt.grid(True, which="both")
 plt.legend(loc=2)
-# plt.xlim([0, 1500])
+plt.xlim([0, 800])
 # plt.ylim([10, 100000])
 plt.show()
 

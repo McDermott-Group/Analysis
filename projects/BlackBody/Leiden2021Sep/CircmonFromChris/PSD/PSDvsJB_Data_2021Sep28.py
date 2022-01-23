@@ -5,7 +5,7 @@ Z:\mcdermott-group\data\Antenna\Circmon\Liu\CW20180514A_Ox2\J6Radiator_2021Sep28
 Fitting method Chris' no white noise verison
 
 """
-import noiselib
+# import noiselib
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -85,6 +85,9 @@ plt.plot(Q4[:, 0]*f, Q4[:, 1], color='y', label='Q4')
 plt.xlabel('Radiator Josephson Frequency (GHz)')
 plt.ylabel('PSD (Hz)')
 plt.yscale('log')
+plt.xlim([0, 600])
+plt.ylim([1e1, 1e4])
+plt.title('SFQ J6 Radiator Sep Orthogonal (maybe J8)')
 plt.grid()
 plt.legend(loc=1)
 plt.show()

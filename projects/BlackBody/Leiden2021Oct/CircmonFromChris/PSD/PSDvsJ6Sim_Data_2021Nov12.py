@@ -6,7 +6,7 @@ Z:\mcdermott-group\data\Antenna\Circmon\Liu\CW20180514A_Ox2\2021Nov16_QB4_PSD_J6
 Fitting method Chris' no white noise verison
 
 """
-import noiselib
+# import noiselib
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -195,6 +195,7 @@ plt.xlabel('Radiator Josephson Frequency (GHz)')
 plt.ylabel('PSD (Hz)')
 plt.yscale('log')
 plt.grid(True, which="both")
+plt.title('SFQ J6 Wiggles')
 plt.legend(loc=1)
 # plt.xlim([0, 1500])
 # plt.ylim([10, 100000])

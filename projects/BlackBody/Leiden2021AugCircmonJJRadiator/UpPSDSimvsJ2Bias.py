@@ -13,46 +13,46 @@ import matplotlib.pyplot as plt
 import numpy as np
 from antennalib import AntennaCoupling
 
-for _ in range(1):   # CST Sim
-    JJ2 = [4.8 * 1e3, None, 0, 320 * 123 * 2, "Radiator"]  # [R, L, C, A]
-    JQ1 = [16.6 * 1e3, 18.3 * 1e-9, 0, 193.8 * 121.8 * 2, "Receiver"]  #
-    JQ2 = [13.2 * 1e3, 14.6 * 1e-9, 0, 350 * 126.6, "Receiver"]  #
-    JQ3 = [19 * 1e3, 21 * 1e-9, 0, 310 * 126, "Receiver"]  # some issue with Q3
-    JQ4 = [15 * 1e3, 19.9 * 1e-9, 0, 184.4 * 122.5 * 2, "Receiver"]  # some issue with Q3
-
-    fileJ2 = "J2.txt"
-    # fileQ1 = "Q1.txt"
-    fileQ1 = "Q1_leads.txt"
-    fileQ2 = "Q2.txt"
-    fileQ3 = "Q3.txt"
-    fileQ4 = "Q4.txt"
-
-    J2 = AntennaCoupling()
-    J2.import_data(fileJ2, JJ2)
-    f = J2.Antenna["f"]
-    ecJ2 = J2.e_c_dB
-    # J2.plot()
-
-    Q1 = AntennaCoupling()
-    Q1.import_data(fileQ1, JQ1)
-    # Q1.plot()
-    ecQ1 = Q1.e_c_dB
-    Z_ReQ1 = Q1.Antenna["Z_Re"]
-
-    Q2 = AntennaCoupling()
-    Q2.import_data(fileQ2, JQ2)
-    ecQ2 = Q2.e_c_dB
-    Z_ReQ2 = Q2.Antenna["Z_Re"]
-
-    Q3 = AntennaCoupling()
-    Q3.import_data(fileQ3, JQ3)
-    ecQ3 = Q3.e_c_dB
-    Z_ReQ3 = Q3.Antenna["Z_Re"]
-
-    Q4 = AntennaCoupling()
-    Q4.import_data(fileQ4, JQ4)
-    ecQ4 = Q4.e_c_dB
-    Z_ReQ4 = Q4.Antenna["Z_Re"]
+# for _ in range(1):   # CST Sim
+#     JJ2 = [4.8 * 1e3, None, 0, 320 * 123 * 2, "Radiator"]  # [R, L, C, A]
+#     JQ1 = [16.6 * 1e3, 18.3 * 1e-9, 0, 193.8 * 121.8 * 2, "Receiver"]  #
+#     JQ2 = [13.2 * 1e3, 14.6 * 1e-9, 0, 350 * 126.6, "Receiver"]  #
+#     JQ3 = [19 * 1e3, 21 * 1e-9, 0, 310 * 126, "Receiver"]  # some issue with Q3
+#     JQ4 = [15 * 1e3, 19.9 * 1e-9, 0, 184.4 * 122.5 * 2, "Receiver"]  # some issue with Q3
+#
+#     fileJ2 = "J2.txt"
+#     # fileQ1 = "Q1.txt"
+#     fileQ1 = "Q1_leads.txt"
+#     fileQ2 = "Q2.txt"
+#     fileQ3 = "Q3.txt"
+#     fileQ4 = "Q4.txt"
+#
+#     J2 = AntennaCoupling()
+#     J2.import_data(fileJ2, JJ2)
+#     f = J2.Antenna["f"]
+#     ecJ2 = J2.e_c_dB
+#     # J2.plot()
+#
+#     Q1 = AntennaCoupling()
+#     Q1.import_data(fileQ1, JQ1)
+#     # Q1.plot()
+#     ecQ1 = Q1.e_c_dB
+#     Z_ReQ1 = Q1.Antenna["Z_Re"]
+#
+#     Q2 = AntennaCoupling()
+#     Q2.import_data(fileQ2, JQ2)
+#     ecQ2 = Q2.e_c_dB
+#     Z_ReQ2 = Q2.Antenna["Z_Re"]
+#
+#     Q3 = AntennaCoupling()
+#     Q3.import_data(fileQ3, JQ3)
+#     ecQ3 = Q3.e_c_dB
+#     Z_ReQ3 = Q3.Antenna["Z_Re"]
+#
+#     Q4 = AntennaCoupling()
+#     Q4.import_data(fileQ4, JQ4)
+#     ecQ4 = Q4.e_c_dB
+#     Z_ReQ4 = Q4.Antenna["Z_Re"]
 
 J2_Bias_Q1 = np.array(
     [0., 10., 16.3, 18.3, 20.3, 22.3, 24.3, 26.3, 28.3, 30.3, 32.299, 34.3,
@@ -538,14 +538,14 @@ fig, (ax1, ax2) = plt.subplots(2)
 # plt.legend(loc=1)
 # plt.show()
 
-fk = 4.604
-# ax1.plot(Q1[:, 0] * fk, Q1[:, 1], color='b', label='Q1_PSD')
-# ax1.plot(Q2[:, 0] * fk, Q2[:, 1], color='r', label='Q2_PSD')
-ax1.plot(Q4[:, 0] * fk, Q4[:, 1], color='y', label='Q4_PSD')
-# ax1.set_xlabel('Radiator Josephson Frequency (GHz)')
-ax1.set_ylabel('Rate (Hz)')
-ax1.set_yscale('log')
-ax1.grid()
+# fk = 4.604
+# # ax1.plot(Q1[:, 0] * fk, Q1[:, 1], color='b', label='Q1_PSD')
+# # ax1.plot(Q2[:, 0] * fk, Q2[:, 1], color='r', label='Q2_PSD')
+# ax1.plot(Q4[:, 0] * fk, Q4[:, 1], color='y', label='Q4_PSD')
+# # ax1.set_xlabel('Radiator Josephson Frequency (GHz)')
+# ax1.set_ylabel('Rate (Hz)')
+# ax1.set_yscale('log')
+# ax1.grid()
 # plt.show()
 
 # plt.figure(1)
@@ -560,40 +560,56 @@ ax1.grid()
 # plt.draw()
 # plt.show()
 
+Q1_Up_Data = []
+for i in range(len(J2_Bias_Q1)):
+    d = [J2_Bias_Q1[i], GammaUp_J2_Q1[i]]
+    Q1_Up_Data.append(d)
+np.savetxt('2021SepCircRadiator_Q1_Up_Data.txt', Q1_Up_Data)
+Q2_Up_Data = []
+for i in range(len(J2_Bias_Q2)):
+    d = [J2_Bias_Q2[i], GammaUp_J2_Q2[i]]
+    Q2_Up_Data.append(d)
+np.savetxt('2021SepCircRadiator_Q2_Up_Data.txt', Q2_Up_Data)
+Q4_Up_Data = []
+for i in range(len(J2_Bias_Q4)):
+    d = [J2_Bias_Q4[i], GammaUp_J2_Q4[i]]
+    Q4_Up_Data.append(d)
+np.savetxt('2021SepCircRadiator_Q4_Up_Data.txt', Q4_Up_Data)
+
 # plt.figure(2)
-fk = 4.604
+# fk = 4.604
 # ax1.plot(J2_Bias_Q1 * fk, GammaUp_J2_Q1, '--', color='b', label='Q1_Up')
 # ax1.plot(J2_Bias_Q2 * fk, GammaUp_J2_Q2, '--', color='r', label='Q2_Up')
-ax1.plot(J2_Bias_Q4 * fk, GammaUp_J2_Q4, '--', color='y', label='Q4_Up')
+# ax1.plot(J2_Bias_Q4 * fk, GammaUp_J2_Q4, '--', color='y', label='Q4_Up')
 # ax1.xlabel('J2 Radiation (GHz)')
 # ax1.ylabel('Gamma Up (Hz)')
 # ax1.grid()
-ax1.legend()
-ax1.set_xlim([0, 500])
-ax1.set_ylim([50, 100000])
+# ax1.legend()
+# ax1.set_xlim([0, 500])
+# ax1.set_ylim([50, 100000])
 # ax1.yscale('log')
 # plt.show()
 
 ### CST Sim
 
-ecJ2 = ecJ2*1.0
-k = 0.0
-f = f/1e9
-# print('f=', f)
-# print('ecQ1+ecJ2*k=', ecQ1+ecJ2*k)
-ax2.plot(f, ecQ1+ecJ2*k, color='b', label='Q1')
-ax2.plot(f, ecQ2+ecJ2*k, color='r', label='Q2')
-ax2.plot(f, ecQ3+ecJ2*k, color='k', label='Q3')
-ax2.plot(f, ecQ4+ecJ2*k, color='y', label='Q4')
-# ax2.plot(Q2[:, 0] * fk, Q2[:, 0] * 0-80, color='r', label='plot_Purpose')
-ax2.set_xlim([0, 500])
-ax2.set_ylim([-70, 0])
-ax2.set_ylabel('Coupling efficiency')
-ax2.set_xlabel('J2 Radiation (GHz)')
-# plt.plot(f, ecJ2, color='y', label='J2')
-# ax2.xlabel('Freq')
-# ax2.ylabel('Coupling efficiency')
-ax2.legend()
-ax2.grid()
+# ecJ2 = ecJ2*1.0
+# k = 0.0
+# f = f/1e9
+# # print('f=', f)
+# # print('ecQ1+ecJ2*k=', ecQ1+ecJ2*k)
+# ax2.plot(f, ecQ1+ecJ2*k, color='b', label='Q1')
+# ax2.plot(f, ecQ2+ecJ2*k, color='r', label='Q2')
+# ax2.plot(f, ecQ3+ecJ2*k, color='k', label='Q3')
+# ax2.plot(f, ecQ4+ecJ2*k, color='y', label='Q4')
+# # ax2.plot(Q2[:, 0] * fk, Q2[:, 0] * 0-80, color='r', label='plot_Purpose')
+# ax2.set_xlim([0, 500])
+# ax2.set_ylim([-70, 0])
+# ax2.set_ylabel('Coupling efficiency')
+# ax2.set_xlabel('J2 Radiation (GHz)')
+# # plt.plot(f, ecJ2, color='y', label='J2')
+# # ax2.xlabel('Freq')
+# # ax2.ylabel('Coupling efficiency')
+# ax2.legend()
+# ax2.grid()
 
-plt.show()
+# plt.show()

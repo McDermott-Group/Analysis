@@ -544,7 +544,7 @@ class AntennaCoupling(object):
         """
         f = self.Antenna["f"]
         e_eff = self.Antenna["e_eff"]
-        if 1: # Xmon
+        if 0: # Xmon
             f_gap = 380e-6*e/h
         else:   # Circmon
             f_gap = 420e-6 * e / h
@@ -552,10 +552,11 @@ class AntennaCoupling(object):
         Area = []
         for fi in f:
             w = c / (fi * e_eff ** 0.5)  # wavelength
-            if fi > f_gap:
-                a = w**2/(4*pi)
-            else:
-                a = 0.0
+            a = w ** 2 / (4 * pi)
+            # if fi > f_gap:
+            #     a = w**2/(4*pi)
+            # else:
+            #     a = 0.0
             Area.append(a)
         Area = np.asarray(Area)
         # print('f=', f[270:280])   # for 270 GHz, area=1.6*10^-8 m^2
@@ -568,13 +569,14 @@ class AntennaCoupling(object):
         QPs will be generated locally and suppress the energy and reduce the critical current
         :return:
         """
-        if 1: # Xmon
+        if 0: # Xmon
             Vol = 40 * 1.6 * 0.1  # volume of the junction units um^3
             r = 1 / (400e-9)  # recombination rate sec^-1
+            Vol = Vol * 0.17
         else: # Circmon
-            Vol = 30 * 0.2 * 0.1  # volume of the junction units um^3
+            Vol = 36 * 1 * 0.1  # volume of the junction units um^3
             r = 1 / (400e-9)  # recombination rate sec^-1
-        Vol = Vol*0.17   # QP peak at the center, effective volume
+            Vol = Vol*0.5   # QP peak at the center, effective volume
         n_cp = 4e6  # cooper pair density, units /um^3
         phi_0 = h / (2 * e) # flux quantum
 
@@ -606,23 +608,25 @@ class AntennaCoupling(object):
             X_QP.append(x_qp)
             G0.append(g0)
 
-        # plt.plot([i*1e9 for i in Ic_f])
         X_QP = np.array(X_QP)
+        Ic_f = np.array(Ic_f)
+        if 0:
+            plt.figure(figsize=(4, 3))
+            if 0:   # plot Ic
+                plt.plot(Ic_f*1.0e9)
+                plt.ylabel('Ic (nA)')
+                plt.ylim([4.5, 9.5])
+            else:   # plot x_QP
+                plt.plot(X_QP)
+                plt.ylabel('x_qp')
+                plt.ylim([-0.01, 0.5])
 
-        # plt.plot(X_QP*X_QP)
-        # plt.plot(f*f*5/1e25)
-        # plt.loglog(X_QP*X_QP)
-        # # # # plt.plot(g0)
-        # plt.xlabel('freq (GHz)')
-        # plt.ylabel('x_qp^2')
-        # # # plt.ylabel('Ic (nA)')
-        # plt.xlim([100, 1000])
-        # # # plt.ylim([5.5, 9.5])
-        # # # # plt.ylim([-0.05, 0.45])
-        # plt.grid(True)
-        # # plt.xscale('log')
-        # # plt.yscale('log')
-        # plt.show()
+            plt.xlabel('freq (GHz)')
+            plt.xlim([50, 700])
+            plt.grid(True)
+            # # plt.xscale('log')
+            # # plt.yscale('log')
+            plt.show()
 
         self.Radiator["X_QP"] = X_QP
         self.Radiator["Ic_f"] = Ic_f

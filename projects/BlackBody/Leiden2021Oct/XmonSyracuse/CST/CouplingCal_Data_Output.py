@@ -876,12 +876,12 @@ Q2_P1[:, 0] = (Q2_P1[:, 0]) * 1000
 # for i in range(len(Q1_J1Bias)):
 #     d = [Q1_J1Bias[i], Q1_J1ParityRate[i], Q1_J1ParityUncertainty[i], Q1_J1Fidelity[i]]
 #     Q1_PSD_Data.append(d)
-# np.savetxt('Q1_PSD_Data.txt', Q1_PSD_Data)
+# np.savetxt('2021SepCircRadiator_Q1_PSD_Data.txt', Q1_PSD_Data)
 # Q2_PSD_Data = []
 # for i in range(len(Q2_J1Bias)):
 #     d = [Q2_J1Bias[i], Q2_J1ParityRate[i], Q2_J1ParityUncertainty[i], Q2_J1Fidelity[i]]
 #     Q2_PSD_Data.append(d)
-# np.savetxt('Q2_PSD_Data.txt', Q2_PSD_Data)
+# np.savetxt('2021SepCircRadiator_Q2_PSD_Data.txt', Q2_PSD_Data)
 # Q3_PSD_Data = []
 # for i in range(len(Q3_J1Bias)):
 #     d = [Q3_J1Bias[i], Q3_J1ParityRate[i], Q3_J1ParityUncertainty[i], Q3_J1Fidelity[i]]

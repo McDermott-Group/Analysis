@@ -146,7 +146,7 @@ std_J2_Q1 = np.array([
     0.03139376, 0.03205012, 0.038604, 0.02919936, 0.03071494,
     0.02983059, 0.03442986, 0.02924543, 0.02922662, 0.03580658,
     0.0330152, 0.03317347, 0.02790388, 0.03103452, 0.02689269,
-    0.03274719, 0.03427018, 0.03248586])/np.sqrt(50)
+    0.03274719, 0.03427018, 0.03248586]) / np.sqrt(50)
 std_J2_Q2 = np.array([
     0.00430962, 0.00507592, 0.00487925, 0.004967, 0.00457932,
     0.00567128, 0.00554866, 0.00497015, 0.00477919, 0.00624053,
@@ -163,7 +163,7 @@ std_J2_Q2 = np.array([
     0.00620988, 0.00502148, 0.00521502, 0.00518435, 0.00525949,
     0.00518341, 0.00588383, 0.00543443, 0.00535055, 0.00553482,
     0.00518769, 0.00397268, 0.00473232, 0.00497968, 0.00520334,
-    0.00504387, 0.00475248, 0.0053961])/np.sqrt(50)
+    0.00504387, 0.00475248, 0.0053961]) / np.sqrt(50)
 std_J2_Q3 = np.array([
     0.02922061, 0.0303808, 0.03330525, 0.03483273, 0.0374707,
     0.02965721, 0.03117199, 0.03443822, 0.03563359, 0.03266602,
@@ -180,7 +180,7 @@ std_J2_Q3 = np.array([
     0.03105977, 0.03095276, 0.03198494, 0.0308985, 0.03509738,
     0.0342831, 0.02895869, 0.03502435, 0.03242483, 0.02950574,
     0.03189735, 0.03385271, 0.03130426, 0.04132375, 0.04416565,
-    0.04057942, 0.04070249, 0.044247])/np.sqrt(50)
+    0.04057942, 0.04070249, 0.044247]) / np.sqrt(50)
 
 std_J2_Q4 = np.array([
     0.00656026, 0.00536442, 0.0056219, 0.00498215, 0.00589264,
@@ -198,7 +198,7 @@ std_J2_Q4 = np.array([
     0.00798229, 0.00568245, 0.00705475, 0.00719529, 0.00728284,
     0.007272, 0.00643282, 0.00749999, 0.00624089, 0.00515667,
     0.00620199, 0.00579737, 0.00602301, 0.00578455, 0.00518294,
-    0.00576435, 0.00577453, 0.00652034])/np.sqrt(50)
+    0.00576435, 0.00577453, 0.00652034]) / np.sqrt(50)
 
 ### More Q2
 J2_Bias_Q2_More = np.array([
@@ -234,7 +234,7 @@ std_J2_Q2_More = np.array([
     0.00613848, 0.00594264, 0.00534149, 0.00612965, 0.00545249,
     0.00582748, 0.0054802, 0.0050062, 0.00554411, 0.00581854,
     0.00517684, 0.00584991, 0.00500847, 0.00568827, 0.00602893,
-    0.00554209, 0.0054218, 0.00537498, 0.00556183, 0.00548418])/np.sqrt(200)
+    0.00554209, 0.0054218, 0.00537498, 0.00556183, 0.00548418]) / np.sqrt(200)
 
 J2_Bias_Q2_Combined = np.array([
     70., 70.5, 71., 71.5, 72., 72.5, 73., 73.5, 74., 74.5, 75.,
@@ -270,7 +270,7 @@ std_J2_Q2_Combined = np.array([
     0.00606621, 0.00586147, 0.00554733, 0.00592742, 0.00541576,
     0.00570761, 0.00546448, 0.00512412, 0.00561382, 0.00574388,
     0.00521264, 0.00579644, 0.00510764, 0.00539503, 0.00579349,
-    0.00544213, 0.00544439, 0.00531134, 0.00541793, 0.00546723])/np.sqrt(250)
+    0.00544213, 0.00544439, 0.00531134, 0.00541793, 0.00546723]) / np.sqrt(250)
 
 ### Combine the Q2 data together
 J2_Bias_Q2 = np.concatenate((J2_Bias_Q2[:18], J2_Bias_Q2_Combined))
@@ -287,14 +287,36 @@ std_J2_Q2 = np.concatenate((std_J2_Q2[:18], std_J2_Q2_Combined))
 # plt.legend(loc=1)
 # plt.show()
 
-f = 4.604
-plt.errorbar(J2_Bias_Q1*f, P1_J2_Q1, color='b', yerr=std_J2_Q1, label='Q1')
-plt.errorbar(J2_Bias_Q2*f, P1_J2_Q2, color='r', yerr=std_J2_Q2, label='Q2')
-plt.errorbar(J2_Bias_Q3*f, P1_J2_Q3, color='k', yerr=std_J2_Q3, label='Q3')
-plt.errorbar(J2_Bias_Q4*f, P1_J2_Q4, color='y', yerr=std_J2_Q4, label='Q4')
-plt.xlabel('Radiator Josephson Frequency (GHz)')
-plt.ylabel('P1')
-plt.yscale('log')
-# plt.grid()
-plt.legend(loc=1)
-plt.show()
+# f = 4.604
+# plt.errorbar(J2_Bias_Q1*f, P1_J2_Q1, color='b', yerr=std_J2_Q1, label='Q1')
+# plt.errorbar(J2_Bias_Q2*f, P1_J2_Q2, color='r', yerr=std_J2_Q2, label='Q2')
+# plt.errorbar(J2_Bias_Q3*f, P1_J2_Q3, color='k', yerr=std_J2_Q3, label='Q3')
+# plt.errorbar(J2_Bias_Q4*f, P1_J2_Q4, color='y', yerr=std_J2_Q4, label='Q4')
+# plt.xlabel('Radiator Josephson Frequency (GHz)')
+# plt.ylabel('P1')
+# plt.yscale('log')
+# plt.title('Circmon J2 Radiator')
+# # plt.grid()
+# plt.legend(loc=1)
+# plt.show()
+
+Q1_P1_Data = []
+for i in range(len(J2_Bias_Q1)):
+    d = [J2_Bias_Q1[i], P1_J2_Q1[i], std_J2_Q1[i]]
+    Q1_P1_Data.append(d)
+np.savetxt('2021SepCircRadiator_Q1_P1_Data.txt', Q1_P1_Data)
+# Q2_P1_Data = []
+# for i in range(len(J2_Bias_Q2)):
+#     d = [J2_Bias_Q2[i], P1_J2_Q2[i], std_J2_Q2[i]]
+#     Q2_P1_Data.append(d)
+# np.savetxt('2021SepCircRadiator_Q2_P1_Data.txt', Q2_P1_Data)
+# Q3_P1_Data = []
+# for i in range(len(J2_Bias_Q3)):
+#     d = [J2_Bias_Q3[i], P1_J2_Q3[i], std_J2_Q3[i]]
+#     Q3_P1_Data.append(d)
+# np.savetxt('2021SepCircRadiator_Q3_P1_Data.txt', Q3_P1_Data)
+# Q4_P1_Data = []
+# for i in range(len(J2_Bias_Q4)):
+#     d = [J2_Bias_Q4[i], P1_J2_Q4[i], std_J2_Q4[i]]
+#     Q4_P1_Data.append(d)
+# np.savetxt('2021SepCircRadiator_Q4_P1_Data.txt', Q4_P1_Data)

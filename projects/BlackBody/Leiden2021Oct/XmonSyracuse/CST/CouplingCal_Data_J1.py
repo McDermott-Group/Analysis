@@ -95,7 +95,7 @@ Calculate the noise bandwidth
 """
 Q2 # polished
 """
-if 1:
+if 0:
     # plt.figure(0)
     # plt.rcParams["figure.figsize"] = (6, 20)
     pgJ1Q2 = []
@@ -103,16 +103,21 @@ if 1:
     Gamma_re = []   # photon received
     Gamma_withBase = []  # total parity rate with baseline
     l_i = 50
+    r_i = 700
     for i in range(len(Area)):
-        Gamma_re.append(0.5*PhotonFlux[i]*Area[i]*eQ2[i])
+        Gamma_absorbed = 0.5*PhotonFlux[i]*Area[i]*eQ2[i]
+        Gamma_re.append(Gamma_absorbed)
+
 
     ratio = 1.0/4.6   # for 190 GHz peak, 3.6, for 270 GHz, 7.0
     # ratio = 1.0/1  # for 190 GHz peak, 3.6, for 270 GHz, 7.0
     base = 110
     # base = 0
     for i in range(len(pgJ1)):
-        Gamma_withBase.append(ratio*Gamma_re[i] + base)
-        # x_qp2photon.append(x_qpJ1[i]**2*5000)
+        if f[i] >= 90:
+            Gamma_withBase.append(ratio*Gamma_re[i] + base)
+        else:
+            Gamma_withBase.append(base)
 
     fig, axs = plt.subplots(2, 2, sharex='col', figsize=(12, 8),
                             gridspec_kw={'width_ratios': [3, 2], 'height_ratios': [2, 3],
@@ -126,23 +131,22 @@ if 1:
                 label='Total')
     axs[0, 0].set_ylabel('Coupling Efficiency', color="black", fontsize=10)
     axs[0, 0].set_yscale('log')
-    axs[0, 0].set_xlim([l_i, 600])
+    axs[0, 0].set_xlim([l_i, r_i])
     axs[0, 0].set_ylim([1e-6, 2e-1])
     axs[0, 0].legend(loc=4)
 
     axs[1, 0].plot(f_Q2, Gamma_withBase, color="grey", linestyle='-',  linewidth=2,
-                label='$\Gamma_{0}+\Gamma_{PAT}$')
+                label='$\Gamma_{0}+\Gamma_{\mathrm{PAT}}$')
     axs[1, 0].plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, color="black", linewidth=2,
-                   marker="o", markersize=6, label='$\Gamma_{Measured}$')
+                   marker="o", markersize=6, label='$\Gamma_{\mathrm{Measured}}$')
     # axs[1, 0].plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, color="black", linestyle='d', markersize=4, label='$\Gamma_{Measured}$')
-    axs[1, 0].axhline(y=base, color="blue", linestyle='-', label='$\Gamma_{0}$')
-
+    axs[1, 0].axhline(y=base, c='g', linestyle='--', label='$\Gamma_{0}$')
 
     axs[1, 0].set_xlabel("Radiator Josephson Frequency (GHz)", color="black",
                       fontsize=10)
     axs[1, 0].set_ylabel("$\Gamma_{p}$ ($s^{-1}$)", color="black", fontsize=10)
     axs[1, 0].set_yscale('log')
-    axs[1, 0].set_xlim([50, 700])
+    axs[1, 0].set_xlim([l_i, r_i])
     axs[1, 0].set_ylim([100, 1100])
     axs[1, 0].legend(loc=1)
     # axs[1, 0].share
@@ -181,7 +185,7 @@ if 1:
 """
 P1 Q2 and All PSD
 """
-if 0:
+if 1:
     # plt.figure(0)
     # plt.rcParams["figure.figsize"] = (6, 20)
 
