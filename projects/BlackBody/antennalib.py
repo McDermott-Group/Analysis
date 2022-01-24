@@ -544,11 +544,11 @@ class AntennaCoupling(object):
         """
         f = self.Antenna["f"]
         e_eff = self.Antenna["e_eff"]
-        if 0: # Xmon
-            f_gap = 380e-6*e/h
-        else:   # Circmon
-            f_gap = 420e-6 * e / h
-        # print('f_gap=', f_gap)
+        # if 0: # Xmon
+        #     f_gap = 380e-6*e/h
+        # else:   # Circmon
+        #     f_gap = 400e-6 * e / h
+        # # print('f_gap=', f_gap)
         Area = []
         for fi in f:
             w = c / (fi * e_eff ** 0.5)  # wavelength
@@ -575,8 +575,8 @@ class AntennaCoupling(object):
             Vol = Vol * 0.17
         else: # Circmon
             Vol = 36 * 1 * 0.1  # volume of the junction units um^3
-            r = 1 / (400e-9)  # recombination rate sec^-1
-            Vol = Vol*0.5   # QP peak at the center, effective volume
+            r = 10 / (400e-9)  # recombination rate sec^-1
+            Vol = Vol*1   # QP peak at the center, effective volume
         n_cp = 4e6  # cooper pair density, units /um^3
         phi_0 = h / (2 * e) # flux quantum
 
@@ -604,7 +604,11 @@ class AntennaCoupling(object):
 
             Delta_Al_qp = Delta_Al * (1 - x_qp)  # naive approximation
             ic = (pi / 4) * (2 * Delta_Al_qp / e) * (1 / R)
-            Ic_f.append(ic)
+            ic0 = (pi / 4) * (2 * Delta_Al / e) * (1 / R)
+            if 0: # no ic suppression
+                Ic_f.append(ic0)
+            else:
+                Ic_f.append(ic)
             X_QP.append(x_qp)
             G0.append(g0)
 
@@ -658,7 +662,7 @@ class AntennaCoupling(object):
         """
         f = self.Antenna["f"]
         omega = 2 * np.pi * f
-        sigma = 1e9 / 2
+        sigma = 1*1e9 / 2
         Z0 = 377  # vacuum impedance
         Z_Al_list = []
         Ref = []

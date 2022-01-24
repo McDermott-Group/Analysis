@@ -142,6 +142,10 @@ Q4[:, 0] = (Q4[:, 0])/1000
 # plt.legend(loc=1)
 # plt.show()
 
+np.savetxt('2021OctSFQStrongRadiator_Q1_PSD_Data.txt', Q1)
+np.savetxt('2021OctSFQStrongRadiator_Q2_PSD_Data.txt', Q2)
+np.savetxt('2021OctSFQStrongRadiator_Q4_PSD_Data.txt', Q4)
+
 f = 4.604
 # f = 1
 Al_gap = 380e-6

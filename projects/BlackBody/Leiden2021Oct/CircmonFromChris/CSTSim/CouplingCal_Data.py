@@ -23,7 +23,7 @@ JQ3 = [19*1e3, 21*1e-9, 0, 310*126, "Receiver"]   #    some issue with Q3
 JQ_m = [15*1e3, 19.9*1e-9, 0, 184.4*122.5*2, "Receiver"]   #    some issue with Q3
 
 # fileSFQ = "testpad_1.5THz.txt"
-fileSFQ_4 = "SFQ_4 rectmons.txt"
+fileSFQ_4 = "SFQ_4rectmons.txt"
 fileSFQ = "SFQ_1THz.txt"
 # fileQ_l = "Q_l.txt"
 # fileQ_l = "Q_l_with-leads_1.5THz.txt"

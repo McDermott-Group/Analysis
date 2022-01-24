@@ -13,7 +13,7 @@ Q1 = np.array([
     [0.03, 0.0453, 0.03717], [0.04, 0.04614, 0.037], [0.05, 0.04907, 0.0367],
     [0.06, 0.05046, 0.03851], [0.065, 0.04832, 0.03687], [0.07, 0.046, 0.03569],
     [0.075, 0.04907, 0.03904], [0.08, 0.04824, 0.03981], [0.085, 0.04747, 0.03556],
-    [0.09, 0.04501, 0.03664], [0.095,0.04318, 0.03681], [0.1, 0.04835, 0.03912],
+    [0.09, 0.04501, 0.03664], [0.095, 0.04318, 0.03681], [0.1, 0.04835, 0.03912],
     [0.105, 0.04765, 0.03564], [0.11, 0.04581, 0.032], [0.115, 0.03486, 0.02466],
     [0.12, 0.06003, 0.04422], [0.125, 0.11833, 0.06081], [0.13, 0.09608, 0.06108],
     [0.135, 0.08388, 0.05895], [0.14, 0.07552, 0.05353], [0.145, 0.06188, 0.05147],
@@ -246,27 +246,35 @@ Q2_More[:, 0] = (Q2_More[:, 0])*1000
 Q4[:, 0] = (Q4[:, 0])*1000
 
 
-# f = 4.604
-f = 0.968
-# f = 1
-Al_gap = 380e-6
-DAC_Al = 1e5*Al_gap/0.200
-plt.errorbar(Q1[:, 0]*f, Q1[:, 1], yerr=Q1[:, 2]/np.sqrt(50), color='b', label='Q1')
-plt.errorbar(Q2[:, 0]*f, Q2[:, 1], yerr=Q2[:, 2]/np.sqrt(50), color='r', label='Q2')
-# plt.errorbar(Q2_More[:, 0]*f, Q2_More[:, 1], yerr=Q2_More[:, 2]/np.sqrt(50), color='k', label='Q2_More')
-plt.errorbar(Q4[:, 0]*f, Q4[:, 1], yerr=Q4[:, 2]/np.sqrt(50), color='y', label='Q4')
+# # f = 4.604
+# f = 0.968
+# # f = 1
+# Al_gap = 380e-6
+# DAC_Al = 1e5*Al_gap/0.200
+# plt.errorbar(Q1[:, 0]*f, Q1[:, 1], yerr=Q1[:, 2]/np.sqrt(50), color='b', label='Q1')
+# plt.errorbar(Q2[:, 0]*f, Q2[:, 1], yerr=Q2[:, 2]/np.sqrt(50), color='r', label='Q2')
+# # plt.errorbar(Q2_More[:, 0]*f, Q2_More[:, 1], yerr=Q2_More[:, 2]/np.sqrt(50), color='k', label='Q2_More')
+# plt.errorbar(Q4[:, 0]*f, Q4[:, 1], yerr=Q4[:, 2]/np.sqrt(50), color='y', label='Q4')
+#
+# plt.axvline(x=DAC_Al * f, color='k', linestyle='--', linewidth=4, label='JJ Al Gap')
+#
+# plt.xlabel('J6 Weak Radiator Josephson Frequency (GHz)')
+# plt.ylabel('P1')
+# # plt.xscale('log')
+# plt.yscale('log')
+# plt.grid(True, which="both")
+# plt.legend(loc=2)
+# plt.xlim([0, 800])
+# # plt.ylim([10, 100000])
+# plt.show()
 
-plt.axvline(x=DAC_Al * f, color='k', linestyle='--', linewidth=4, label='JJ Al Gap')
+Q1[:, 2] = Q1[:, 2]/np.sqrt(50)
+Q2[:, 2] = Q2[:, 2]/np.sqrt(50)
+Q4[:, 2] = Q4[:, 2]/np.sqrt(50)
 
-plt.xlabel('J6 Weak Radiator Josephson Frequency (GHz)')
-plt.ylabel('P1')
-# plt.xscale('log')
-plt.yscale('log')
-plt.grid(True, which="both")
-plt.legend(loc=2)
-plt.xlim([0, 800])
-# plt.ylim([10, 100000])
-plt.show()
+np.savetxt('2021OctSFQWeakRadiator_Q1_P1_Data.txt', Q1)
+np.savetxt('2021OctSFQWeakRadiator_Q2_P1_Data.txt', Q2)
+np.savetxt('2021OctSFQWeakRadiator_Q4_P1_Data.txt', Q4)
 
 
 
