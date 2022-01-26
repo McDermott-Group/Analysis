@@ -2,7 +2,7 @@
 A library for the antenna model
 """
 
-# import noiselib
+import noiselib
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.constants import *
@@ -406,6 +406,65 @@ class P1(object):
         self.occ_1D_avg = np.array(occ_1D_avg)
         # self.occ_std = np.mean(occ_1D_std)
         self.temp = temp
+
+class UpAndParity(object):
+    """
+    This is to analyze the up transition rate and the parity rate
+    """
+
+    def __init__(self):
+        self.freq = None
+        self.parity = None
+        self.Delta = 46.0     # 46 GHz one energy gap
+        self.S_Minus = None
+        self.S_Plus = None
+        self.UpRate = None
+
+    def import_data(self, freq, parity):
+        self.freq = freq
+        self.parity = parity
+        # plt.plot(freq, parity)
+        # plt.show()
+        self._getS()
+        self._getUp()
+
+    def _getS(self):
+        freq = self.freq
+        Delta = self.Delta
+        S_Minus = []
+        S_Plus = []
+        X = []
+        for f in freq:
+            x = f/Delta
+            S_minus = 17.0/20*x+1.5
+            S_plus = 1.2*x-2.4
+            S_Minus.append(S_minus)
+            S_Plus.append(S_plus)
+            X.append(x)
+
+        S_Minus = np.array(S_Minus)
+        S_Plus = np.array(S_Plus)
+
+
+        self.S_Minus = S_Minus
+        self.S_Plus = S_Plus
+
+    def _getUp(self):
+        freq = self.freq
+        parity = self.parity
+        S_Minus = self.S_Minus
+        S_Plus = self.S_Plus
+        E_ratio = np.sqrt(8.0*27.0)
+        UpRate = []
+        for i in range(len(freq)):
+            ratio = 1.0/(1.0+E_ratio*(S_Minus[i])/(S_Plus[i]))
+            uprate = parity[i]*ratio
+            UpRate.append(uprate)
+
+        # plt.plot(freq, UpRate)
+        # plt.show()
+        self.UpRate = UpRate
+
 
 
 class AntennaCoupling(object):

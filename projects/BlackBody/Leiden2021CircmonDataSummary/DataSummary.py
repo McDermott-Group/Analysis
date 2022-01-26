@@ -8,7 +8,7 @@ if 1:
     """
     e_eff = 6  # limit (1, 6.5), the voltage can also be built in to have a larger range
     C_eff_circ = 75 * 1e-21  # Commonly used (50-100)
-    C_eff_SFQ = 75 * 1e-21  # Commonly used (50-100)
+    C_eff_SFQ = 150 * 1e-21  # Commonly used (50-100)
 
     JCirc = [4.8 * 1e3, None, 0, 320 * 123 * 2, "Radiator"]  # [R, L, C, A]
     JSFQ_weak = [16 * 1e3, None, 0, 100 * 200, "Radiator"]  # [R, L, C, A]
@@ -401,8 +401,9 @@ if 1:
     # plt.legend()
     # plt.show()
 
-if 0:  # parity data cross talk for Oct weak
-    f_SIM_OctW = 0.96758 * 1.025  # Xmon match data
+if 1:  # parity data cross talk for Oct weak
+    # f_SIM_OctW = 0.96758 * 1.025  # Xmon match data
+    f_SIM_OctW = 0.96758 * 0.95  # Xmon match data
     SIM_OctW_Offset = 2  # Xmon match data   2mV is OK or max
     f_DAC_Oct = 4.64  # 4.604
     DAC_Oct_Offset = 0.5  # 0.9
