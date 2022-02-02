@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
-from antennalib import AntennaCoupling, UpAndParity
+from antennalib import AntennaCoupling, UpAndParity, getPhotonRate
 import numpy as np
 from scipy import interpolate
 
-if 1:
+if 0:
     """
     Import CST files and Junction parameters
     """
@@ -103,6 +103,19 @@ if 1:
     # plt.grid(which='both')
     # plt.show()
 
+
+    Tbb4 = 542.3e-3
+    PRQ4 = getPhotonRate(eQ4, f_SFQ, Tbb4)
+    PR, f_used = PRQ4[1], PRQ4[2]
+    print('PRQ4=', PRQ4[0])
+
+    UpParity = UpAndParity()
+    freq_data = f_used
+    parity_data = PR
+    UpParity.import_data(freq_data, parity_data)
+    UpRate = UpParity.UpRate
+    print('UpRate=', sum(UpRate))
+
 if 1:
     """
     Import measurement data starts
@@ -138,7 +151,10 @@ if 1:
         freq_data = Q4_PSD_Aug[:, 0] * f_DAC_Aug
         parity_data = Q4_PSD_Aug[:, 1]
         UpParity.import_data(freq_data, parity_data)
-        UpRate = UpParity.UpRate
+        UpRate = np.array(UpParity.UpRate)
+        X_QP = np.array(UpParity.X_QP)
+
+        BB_UpRate = 52.7 # Hz, calculated from effective BB temp and Yale's theory
 
         # plt.plot(Q1_PSD_Aug[:, 0]*f_DAC_Aug, Q1_PSD_Aug[:, 1])
         # plt.plot(Q2_PSD_Aug[:, 0]*f_DAC_Aug, Q2_PSD_Aug[:, 1])
@@ -160,37 +176,66 @@ if 1:
         Q4_PSD_Interpolated = f(Q4_Up_Aug[:, 0])
         Q4_Up_Interpolated = f_UpParity(Q4_Up_Aug[:, 0])
 
-        fig, ax = plt.subplots(2, figsize=(8, 8))
-        ax[0].plot(Q4_PSD_Aug[:, 0] * f_DAC_Aug, Q4_PSD_Aug[:, 1], label='$\Gamma_{P}$')
+        alpha = 8e6
+
+        fig, ax = plt.subplots(1, figsize=(8, 8))
+        ax.plot(Q4_PSD_Aug[:, 0] * f_DAC_Aug, Q4_PSD_Aug[:, 1], 'b', label='$\Gamma_{P}$', linewidth=4)
         # ax[0].plot(PSD * f_DAC_Aug, f(PSD), label='interploted')
         # ax[0].plot(Q4_Up_Aug[:, 0] * f_DAC_Aug, f(Q4_Up_Aug[:, 0]), label='interploted for up rate')
-        ax[0].plot(Q4_Up_Aug[:, 0] * f_DAC_Aug, Q4_Up_Aug[:, 1], label='$\Gamma_{01}$')
-        ax[0].plot(Q4_PSD_Aug[:, 0] * f_DAC_Aug, UpRate, label='$\Gamma_{01}$ from $\Gamma_{P}$')
-        ax[0].set_xlim([0, 550])
-        ax[0].set_ylabel('Rate (Hz)')
-        ax[0].set_yscale('log')
-        ax[0].legend(loc=4)
-        ax[0].set_title('Circmon Q4 Parity vs Up Rate and P1 Steady state')
+        ax.plot(Q4_Up_Aug[:, 0] * f_DAC_Aug, Q4_Up_Aug[:, 1], 'r', label='$\Gamma_{01}$', linewidth=4)
 
-        # ax_02 = ax[0].twinx()
-        # ax_02.plot(Q4_Up_Aug[:, 0] * f_DAC_Aug, np.divide(Q4_PSD_Interpolated, Q4_Up_Aug[:, 1]), 'r--',
-        #            label='$\Gamma_{p}/\Gamma_{01}$')
-        # ax_02.set_ylabel('$\Gamma_{p}/\Gamma_{01}$', color='red')
-        # ax_02.set_ylim([1, 7])
+        # ax.plot(Q4_PSD_Aug[:, 0] * f_DAC_Aug, alpha * X_QP, 'y', label='X_QP')
+        ax.plot(Q4_PSD_Aug[:, 0] * f_DAC_Aug, UpRate + BB_UpRate, 'g', label='$\Gamma_{01}$ from $\Gamma_{P}$', linewidth=4)
+        # ax.plot(Q4_PSD_Aug[:, 0] * f_DAC_Aug, UpRate + alpha * X_QP, 'k', label='Sum')
 
-        ax_02 = ax[0].twinx()
-        ax_02.plot(Q4_Up_Aug[:, 0] * f_DAC_Aug, np.divide(Q4_Up_Interpolated, Q4_Up_Aug[:, 1]), 'r--',
-                   label='$\Gamma_{01 from P}/\Gamma_{01}$')
-        ax_02.set_ylabel('$\Gamma_{01 from P}/\Gamma_{01}$', color='red')
-        # ax_02.set_ylim([0.05, 0.3])
+        # ax[0].set_title('Circmon Q4 Parity vs Up Rate and P1 Steady state')
+        # ax_02 = ax.twinx()
+        # # ax_02.plot(Q4_PSD_Aug[:, 0] * f_DAC_Aug, alpha*X_QP, label='X_QP')
+        # ax_02.plot(Q4_Up_Aug[:, 0] * f_DAC_Aug, np.divide(Q4_Up_Interpolated, Q4_Up_Aug[:, 1]), 'r--',
+        #            label='$\Gamma_{01 from P}/\Gamma_{01}$')
+        # ax_02.set_ylabel('$\Gamma_{01 from P}/\Gamma_{01}$', color='red')
+        plt.yscale('log')
+        plt.xlim([0, 500])
+        plt.ylim([1e1, 1e4])
 
-        ax[1].plot(Q4_P1_Aug[:, 0]*f_DAC_Aug, Q4_P1_Aug[:, 1], label='P1')
-        ax[1].set_ylabel('P1')
-        ax[1].set_yscale('log')
-        ax[1].set_xlim([0, 550])
-
-        # plt.xlim([50, 600])
-        # plt.ylim([1e2, 1e4])
         plt.xlabel('Radiator Freq (GHz)')
         plt.legend()
         plt.show()
+
+        # fig, ax = plt.subplots(2, figsize=(8, 8))
+        # ax[0].plot(Q4_PSD_Aug[:, 0] * f_DAC_Aug, Q4_PSD_Aug[:, 1], label='$\Gamma_{P}$')
+        # ax[0].plot(Q4_PSD_Aug[:, 0] * f_DAC_Aug, alpha*X_QP, label='X_QP')
+        # # ax[0].plot(PSD * f_DAC_Aug, f(PSD), label='interploted')
+        # # ax[0].plot(Q4_Up_Aug[:, 0] * f_DAC_Aug, f(Q4_Up_Aug[:, 0]), label='interploted for up rate')
+        # ax[0].plot(Q4_Up_Aug[:, 0] * f_DAC_Aug, Q4_Up_Aug[:, 1], label='$\Gamma_{01}$')
+        # ax[0].plot(Q4_PSD_Aug[:, 0] * f_DAC_Aug, UpRate, label='$\Gamma_{01}$ from $\Gamma_{P}$')
+        # ax[0].set_xlim([0, 550])
+        # ax[0].set_ylabel('Rate (Hz)')
+        # ax[0].set_yscale('log')
+        # ax[0].legend(loc=4)
+        # ax[0].set_title('Circmon Q4 Parity vs Up Rate and P1 Steady state')
+        #
+        # # ax_02 = ax[0].twinx()
+        # # ax_02.plot(Q4_Up_Aug[:, 0] * f_DAC_Aug, np.divide(Q4_PSD_Interpolated, Q4_Up_Aug[:, 1]), 'r--',
+        # #            label='$\Gamma_{p}/\Gamma_{01}$')
+        # # ax_02.set_ylabel('$\Gamma_{p}/\Gamma_{01}$', color='red')
+        # # ax_02.set_ylim([1, 7])
+        #
+        #
+        # ax_02 = ax[0].twinx()
+        # # ax_02.plot(Q4_PSD_Aug[:, 0] * f_DAC_Aug, alpha*X_QP, label='X_QP')
+        # ax_02.plot(Q4_Up_Aug[:, 0] * f_DAC_Aug, np.divide(Q4_Up_Interpolated, Q4_Up_Aug[:, 1]), 'r--',
+        #            label='$\Gamma_{01 from P}/\Gamma_{01}$')
+        # ax_02.set_ylabel('$\Gamma_{01 from P}/\Gamma_{01}$', color='red')
+        # ax_02.set_ylim([0.05, 0.3])
+
+        # ax[1].plot(Q4_P1_Aug[:, 0]*f_DAC_Aug, Q4_P1_Aug[:, 1], label='P1')
+        # ax[1].set_ylabel('P1')
+        # ax[1].set_yscale('log')
+        # ax[1].set_xlim([0, 550])
+
+        # plt.xlim([50, 600])
+        # plt.ylim([1e2, 1e4])
+        # plt.xlabel('Radiator Freq (GHz)')
+        # plt.legend()
+        # plt.show()

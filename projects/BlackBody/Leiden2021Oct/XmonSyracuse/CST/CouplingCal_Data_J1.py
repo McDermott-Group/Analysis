@@ -95,7 +95,7 @@ Calculate the noise bandwidth
 """
 Q2 # polished
 """
-if 0:
+if 1:
     # plt.figure(0)
     # plt.rcParams["figure.figsize"] = (6, 20)
     pgJ1Q2 = []
@@ -185,7 +185,7 @@ if 0:
 """
 P1 Q2 and All PSD
 """
-if 1:
+if 0:
     # plt.figure(0)
     # plt.rcParams["figure.figsize"] = (6, 20)
 
