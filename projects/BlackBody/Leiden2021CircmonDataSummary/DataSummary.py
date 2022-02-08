@@ -116,20 +116,9 @@ if 1:
     # plt.grid(which='both')
     # plt.show()
 
-    """
-    Calculate the noise bandwidth
-    """
-    Tbb1 = 429e-3
-    Tbb2 = 522e-3
-    Tbb4 = 543e-3
-    PRQ1 = getPhotonRate(eQ1, f_SFQ, Tbb1)
-    PRQ2 = getPhotonRate(eQ2, f_SFQ, Tbb2)
-    PRQ4 = getPhotonRate(eQ4, f_SFQ, Tbb4)
-    print('PRQ1=', PRQ1[0])
-    print('PRQ2=', PRQ2[0])
-    print('PRQ4=', PRQ4[0])
 
-if 0:
+
+if 1:
     """
     Import measurement data starts
     """
@@ -526,17 +515,16 @@ if 0:  # parity data cross talk for Oct weak
     f_r = 550
 
     axs_02 = axs[0].twinx()
-    axs_02.plot(f_SFQ, PhotonFlux, color="black", linestyle='--',
+    axs_02.plot(f_SFQ, PhotonFlux, color="green", linestyle='--',
                 linewidth=4, label='Photon Flux')
     axs_02.set_ylabel("Photon flux $=S/hf$ $(m^{-2} sec^{-1})$", color="black", fontsize=10)
     axs_02.set_xlim([f_l, f_r])
     axs_02.set_ylim([5e12, 5e14])
     axs_02.set_yscale('log')
-    axs_02.legend(loc=4)
+    axs_02.legend(loc=1)
 
     axs[0].plot(f_SFQ, eQ1*AreaQ1, color="red", label='Q1')
-    # axs[0].plot(f_SFQ, eQ2*AreaQ2, color="blue", label='Q2')
-    axs[0].plot(f_Q2, eQ2*AreaQ2, color="blue", label='Q2')
+    axs[0].plot(f_SFQ, eQ2*AreaQ2, color="blue", label='Q2')
     axs[0].plot(f_SFQ, eQ4*AreaQ4, color="black", label='Q4')
     # axs[0].plot(f_SFQ, eSFQ_4, color="purple", label='SFQ Full')
     # axs[0].plot(f_SFQ, eSFQ_weak, color="green", label='SFQ')
@@ -552,8 +540,8 @@ if 0:  # parity data cross talk for Oct weak
     # axs[0].set_ylim([5e-7, 6e-2])   # Q2 tot
     # axs[0].set_ylim([5e-5, 6e-2])   # Q4 tot
     axs[0].set_yscale('log')
-    axs[0].grid(which='both')
-    axs[0].legend(loc=1)
+    # axs[0].grid(which='both')
+    axs[0].legend(loc=2)
 
     # plt.axhline(y=Q1_base)
     # plt.axhline(y=Q2_base)
@@ -569,7 +557,7 @@ if 0:  # parity data cross talk for Oct weak
     # axs[1].set_ylim([1e2, 5e3]) # Q4
     axs[1].set_ylim([1e1, 6e3])
     axs[1].set_yscale('log')
-    axs[1].grid(which='both')
+    # axs[1].grid(which='both')
     axs[1].legend(loc=1)
     # plt.yscale('log')
     plt.show()
@@ -674,3 +662,95 @@ if 0:  # parity data cross talk for Oct weak
     axs[2].legend(loc=1)
     # plt.yscale('log')
     plt.show()
+
+
+### For paper plot
+
+"""
+Calculate effective blackbody temperature
+"""
+# Circmon radiator data
+# Tbb1 = 429e-3
+# Tbb2 = 522e-3
+# Tbb4 = 543e-3
+# PRQ1 = getPhotonRate(eQ1, f_SFQ, Tbb1)
+# PRQ2 = getPhotonRate(eQ2, f_SFQ, Tbb2)
+# PRQ4 = getPhotonRate(eQ4, f_SFQ, Tbb4)
+# print('PRQ1=', PRQ1[0])
+# print('PRQ2=', PRQ2[0])
+# print('PRQ4=', PRQ4[0])
+
+### SFQ weak radiator data
+# Tbb1 = 407e-3   # 407,408
+# Tbb2 = 459e-3   # 458,460
+# Tbb4 = 488e-3   # 487,489
+# PRQ1 = getPhotonRate(eQ1, f_SFQ, Tbb1)
+# PRQ2 = getPhotonRate(eQ2, f_SFQ, Tbb2)
+# PRQ4 = getPhotonRate(eQ4, f_SFQ, Tbb4)
+# print('PRQ1=', PRQ1[0])
+# print('PRQ2=', PRQ2[0])
+# print('PRQ4=', PRQ4[0])
+
+
+label_font = 20
+tick_font = 20
+legend_font = 12
+
+f_SIM_OctW = 0.96758 * 0.95  # Xmon match data
+SIM_OctW_Offset = 2  # Xmon match data   2mV is OK or max
+f_DAC_Oct = 4.604  # 4.604
+DAC_Oct_Offset = 0.5  # 0.9
+
+
+Q1_base = np.mean(Q1_PSD_OctWeak[:, 1][:8])
+Q2_base = np.mean(Q2_PSD_OctWeak[:, 1][:8])
+Q4_base = np.mean(Q4_PSD_OctWeak[:, 1][:8])
+
+fig, axs = plt.subplots(2, figsize=(8, 8))
+
+f_l = 50
+f_r = 535
+
+ld1=3
+ld2=5
+
+axs_02 = axs[0].twinx()
+axs_02.plot(f_SFQ, PhotonFlux, color="green", linestyle='--',
+            linewidth=ld2, label='Photon Flux')
+axs_02.set_ylabel("Photon flux $(\\rm m^{-2}\\rm s^{-1})$", color="black", fontsize=label_font, fontweight='bold')
+axs_02.set_xlim([f_l, f_r])
+axs_02.set_ylim([2e12, 6e14])
+axs_02.set_yscale('log')
+axs_02.legend(loc=1)
+axs_02.tick_params(labelsize=tick_font)
+
+axs[0].plot(f_SFQ, eQ1*AreaQ1, linewidth=ld2, color="red", label='$Q^{L}$')
+axs[0].plot(f_SFQ, eQ4*AreaQ4, linewidth=ld2, color="black", label='$Q^{M}$')
+axs[0].plot(f_SFQ, eQ2*AreaQ2, linewidth=ld2, color="blue", label='$Q^{S}$')
+axs[0].set_ylabel('$e_{c}^{r}\\times A_{eff}$  $(\\rm m ^2)$', color="black", fontsize=label_font, fontweight='bold')
+axs[0].set_xlim([f_l, f_r])
+axs[0].set_ylim([2e-11, 6e-9])
+axs[0].set_yscale('log')
+axs[0].legend(loc=2)
+axs[0].tick_params(labelsize=tick_font)
+
+axs[1].axhline(y=Q1_base, color='r', linestyle='--', linewidth=ld1)
+axs[1].axhline(y=Q2_base, color='b', linestyle='--', linewidth=ld1)
+axs[1].axhline(y=Q4_base, color='k', linestyle='--', linewidth=ld1)
+
+axs[1].plot((Q1_PSD_OctWeak[:, 0]+SIM_OctW_Offset)*f_SIM_OctW, Q1_PSD_OctWeak[:, 1], 'r-', linewidth=ld2, label='$Q^{L}$')
+axs[1].plot((Q4_PSD_OctWeak[:, 0]+SIM_OctW_Offset)*f_SIM_OctW, Q4_PSD_OctWeak[:, 1], 'k-', linewidth=ld2, label='$Q^{M}$')
+axs[1].plot((Q2_PSD_OctWeak[:, 0]+SIM_OctW_Offset)*f_SIM_OctW, Q2_PSD_OctWeak[:, 1], 'b-', linewidth=ld2, label='$Q^{S}$')
+axs[1].tick_params(labelsize=tick_font)
+
+axs[1].set_xlim([f_l, f_r])
+axs[1].set_ylim([1e1, 1e4])
+axs[1].set_yscale('log')
+axs[1].legend(loc=4)
+axs[1].set_xlabel("Radiator Frequency (GHz)", color="black", fontsize=label_font, fontweight='bold')
+axs[1].set_ylabel("$\Gamma_{P}$ ($s^{-1}$)", color="black", fontsize=label_font, fontweight='bold')
+
+path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
+plt.tight_layout()
+plt.savefig(path + '\Circmon.pdf', bbox_inches='tight', format='pdf', dpi=1200)
+plt.show()

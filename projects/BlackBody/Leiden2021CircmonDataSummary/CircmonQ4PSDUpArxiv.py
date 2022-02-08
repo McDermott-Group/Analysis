@@ -4,7 +4,7 @@ import numpy as np
 from scipy import interpolate
 from scipy.integrate import quad
 
-if 0:
+if 1:
     """
     Import CST files and Junction parameters
     """
@@ -145,77 +145,111 @@ if 1:
         Q4_Up_Aug = np.loadtxt(Q4_Up_file_Aug, skiprows=20)
 
         S_param_file = "S_minusplus.txt"
+        # S_param = np.loadtxt(S_param_file)
+        # plt.plot(S_param[:, 0], S_param[:, 1])
+        # plt.plot(S_param[:, 0], S_param[:, 2])
+        # plt.xlim([2, 18])
+        # plt.ylim([0, 18])
+        # plt.show()
 
         """Working on the theory"""
         UpParity = UpAndParity()
 
+        # parity_freq_data = Q4_PSD_Aug[:, 0] * f_DAC_Aug
+        # parity_data = Q4_PSD_Aug[:, 1]
+        # up_freq_data = Q4_Up_Aug[:, 0] * f_DAC_Aug
+        # up_data = Q4_Up_Aug[:, 1]
+
         UpParity.import_data(Q4_PSD_file_Aug, Q4_Up_file_Aug, S_param_file)
+        # UpRate = np.array(UpParity.UpRate)
+        # X_QP = np.array(UpParity.X_QP)
 
         BB_UpRate = 52.7  # Hz, calculated from effective BB temp and Yale's theory
 
-        parity_freq_data = np.array(UpParity.parity_freq_data)
-        parity_data = np.array(UpParity.parity_data)
-        up_freq_data = np.array(UpParity.up_freq_data)
-        up_data = np.array(UpParity.up_data)
+        # plt.plot(Q1_PSD_Aug[:, 0]*f_DAC_Aug, Q1_PSD_Aug[:, 1])
+        # plt.plot(Q2_PSD_Aug[:, 0]*f_DAC_Aug, Q2_PSD_Aug[:, 1])
+        # plt.plot(Q4_PSD_Aug[:, 0]*f_DAC_Aug, Q4_PSD_Aug[:, 1], label='Parity')
 
-        f_interest = np.array(UpParity.f_interest)
-        parity = np.array(UpParity.parity_interest)
-        up = np.array(UpParity.up_interest)
-        parity_PAT = np.array(UpParity.parity_PAT)
-        parity_QPD = np.array(UpParity.parity_QPD)
-        up_PAT = np.array(UpParity.up_PAT)
-        up_QPD = np.array(UpParity.up_QPD)
+        # plt.plot(Q1_P1_Aug[:, 0]*f_DAC_Aug, Q1_P1_Aug[:, 1])
+        # plt.plot(Q2_P1_Aug[:, 0]*f_DAC_Aug, Q2_P1_Aug[:, 1])
+        # plt.plot(Q3_P1_Aug[:, 0]*f_DAC_Aug, Q3_P1_Aug[:, 1])
+        # plt.plot(Q4_P1_Aug[:, 0]*f_DAC_Aug, Q4_P1_Aug[:, 1], label='Steady')
 
+        # plt.plot(Q1_Up_Aug[:, 0]*f_DAC_Aug, Q1_Up_Aug[:, 1])
+        # plt.plot(Q2_Up_Aug[:, 0]*f_DAC_Aug, Q2_Up_Aug[:, 1])
+        # plt.plot(Q4_Up_Aug[:, 0]*f_DAC_Aug, Q4_Up_Aug[:, 1], label='Up')
 
-        ### plot start
-        label_font = 16
-        tick_font = 13
-        legend_font = 12
+        ### interpolate since parity rate has higher density
+        f = interpolate.interp1d(Q4_PSD_Aug[:, 0], Q4_PSD_Aug[:, 1])
+        f_UpParity = interpolate.interp1d(Q4_PSD_Aug[:, 0], UpRate)
+        PSD = np.arange(0, 100, 0.1)
+        Q4_PSD_Interpolated = f(Q4_Up_Aug[:, 0])
+        Q4_Up_Interpolated = f_UpParity(Q4_Up_Aug[:, 0])
 
-        fig, axs = plt.subplots(2, sharex='col', figsize=(6, 6),
-                                gridspec_kw={'height_ratios': [4, 3],
-                                             'hspace': 0.1}
-                                )
+        alpha = 8e6
 
-        f_l = 80
-        f_r = 650
-        loc = 4
-        axs[0].plot(parity_freq_data, parity_data, 'r', linewidth=3, label='$\Gamma_{p, Meas}$')
-        axs[0].plot(f_interest, parity_PAT, 'r--', linewidth=3, label='$\Gamma_{p, PAT}$')
-        axs[0].plot(up_freq_data, up_data, 'b', linewidth=3, label='$\Gamma_{\uparrow, Meas}$')
+        fig, ax = plt.subplots(1, figsize=(8, 8))
+        ax.plot(Q4_PSD_Aug[:, 0] * f_DAC_Aug, Q4_PSD_Aug[:, 1], 'b', label='$\Gamma_{P}$', linewidth=4)
+        # ax[0].plot(PSD * f_DAC_Aug, f(PSD), label='interploted')
+        # ax[0].plot(Q4_Up_Aug[:, 0] * f_DAC_Aug, f(Q4_Up_Aug[:, 0]), label='interploted for up rate')
+        ax.plot(Q4_Up_Aug[:, 0] * f_DAC_Aug, Q4_Up_Aug[:, 1], 'r', label='$\Gamma_{01}$', linewidth=4)
 
+        # ax.plot(Q4_PSD_Aug[:, 0] * f_DAC_Aug, alpha * X_QP, 'y', label='X_QP')
+        ax.plot(Q4_PSD_Aug[:, 0] * f_DAC_Aug, UpRate + BB_UpRate, 'g', label='$\Gamma_{01}$ from $\Gamma_{P}$',
+                linewidth=4)
+        # ax.plot(Q4_PSD_Aug[:, 0] * f_DAC_Aug, UpRate + alpha * X_QP, 'k', label='Sum')
 
-        # axs[1].plot(f_interest, parity_QPD, 'r:', linewidth=3, label='$\Gamma_{p, QPD}$')
-        axs[0].plot(f_interest, up_PAT, 'b--', linewidth=3, label='$\Gamma_{\uparrow, PAT}$')
-        # axs[1].plot(f_interest, up_QPD, 'b:', linewidth=3, label='$\Gamma_{\uparrow, QPD}=\Gamma_{p, QPD}$')
-        # axs[1].set_ylim([8e1, 1e4])
-        # axs[1].set_yscale('log')
-        # axs[1].set_ylabel('Rate (Hz)')
-        # axs[1].legend(loc=loc)
+        # ax[0].set_title('Circmon Q4 Parity vs Up Rate and P1 Steady state')
+        # ax_02 = ax.twinx()
+        # # ax_02.plot(Q4_PSD_Aug[:, 0] * f_DAC_Aug, alpha*X_QP, label='X_QP')
+        # ax_02.plot(Q4_Up_Aug[:, 0] * f_DAC_Aug, np.divide(Q4_Up_Interpolated, Q4_Up_Aug[:, 1]), 'r--',
+        #            label='$\Gamma_{01 from P}/\Gamma_{01}$')
+        # ax_02.set_ylabel('$\Gamma_{01 from P}/\Gamma_{01}$', color='red')
+        plt.yscale('log')
+        plt.xlim([0, 500])
+        plt.ylim([1e1, 1e4])
 
-        axs[0].set_ylim([8e1, 1e4])
-        axs[0].set_yscale('log')
-        axs[0].set_ylabel('Rate (Hz)', fontsize=label_font)
-        axs[0].tick_params(labelsize=tick_font)
-        axs[0].legend(loc=loc, fontsize=legend_font)
-
-        axs[1].plot(f_interest, np.divide(parity_PAT, parity), 'r:', linewidth=3, label='$\Gamma_{p, PAT}/\Gamma_{p, J}$')
-        # axs[2].plot(f_interest, np.divide(parity_QPD, parity), 'r--', linewidth=3, label='$\Gamma_{p, QPD}$ ratio')
-        axs[1].plot(f_interest, np.divide(up_PAT, up), 'b:', linewidth=3, label='$\Gamma_{\uparrow, PAT}/\Gamma_{\uparrow, J}$')
-        # axs[2].plot(f_interest, np.divide(up_QPD, up), 'b--', linewidth=3, label='$\Gamma_{\uparrow, QPD}$ ratio')
-
-        axs[1].set_xlim([f_l, f_r])
-        axs[1].set_ylim([0, 1])
-        axs[1].set_xlabel('Frequency (GHz)', fontsize=label_font)
-        axs[1].set_ylabel('Ratio', fontsize=label_font)
-        axs[1].tick_params(labelsize=tick_font)
-        axs[1].legend(loc=loc, fontsize=legend_font)
-
-        # plt.title('Up rate baseline hand chosen 200 Hz')
-        path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
-        plt.savefig(path + '\ParityUpCorrelation.pdf', format='pdf', bbox_inches='tight', dpi=1200)
+        plt.xlabel('Radiator Freq (GHz)')
+        plt.legend()
         plt.show()
 
+        # fig, ax = plt.subplots(2, figsize=(8, 8))
+        # ax[0].plot(Q4_PSD_Aug[:, 0] * f_DAC_Aug, Q4_PSD_Aug[:, 1], label='$\Gamma_{P}$')
+        # ax[0].plot(Q4_PSD_Aug[:, 0] * f_DAC_Aug, alpha*X_QP, label='X_QP')
+        # # ax[0].plot(PSD * f_DAC_Aug, f(PSD), label='interploted')
+        # # ax[0].plot(Q4_Up_Aug[:, 0] * f_DAC_Aug, f(Q4_Up_Aug[:, 0]), label='interploted for up rate')
+        # ax[0].plot(Q4_Up_Aug[:, 0] * f_DAC_Aug, Q4_Up_Aug[:, 1], label='$\Gamma_{01}$')
+        # ax[0].plot(Q4_PSD_Aug[:, 0] * f_DAC_Aug, UpRate, label='$\Gamma_{01}$ from $\Gamma_{P}$')
+        # ax[0].set_xlim([0, 550])
+        # ax[0].set_ylabel('Rate (Hz)')
+        # ax[0].set_yscale('log')
+        # ax[0].legend(loc=4)
+        # ax[0].set_title('Circmon Q4 Parity vs Up Rate and P1 Steady state')
+        #
+        # # ax_02 = ax[0].twinx()
+        # # ax_02.plot(Q4_Up_Aug[:, 0] * f_DAC_Aug, np.divide(Q4_PSD_Interpolated, Q4_Up_Aug[:, 1]), 'r--',
+        # #            label='$\Gamma_{p}/\Gamma_{01}$')
+        # # ax_02.set_ylabel('$\Gamma_{p}/\Gamma_{01}$', color='red')
+        # # ax_02.set_ylim([1, 7])
+        #
+        #
+        # ax_02 = ax[0].twinx()
+        # # ax_02.plot(Q4_PSD_Aug[:, 0] * f_DAC_Aug, alpha*X_QP, label='X_QP')
+        # ax_02.plot(Q4_Up_Aug[:, 0] * f_DAC_Aug, np.divide(Q4_Up_Interpolated, Q4_Up_Aug[:, 1]), 'r--',
+        #            label='$\Gamma_{01 from P}/\Gamma_{01}$')
+        # ax_02.set_ylabel('$\Gamma_{01 from P}/\Gamma_{01}$', color='red')
+        # ax_02.set_ylim([0.05, 0.3])
+
+        # ax[1].plot(Q4_P1_Aug[:, 0]*f_DAC_Aug, Q4_P1_Aug[:, 1], label='P1')
+        # ax[1].set_ylabel('P1')
+        # ax[1].set_yscale('log')
+        # ax[1].set_xlim([0, 550])
+
+        # plt.xlim([50, 600])
+        # plt.ylim([1e2, 1e4])
+        # plt.xlabel('Radiator Freq (GHz)')
+        # plt.legend()
+        # plt.show()
 
 
 ###Delta = 46 GHz

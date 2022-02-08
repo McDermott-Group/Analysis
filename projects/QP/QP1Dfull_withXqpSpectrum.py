@@ -51,10 +51,10 @@ ne_log = 100    # points in log energy grid,
                 # 1000 enough for my purpose, 100 good for debug purpose
                 # finer ne also means finer time step
 
-time_tot = 10 * 1e-3  # milli sec. 1 msec should be enough, from 1 to 10 msec,
+time_tot = 0.01 * 1e-3  # milli sec. 1 msec should be enough, from 1 to 10 msec,
 # the change is 0.001% level, 100 msec is more than enough without trapping
-s = 1e-2  # sets time step; units of tau0 -- try 1e-4, 5e-2 good for E=2Delta injection
-dt = s * tau0
+s = 1e-4  # sets time step; units of tau0 -- try 1e-4, 5e-2 good for E=2Delta injection
+dt = s * tau0   # time step, units of nsec
 Gamma = 1e-3  # Dynes broadening
 
 nt = int(time_tot * 1e9 / dt)  # time steps, convert things to nanoseconds
@@ -65,7 +65,7 @@ emax = 10.0  # units of Delta
 # de = (emax - 1.0) / ne  # energy increment in units of Delta = 1
 # e = 1.0 + de * np.linspace(0, ne - 1, ne)
 e_log = np.logspace(0, 4, num=ne_log, base=2)
-e_inj = 2
+e_inj = 5.43/2
 idx_e_upper = (np.abs(e_log - e_inj)).argmin()
 e = e_log[:idx_e_upper + 5]  # useful energy grid
 ne = len(e)  # points in energy grid
@@ -74,6 +74,12 @@ Dynes = e + broadened
 rho = Dynes / np.sqrt(Dynes ** 2 - Delta ** 2)
 rho = rho.real
 n = np.zeros(ne)
+
+
+### initial data
+dat = np.loadtxt('QPEnergySpectrum_250GHzPhoton.txt')
+e = dat[:, 0]
+n = dat[:, 1]# use earlier data as initial
 
 G = np.zeros((ne, ne))
 Gr0 = np.zeros((ne, ne))
@@ -125,6 +131,16 @@ def scatter(n, inj, dt, i):
     recomb_helper = np.kron(n, np.ones(ne))  # helper is the issue, get large numbers and become nans
     Gr = 2 * Gr0 * recomb_helper  # 2 QPs recombine into 1 CP
     recombined = np.matmul(Gr, n)
+
+    trap_time = 0.01e-6  # 100 usec
+    trap_rate = 1/(trap_time*1e9)   # convert to 1/ns
+    trapped = dt*trap_rate*n
+    # if i % 10000 == 0:
+    #     print(i / 10000)
+    #     print('sum(recombined)=', sum(recombined))
+    #     print('sum(trapped)=', sum(trapped))
+
+    # n = n + inflow - outflow - recombined-trapped
     n = n + inflow - outflow - recombined
     n = n + inj
 
@@ -177,7 +193,7 @@ def inj(ne, e_inj, Gamma_p, tau0, dt):
     return delta_inj
 
 
-Gamma_p = 4.4e3
+Gamma_p = 2*5.6e3 # at 250 GHz, one photon generates two QPs at half energy
 n_inj = inj(ne, e_inj, Gamma_p, tau0, dt)
 # print('n_inj=', n_inj)
 ### n_inj = [0,0,0,...,8.8e-10,...,0]
@@ -220,7 +236,7 @@ QP_Data = []
 for i in range(len(ni)):
     d = [e[i], ni[i]]
     QP_Data.append(d)
-np.savetxt('QPEnergySpectrum_new.txt', QP_Data)
+np.savetxt('QPEnergySpectrumWithTrapping.txt', QP_Data)
 
 plt.plot(e, ni)
 plt.xlabel('$E/\Delta$')

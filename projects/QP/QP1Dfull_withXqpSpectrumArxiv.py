@@ -176,7 +176,7 @@ QP_Data = []
 for i in range(len(ni)):
     d = [e[i], ni[i]]
     QP_Data.append(d)
-np.savetxt('QPEnergySpectrum_new.txt', QP_Data)
+np.savetxt('QPEnergySpectrum_250GHz.txt', QP_Data)
 
 plt.plot(e, ni)
 plt.xlabel('$E/\Delta$')

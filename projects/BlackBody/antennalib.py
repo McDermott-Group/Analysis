@@ -12,6 +12,7 @@ from sklearn.mixture import GaussianMixture
 from scipy.optimize import fsolve
 from scipy.optimize import root
 from scipy.optimize import minimize
+from scipy import interpolate
 
 from scipy.optimize import curve_fit
 
@@ -417,42 +418,164 @@ class UpAndParity(object):
     """
 
     def __init__(self):
-        self.freq = None
-        self.parity = None
-        self.Delta = 46.0  # 46 GHz one energy gap
+        self.parity_freq_data = None
+        self.parity_data = None
+        self.parity_data_nobase = None
+
+        self.up_freq_data = None
+        self.up_data = None
+        self.up_data_nobase = None
+
+        self.S_freq = None
         self.S_Minus = None
         self.S_Plus = None
+        self.S_MinusOverPlus = None
+
+        self.Delta = 46.0  # 46 GHz one energy gap
         self.UpRate = None
         self.X_QP = None
 
-    def import_data(self, freq, parity):
-        self.freq = freq
-        self.parity = parity
-        # plt.plot(freq, parity)
-        # plt.show()
-        self._getS()
-        self._getUp()
-        self._getXqp()
+        self.f_DAC = 4.604  # DAC to freq conversion
 
-    def _getS(self):
-        freq = self.freq
+        self.f_interest = None
+        self.up_interest = None
+        self.parity_interest = None
+        self.S_Minus_interest = None
+        self.S_Plus_interest = None
+        self.S_MOP_interest = None
+
+        self.parity_PAT = None
+        self.parity_QPD = None
+        self.up_PAT = None
+        self.up_QPD = None
+
+    def import_data(self, parity_file, up_file, S_file):
+
+        self._importP(parity_file)
+        self._importUP(up_file)
+        self._importS(S_file)
+        self._interpolateToUp()
+        self._separatePATandQPDiffusion()
+        # self._getUp()
+        # self._getXqp()
+
+    def _importP(self, parity_file):
+        PSD = np.loadtxt(parity_file, skiprows=20)
+        self.parity_freq_data = PSD[:, 0] * self.f_DAC
+        self.parity_data = PSD[:, 1]
+        self.parity_data_nobase = PSD[:, 1] - np.mean(PSD[:, 1][:5])
+
+    def _importUP(self, up_file):
+        UP = np.loadtxt(up_file, skiprows=20)
+        self.up_freq_data = UP[:, 0] * self.f_DAC
+        self.up_data = UP[:, 1]
+        # self.up_data_nobase = UP[:, 1] - np.mean(UP[:, 1][:5])
+        self.up_data_nobase = UP[:, 1] - 200.0    # 200 Hz will make all elements positive
+
+    def _importS(self, S_file):
         Delta = self.Delta
-        S_Minus = []
-        S_Plus = []
-        X = []
-        for f in freq:
-            x = f / Delta
-            S_minus = 17.0 / 20 * x + 1.5
-            S_plus = 1.2 * x - 2.4
-            S_Minus.append(S_minus)
-            S_Plus.append(S_plus)
-            X.append(x)
+        S_param = np.loadtxt(S_file)
+        self.S_freq = S_param[:, 0] * Delta
+        self.S_Minus = S_param[:, 1]
+        self.S_Plus = S_param[:, 2]
+        self.S_MinusOverPlus = np.divide(S_param[:, 1], S_param[:, 2])
 
-        S_Minus = np.array(S_Minus)
-        S_Plus = np.array(S_Plus)
+    def _interpolateToUp(self):
+        ### Freq aligned
+        ### only data without base
+        ### For data > 100 GHz
+        f_l = 115
+        f_interest = []
+        up_interest = []
+        parity_interest = []
+        S_Minus_interest = []
+        S_Plus_interest = []
+        S_MOP_interest = []
 
-        self.S_Minus = S_Minus
-        self.S_Plus = S_Plus
+        f_PSD = interpolate.interp1d(self.parity_freq_data, self.parity_data_nobase)
+        f_S_Minus = interpolate.interp1d(self.S_freq, self.S_Minus)
+        f_S_Plus = interpolate.interp1d(self.S_freq, self.S_Plus)
+        f_S_MOP = interpolate.interp1d(self.S_freq, self.S_MinusOverPlus)
+
+        up_freq = self.up_freq_data
+
+        ### data > 100 GHz and without base clean
+        for i in range(len(up_freq)):
+            fi = up_freq[i]
+            if fi > f_l:
+                f_interest.append(fi)
+                up_interest.append(self.up_data_nobase[i])
+                parity_interest.append(f_PSD(fi))
+                S_Minus_interest.append(f_S_Minus(fi))
+                S_Plus_interest.append(f_S_Plus(fi))
+                S_MOP_interest.append(f_S_MOP(fi))
+
+        self.f_interest = f_interest
+        self.up_interest = up_interest
+        self.parity_interest = parity_interest
+        self.S_Minus_interest = S_Minus_interest
+        self.S_Plus_interest = S_Plus_interest
+        self.S_MOP_interest = S_MOP_interest
+
+    def _separatePATandQPDiffusion(self):
+        """
+        Use linear algebra to separate the direct PAT contribution and the QP diffusion
+
+        Gamma_p = Gamma_p_PAT + Gamma_p_QPD
+        Gamma_up = Gamma_up_PAT + Gamma_up_QPD
+
+        Gamma_up_PAT = alpha*Gamma_p_PAT
+        Gamma_up_QPD = Gamma_p_QPD
+
+        :return:
+        """
+
+        parity_PAT = []
+        parity_QPD = []
+        up_PAT = []
+        up_QPD = []
+
+        SOP = self.S_MOP_interest
+        parity = self.parity_interest
+        up = self.up_interest
+
+        EjOverEc = 27.0
+
+        for i in range(len(SOP)):
+            ratio = 1.0/(1.0+np.sqrt(8*EjOverEc)*SOP[i])
+            m = 1 # up/(up+ down) ratio
+            # a = [[1.0, 1.0], [ratio, 1.0]]
+            a = [[1.0, 1.0], [ratio, m]]
+            b = [parity[i], up[i]]
+            parity_pat, parity_qpd = np.linalg.solve(a, b)
+            up_pat = ratio * parity_pat
+            up_qpt = m*parity_qpd
+
+            parity_PAT.append(parity_pat)
+            parity_QPD.append(parity_qpd)
+            up_PAT.append(up_pat)
+            up_QPD.append(up_qpt)
+
+        self.parity_PAT = parity_PAT
+        self.parity_QPD = parity_QPD
+        self.up_PAT = up_PAT
+        self.up_QPD = up_QPD
+
+        # plt.plot(self.f_interest, SOP)
+        # plt.plot(self.f_interest, parity, 'r', linewidth=4, label='parity interet')
+        # plt.plot(self.f_interest, parity_PAT, 'r:', linewidth=2, label='parity PAT')
+        # # plt.plot(self.f_interest, parity_QPD, 'r--', linewidth=2, label='parity QPD')
+        # plt.plot(self.f_interest, up, 'b', linewidth=4, label='up interet')
+        # plt.plot(self.f_interest, up_PAT, 'b:', linewidth=2, label='up PAT')
+        # plt.plot(self.f_interest, up_QPD, 'k', linewidth=2, label='parity/up QPDiffusion')
+        #
+        # plt.yscale('log')
+        # plt.legend()
+        # plt.xlim([100, 600])
+        # plt.xlabel('Frequency (GHz)')
+        # plt.ylabel('Rate (Hz)')
+        # plt.title('Up rate baseline hand chosen 200 Hz')
+        # plt.show()
 
     def _getUp(self):
         freq = self.freq
@@ -464,7 +587,7 @@ class UpAndParity(object):
         for i in range(len(freq)):
             ratio = 1.0 / (1.0 + E_ratio * (S_Minus[i]) / (S_Plus[i]))
             uprate = parity[i] * ratio
-            if freq[i] <= 2*self.Delta:
+            if freq[i] <= 2 * self.Delta:
                 uprate = 0.0
             UpRate.append(uprate)
 
@@ -508,9 +631,9 @@ def getGammaUpDownFromQPSpectrum(epsilon, n):
     Delta = 1.0  # energy gap
     Myarray_up = np.zeros(len(n))
     Myarray_down = np.zeros(len(n))
-    Rn = 10.0e3  # normal state resistance
-    C = 5.0e-15  # junction self capacitance
-    E_ge = 0.1  # =hf_{01}/\Delta, qubit energy normalized to energy gap, 10% of delta
+    Rn = 15.0e3  # normal state resistance
+    C = 3.39e-15  # junction self capacitance
+    E_ge = 0.1076  # =hf_{01}/\Delta, qubit energy normalized to energy gap, 10% of delta
 
     for i in range(len(n)):
         e_i = epsilon[i]
@@ -518,12 +641,12 @@ def getGammaUpDownFromQPSpectrum(epsilon, n):
         e_f_down = e_i + E_ge
         if e_f_up >= Delta:
             element_up = (n[i] / E_ge) * (1 + Delta ** 2 / (e_i * e_f_up)) * \
-                      (e_f_up ** 2 / (e_f_up ** 2 - Delta ** 2)) ** 0.5
+                         (e_f_up ** 2 / (e_f_up ** 2 - Delta ** 2)) ** 0.5
 
             Myarray_up[i] = element_up
 
         element_down = (n[i] / E_ge) * (1 + Delta ** 2 / (e_i * e_f_down)) * \
-                     (e_f_down ** 2 / (e_f_down ** 2 - Delta ** 2)) ** 0.5
+                       (e_f_down ** 2 / (e_f_down ** 2 - Delta ** 2)) ** 0.5
 
         Myarray_down[i] = element_down
 
@@ -776,10 +899,11 @@ class AntennaCoupling(object):
         QPs will be generated locally and suppress the energy and reduce the critical current
         :return:
         """
-        if 0:  # Xmon
+        if 1:  # Xmon
             Vol = 40 * 1.6 * 0.1  # volume of the junction units um^3
             r = 1 / (400e-9)  # recombination rate sec^-1
             Vol = Vol * 0.17
+            # the recombination rate and vol of the leads can be reconsidered
         else:  # Circmon
             Vol = 36 * 1 * 0.1  # volume of the junction units um^3
             r = 10 / (400e-9)  # recombination rate sec^-1
