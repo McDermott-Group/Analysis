@@ -33,7 +33,7 @@ Dn = 6e-2  # units of um^2/ns -- want to use 6 here for aluminum
 
 nx = 100  # points in space grid
 ne = 1  # points in energy grid
-nt = 10000# time steps
+nt = 1000# time steps
 
 s = 1e-3  # sets time step; units of tau0 -- try 1e-4
 dt = s * tau0

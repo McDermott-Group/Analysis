@@ -520,7 +520,6 @@ print('PRQ1=', PRQ1)
 print('PRQ2=', PRQ2)
 print('PRQ4=', PRQ4)
 
-
 # DfQ1 = getNoiseBandwidth(eQ1, f_SFQ)
 # DfQ2 = getNoiseBandwidth(eQ2, f_SFQ)
 # DfQ4 = getNoiseBandwidth(eQ4, f_SFQ)

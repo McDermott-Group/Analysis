@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from antennalib import AntennaCoupling
+from antennalib import AntennaCoupling, getPhotonRate
 import numpy as np
 
 if 1:
@@ -8,7 +8,7 @@ if 1:
     """
     e_eff = 6  # limit (1, 6.5), the voltage can also be built in to have a larger range
     C_eff_circ = 75 * 1e-21  # Commonly used (50-100)
-    C_eff_SFQ = 150 * 1e-21  # Commonly used (50-100)
+    C_eff_SFQ = 75 * 1e-21  # Commonly used (50-100)
 
     JCirc = [4.8 * 1e3, None, 0, 320 * 123 * 2, "Radiator"]  # [R, L, C, A]
     JSFQ_weak = [16 * 1e3, None, 0, 100 * 200, "Radiator"]  # [R, L, C, A]
@@ -16,8 +16,8 @@ if 1:
 
 
 
-    JQ1 = [16.6 * 1e3, 18.3 * 1e-9, 0, 193.8 * 121.8, "Receiver"]  #
-    JQ2 = [13.2 * 1e3, 14.6 * 1e-9, 0, 350 * 126.6, "Receiver"]  #
+    JQ1 = [16.6 * 1e3, 18.3 * 1e-9, 0, 193.8 * 121.8 * 2, "Receiver"]  #
+    JQ2 = [13.2 * 1e3, 14.6 * 1e-9, 0, 330 * 128.0, "Receiver"]  #
     JQ3 = [19 * 1e3, 21 * 1e-9, 0, 310 * 126, "Receiver"]  # some issue with Q3
     JQ4 = [15 * 1e3, 19.9 * 1e-9, 0, 184.4 * 122.5 * 2, "Receiver"]  #
 
@@ -29,14 +29,24 @@ if 1:
     fileQ4Aug = "2021Aug_Q4.txt"
 
     ### up to 1000 GHz
+    fileCircTest = "testpad_circmon1THz.txt"
     # fileSFQ = "testpad_1.5THz.txt"
     fileSFQ_4 = "SFQ_4rectmons.txt"
     fileSFQ = "SFQ_1THz.txt"
     # fileQ_l = "Q_l_with-leads_1.5THz.txt"
     fileQ1 = "Q1_full-chip.txt"
     fileQ2 = "Q2_full-chip.txt"
+    # fileQ2 = "Q2_overetch.txt"
+    # fileQ2 = "Q2_non_overetch.txt"
     fileQ3 = "Q3_full-chip.txt"
     fileQ4 = "Q4_full-chip.txt"
+
+    Circ_test = AntennaCoupling()
+    Circ_test.import_data(fileCircTest, JCirc, C_eff=C_eff_circ)
+    f_Circ_test = Circ_test.Antenna["f"]
+    ecCirc_test = Circ_test.Antenna["e_c_dB"]
+    eCirc_test = Circ_test.Antenna["e_c"]
+    PhotonFlux_CircTest = Circ_test.Al_Wall["PhotonFlux"]
 
     Circ = AntennaCoupling()
     Circ.import_data(fileCirc, JCirc, C_eff=C_eff_circ)
@@ -69,6 +79,8 @@ if 1:
 
     Q2 = AntennaCoupling()
     Q2.import_data(fileQ2, JQ2, C_eff=C_eff_circ)
+    # Q2.import_data(fileQ2Aug, JQ2, C_eff=C_eff_circ)
+    f_Q2 = Q2.Antenna["f"]
     eQ2 = Q2.Antenna["e_c"]
     ecQ2 = Q2.Antenna["e_c_dB"]
     AreaQ2 = Q2.Receiver["Area"]
@@ -81,7 +93,9 @@ if 1:
 
     f_scale = np.sqrt(e_eff / 6.0)
     f_Circ = f_Circ * f_scale / 1e9
+    f_Circ_test = f_Circ_test * f_scale / 1e9
     f_SFQ = f_SFQ * f_scale / 1e9
+    f_Q2 = f_Q2 * f_scale / 1e9
 
     if 0: # radiator
         plt.plot(f_Circ, eCirc, label='circ')
@@ -101,6 +115,8 @@ if 1:
     # plt.legend()
     # plt.grid(which='both')
     # plt.show()
+
+
 
 if 1:
     """
@@ -262,6 +278,7 @@ if 1:
         plt.yscale('log')
         plt.legend()
         plt.show()
+
     if 0:   # parity data cross talk for Aug
         f_SIM_OctW = 0.96758 * 1.025 # Xmon match data
         SIM_OctW_Offset = 2 # Xmon match data   2mV is OK or max
@@ -281,9 +298,9 @@ if 1:
         # plt.axhline(y=Q2_base)
         # plt.axhline(y=Q4_base)
 
-        # plt.plot(Q1_PSD_Aug[:, 0]*f_DAC_Aug, Q1_PSD_Aug[:, 1], 'r--', label='Q1 PSD Aug')
-        # plt.plot(Q2_PSD_Aug[:, 0]*f_DAC_Aug, Q2_PSD_Aug[:, 1], 'b--', label='Q2 PSD Aug')
-        # plt.plot(Q4_PSD_Aug[:, 0]*f_DAC_Aug, Q4_PSD_Aug[:, 1], 'k--', label='Q4 PSD Aug')
+        plt.plot(Q1_PSD_Aug[:, 0]*f_DAC_Aug, Q1_PSD_Aug[:, 1], 'r--', label='Q1 PSD Aug')
+        plt.plot(Q2_PSD_Aug[:, 0]*f_DAC_Aug, Q2_PSD_Aug[:, 1], 'b--', label='Q2 PSD Aug')
+        plt.plot(Q4_PSD_Aug[:, 0]*f_DAC_Aug, Q4_PSD_Aug[:, 1], 'k--', label='Q4 PSD Aug')
 
         # plt.plot(Q1_PSD_Aug[:, 0]*f_DAC_Aug, Q1_PSD_Aug[:, 1]-Q1_base, 'r--', label='Q1 PSD Aug')
         # plt.plot(Q1_PSD_Aug[:, 0]*f_DAC_Aug, 0.002*(Q1_PSD_Aug[:, 1]-Q1_base), 'r:', label='Q1 ')
@@ -401,11 +418,84 @@ if 1:
     # plt.legend()
     # plt.show()
 
-if 1:  # parity data cross talk for Oct weak
+if 0:  # parity data cross talk for Aug
     # f_SIM_OctW = 0.96758 * 1.025  # Xmon match data
     f_SIM_OctW = 0.96758 * 0.95  # Xmon match data
     SIM_OctW_Offset = 2  # Xmon match data   2mV is OK or max
-    f_DAC_Oct = 4.64  # 4.604
+    f_DAC_Aug = 4.604  # 4.604
+    DAC_Oct_Offset = 0.5  # 0.9
+
+
+    k41 = 0     # [, 0.18 (baseline)], [0, 0.12 (-baseline)]
+    k21 = 0     # [, 0.012 (baseline)], [0, 0.016 (-baseline)]
+    k24 = 0     #
+    # Q1_base = 1046.0
+    # Q2_base = 12.5
+    # Q4_base = 192.0
+
+    Q1_base = np.mean(Q1_PSD_Aug[:, 1][:8])
+    Q2_base = np.mean(Q2_PSD_Aug[:, 1][:8])
+    Q4_base = np.mean(Q4_PSD_Aug[:, 1][:8])
+
+    Q1_photon_absorbed = eQ1 * AreaQ1 * PhotonFlux_CircTest/2
+    Q2_photon_absorbed = eQ2 * AreaQ2 * PhotonFlux_CircTest/2
+    Q4_photon_absorbed = eQ4 * AreaQ4 * PhotonFlux_CircTest/2
+
+    fig, axs = plt.subplots(2, figsize=(8, 8))
+
+    f_l = 50
+    f_r = 550
+
+    axs_02 = axs[0].twinx()
+    axs_02.plot(f_Circ_test, PhotonFlux_CircTest, color="black", linestyle='--',
+                linewidth=4, label='Photon Flux')
+    axs_02.set_ylabel("Photon flux $=S/hf$ $(m^{-2} sec^{-1})$", color="black", fontsize=10)
+    axs_02.set_xlim([f_l, f_r])
+    axs_02.set_ylim([5e12, 5e15])
+    axs_02.set_yscale('log')
+    axs_02.legend(loc=4)
+
+    axs[0].plot(f_Circ_test, eQ1*AreaQ1, color="red", label='Q1')
+    axs[0].plot(f_Circ_test, eQ2*AreaQ2, color="blue", label='Q2')
+    axs[0].plot(f_Circ_test, eQ4*AreaQ4, color="black", label='Q4')
+    axs[0].set_ylabel('$e_{c}^{r}*A_{eff} (sec^{-1})$', color="black", fontsize=10)
+    # axs[0].set_ylabel('$e_{c}$', color="black", fontsize=10)
+    axs[0].set_xlim([f_l, f_r])
+    axs[0].set_ylim([1e-11, 1e-8])
+    axs[0].set_yscale('log')
+    axs[0].grid(which='both')
+    axs[0].legend(loc=1)
+
+    # axs[0].plot(f_Circ_test, Q1_photon_absorbed, color="red", label='Q1')
+    # axs[0].plot(f_Circ_test, Q2_photon_absorbed, color="blue", label='Q2')
+    # axs[0].plot(f_Circ_test, Q4_photon_absorbed, color="black", label='Q4')
+    # axs[0].set_ylabel('$PAT$', color="black", fontsize=10)
+    # axs[0].set_xlim([f_l, f_r])
+    # axs[0].set_ylim([3e2, 3e6])
+    # axs[0].set_yscale('log')
+    # axs[0].grid(which='both')
+    # axs[0].legend(loc=1)
+
+    axs[1].plot((Q1_PSD_Aug[:, 0])*f_DAC_Aug, Q1_PSD_Aug[:, 1], 'r-', label='Q1 PSD Aug')
+    axs[1].plot((Q2_PSD_Aug[:, 0])*f_DAC_Aug, Q2_PSD_Aug[:, 1], 'b-', label='Q2 PSD Aug')
+    axs[1].plot((Q4_PSD_Aug[:, 0])*f_DAC_Aug, Q4_PSD_Aug[:, 1], 'k-', label='Q4 PSD Aug')
+
+    axs[1].set_xlim([f_l, f_r])
+    # axs[1].set_ylim([8e2, 8e3]) # Q1
+    # axs[1].set_ylim([1e1, 1e3]) # Q2
+    # axs[1].set_ylim([1e2, 5e3]) # Q4
+    # axs[1].set_ylim([1e1, 6e3])
+    axs[1].set_yscale('log')
+    axs[1].grid(which='both')
+    axs[1].legend(loc=1)
+    # plt.yscale('log')
+    plt.show()
+
+if 0:  # parity data cross talk for Oct weak
+    # f_SIM_OctW = 0.96758 * 1.025  # Xmon match data
+    f_SIM_OctW = 0.96758 * 0.95  # Xmon match data
+    SIM_OctW_Offset = 2  # Xmon match data   2mV is OK or max
+    f_DAC_Oct = 4.604  # 4.604
     DAC_Oct_Offset = 0.5  # 0.9
 
     k41 = 0     # [, 0.18 (baseline)], [0, 0.12 (-baseline)]
@@ -425,13 +515,13 @@ if 1:  # parity data cross talk for Oct weak
     f_r = 550
 
     axs_02 = axs[0].twinx()
-    axs_02.plot(f_SFQ, PhotonFlux, color="black", linestyle='--',
+    axs_02.plot(f_SFQ, PhotonFlux, color="green", linestyle='--',
                 linewidth=4, label='Photon Flux')
     axs_02.set_ylabel("Photon flux $=S/hf$ $(m^{-2} sec^{-1})$", color="black", fontsize=10)
     axs_02.set_xlim([f_l, f_r])
     axs_02.set_ylim([5e12, 5e14])
     axs_02.set_yscale('log')
-    axs_02.legend(loc=4)
+    axs_02.legend(loc=1)
 
     axs[0].plot(f_SFQ, eQ1*AreaQ1, color="red", label='Q1')
     axs[0].plot(f_SFQ, eQ2*AreaQ2, color="blue", label='Q2')
@@ -450,8 +540,8 @@ if 1:  # parity data cross talk for Oct weak
     # axs[0].set_ylim([5e-7, 6e-2])   # Q2 tot
     # axs[0].set_ylim([5e-5, 6e-2])   # Q4 tot
     axs[0].set_yscale('log')
-    axs[0].grid(which='both')
-    axs[0].legend(loc=1)
+    # axs[0].grid(which='both')
+    axs[0].legend(loc=2)
 
     # plt.axhline(y=Q1_base)
     # plt.axhline(y=Q2_base)
@@ -467,7 +557,7 @@ if 1:  # parity data cross talk for Oct weak
     # axs[1].set_ylim([1e2, 5e3]) # Q4
     axs[1].set_ylim([1e1, 6e3])
     axs[1].set_yscale('log')
-    axs[1].grid(which='both')
+    # axs[1].grid(which='both')
     axs[1].legend(loc=1)
     # plt.yscale('log')
     plt.show()
@@ -572,3 +662,95 @@ if 0:  # parity data cross talk for Oct weak
     axs[2].legend(loc=1)
     # plt.yscale('log')
     plt.show()
+
+
+### For paper plot
+
+"""
+Calculate effective blackbody temperature
+"""
+# Circmon radiator data
+# Tbb1 = 429e-3
+# Tbb2 = 522e-3
+# Tbb4 = 543e-3
+# PRQ1 = getPhotonRate(eQ1, f_SFQ, Tbb1)
+# PRQ2 = getPhotonRate(eQ2, f_SFQ, Tbb2)
+# PRQ4 = getPhotonRate(eQ4, f_SFQ, Tbb4)
+# print('PRQ1=', PRQ1[0])
+# print('PRQ2=', PRQ2[0])
+# print('PRQ4=', PRQ4[0])
+
+### SFQ weak radiator data
+# Tbb1 = 407e-3   # 407,408
+# Tbb2 = 459e-3   # 458,460
+# Tbb4 = 488e-3   # 487,489
+# PRQ1 = getPhotonRate(eQ1, f_SFQ, Tbb1)
+# PRQ2 = getPhotonRate(eQ2, f_SFQ, Tbb2)
+# PRQ4 = getPhotonRate(eQ4, f_SFQ, Tbb4)
+# print('PRQ1=', PRQ1[0])
+# print('PRQ2=', PRQ2[0])
+# print('PRQ4=', PRQ4[0])
+
+
+label_font = 20
+tick_font = 20
+legend_font = 12
+
+f_SIM_OctW = 0.96758 * 0.95  # Xmon match data
+SIM_OctW_Offset = 2  # Xmon match data   2mV is OK or max
+f_DAC_Oct = 4.604  # 4.604
+DAC_Oct_Offset = 0.5  # 0.9
+
+
+Q1_base = np.mean(Q1_PSD_OctWeak[:, 1][:8])
+Q2_base = np.mean(Q2_PSD_OctWeak[:, 1][:8])
+Q4_base = np.mean(Q4_PSD_OctWeak[:, 1][:8])
+
+fig, axs = plt.subplots(2, figsize=(8, 8))
+
+f_l = 50
+f_r = 535
+
+ld1=3
+ld2=5
+
+axs_02 = axs[0].twinx()
+axs_02.plot(f_SFQ, PhotonFlux, color="green", linestyle='--',
+            linewidth=ld2, label='Photon Flux')
+axs_02.set_ylabel("Photon flux $(\\rm m^{-2}\\rm s^{-1})$", color="black", fontsize=label_font, fontweight='bold')
+axs_02.set_xlim([f_l, f_r])
+axs_02.set_ylim([2e12, 6e14])
+axs_02.set_yscale('log')
+axs_02.legend(loc=1)
+axs_02.tick_params(labelsize=tick_font)
+
+axs[0].plot(f_SFQ, eQ1*AreaQ1, linewidth=ld2, color="red", label='$Q^{L}$')
+axs[0].plot(f_SFQ, eQ4*AreaQ4, linewidth=ld2, color="black", label='$Q^{M}$')
+axs[0].plot(f_SFQ, eQ2*AreaQ2, linewidth=ld2, color="blue", label='$Q^{S}$')
+axs[0].set_ylabel('$e_{c}^{r}\\times A_{eff}$  $(\\rm m ^2)$', color="black", fontsize=label_font, fontweight='bold')
+axs[0].set_xlim([f_l, f_r])
+axs[0].set_ylim([2e-11, 6e-9])
+axs[0].set_yscale('log')
+axs[0].legend(loc=2)
+axs[0].tick_params(labelsize=tick_font)
+
+axs[1].axhline(y=Q1_base, color='r', linestyle='--', linewidth=ld1)
+axs[1].axhline(y=Q2_base, color='b', linestyle='--', linewidth=ld1)
+axs[1].axhline(y=Q4_base, color='k', linestyle='--', linewidth=ld1)
+
+axs[1].plot((Q1_PSD_OctWeak[:, 0]+SIM_OctW_Offset)*f_SIM_OctW, Q1_PSD_OctWeak[:, 1], 'r-', linewidth=ld2, label='$Q^{L}$')
+axs[1].plot((Q4_PSD_OctWeak[:, 0]+SIM_OctW_Offset)*f_SIM_OctW, Q4_PSD_OctWeak[:, 1], 'k-', linewidth=ld2, label='$Q^{M}$')
+axs[1].plot((Q2_PSD_OctWeak[:, 0]+SIM_OctW_Offset)*f_SIM_OctW, Q2_PSD_OctWeak[:, 1], 'b-', linewidth=ld2, label='$Q^{S}$')
+axs[1].tick_params(labelsize=tick_font)
+
+axs[1].set_xlim([f_l, f_r])
+axs[1].set_ylim([1e1, 1e4])
+axs[1].set_yscale('log')
+axs[1].legend(loc=4)
+axs[1].set_xlabel("Radiator Frequency (GHz)", color="black", fontsize=label_font, fontweight='bold')
+axs[1].set_ylabel("$\Gamma_{P}$ ($s^{-1}$)", color="black", fontsize=label_font, fontweight='bold')
+
+path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
+plt.tight_layout()
+plt.savefig(path + '\Circmon.pdf', bbox_inches='tight', format='pdf', dpi=1200)
+plt.show()

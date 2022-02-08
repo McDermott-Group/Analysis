@@ -21,7 +21,7 @@ def get_bias_list(qubit_number):
         return np.array([0,10]+list(np.arange(16.3,60.301,2))+list(np.arange(75,135.001,20)))
 
 data_dict = {}
-for qubit_number in (1,2,4):
+for qubit_number in (4):
     data_dict[qubit_number] = []
     for J2B in get_bias_list(qubit_number):
         experiment_name = ('Q'+str(qubit_number)+'_P1_'+str(int(J2B*1000))+'uDACJ2')
@@ -34,7 +34,7 @@ for qubit_number in (1,2,4):
         QP = QP_Up()
         QP.add_data_from_matlab(file_list, data_type1='Occupation_Filtered')
         #QP.plot_Chi()
-        QP.plot(save=True,name='Figures/'+experiment_name+'.png')
+        # QP.plot(save=True,name='Figures/'+experiment_name+'.png')
         data_dict[qubit_number].append(QP.GammaUp)
     plt.plot(get_bias_list(qubit_number),data_dict[qubit_number],label='Q'+str(int(qubit_number)))
 plt.xlabel('J2 Bias (mDAC)')

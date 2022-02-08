@@ -9,7 +9,7 @@ Modified:
 2022Jan
 Chuanhong Liu
 
-For recombination photon emission
+For recombination photon/phonon emission energy spectrum
 
 """
 
@@ -28,7 +28,7 @@ tau0 = 400  # e-p coupling time, units of ns
 Dn = 6e-2  # units of um^2/ns -- use 6 here for aluminum
 
 nx = 1  # points in space grid, let's say it is 1 D now
-ne = 300  # points in energy grid
+ne = 200  # points in energy grid
 nt = 10  # time steps
 
 s = 1e-3  # sets time step; units of tau0 -- try 1e-4
@@ -38,7 +38,7 @@ Gamma = 1e-3  # Dynes broadening
 
 # energy stuff
 ## IF NEED HIGHER RESOLUTION AT GAP, LOG SPACING FROM DELTA
-emax = 2.0  # units of Delta, this needs to be modified for different bias voltage
+emax = 4.0  # units of Delta
 de = (emax - 1.0) / ne  # energy increment in units of Delta = 1
 e = 1.0 + de * np.linspace(0, ne - 1, ne)
 broadened = complex(0, -Gamma)
