@@ -750,7 +750,7 @@ axs[1].legend(loc=4)
 axs[1].set_xlabel("Radiator Frequency (GHz)", color="black", fontsize=label_font, fontweight='bold')
 axs[1].set_ylabel("$\Gamma_{P}$ ($s^{-1}$)", color="black", fontsize=label_font, fontweight='bold')
 
-path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
 plt.tight_layout()
+path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
 plt.savefig(path + '\Circmon.pdf', bbox_inches='tight', format='pdf', dpi=1200)
 plt.show()
