@@ -113,7 +113,7 @@ Calculate the noise bandwidth
 """
 Q2 # polished
 """
-if 0:
+if 1:
 
     label_font = 16
     tick_font = 13
