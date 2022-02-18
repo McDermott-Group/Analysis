@@ -45,23 +45,35 @@ for i in range(n):
 """Voltage"""
 step = 36
 length_ref = 0.3
-for i in n_list[0::step]:
-    if y1[i] >= 0.1 or y1[i] <= -0.1:
-        length = np.sqrt((x2[i]-x[i])**2+(y2[i]-y[i])**2)
-        scale = (length/length_ref)**(0.4)
-        # plt.arrow(x1[i], y1[i], (x2[i]-x1[i])*scale, (y2[i]-y1[i])*scale,
-        print('scale=', scale)
-        plt.arrow(x[i], y[i], (x2[i]-x[i])*scale, (y2[i]-y[i])*scale,
-                   lw=4*scale, head_width=0.02*scale, head_length=0.02*scale)
+plt.figure(figsize=(4, 4))
+# for i in n_list[0::step]:
+#     if y1[i] >= 0.1 or y1[i] <= -0.1:
+#         length = np.sqrt((x2[i]-x[i])**2+(y2[i]-y[i])**2)
+#         scale = (length/length_ref)**(0.2)
+#         plt.arrow(x1[i], y1[i], (x2[i]-x1[i])*scale, (y2[i]-y1[i])*scale,
+#         # print('scale=', scale)
+#         # plt.arrow(x[i], y[i], (x2[i]-x[i])*scale, (y2[i]-y[i])*scale,
+#                    lw=4*scale, head_width=0.05*scale, head_length=0.05*scale)
 plt.plot(x, y, '--', color="grey")
-plt.plot(x1, y1, '--', color="blue")
-plt.plot(x2, y2, '--', color="red")
+# plt.plot(x1, y1, '--', color="blue")
+# plt.plot(x2, y2, '--', color="red")
 plt.xlim([-1.5, 1.5])
 plt.ylim([-1.5, 1.5])
+# plt.xlim([-1, 1])
+# plt.ylim([-1, 1])
 plt.axis('off')
+
 # plt.savefig('AntennaVoltage.eps', format='eps')
 # plt.savefig('AntennaVoltage.pdf', format='pdf', dpi=1200)
 # plt.imsave('AntennaVoltage.pdf')
+path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
+# plt.savefig(path+'\AntennaVoltage.pdf', format='pdf', bbox_inches='tight', dpi=1200,
+#             pad_inches=0, transparent=True)
+plt.savefig(path+'\AntennaVoltage.png', format='png', bbox_inches='tight', transparent=True)
+# savefig(fname, dpi=None, facecolor='w', edgecolor='w',
+#         orientation='portrait', papertype=None, format=None,
+#         transparent=False, bbox_inches=None, pad_inches=0.1,
+#         frameon=None, metadata=None)
 plt.show()
 
 # """Current"""

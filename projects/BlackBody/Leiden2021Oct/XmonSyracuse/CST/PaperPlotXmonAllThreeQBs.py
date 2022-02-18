@@ -133,10 +133,10 @@ if 1:
     l_i = 50
     r_i = 700
     for i in range(len(Area)):
-        Gamma_absorbed = 1*PhotonFlux[i]*Area[i]*eQ2[i]
+        Gamma_absorbed = 0.5*PhotonFlux[i]*Area[i]*eQ2[i]
         Gamma_re.append(Gamma_absorbed)
 
-    ratio = 0.25   # for 190 GHz peak, 3.6, for 270 GHz, 7.0
+    ratio = 0.5   # for 190 GHz peak, 3.6, for 270 GHz, 7.0
     base = 110
     for i in range(len(pgJ1)):
         if f[i] >= 92:

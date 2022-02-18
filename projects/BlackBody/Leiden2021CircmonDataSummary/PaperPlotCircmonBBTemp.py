@@ -15,7 +15,6 @@ if 1:
     JSFQ_strong = [8 * 1e3, None, 0, 100 * 200 * 2, "Radiator"]  # [R, L, C, A]
 
 
-
     JQ1 = [16.6 * 1e3, 18.3 * 1e-9, 0, 193.8 * 121.8 * 2, "Receiver"]  #
     JQ2 = [13.2 * 1e3, 14.6 * 1e-9, 0, 330 * 128.0, "Receiver"]  #
     JQ3 = [19 * 1e3, 21 * 1e-9, 0, 310 * 126, "Receiver"]  # some issue with Q3
@@ -115,8 +114,6 @@ if 1:
     # plt.legend()
     # plt.grid(which='both')
     # plt.show()
-
-
 
 if 1:
     """
@@ -255,7 +252,7 @@ if 1:
         # plt.plot(Q2_P1_OctStrong[:, 0]*f_SIM_Octs, Q2_P1_OctStrong[:, 1], 'b-.', label='Q1 P1 Oct Strong')
         plt.plot(Q4_P1_OctStrong[:, 0]*f_SIM_Octs, Q4_P1_OctStrong[:, 1], 'k-.', label='Q1 P1 Oct Strong')
 
-    if 1:   # plot PSD data
+    if 0:   # plot PSD data
         f_SIM_OctW = 0.96758 * 1.025 # Xmon match data
         SIM_OctW_Offset = 2 # Xmon match data   2mV is OK or max
         # f_SIM_Octs = 0.96758 * 1 # Xmon match data
@@ -446,14 +443,14 @@ if 0:  # parity data cross talk for Aug
     f_l = 50
     f_r = 550
 
-    axs_12 = axs[0].twinx()
-    axs_12.plot(f_Circ_test, PhotonFlux_CircTest, color="black", linestyle='--',
+    axs_02 = axs[0].twinx()
+    axs_02.plot(f_Circ_test, PhotonFlux_CircTest, color="black", linestyle='--',
                 linewidth=4, label='Photon Flux')
-    axs_12.set_ylabel("Photon flux $=S/hf$ $(m^{-2} sec^{-1})$", color="black", fontsize=10)
-    axs_12.set_xlim([f_l, f_r])
-    axs_12.set_ylim([5e12, 5e15])
-    axs_12.set_yscale('log')
-    axs_12.legend(loc=4)
+    axs_02.set_ylabel("Photon flux $=S/hf$ $(m^{-2} sec^{-1})$", color="black", fontsize=10)
+    axs_02.set_xlim([f_l, f_r])
+    axs_02.set_ylim([5e12, 5e15])
+    axs_02.set_yscale('log')
+    axs_02.legend(loc=4)
 
     axs[0].plot(f_Circ_test, eQ1*AreaQ1, color="red", label='Q1')
     axs[0].plot(f_Circ_test, eQ2*AreaQ2, color="blue", label='Q2')
@@ -514,14 +511,14 @@ if 0:  # parity data cross talk for Oct weak
     f_l = 50
     f_r = 550
 
-    axs_12 = axs[0].twinx()
-    axs_12.plot(f_SFQ, PhotonFlux, color="green", linestyle='--',
+    axs_02 = axs[0].twinx()
+    axs_02.plot(f_SFQ, PhotonFlux, color="green", linestyle='--',
                 linewidth=4, label='Photon Flux')
-    axs_12.set_ylabel("Photon flux $=S/hf$ $(m^{-2} sec^{-1})$", color="black", fontsize=10)
-    axs_12.set_xlim([f_l, f_r])
-    axs_12.set_ylim([5e12, 5e14])
-    axs_12.set_yscale('log')
-    axs_12.legend(loc=1)
+    axs_02.set_ylabel("Photon flux $=S/hf$ $(m^{-2} sec^{-1})$", color="black", fontsize=10)
+    axs_02.set_xlim([f_l, f_r])
+    axs_02.set_ylim([5e12, 5e14])
+    axs_02.set_yscale('log')
+    axs_02.legend(loc=1)
 
     axs[0].plot(f_SFQ, eQ1*AreaQ1, color="red", label='Q1')
     axs[0].plot(f_SFQ, eQ2*AreaQ2, color="blue", label='Q2')
@@ -599,14 +596,14 @@ if 0:  # parity data cross talk for Oct weak
     f_l = 50
     f_r = 550
 
-    axs_12 = axs[0].twinx()
-    axs_12.plot(f_SFQ, PhotonFlux, color="black", linestyle='--',
+    axs_02 = axs[0].twinx()
+    axs_02.plot(f_SFQ, PhotonFlux, color="black", linestyle='--',
                 linewidth=4, label='Photon Flux')
-    axs_12.set_ylabel("Photon flux $=S/hf$ $(m^{-2} sec^{-1})$", color="purple", fontsize=10)
-    axs_12.set_xlim([f_l, f_r])
-    axs_12.set_ylim([5e12, 5e14])
-    axs_12.set_yscale('log')
-    axs_12.legend(loc=4)
+    axs_02.set_ylabel("Photon flux $=S/hf$ $(m^{-2} sec^{-1})$", color="purple", fontsize=10)
+    axs_02.set_xlim([f_l, f_r])
+    axs_02.set_ylim([5e12, 5e14])
+    axs_02.set_yscale('log')
+    axs_02.legend(loc=4)
 
     # axs[0].plot(f_SFQ, eQ1*AreaQ1, color="red", label='Q1')
     axs[0].plot(f_SFQ, eQ2*AreaQ2, color="blue", label='Q2')
@@ -669,16 +666,6 @@ if 0:  # parity data cross talk for Oct weak
 """
 Calculate effective blackbody temperature
 """
-# Circmon radiator data
-# Tbb1 = 429e-3
-# Tbb2 = 522e-3
-# Tbb4 = 543e-3
-# PRQ1 = getPhotonRate(eQ1, f_SFQ, Tbb1)
-# PRQ2 = getPhotonRate(eQ2, f_SFQ, Tbb2)
-# PRQ4 = getPhotonRate(eQ4, f_SFQ, Tbb4)
-# print('PRQ1=', PRQ1[0])
-# print('PRQ2=', PRQ2[0])
-# print('PRQ4=', PRQ4[0])
 
 ### SFQ weak radiator data
 # Tbb1 = 407e-3   # 407,408
@@ -691,70 +678,53 @@ Calculate effective blackbody temperature
 # print('PRQ2=', PRQ2[0])
 # print('PRQ4=', PRQ4[0])
 
+Temp = np.arange(150, 800, 20)
+Temp = Temp/1000.0  # units is K
+# print('Temp=', Temp)
+PRQ1 = []
+PRQ2 = []
+PRQ4 = []
+for temp in Temp:
+    prQ1 = getPhotonRate(eQ1, f_SFQ, temp)[0]
+    prQ2 = getPhotonRate(eQ2, f_SFQ, temp)[0]
+    prQ4 = getPhotonRate(eQ4, f_SFQ, temp)[0]
+    PRQ1.append(prQ1)
+    PRQ2.append(prQ2)
+    PRQ4.append(prQ4)
+#
+label_font = 16
+tick_font = 16
+legend_font = 12
 
-# label_font = 14
-# tick_font = 14
-# legend_font = 12
 #
-# f_SIM_OctW = 0.96758 * 0.95  # Xmon match data
-# SIM_OctW_Offset = 2  # Xmon match data   2mV is OK or max
-# f_DAC_Oct = 4.604  # 4.604
-# DAC_Oct_Offset = 0.5  # 0.9
-#
-#
-# Q1_base = np.mean(Q1_PSD_OctWeak[:, 1][:8])
-# Q2_base = np.mean(Q2_PSD_OctWeak[:, 1][:8])
-# Q4_base = np.mean(Q4_PSD_OctWeak[:, 1][:8])
-#
-# fig, axs = plt.subplots(2, figsize=(6, 5),
-#                         gridspec_kw={'height_ratios': [2, 3],
-#                                      'hspace': 0.15}
-#                         )
-#
-# f_l = 50
-# f_r = 535
-#
-# ld1=3
-# ld2=3
-#
-#
-# axs_12 = axs[0].twinx()
-# axs_12.plot(f_SFQ, PhotonFlux, color="green", linestyle='--',
-#             linewidth=ld2, label='Photon Flux')
-# # axs_12.set_ylabel("Photon flux $(\\rm m^{-2}\\rm s^{-1})$", color="black", fontsize=label_font, fontweight='bold')
-# axs_12.set_xlim([f_l, f_r])
-# axs_12.set_ylim([2e12, 6e14])
-# axs_12.set_yscale('log')
-# axs_12.legend(loc=1)
-# axs_12.tick_params(labelsize=tick_font)
-#
-# axs[0].plot(f_SFQ, eQ1*AreaQ1, linewidth=ld2, color="red", label='$Q^{L}$')
-# axs[0].plot(f_SFQ, eQ4*AreaQ4, linewidth=ld2, color="black", label='$Q^{M}$')
-# axs[0].plot(f_SFQ, eQ2*AreaQ2, linewidth=ld2, color="blue", label='$Q^{S}$')
-# # axs[1].set_ylabel('$e_{c}^{r}\\times A_{eff}$  $(\\rm m ^2)$', color="black", fontsize=label_font, fontweight='bold')
-# axs[0].set_xlim([f_l, f_r])
-# axs[0].set_ylim([2e-11, 6e-9])
-# axs[0].set_yscale('log')
-# axs[0].legend(loc=2)
-# axs[0].tick_params(labelsize=tick_font)
-#
-# axs[1].axhline(y=Q1_base, color='r', linestyle='--', linewidth=ld1)
-# axs[1].axhline(y=Q2_base, color='b', linestyle='--', linewidth=ld1)
-# axs[1].axhline(y=Q4_base, color='k', linestyle='--', linewidth=ld1)
-#
-# axs[1].plot((Q1_PSD_OctWeak[:, 0]+SIM_OctW_Offset)*f_SIM_OctW, Q1_PSD_OctWeak[:, 1], 'r-', linewidth=ld2, label='$Q^{L}$')
-# axs[1].plot((Q4_PSD_OctWeak[:, 0]+SIM_OctW_Offset)*f_SIM_OctW, Q4_PSD_OctWeak[:, 1], 'k-', linewidth=ld2, label='$Q^{M}$')
-# axs[1].plot((Q2_PSD_OctWeak[:, 0]+SIM_OctW_Offset)*f_SIM_OctW, Q2_PSD_OctWeak[:, 1], 'b-', linewidth=ld2, label='$Q^{S}$')
-# axs[1].tick_params(labelsize=tick_font)
-#
-# axs[1].set_xlim([f_l, f_r])
-# axs[1].set_ylim([1e1, 1e4])
-# axs[1].set_yscale('log')
-# axs[1].legend(loc=4)
-# axs[1].set_xlabel("Radiator Frequency (GHz)", color="black", fontsize=label_font)
-# # axs[1].set_ylabel("$\Gamma_{P}$ ($s^{-1}$)", color="black", fontsize=label_font)
-#
-# plt.tight_layout()
+Q1_base = np.mean(Q1_PSD_OctWeak[:, 1][:8])
+Q2_base = np.mean(Q2_PSD_OctWeak[:, 1][:8])
+Q4_base = np.mean(Q4_PSD_OctWeak[:, 1][:8])
+
+# Data from the circmon radiator, not good as well
+# Q1_base = 2100
+# Q2_base = 604
+# Q4_base = 52
+
+ld1=3
+
+plt.figure(figsize=(6, 4))
+plt.plot(Temp*1000, PRQ1, 'r', label='        ', linewidth=ld1)
+plt.axhline(y=Q1_base, color='r', linestyle='--', linewidth=ld1, label='        ')
+
+plt.plot(Temp*1000, PRQ4, 'k', label='         ', linewidth=ld1)
+plt.axhline(y=Q4_base, color='k', linestyle='--', linewidth=ld1, label='         ')
+
+plt.plot(Temp*1000, PRQ2, 'b', label='            ', linewidth=ld1)
+plt.axhline(y=Q2_base, color='b', linestyle='--', linewidth=ld1, label='            ')
+
+plt.xlabel('Effective Blackbody Temperature (mK)', fontsize=label_font, family='Arial')
+plt.xlim([180, 720])
+plt.ylim([5e0, 5e3])
+plt.yscale('log')
+plt.tight_layout()
+plt.tick_params(labelsize=tick_font)
+plt.legend(ncol=3, loc=1, prop={'size': 13})
 # path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
-# plt.savefig(path + '\Circmon.pdf', bbox_inches='tight', format='pdf', dpi=1200, transparent=True)
-# plt.show()
+# plt.savefig(path + '\CircmonBBTemp.pdf', bbox_inches='tight', format='pdf', dpi=1200, transparent=True)
+plt.show()

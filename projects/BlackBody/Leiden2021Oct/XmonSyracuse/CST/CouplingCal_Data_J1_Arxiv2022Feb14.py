@@ -133,13 +133,16 @@ if 1:
     l_i = 50
     r_i = 700
     for i in range(len(Area)):
-        Gamma_absorbed = 1*PhotonFlux[i]*Area[i]*eQ2[i]
+        Gamma_absorbed = 0.5*PhotonFlux[i]*Area[i]*eQ2[i]
         Gamma_re.append(Gamma_absorbed)
 
-    ratio = 0.25   # for 190 GHz peak, 3.6, for 270 GHz, 7.0
+
+    ratio = 0.6   # for 190 GHz peak, 3.6, for 270 GHz, 7.0
+    # ratio = 1.0/1  # for 190 GHz peak, 3.6, for 270 GHz, 7.0
     base = 110
+    # base = 0
     for i in range(len(pgJ1)):
-        if f[i] >= 92:
+        if f[i] >= 90:
             Gamma_withBase.append(ratio*Gamma_re[i] + base)
         else:
             Gamma_withBase.append(base)
@@ -185,16 +188,31 @@ if 1:
     axs[0, 1].plot(f, Ic_f*1e9, color="black", marker="o", markersize=4,
                 label='$I_{c}$')
     axs[0, 1].set_xlim([100, 700])
-    axs[0, 1].set_ylim([6.5, 9.5])
+    axs[0, 1].set_ylim([4, 10])
     axs[0, 1].set_ylabel('$I_{c}$ (nA)', fontsize=label_font)
     axs[0, 1].yaxis.set_label_position("right")
     axs[0, 1].tick_params(labelsize=tick_font)
     axs[0, 1].yaxis.tick_right()
 
+    # axs[0, 1].plot(f, eJ1, color="red", marker="o", markersize=4,
+    #             label='Radiator Efficiency')
+    # axs[0, 1].plot(f_Q2, eQ2, color="blue", marker="o", markersize=4,
+    #             label='Receiver Efficiency')
+    # axs[0, 1].plot(f_Q2, eJ1 * eQ2, color="purple", marker="o", markersize=4,
+    #             label='Total Efficiency')
+    # axs[0, 1].set_yscale('log')
+    # axs[0, 1].set_xlim([freq_l, freq_r])
+    # axs[0, 1].set_ylim([1e-6, 2e-1])
+    # axs[0, 1].yaxis.tick_right()
+    # axs[0, 1].set_xlabel("Antenna Frequency (GHz)", color="black", fontsize=label_font)
+
     axs[1, 1].plot(f_Q2, Gamma_withBase, color="grey", linestyle='-',  linewidth=4,
                 label='$\Gamma_{0}+\Gamma_{PAT}$')
     axs[1, 1].plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, color="black", linewidth=4,
                    marker="o", markersize=6, label='$\Gamma_{Measured}$')
+    # axs[1].errorbar([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate,
+    #                 yerr=Q2_J1ParityUncertainty, label='Q2', ecolor='k',
+    #                 capthick=4, color='g')
     axs[1, 1].set_xlabel("Radiator Frequency (GHz)", color="black",
                       fontsize=label_font)
     axs[1, 1].set_yscale('log')
@@ -204,6 +222,7 @@ if 1:
     axs[1, 1].yaxis.tick_right()
     axs[1, 1].set_ylabel("$\Gamma_{P}$ ($s^{-1}$)", color="black", fontsize=label_font)
     axs[1, 1].yaxis.set_label_position("right")
+    # axs[1, 1].legend(loc=4)
 
     fig.align_ylabels(axs)
 

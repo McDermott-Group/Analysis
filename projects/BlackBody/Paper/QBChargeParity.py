@@ -4,7 +4,7 @@ import matplotlib.font_manager as font_manager
 from matplotlib.colors import LogNorm, SymLogNorm
 import numpy as np
 
-if 1:  # PSD Data
+if 0:  # PSD Data
     psd1 = np.array(
         [1.50348172e-04, 1.45431952e-04, 1.41352439e-04, 1.39377523e-04, 1.39231737e-04, 1.38338763e-04, 1.38380953e-04,
          1.33964249e-04, 1.33950169e-04, 1.32312683e-04, 1.30064720e-04, 1.28196521e-04, 1.29120006e-04, 1.31413783e-04,
@@ -2717,6 +2717,26 @@ if 1:  # PSD Data
     psd = [np.mean(psd) for psd in zip(psd1, psd2, psd3, psd4, psd5, psd6, psd7, psd8, psd9)]
     fit = [np.mean(fit) for fit in zip(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit8, fit9)]
 
+
+PSD_file = '2021CircRadiator_Q4_PSD_1D_Data.txt'
+PSD_1D_data = np.loadtxt(PSD_file, skiprows=20)
+PSD_1D_f = PSD_1D_data[:, 0]
+PSD_1D = PSD_1D_data[:, 1]
+
+# ('Q4_J2Bias=', [39000])
+# ('Q4_J2ParityRate=', [612.377138407917])
+# ('Q4_J2ParityUncertainty=', [4.484381178011137])
+# ('Q4_J2Fidelity=', [0.6806103028660097])
+Gamma_p = 612.377138407917
+F = 0.6806103028660097
+dt = 50e-6
+f_fit = np.arange(1, 100001, 1)
+PSD_fit = []
+for fi in f_fit:
+ psd_i = F**2*Gamma_p/(Gamma_p**2+np.pi**2*fi**2) + (1-F**2)*dt
+ PSD_fit.append(psd_i)
+
+
 # plt.plot(f1, psd)
 # plt.plot(f2, fit)
 # plt.xlabel('Frequency (Hz)')
@@ -2779,21 +2799,22 @@ axs[0].set_xlabel('$n_{g}$ (2e)', fontsize=label_font)
 axs[0].set_ylabel('$f-\overline{f_{01}}$ (MHz)', fontsize=label_font)
 axs[0].tick_params(labelsize=tick_font)
 
-axs[1].plot(f1, psd, marker="o", markersize=6, color="purple", label='PSD')
-axs[1].plot(f2, fit, linewidth=ld/2, color="orange", label='fit')
+# axs[1].scatter(PSD_1D_f, PSD_1D, color="green", label='PSD')
+axs[1].plot(PSD_1D_f, PSD_1D, marker="o", markersize=10, color="orange", label='data')
+axs[1].plot(f_fit, PSD_fit, 'k-', linewidth=4, label='fit')
 axs[1].set_xscale('log')
 axs[1].set_yscale('log')
-axs[1].set_xlim([1e2, 1e4])
-axs[1].set_ylim([3e-5, 1.5e-4])
+axs[1].set_xlim([2e1, 1e4])
+axs[1].set_ylim([1e-5, 1e-3])
 axs[1].set_xlabel('Frequency (Hz)', fontsize=label_font)
-axs[1].set_ylabel('$\Gamma_{P}$ ($s^{-1}$)', fontsize=label_font)
+axs[1].set_ylabel('$S_{P}$ (Hz$^{-1}$)', fontsize=label_font)
 axs[1].tick_params(labelsize=tick_font)
 axs[1].legend(loc=1, prop=legend, frameon=False)
 
 fig.align_ylabels(axs)
+plt.tight_layout()
 
 path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
-plt.tight_layout()
 plt.savefig(path + '\ParityMeasurement.pdf', format='pdf', bbox_inches='tight', dpi=1200)
-# plt.show()
+plt.show()
 

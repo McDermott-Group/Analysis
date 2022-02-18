@@ -543,7 +543,7 @@ class UpAndParity(object):
 
         for i in range(len(SOP)):
             ratio = 1.0/(1.0+np.sqrt(8*EjOverEc)*SOP[i])
-            m = 1 # up/(up+ down) ratio
+            m = 1 # up_qpd = m*parity_qpd
             # a = [[1.0, 1.0], [ratio, 1.0]]
             a = [[1.0, 1.0], [ratio, m]]
             b = [parity[i], up[i]]
@@ -772,7 +772,7 @@ class AntennaCoupling(object):
             "Gamma_rad": [],  # photon radiated rate
         }
         self.Al_Wall = {
-            "Area": 3.01e-3,  # units m^2
+            "Area": 3.15e-3,  # units m^2, all area including under the chip
             "Ref": [],  # reflection coefficients
             "Absorption": [],  # Absorption power ratio
             "S": None,  # poynting vector or related parameters
@@ -882,7 +882,7 @@ class AntennaCoupling(object):
         Area = []
         for fi in f:
             w = c / (fi * e_eff ** 0.5)  # wavelength
-            a = w ** 2 / (4 * pi)
+            a = w ** 2 / (4 * pi)   # effective area for this wavelength
             # if fi > f_gap:
             #     a = w**2/(4*pi)
             # else:
@@ -900,9 +900,9 @@ class AntennaCoupling(object):
         :return:
         """
         if 1:  # Xmon
-            Vol = 40 * 1.6 * 0.1  # volume of the junction units um^3
-            r = 1 / (400e-9)  # recombination rate sec^-1
-            Vol = Vol * 0.17
+            Vol = 46 * 0.6 * 0.118  # volume of the junction units um^3
+            r = 1 / (438e-9)  # recombination rate sec^-1, Kaplan 1976
+            Vol = Vol
             # the recombination rate and vol of the leads can be reconsidered
         else:  # Circmon
             Vol = 36 * 1 * 0.1  # volume of the junction units um^3
@@ -977,9 +977,12 @@ class AntennaCoupling(object):
         R = self.Junction["R"]
         Gamma_rad = []
 
+        subtrate_air_factor = 1.0
+        rms_factor = 0.5
+        currrent_distribution_factor = 0.5
         for i in range(len(f)):
-            gamma_g = 0.5 * (0.5 * Ic_f[i]) ** 2 * R / (h * f[i])
-            gamma_rad = 0.5 * gamma_g * e_c[i]
+            gamma_g = rms_factor * (currrent_distribution_factor * Ic_f[i]) ** 2 * R / (h * f[i])
+            gamma_rad = subtrate_air_factor * gamma_g * e_c[i]
             Gamma_rad.append(gamma_rad)
 
         self.Radiator["Gamma_rad"] = Gamma_rad
@@ -993,7 +996,7 @@ class AntennaCoupling(object):
         """
         f = self.Antenna["f"]
         omega = 2 * np.pi * f
-        sigma = 1 * 1e9 / 2
+        sigma = 7.2 * 1e7   # conductivity 1/resistivity
         Z0 = 377  # vacuum impedance
         Z_Al_list = []
         Ref = []
@@ -1030,10 +1033,10 @@ class AntennaCoupling(object):
         Gamma_rad = self.Radiator["Gamma_rad"]
 
         P_f = []  # photon flux array
-        S_f = []
+        S_f = []    # energy flux, poynting vector
         for i in range(len(Absorption)):
             p_f = Gamma_rad[i] / (Area * Absorption[i])
-            s_f = p_f * h * f
+            s_f = p_f * h * f[i]
             P_f.append(p_f)
             S_f.append(s_f)
 
@@ -1041,6 +1044,7 @@ class AntennaCoupling(object):
         S_f = np.asarray(S_f)
         # print('f=', f[265:275])   # for 270 GHz
         # print('PhotonFlux=', P_f[265:275])
+        # print('S=', S_f[265:275])
         self.Al_Wall["PhotonFlux"] = P_f
         self.Al_Wall["S"] = S_f
 
