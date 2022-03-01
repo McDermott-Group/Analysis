@@ -282,8 +282,8 @@ Q1_base = np.mean(Q1_PSD_OctWeak[:, 1][:8])
 Q2_base = np.mean(Q2_PSD_OctWeak[:, 1][:8])
 Q4_base = np.mean(Q4_PSD_OctWeak[:, 1][:8])
 
-fig, axs = plt.subplots(2, figsize=(6, 5),
-                        gridspec_kw={'height_ratios': [2, 3],
+fig, axs = plt.subplots(2, figsize=(6, 7),
+                        gridspec_kw={'height_ratios': [2.5, 3],
                                      'hspace': 0.15})
 
 f_l = 50
@@ -293,33 +293,46 @@ ld1=3
 ld2=3
 
 
-axs[0].plot(f_SFQ, eSFQ_4, color="green", linestyle='--', linewidth=ld2, label='Transmitter')
+# axs[0].plot(f_SFQ, eSFQ_4, color="green", linestyle='--', linewidth=ld2, label='Transmitter')
+axs[0].plot(f_SFQ, eSFQ_4, color=[0, 1, 0], linestyle='--', linewidth=ld2, label='Transmitter')
 
-axs[0].plot(f_SFQ, eQ1, linewidth=ld2, color="red", label='$Q^{L}$')
-axs[0].plot(f_SFQ, eQ4, linewidth=ld2, color="black", label='$Q^{M}$')
-axs[0].plot(f_SFQ, eQ2, linewidth=ld2, color="blue", label='$Q^{S}$')
+axs[0].plot(f_SFQ, eQ1, linewidth=ld2, color="red", label='$\mathrm{Q_{1}}$')
+axs[0].plot(f_SFQ, eQ4, linewidth=ld2, color="black", label='$\mathrm{Q_{2}}$')
+axs[0].plot(f_SFQ, eQ2, linewidth=ld2, color="blue", label='$\mathrm{Q_{3}}$')
 axs[0].set_xlim([f_l, f_r])
-axs[0].set_ylim([9e-4, 9e-1])
+axs[0].set_ylim([4e-5, 1e-1])
 axs[0].set_yscale('log')
-axs[0].legend(loc=1, ncol=2, frameon=False)
+axs[0].legend(loc=4, ncol=2, frameon=False, prop={'size': 13})
 axs[0].tick_params(labelsize=tick_font)
 
-# axs[1].axhline(y=Q1_base, color='r', linestyle='--', linewidth=ld1)
-# axs[1].axhline(y=Q2_base, color='b', linestyle='--', linewidth=ld1)
-# axs[1].axhline(y=Q4_base, color='k', linestyle='--', linewidth=ld1)
+axs[0].tick_params(axis="x", direction="in", which='both')
+axs[0].tick_params(axis="y", direction="in", which='both')
+axs[0].tick_params(axis="x", width=1, length=4, which='both')
+axs[0].tick_params(axis="y", width=1, length=3, which='minor')
+axs[0].tick_params(axis="y", width=1, length=6, which='major')
 
-axs[1].plot((Q1_PSD_OctWeak[:, 0]+SIM_OctW_Offset)*f_SIM_OctW, Q1_PSD_OctWeak[:, 1], 'r-', linewidth=ld2, label='$Q^{L}$')
-axs[1].plot((Q4_PSD_OctWeak[:, 0]+SIM_OctW_Offset)*f_SIM_OctW, Q4_PSD_OctWeak[:, 1], 'k-', linewidth=ld2, label='$Q^{M}$')
-axs[1].plot((Q2_PSD_OctWeak[:, 0]+SIM_OctW_Offset)*f_SIM_OctW, Q2_PSD_OctWeak[:, 1], 'b-', linewidth=ld2, label='$Q^{S}$')
+axs[1].axhline(y=Q1_base, color='r', linestyle='--', linewidth=ld1)
+axs[1].axhline(y=Q2_base, color='b', linestyle='--', linewidth=ld1)
+axs[1].axhline(y=Q4_base, color='k', linestyle='--', linewidth=ld1)
+
+axs[1].plot((Q1_PSD_OctWeak[:, 0]+SIM_OctW_Offset)*f_SIM_OctW, Q1_PSD_OctWeak[:, 1], 'r-', linewidth=ld2, label='$\mathrm{Q_{1}}$')
+axs[1].plot((Q4_PSD_OctWeak[:, 0]+SIM_OctW_Offset)*f_SIM_OctW, Q4_PSD_OctWeak[:, 1], 'k-', linewidth=ld2, label='$\mathrm{Q_{2}}$')
+axs[1].plot((Q2_PSD_OctWeak[:, 0]+SIM_OctW_Offset)*f_SIM_OctW, Q2_PSD_OctWeak[:, 1], 'b-', linewidth=ld2, label='$\mathrm{Q_{3}}$')
 axs[1].tick_params(labelsize=tick_font)
 
 axs[1].set_xlim([f_l, f_r])
-axs[1].set_ylim([1e1, 1e4])
+axs[1].set_ylim([9e0, 1e4])
 axs[1].set_yscale('log')
-axs[1].legend(loc=4, frameon=False)
-axs[1].set_xlabel("Radiator Frequency (GHz)", color="black", fontsize=label_font)
+# axs[1].legend(loc=4, ncol=3, frameon=False)
+# axs[1].set_xlabel("Radiator Frequency (GHz)", color="black", fontsize=label_font)
+
+axs[1].tick_params(axis="x", direction="in", which='both')
+axs[1].tick_params(axis="y", direction="in", which='both')
+axs[1].tick_params(axis="x", width=1, length=4, which='both')
+axs[1].tick_params(axis="y", width=1, length=3, which='minor')
+axs[1].tick_params(axis="y", width=1, length=6, which='major')
 
 plt.tight_layout()
-path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
-plt.savefig(path + '\Circmon.pdf', bbox_inches='tight', format='pdf', dpi=1200, transparent=True)
+# path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
+# plt.savefig(path + '\Circmon.pdf', bbox_inches='tight', format='pdf', dpi=1200, transparent=True)
 plt.show()

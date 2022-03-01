@@ -40,7 +40,6 @@ if 1: # import CST data
     refJ1 = J1.Al_Wall["Ref"]
     PhotonFlux = J1.Al_Wall["PhotonFlux"]
     Ic_f = J1.Radiator["Ic_f"]
-    X_QP = J1.Radiator["X_QP"]
 
     Q1 = AntennaCoupling()
     Q1.import_data(fileQ1, JQ1, C_eff=C_eff)
@@ -110,76 +109,31 @@ if 1:
 
 """
 Calculate the noise bandwidth
-"""
-
-"""
-Q2 # polished
+P1 Q2
 """
 if 1:
+    # plt.figure(0)
+    # plt.rcParams["figure.figsize"] = (6, 20)
 
     label_font = 16
     tick_font = 13
-    legend_font = 15
+    # legend_font = 12
 
-    legend_font = font_manager.FontProperties(
-        # weight='bold',
-        style='normal', size=legend_font)
+    plt.figure(figsize=(6, 4))
+    plt.errorbar(Q2_P1[:, 0] * f_AWG, Q2_P1[:, 1] *100, yerr=Q2_P1[:, 2]*100 / np.sqrt(100), label='$Q_{2}$', ecolor='k',
+                    capthick=4, color='k', linewidth=2, fmt="o")
+    plt.xlim([50, 620])
+    plt.ylim([1.8, 4.5])
+    plt.tick_params(labelsize=tick_font)
+    plt.tick_params(axis="x", direction="in", which='both')
+    plt.tick_params(axis="y", direction="in", which='both')
+    plt.tick_params(axis="x", width=1, length=6, which='both')
+    plt.tick_params(axis="y", width=1, length=6, which='both')
+    plt.xlabel("Transmitter frequency (GHz)", color="black",
+                      fontsize=label_font)
 
-    # plt.figure(0)
-    # plt.rcParams["figure.figsize"] = (6, 20)
-    pgJ1Q2 = []
-    x_qp2photon = []
-    Gamma_re = []   # photon received
-    Gamma_withBase = []  # total parity rate with baseline
-    l_i = 50
-    r_i = 700
-    for i in range(len(Area)):
-        Gamma_absorbed = 0.5*PhotonFlux[i]*Area[i]*eQ2[i]
-        Gamma_re.append(Gamma_absorbed)
-
-    ratio = 0.5   # for 190 GHz peak, 3.6, for 270 GHz, 7.0
-    base = 110
-    for i in range(len(pgJ1)):
-        if f[i] >= 92:
-            Gamma_withBase.append(ratio*Gamma_re[i] + base)
-        else:
-            Gamma_withBase.append(base)
-
-    fig, axs = plt.subplots(2, sharex='col', figsize=(6, 5),
-                            gridspec_kw={'hspace': 0.1})
-
-
-    freq_l = 175
-    freq_r = 310
-
-    axs[0].plot(f, X_QP, 'k-', linewidth=4,
-                label='$I_{c}$')
-    axs[0].set_xlim([100, 700])
-    axs[0].set_ylim([-0.02, 0.25])
-    # axs[0].set_ylabel('$x_{\mathrm{QP}}$', fontsize=label_font)
-    axs[0].tick_params(labelsize=tick_font)
-    axs[0].tick_params(axis="x", direction="in", which='both')
-    axs[0].tick_params(axis="y", direction="in", which='both')
-    axs[0].tick_params(axis="x", width=1, length=6, which='both')
-    axs[0].tick_params(axis="y", width=1, length=6, which='both')
-
-    axs[1].plot(f, Ic_f*1e9, 'k-', linewidth=4,
-                label='$I_{c}$')
-    axs[1].set_xlim([150, 650])
-    axs[1].set_ylim([6.5, 9.5])
-    # axs[1].set_ylabel('$I_{c}$ (nA)', fontsize=label_font)
-    axs[1].tick_params(labelsize=tick_font)
-    axs[1].set_xlabel('Transmitter frequency (GHz)', fontsize=label_font)
-    axs[1].set_xticks([200, 300, 400, 500, 600])
-    axs[1].tick_params(axis="x", direction="in", which='both')
-    axs[1].tick_params(axis="y", direction="in", which='both')
-    axs[1].tick_params(axis="x", width=1, length=6, which='both')
-    axs[1].tick_params(axis="y", width=1, length=6, which='both')
-
-    fig.align_ylabels(axs[:])
-
-    # path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
-    # plt.savefig(path+'\XmonRadiatorIcXqp.pdf', format='pdf', bbox_inches='tight', dpi=1200)
+    plt.tight_layout()
+    path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
+    plt.savefig(path+'\XmonQ2_P1.pdf', format='pdf', bbox_inches='tight', dpi=1200)
     plt.show()
-
 

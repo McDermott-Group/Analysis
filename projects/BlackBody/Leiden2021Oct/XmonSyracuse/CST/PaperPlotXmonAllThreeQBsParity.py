@@ -40,7 +40,6 @@ if 1: # import CST data
     refJ1 = J1.Al_Wall["Ref"]
     PhotonFlux = J1.Al_Wall["PhotonFlux"]
     Ic_f = J1.Radiator["Ic_f"]
-    X_QP = J1.Radiator["X_QP"]
 
     Q1 = AntennaCoupling()
     Q1.import_data(fileQ1, JQ1, C_eff=C_eff)
@@ -115,71 +114,51 @@ Calculate the noise bandwidth
 """
 Q2 # polished
 """
+
+"""
+P1 Q2 and All PSD
+"""
 if 1:
+    # plt.figure(0)
+    # plt.rcParams["figure.figsize"] = (6, 20)
 
     label_font = 16
     tick_font = 13
-    legend_font = 15
+    # legend_font = 12
 
-    legend_font = font_manager.FontProperties(
-        # weight='bold',
-        style='normal', size=legend_font)
+    # fig, axs = plt.subplots(2, sharex='col', figsize=(6, 6.5))
+    plt.figure(figsize=(6, 4))
 
-    # plt.figure(0)
-    # plt.rcParams["figure.figsize"] = (6, 20)
-    pgJ1Q2 = []
-    x_qp2photon = []
-    Gamma_re = []   # photon received
-    Gamma_withBase = []  # total parity rate with baseline
-    l_i = 50
-    r_i = 700
-    for i in range(len(Area)):
-        Gamma_absorbed = 0.5*PhotonFlux[i]*Area[i]*eQ2[i]
-        Gamma_re.append(Gamma_absorbed)
+    plt.plot([J * f_SIM for J in Q1_J1Bias], Q1_J1ParityRate, color='r',
+                marker="o", markersize=4, linestyle='None', label='$\mathrm{Q_1}$')
+    plt.plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, color='k',
+                marker="o", markersize=4, linestyle='None', label='$\mathrm{Q_2}$')
+    plt.plot([J * f_SIM for J in Q3_J1Bias], Q3_J1ParityRate, color='b',
+                marker="o", markersize=4, linestyle='None', label='$\mathrm{Q_3}$')
+    plt.yscale('log')
+    plt.xlim([50, 620])
+    plt.ylim([80, 1000])
+    # axs[1].grid(True, which="both")
+    plt.legend(loc=2, prop={'size': 15}, frameon=False)
+    plt.tick_params(labelsize=tick_font)
+    plt.tick_params(axis="x", direction="in", which='both')
+    plt.tick_params(axis="y", direction="in", which='both')
+    plt.tick_params(axis="x", width=1, length=6, which='both')
+    plt.tick_params(axis="y", width=1, length=3, which='minor')
+    plt.tick_params(axis="y", width=1, length=6, which='major')
 
-    ratio = 0.5   # for 190 GHz peak, 3.6, for 270 GHz, 7.0
-    base = 110
-    for i in range(len(pgJ1)):
-        if f[i] >= 92:
-            Gamma_withBase.append(ratio*Gamma_re[i] + base)
-        else:
-            Gamma_withBase.append(base)
-
-    fig, axs = plt.subplots(2, sharex='col', figsize=(6, 5),
-                            gridspec_kw={'hspace': 0.1})
+    plt.xlabel("Transmitter frequency (GHz)", color="black",
+                      fontsize=label_font)
 
 
-    freq_l = 175
-    freq_r = 310
 
-    axs[0].plot(f, X_QP, 'k-', linewidth=4,
-                label='$I_{c}$')
-    axs[0].set_xlim([100, 700])
-    axs[0].set_ylim([-0.02, 0.25])
-    # axs[0].set_ylabel('$x_{\mathrm{QP}}$', fontsize=label_font)
-    axs[0].tick_params(labelsize=tick_font)
-    axs[0].tick_params(axis="x", direction="in", which='both')
-    axs[0].tick_params(axis="y", direction="in", which='both')
-    axs[0].tick_params(axis="x", width=1, length=6, which='both')
-    axs[0].tick_params(axis="y", width=1, length=6, which='both')
 
-    axs[1].plot(f, Ic_f*1e9, 'k-', linewidth=4,
-                label='$I_{c}$')
-    axs[1].set_xlim([150, 650])
-    axs[1].set_ylim([6.5, 9.5])
-    # axs[1].set_ylabel('$I_{c}$ (nA)', fontsize=label_font)
-    axs[1].tick_params(labelsize=tick_font)
-    axs[1].set_xlabel('Transmitter frequency (GHz)', fontsize=label_font)
-    axs[1].set_xticks([200, 300, 400, 500, 600])
-    axs[1].tick_params(axis="x", direction="in", which='both')
-    axs[1].tick_params(axis="y", direction="in", which='both')
-    axs[1].tick_params(axis="x", width=1, length=6, which='both')
-    axs[1].tick_params(axis="y", width=1, length=6, which='both')
+    # axs[1].set_ylabel("$\Gamma_{\mathrm{P}}$ (s$^{-1}$)", color="black", fontsize=label_font)
 
-    fig.align_ylabels(axs[:])
 
-    # path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
-    # plt.savefig(path+'\XmonRadiatorIcXqp.pdf', format='pdf', bbox_inches='tight', dpi=1200)
+    # fig.align_ylabels(axs)
+    plt.tight_layout()
+    path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
+    plt.savefig(path+'\XmonQ123Parity.pdf', format='pdf', bbox_inches='tight', dpi=1200)
     plt.show()
-
 

@@ -44,8 +44,8 @@ ax2.set_xticklabels(f_range)
 ax2.set_xlabel('$\omega_{\\nu}/2\pi$ (GHz)', fontsize=label_font)
 ax2.tick_params(labelsize=tick_font, direction='in')
 
-path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
 plt.tight_layout()
+path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
 plt.savefig(path + '\StructureFactor.pdf', format='pdf', dpi=1200)
 # plt.savefig(path + '\StructureFactor.pdf', format='pdf', bbox_inches='tight', dpi=1200)
 plt.show()

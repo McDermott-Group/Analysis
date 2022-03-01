@@ -21,7 +21,7 @@ if 1: # import CST data
     f_AWG = 4.604 * 1.05  # P1 AWG Bias freq conversion
     ### parameteres tuned done
 
-    # JJ7 = [4.2*1e3, None, 0, 1000*150]   #[R, L, C, A] strong radiator
+    JJ7 = [4.2*1e3, None, 0, 1000*150, "Radiator"]   #[R, L, C, A] strong radiator
     JJ1 = [33 * 1e3, None, 0, 180 * 150, "Radiator"]  # [R, L, C, A] weak radiator
     JQ1 = [17.1 * 1e3, None, 0, 360 * 150, "Receiver"]
     JQ2 = [16.6 * 1e3, None, 0, 360 * 150, "Receiver"]  #
@@ -120,7 +120,7 @@ Q2 # polished
 if 1:
 
     label_font = 16
-    tick_font = 15
+    tick_font = 14
     legend_font = 15
 
     legend_font = font_manager.FontProperties(
@@ -163,30 +163,42 @@ if 1:
     axs[0].set_ylim([1e-6, 2e-1])
     axs[0].set_yticks([1e-5, 1e-3, 1e-1])
     axs[0].tick_params(labelsize=tick_font)
-    axs[0].legend(loc=4, prop=legend_font)
+    # axs[0].legend(loc=4, prop=legend_font)
+    axs[0].tick_params(axis="x", direction="in", which='both')
+    axs[0].tick_params(axis="y", direction="in", which='both')
+    axs[0].tick_params(axis="x", width=1, length=6, which='both')
+    axs[0].tick_params(axis="y", width=1, length=3, which='minor')
+    axs[0].tick_params(axis="y", width=1, length=6, which='major')
+    # axs[0].set_ylabel("$e_{\mathrm{c}}$)", color="black", fontsize=label_font)
 
-    axs[1].plot(f_Q2, Gamma_withBase, color="grey", linestyle='-',  linewidth=2,
-                label='   ')
+    axs[1].plot(f_Q2, Gamma_withBase, color="purple", linestyle='-',  linewidth=3)
     axs[1].plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, color="black", linewidth=2,
-                   marker="o", markersize=6, label='   ')
-    # axs[1].plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, color="black", linestyle='d', markersize=4, label='$\Gamma_{Measured}$')
-    axs[1].axhline(y=base, c='g', linestyle='--', label='   ')
+                   marker="o", linestyle='none', markersize=4)
+    # axs[1].plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, 'o', color="black")
+    axs[1].axhline(y=base, c='k', linestyle='--')
 
-    # axs[1].set_xlabel("Radiator Frequency (GHz)", color="black",
+    # axs[1].set_xlabel("Transmitter Frequency (GHz)", color="black",
     #                   fontsize=label_font)
-    # axs[1].set_ylabel("$\Gamma_{P}$ ($s^{-1}$)", color="black", fontsize=label_font)
+    # axs[1].set_ylabel("$\Gamma_{\mathrm{p}}$ ($\mathrm{s^{-1}}$)", color="black", fontsize=label_font)
     axs[1].set_yscale('log')
     axs[1].set_xlim([l_i, r_i])
     axs[1].set_ylim([100, 1100])
-    axs[1].legend(loc=2, prop=legend_font, frameon=False)
+    # axs[1].legend(loc=2, prop=legend_font, frameon=False)
     axs[1].tick_params(labelsize=tick_font)
     # axs[1].share
+
+    axs[1].tick_params(axis="x", direction="in", which='both')
+    axs[1].tick_params(axis="y", direction="in", which='both')
+
+    axs[1].tick_params(axis="x", width=1, length=6, which='both')
+    axs[1].tick_params(axis="y", width=1, length=3, which='minor')
+    axs[1].tick_params(axis="y", width=1, length=6, which='major')
 
     freq_l = 175
     freq_r = 310
 
 
-    fig.align_ylabels(axs)
+    # fig.align_ylabels(axs)
 
     # path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
     # plt.savefig(path+'\XmonSpectroscopy.pdf', format='pdf', bbox_inches='tight', dpi=1200)
@@ -198,43 +210,54 @@ if 0:   # inset
     tick_font = 24
     legend_font = 15
 
-    legend_font = font_manager.FontProperties(
-        # weight='bold',
-        style='normal', size=legend_font)
-
-    # plt.figure(0)
-    # plt.rcParams["figure.figsize"] = (6, 20)
     pgJ1Q2 = []
     x_qp2photon = []
-    Gamma_re = []   # photon received
+    Gamma_re = []  # photon received
     Gamma_withBase = []  # total parity rate with baseline
     l_i = 50
     r_i = 610
+    polarization_factor = 0.5
+
     for i in range(len(Area)):
-        Gamma_absorbed = 0.5*PhotonFlux[i]*Area[i]*eQ2[i]
+        Gamma_absorbed = polarization_factor * PhotonFlux[i] * Area[i] * eQ2[i]
         Gamma_re.append(Gamma_absorbed)
 
-    ratio = 0.5   # for 190 GHz peak, 3.6, for 270 GHz, 7.0
+    ratio = 0.26  # for 190 GHz peak, 3.6, for 270 GHz, 7.0
     base = 110
     for i in range(len(pgJ1)):
         if f[i] >= 92:
-            Gamma_withBase.append(ratio*Gamma_re[i] + base)
+            Gamma_withBase.append(ratio * Gamma_re[i] + 1 * base)
         else:
             Gamma_withBase.append(base)
 
     fig1, ax = plt.subplots()
-    ax.plot(f_Q2, Gamma_withBase, color="grey", linestyle='-',  linewidth=4)
-    ax.plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, color="black", linewidth=4,
-                   marker="o", markersize=10)
+    # plt.plot(f_Q2, Gamma_withBase, color="purple", linestyle='-',  linewidth=5)
+    # plt.yscale('log')
+    # plt.tick_params(axis="x", direction="in")
+    # plt.tick_params(axis="y", direction="in")
 
+    ax.plot(f_Q2, Gamma_withBase, color="purple", linestyle='-',  linewidth=5)
+    ax.plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, color="black", linestyle='None',
+                   marker="o", markersize=8)
     ax.set_yscale('log')
+    # ax.ticklabel_format(axis="y", style='sci')
     ax.set_xlim([230, 310])
     ax.set_ylim([100, 1005])
+    ax.tick_params(labelsize=tick_font)
+    ax.tick_params(axis="x", direction="in", which='both')
+    ax.tick_params(axis="y", direction="in", which='both')
+
+    ax.tick_params(axis="x", width=2, length=6, which='both')
+    ax.tick_params(axis="y", width=2, length=6, which='minor')
+    ax.tick_params(axis="y", width=2, length=12, which='major')
+    # ax.tick_params(axis="y", width=1, length=10, which='major')
+    # ax.get_yaxis().get_major_formatter().set_scientific(False)
+    # ax.ticklabel_format(style='sci')
+
     # ax.set_yticks([2e2, 4e2, 6e2])
     # ax.yaxis.set_major_formatter(ScalarFormatter())
     # ax.yaxis.set_minor_formatter(NullFormatter())
     # ax.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
-    ax.tick_params(labelsize=tick_font)
 
     path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
     plt.savefig(path+'\XmonSpectroscopyInset.pdf', format='pdf', bbox_inches='tight', dpi=1200, transparent='True')

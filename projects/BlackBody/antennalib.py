@@ -432,7 +432,7 @@ class UpAndParity(object):
         self.S_MinusOverPlus = None
 
         self.Delta = 46.0  # 46 GHz one energy gap
-        self.UpRate = None
+        self.UpRateYale = None
         self.X_QP = None
 
         self.f_DAC = 4.604  # DAC to freq conversion
@@ -456,7 +456,7 @@ class UpAndParity(object):
         self._importS(S_file)
         self._interpolateToUp()
         self._separatePATandQPDiffusion()
-        # self._getUp()
+        self._getUpYale()
         # self._getXqp()
 
     def _importP(self, parity_file):
@@ -577,23 +577,59 @@ class UpAndParity(object):
         # plt.title('Up rate baseline hand chosen 200 Hz')
         # plt.show()
 
-    def _getUp(self):
-        freq = self.freq
-        parity = self.parity
+    def getBaseUpYale(self, antenna, Tbb=543e-3,):
+        """
+        From the e_c of the antenna mode, and effective BB temp
+        get the BB induced upward transition from Yale's model
+        :return:
+        """
+        f = antenna.Antenna["f"]    # GHz
+        e_c = antenna.Antenna["e_c"]
+        f_S_Minus = interpolate.interp1d(self.S_freq, self.S_Minus)
+        f_S_Plus = interpolate.interp1d(self.S_freq, self.S_Plus)
+        # print(f[0]/1e9, f[-1]/1e9)
+        E_ratio = np.sqrt(8.0 * 27.0)
+        Up = []  # up rate
+        for i in range(len(f)):
+
+            if f[i] <= 108*1e9:
+                up = 0.0
+            else:
+                ratio = 1.0 / (1.0 + E_ratio * (f_S_Minus(f[i]/1e9)) / (f_S_Plus(f[i]/1e9)))
+                up = (f[i] - f[i - 1]) * e_c[i] / (np.exp(h * f[i] / (k * Tbb)) - 1) * ratio
+            Up.append(up)
+
+        return np.sum(Up)
+
+    def _getUpYale(self):
+        """
+        Assume all the uprate is from parity correlation
+        :return:
+        """
+        freq = self.parity_freq_data
+        parity = self.parity_data_nobase
         S_Minus = self.S_Minus
         S_Plus = self.S_Plus
         E_ratio = np.sqrt(8.0 * 27.0)
-        UpRate = []
+        UpRateYale = []
+
+        f_S_Minus = interpolate.interp1d(self.S_freq, self.S_Minus)
+        f_S_Plus = interpolate.interp1d(self.S_freq, self.S_Plus)
+        # f_S_MOP = interpolate.interp1d(self.S_freq, self.S_MinusOverPlus)
+
         for i in range(len(freq)):
-            ratio = 1.0 / (1.0 + E_ratio * (S_Minus[i]) / (S_Plus[i]))
-            uprate = parity[i] * ratio
-            if freq[i] <= 2 * self.Delta:
-                uprate = 0.0
-            UpRate.append(uprate)
+
+            # if freq[i] <= 2 * self.Delta:
+            if freq[i] <= 108:
+                uprateYale = 0.0
+            else:
+                ratio = 1.0 / (1.0 + E_ratio * (f_S_Minus(freq[i])) / (f_S_Plus(freq[i])))
+                uprateYale = parity[i] * ratio
+            UpRateYale.append(uprateYale)
 
         # plt.plot(freq, UpRate)
         # plt.show()
-        self.UpRate = UpRate
+        self.UpRateYale = UpRateYale
 
     def _getXqp(self):
         """

@@ -116,8 +116,6 @@ if 1:
     # plt.grid(which='both')
     # plt.show()
 
-
-
 if 1:
     """
     Import measurement data starts
@@ -255,7 +253,7 @@ if 1:
         # plt.plot(Q2_P1_OctStrong[:, 0]*f_SIM_Octs, Q2_P1_OctStrong[:, 1], 'b-.', label='Q1 P1 Oct Strong')
         plt.plot(Q4_P1_OctStrong[:, 0]*f_SIM_Octs, Q4_P1_OctStrong[:, 1], 'k-.', label='Q1 P1 Oct Strong')
 
-    if 1:   # plot PSD data
+    if 0:   # plot PSD data
         f_SIM_OctW = 0.96758 * 1.025 # Xmon match data
         SIM_OctW_Offset = 2 # Xmon match data   2mV is OK or max
         # f_SIM_Octs = 0.96758 * 1 # Xmon match data
@@ -265,13 +263,13 @@ if 1:
         plt.plot(Q2_PSD_Aug[:, 0]*f_DAC_Aug, Q2_PSD_Aug[:, 1], 'b--', label='Q2 PSD Aug')
         plt.plot(Q4_PSD_Aug[:, 0]*f_DAC_Aug, Q4_PSD_Aug[:, 1], 'k--', label='Q4 PSD Aug')
 
-        plt.plot((Q1_PSD_OctWeak[:, 0]+SIM_OctW_Offset)*f_SIM_OctW, Q1_PSD_OctWeak[:, 1], 'r-', label='Q1 PSD Oct Weak')
-        plt.plot((Q2_PSD_OctWeak[:, 0]+SIM_OctW_Offset)*f_SIM_OctW, Q2_PSD_OctWeak[:, 1], 'b-', label='Q2 PSD Oct Weak')
-        plt.plot((Q4_PSD_OctWeak[:, 0]+SIM_OctW_Offset)*f_SIM_OctW, Q4_PSD_OctWeak[:, 1], 'k-', label='Q4 PSD Oct Weak')
+        # plt.plot((Q1_PSD_OctWeak[:, 0]+SIM_OctW_Offset)*f_SIM_OctW, Q1_PSD_OctWeak[:, 1], 'r-', label='Q1 PSD Oct Weak')
+        # plt.plot((Q2_PSD_OctWeak[:, 0]+SIM_OctW_Offset)*f_SIM_OctW, Q2_PSD_OctWeak[:, 1], 'b-', label='Q2 PSD Oct Weak')
+        # plt.plot((Q4_PSD_OctWeak[:, 0]+SIM_OctW_Offset)*f_SIM_OctW, Q4_PSD_OctWeak[:, 1], 'k-', label='Q4 PSD Oct Weak')
 
-        plt.plot((Q1_PSD_OctStrong[:, 0]+DAC_Oct_Offset)*f_DAC_Oct, Q1_PSD_OctStrong[:, 1], 'r-.', label='Q1 PSD Oct Strong')
-        plt.plot((Q2_PSD_OctStrong[:, 0]+DAC_Oct_Offset)*f_DAC_Oct, Q2_PSD_OctStrong[:, 1], 'b-.', label='Q2 PSD Oct Strong')
-        plt.plot((Q4_PSD_OctStrong[:, 0]+DAC_Oct_Offset)*f_DAC_Oct, Q4_PSD_OctStrong[:, 1], 'k-.', label='Q4 PSD Oct Strong')
+        # plt.plot((Q1_PSD_OctStrong[:, 0]+DAC_Oct_Offset)*f_DAC_Oct, Q1_PSD_OctStrong[:, 1], 'r-.', label='Q1 PSD Oct Strong')
+        # plt.plot((Q2_PSD_OctStrong[:, 0]+DAC_Oct_Offset)*f_DAC_Oct, Q2_PSD_OctStrong[:, 1], 'b-.', label='Q2 PSD Oct Strong')
+        # plt.plot((Q4_PSD_OctStrong[:, 0]+DAC_Oct_Offset)*f_DAC_Oct, Q4_PSD_OctStrong[:, 1], 'k-.', label='Q4 PSD Oct Strong')
 
         plt.xlim([50, 600])
         # plt.xlim([1e2, 1e5])
@@ -418,7 +416,7 @@ if 1:
     # plt.legend()
     # plt.show()
 
-if 0:  # parity data cross talk for Aug
+if 1:  # parity data cross talk for Aug
     # f_SIM_OctW = 0.96758 * 1.025  # Xmon match data
     f_SIM_OctW = 0.96758 * 0.95  # Xmon match data
     SIM_OctW_Offset = 2  # Xmon match data   2mV is OK or max
