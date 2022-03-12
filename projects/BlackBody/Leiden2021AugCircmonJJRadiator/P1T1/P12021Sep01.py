@@ -18,11 +18,14 @@ def get_bias_list(qubit_number):
     elif qubit_number == 2:
         return np.array([0,10]+list(np.arange(16.3,60.301,2))+list(np.arange(69.8,229.801,8)))
     elif qubit_number == 4:
-        return np.array([0,10]+list(np.arange(16.3,60.301,2))+list(np.arange(75,135.001,20)))
+        return [32.3,28.3]
+        #return np.array([0,10]+list(np.arange(16.3,60.301,2))+list(np.arange(75,135.001,20)))
 
 data_dict = {}
-for qubit_number in (4):
+error_dict = {}
+for qubit_number in [4]:#(1,2,4):
     data_dict[qubit_number] = []
+    error_dict[qubit_number] = []
     for J2B in get_bias_list(qubit_number):
         experiment_name = ('Q'+str(qubit_number)+'_P1_'+str(int(J2B*1000))+'uDACJ2')
 
@@ -34,8 +37,9 @@ for qubit_number in (4):
         QP = QP_Up()
         QP.add_data_from_matlab(file_list, data_type1='Occupation_Filtered')
         #QP.plot_Chi()
-        # QP.plot(save=True,name='Figures/'+experiment_name+'.png')
+        QP.plotErrorBars(save=True,name='Figures/NEW'+experiment_name+'.png')
         data_dict[qubit_number].append(QP.GammaUp)
+        error_dict[qubit_number].append(QP.GammaUp_std_err)
     plt.plot(get_bias_list(qubit_number),data_dict[qubit_number],label='Q'+str(int(qubit_number)))
 plt.xlabel('J2 Bias (mDAC)')
 plt.ylabel('Gamma Up (Hz)')
@@ -45,3 +49,4 @@ plt.show()
 for qubit_number in (1,2,4):
     print get_bias_list(qubit_number)
     print data_dict[qubit_number]
+    print error_dict[qubit_number]

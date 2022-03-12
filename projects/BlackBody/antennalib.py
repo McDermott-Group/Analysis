@@ -179,7 +179,7 @@ class QP_Up(object):
         temp = str(self.temp) + 'mK'
         if not save:
             plt.figure(3)
-        plt.plot(time, occ_fit, 'o-',
+        plt.errorbar(time, occ_fit, 'o-',
                  label=temp + '_GammaUp={0:.4g} Hz'.format(GammaUp))
         plt.plot(time, occ, 'k-', label=temp)
         plt.fill_between(time, occ - error, occ + error, alpha=0.2)
@@ -194,6 +194,40 @@ class QP_Up(object):
         else:
             plt.show()
 
+    def plotErrorBars(self, name='', save=False):
+        time = self.Pre_to_RO_Time * 10 ** 6
+        occ = self.occ_1D_avg
+        occ_fit = self.occ_1D_avg_fit
+        error = self.occ_1D_avg_error_band
+        GammaUp = self.GammaUp
+        temp = str(self.temp) + 'mK'
+        if not save:
+            plt.figure(3)
+        plt.plot(list([0])+list(time),list([-(time[0])*(10**-6)*GammaUp+occ_fit[0]])+list(occ_fit))
+        plt.errorbar(time, occ, yerr=error,fmt='o', label=temp + '_GammaUp={0:.4g} Hz'.format(GammaUp))
+        plt.xlim([0,15.5])
+        plt.xlabel('time (us)')
+        plt.ylabel('P1')
+        # plt.yscale('log')
+        plt.grid()
+        plt.legend()
+
+        print('#GammaUp=')
+        print(GammaUp)
+        print('time=')
+        print(time)
+        print('occ=')
+        print(occ)
+        print('error=')
+        print(error)
+        print('occ_fit=')
+        print(occ_fit)
+
+        if save:
+            plt.savefig(name)
+            plt.show()
+        else:
+            plt.show()
 
 class Up_array(object):
     """
@@ -290,7 +324,8 @@ class T1(object):
         occ_2D = np.array([])
         Gamma_fit_parameters = np.array([])
         self.QB_Idle_Gate_Time = np.array(
-            noiselib.loadmat(f_l)[data_type2]) * 1e-9
+            noiselib.loadmat(f_l)[data_type2])*1e-6
+
         occ_1D = np.array(noiselib.loadmat(f_l)[data_type1])
         occ_2D = np.hstack((occ_2D, occ_1D))  # for future average use
         # fit_params = np.array([self.fitToExponential(occ_1D)])
@@ -335,7 +370,7 @@ class T1(object):
         time = self.QB_Idle_Gate_Time
         P1 = occ_1D
         # params, covariance = curve_fit(self.f_exp, time, P1, p0=[0.9, 30e4])
-        bounds = [(0.5, 1e4, 0.008), (1.05, 1e6, 0.4)]
+        bounds = [(0.75, 1e4, 0.008), (1.05, 1e6, 0.4)]
         params, covariance = curve_fit(self.f_exp_off, time, P1,
                                        bounds=bounds, p0=[0.9, 1e5, 0.1])
         # params, covariance = curve_fit(self.f_exp, time, P1, p0=[0.9, 3e4])
