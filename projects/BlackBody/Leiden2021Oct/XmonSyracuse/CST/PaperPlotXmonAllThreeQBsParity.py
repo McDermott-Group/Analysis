@@ -118,16 +118,22 @@ Q2 # polished
 """
 P1 Q2 and All PSD
 """
-if 1:
+if 1:   # one plot
     # plt.figure(0)
     # plt.rcParams["figure.figsize"] = (6, 20)
 
     label_font = 16
-    tick_font = 13
+    tick_font = 16
     # legend_font = 12
 
     # fig, axs = plt.subplots(2, sharex='col', figsize=(6, 6.5))
     plt.figure(figsize=(6, 4))
+
+    # plt.plot(f, 100+2000 * np.multiply(x_qpJ1, x_qpJ1), 'k--', linewidth=4,
+    #             label='Base+'+'$a*x_{\mathrm{qp}}^2$')
+
+    # plt.plot(f, 100+2000 * x_qpJ1, 'k--', linewidth=4,
+    #             label='Base+'+'$a*x_{\mathrm{qp}}^2$')
 
     plt.plot([J * f_SIM for J in Q1_J1Bias], Q1_J1ParityRate, color='r',
                 marker="o", markersize=4, linestyle='None', label='$\mathrm{Q_1}$')
@@ -138,6 +144,8 @@ if 1:
     plt.yscale('log')
     plt.xlim([50, 620])
     plt.ylim([80, 1000])
+    # plt.xlim([50, 1200])
+    # plt.ylim([80, 3000])
     # axs[1].grid(True, which="both")
     plt.legend(loc=2, prop={'size': 15}, frameon=False)
     plt.tick_params(labelsize=tick_font)
@@ -160,5 +168,68 @@ if 1:
     plt.tight_layout()
     path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
     plt.savefig(path+'\XmonQ123Parity.pdf', format='pdf', bbox_inches='tight', dpi=1200)
+    plt.show()
+
+if 0:   # one plot+zoom in
+    label_font = 16
+    tick_font = 16
+
+    fig, axs = plt.subplots(2, figsize=(6.5, 7.5))
+
+    axs[0].plot([J * f_SIM for J in Q1_J1Bias], Q1_J1ParityRate, color='r',
+                marker="o", markersize=4, linestyle='None', label='$\mathrm{Q_1}$')
+    axs[0].plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, color='k',
+                marker="o", markersize=4, linestyle='None', label='$\mathrm{Q_2}$')
+    axs[0].plot([J * f_SIM for J in Q3_J1Bias], Q3_J1ParityRate, color='b',
+                marker="o", markersize=4, linestyle='None', label='$\mathrm{Q_3}$')
+    axs[0].set_yscale('log')
+    # axs[0].set_xlim([50, 620])
+    # axs[0].set_ylim([80, 1000])
+    axs[0].set_xlim([150, 620])
+    axs[0].set_ylim([80, 1000])
+    axs[0].legend(loc=2, prop={'size': 15}, frameon=False)
+    axs[0].tick_params(labelsize=tick_font)
+    axs[0].tick_params(axis="x", direction="in", which='both')
+    axs[0].tick_params(axis="y", direction="in", which='both')
+    axs[0].tick_params(axis="x", width=1, length=6, which='both')
+    axs[0].tick_params(axis="y", width=1, length=3, which='minor')
+    axs[0].tick_params(axis="y", width=1, length=6, which='major')
+
+    axs[0].set_xlabel("Transmitter frequency (GHz)", color="black",
+                      fontsize=label_font)
+
+    # axs[1].plot([J * f_SIM for J in Q1_J1Bias], Q1_J1ParityRate, color='r',
+    #             marker="o", markersize=4, linestyle='None', label='$\mathrm{Q_1}$')
+    # axs[1].plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, color='k',
+    #             marker="o", markersize=4, linestyle='None', label='$\mathrm{Q_2}$')
+    axs[1].plot([J * f_SIM for J in Q3_J1Bias], Q3_J1ParityRate, color='b',
+                marker="o", markersize=4, linestyle='None', label='$\mathrm{Q_3}$')
+    axs[1].set_yscale('log')
+    axs[1].set_xlim([245, 311])
+    axs[1].set_ylim([140, 705])
+    axs[1].set_xticks([250, 270, 290, 310])
+    # axs[1].set_yticks([200, 300, 400, 500, 600, 700])
+    # axs[1].legend(loc=2, prop={'size': 15}, frameon=False)
+    axs[1].tick_params(axis="x", labelsize=tick_font)
+    axs[1].tick_params(axis="y", labelsize=tick_font, which='both')
+    axs[1].tick_params(axis="x", direction="in", which='both')
+    axs[1].tick_params(axis="y", direction="in", which='both')
+    axs[1].tick_params(axis="x", width=1, length=6, which='both')
+    axs[1].tick_params(axis="y", width=1, length=3, which='minor')
+    axs[1].tick_params(axis="y", width=1, length=6, which='major')
+
+    axs[1].set_xlabel("Transmitter frequency (GHz)", color="black",
+                      fontsize=label_font)
+
+
+
+
+    # axs[1].set_ylabel("$\Gamma_{\mathrm{P}}$ (s$^{-1}$)", color="black", fontsize=label_font)
+
+
+    # fig.align_ylabels(axs)
+    plt.tight_layout()
+    # path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
+    # plt.savefig(path+'\XmonQ123Parity.pdf', format='pdf', bbox_inches='tight', dpi=1200)
     plt.show()
 

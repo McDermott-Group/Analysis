@@ -24,7 +24,8 @@ if 1: # import CST data
     JJ7 = [4.2*1e3, None, 0, 1000*150, "Radiator"]   #[R, L, C, A] strong radiator
     JJ1 = [33 * 1e3, None, 0, 180 * 150, "Radiator"]  # [R, L, C, A] weak radiator
     JQ1 = [17.1 * 1e3, None, 0, 360 * 150, "Receiver"]
-    JQ2 = [16.6 * 1e3, None, 0, 360 * 150, "Receiver"]  #
+    # JQ2 = [16.6 * 1e3, None, 0, 360 * 150, "Receiver"]  #
+    JQ2 = [16.6 * 1e3, None, 0, 390 * 156, "Receiver"]  #
     JQ3 = [16.1 * 1e3, None, 0, 360 * 150, "Receiver"]  #
 
     fileJ1 = "xmon_full-chip_JJ1.txt"
@@ -117,7 +118,7 @@ Calculate the noise bandwidth
 """
 Q2 # polished
 """
-if 1:
+if 0:
 
     label_font = 16
     tick_font = 14
@@ -137,10 +138,11 @@ if 1:
     r_i = 610
     polarization_factor = 0.5
     for i in range(len(Area)):
-        Gamma_absorbed = polarization_factor*PhotonFlux[i]*Area[i]*eQ2[i]
+        Gamma_absorbed = polarization_factor*PhotonFlux[i]*Area[i]*eQ2[i]*4
         Gamma_re.append(Gamma_absorbed)
 
-    ratio = 0.25   # for 190 GHz peak, 3.6, for 270 GHz, 7.0
+    ratio = 0.07  # for 190 GHz peak, 3.6, for 270 GHz, 7.0
+    # ratio = 1  # for 190 GHz peak, 3.6, for 270 GHz, 7.0
     base = 110
     for i in range(len(pgJ1)):
         if f[i] >= 92:
@@ -200,11 +202,11 @@ if 1:
 
     # fig.align_ylabels(axs)
 
-    # path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
-    # plt.savefig(path+'\XmonSpectroscopy.pdf', format='pdf', bbox_inches='tight', dpi=1200)
+    path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
+    plt.savefig(path+'\XmonSpectroscopy.pdf', format='pdf', bbox_inches='tight', dpi=1200)
     plt.show()
 
-if 0:   # inset
+if 1:   # inset
 
     label_font = 16
     tick_font = 24
@@ -219,10 +221,10 @@ if 0:   # inset
     polarization_factor = 0.5
 
     for i in range(len(Area)):
-        Gamma_absorbed = polarization_factor * PhotonFlux[i] * Area[i] * eQ2[i]
+        Gamma_absorbed = polarization_factor * PhotonFlux[i] * Area[i] * eQ2[i]*4
         Gamma_re.append(Gamma_absorbed)
 
-    ratio = 0.26  # for 190 GHz peak, 3.6, for 270 GHz, 7.0
+    ratio = 0.07  # for 190 GHz peak, 3.6, for 270 GHz, 7.0
     base = 110
     for i in range(len(pgJ1)):
         if f[i] >= 92:

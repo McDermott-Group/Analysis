@@ -116,7 +116,7 @@ if 1:
     # plt.rcParams["figure.figsize"] = (6, 20)
 
     label_font = 16
-    tick_font = 13
+    tick_font = 16
     # legend_font = 12
 
     plt.figure(figsize=(6, 4))

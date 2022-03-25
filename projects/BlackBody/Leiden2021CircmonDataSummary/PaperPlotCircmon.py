@@ -12,6 +12,7 @@ if 1:
 
     JCirc = [4.8 * 1e3, None, 0, 320 * 123 * 2, "Radiator"]  # [R, L, C, A]
     JSFQ_weak = [16 * 1e3, None, 0, 100 * 200, "Radiator"]  # [R, L, C, A]
+    JSFQ_weak_qp = [16 * 1e3 * 100, None, 0, 100 * 200, "Radiator"]  # [R, L, C, A]
     JSFQ_strong = [8 * 1e3, None, 0, 100 * 200 * 2, "Radiator"]  # [R, L, C, A]
 
 
@@ -70,6 +71,12 @@ if 1:
     ecSFQ_4 = SFQ_4.Antenna["e_c_dB"]
     eSFQ_4 = SFQ_4.Antenna["e_c"]
     PhotonFlux = SFQ_4.Al_Wall["PhotonFlux"]
+
+    SFQ_4_qp = AntennaCoupling()
+    SFQ_4_qp.import_data(fileSFQ_4, JSFQ_weak_qp, C_eff=C_eff_SFQ)
+    ecSFQ_4_qp= SFQ_4_qp.Antenna["e_c_dB"]
+    eSFQ_4_qp = SFQ_4_qp.Antenna["e_c"]
+    PhotonFlux_qp = SFQ_4_qp.Al_Wall["PhotonFlux"]
 
     Q1 = AntennaCoupling()
     Q1.import_data(fileQ1, JQ1, C_eff=C_eff_circ)
@@ -294,15 +301,17 @@ ld2=3
 
 
 # axs[0].plot(f_SFQ, eSFQ_4, color="green", linestyle='--', linewidth=ld2, label='Transmitter')
-axs[0].plot(f_SFQ, eSFQ_4, color=[0, 1, 0], linestyle='--', linewidth=ld2, label='Transmitter')
+# axs[0].plot(f_SFQ, eSFQ_4, color=[0, 1, 0], linestyle='--', linewidth=ld2, label='Transmitter')
+axs[0].plot(f_SFQ, eSFQ_4, color="darkgreen", linestyle='--', linewidth=ld2, label='            ')
+axs[0].plot(f_SFQ, eSFQ_4_qp, color="green", linestyle='--', linewidth=ld2, label='            ')
 
-axs[0].plot(f_SFQ, eQ1, linewidth=ld2, color="red", label='$\mathrm{Q_{1}}$')
-axs[0].plot(f_SFQ, eQ4, linewidth=ld2, color="black", label='$\mathrm{Q_{2}}$')
-axs[0].plot(f_SFQ, eQ2, linewidth=ld2, color="blue", label='$\mathrm{Q_{3}}$')
+axs[0].plot(f_SFQ, eQ1, linewidth=ld2, color="red", label='            ')
+axs[0].plot(f_SFQ, eQ4, linewidth=ld2, color="black", label='   ')
+axs[0].plot(f_SFQ, eQ2, linewidth=ld2, color="blue", label='   ')
 axs[0].set_xlim([f_l, f_r])
 axs[0].set_ylim([4e-5, 1e-1])
 axs[0].set_yscale('log')
-axs[0].legend(loc=4, ncol=2, frameon=False, prop={'size': 13})
+# axs[0].legend(loc=4, ncol=2, frameon=False, prop={'size': 13})
 axs[0].tick_params(labelsize=tick_font)
 
 axs[0].tick_params(axis="x", direction="in", which='both')

@@ -66,6 +66,7 @@ emax = 10.0  # units of Delta
 # e = 1.0 + de * np.linspace(0, ne - 1, ne)
 e_log = np.logspace(0, 4, num=ne_log, base=2)
 e_inj = 5.43/2
+# e_inj = 2.5
 idx_e_upper = (np.abs(e_log - e_inj)).argmin()
 e = e_log[:idx_e_upper + 5]  # useful energy grid
 ne = len(e)  # points in energy grid
@@ -142,6 +143,7 @@ def scatter(n, inj, dt, i):
 
     # n = n + inflow - outflow - recombined-trapped
     n = n + inflow - outflow - recombined
+    # n = n + inflow - outflow
     n = n + inj
 
     ### Debug
@@ -183,7 +185,8 @@ def inj(ne, e_inj, Gamma_p, tau0, dt):
 
     Vol_Al = 2.0  # um^3
     t = tau0 * dt * 1e-9  # in units of seconds
-    N_qp = 2 * t * Gamma_p  # time * parity rate = QPs generated, 2 means a broken pair generates 2 QPs
+    # N_qp = 2 * t * Gamma_p  # time * parity rate = QPs generated, 2 means a broken pair generates 2 QPs
+    N_qp = t * Gamma_p  #
     # print('N_qp=', N_qp)
     n_cp = 4.0 * 1e6  # Cooper pair density um^-3
     n_qp = N_qp / (Vol_Al)
@@ -193,7 +196,8 @@ def inj(ne, e_inj, Gamma_p, tau0, dt):
     return delta_inj
 
 
-Gamma_p = 2*5.6e3 # at 250 GHz, one photon generates two QPs at half energy
+# Gamma_p = 5.6e3 # at 250 GHz, one photon generates two QPs at half energy
+Gamma_p = 1e9 # at 250 GHz, one photon generates two QPs at half energy
 n_inj = inj(ne, e_inj, Gamma_p, tau0, dt)
 # print('n_inj=', n_inj)
 ### n_inj = [0,0,0,...,8.8e-10,...,0]
@@ -223,7 +227,10 @@ for i in range(nt):
         print('Converge once')
         print('i_converge=', i_converge)
         i_converge = i_converge + 1
-        if i_converge >= 5: break  # convergence criterion satisfied 5 times in a row
+        if i_converge >= 5:
+            print('convert')
+            convert_time_step = i
+            break  # convergence criterion satisfied 5 times in a row
     else:
         i_converge = 0
     n_before = n
@@ -233,9 +240,15 @@ print('x_qp=', 2 * sum(n))
 ni = n
 
 QP_Data = []
+energy_tot = 0.0
 for i in range(len(ni)):
     d = [e[i], ni[i]]
     QP_Data.append(d)
+    energy_tot = energy_tot + e[i]*ni[i]
+
+print('energy_inj=', sum(n_inj)*e_inj*nt)
+print('energy_tot=', energy_tot)
+print('convert_time_step=', convert_time_step)
 np.savetxt('QPEnergySpectrumWithTrapping.txt', QP_Data)
 
 plt.plot(e, ni)
