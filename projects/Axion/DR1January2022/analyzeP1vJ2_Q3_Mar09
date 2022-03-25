@@ -1,0 +1,49 @@
+"""
+2021Jul
+"""
+import noiselib, antennalib
+from QPTunneling_LIU import QPTunneling_Wilen, plotMultiFittedPSD, QPTunneling_Liu, QPTunneling_Harrison, \
+    OneStateCleanDirty, plotFittedPSD_Harrison
+import matplotlib.pyplot as plt
+import numpy as np
+
+"""Q2"""
+QP_path = ('Z:/mcdermott-group/data/testProject/Keysight/DCH/NA/{}/{}/MATLABData/{}')
+# Z:\mcdermott-group\data\BlackBody\Circmon\LIU\CW20180514A_Ox2\08-19-21
+# date = '08-19-21'
+# date = 'JJRadiatorQPT_2021Aug19'
+date2 = '03-10-22'
+# QBs = ['Q1','Q2','Q4']
+QBs=['Q3']
+#J2Biaslist = np.arange(35000,80001,500)
+# J2Biaslist = [40, 42, 44]
+fparity = {}
+uparity = {}
+fidelity={}
+# for J2Bias in J2Biaslist:
+for QB_id in QBs:
+    experiment_name_P1 = (QB_id+'_P1_JB2')
+    P1_file_Number2 = np.arange(67, 86, 1)
+    P1_file = [QP_path.format(date2, experiment_name_P1, experiment_name_P1) + '_{:03d}.mat'.format(i) for i in P1_file_Number2]
+
+    average_data=None
+    JB_Bias_2=None
+    data_type='Projected_Occupation'
+
+    for f in P1_file:
+        data = noiselib.loadmat(f)
+        if average_data is None:
+            average_data = data[data_type]
+            JB_Bias_2 = data['JB_Bias_2']
+        else:
+            average_data = average_data + data[data_type]
+
+    average_data = average_data/(len(P1_file_Number2))
+
+
+plt.figure(figsize=(8, 6))
+plt.title('P1 vs Radiator Frequency')
+plt.xlabel('Radiator Frequency (GHz)')
+plt.ylabel('P1')
+plt.plot([484*1.6*2*(bias-.2) for bias in JB_Bias_2],average_data)
+plt.show()
