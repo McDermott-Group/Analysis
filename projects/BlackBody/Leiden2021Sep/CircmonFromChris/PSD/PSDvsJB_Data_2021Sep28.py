@@ -5,7 +5,7 @@ Z:\mcdermott-group\data\Antenna\Circmon\Liu\CW20180514A_Ox2\J6Radiator_2021Sep28
 Fitting method Chris' no white noise verison
 
 """
-import noiselib
+# import noiselib
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -77,17 +77,24 @@ Q4[:, 0] = (Q4[:, 0])/1000
 # plt.legend(loc=1)
 # plt.show()
 
-f = 4.604
-plt.plot(Q1[:, 0]*f, Q1[:, 1], color='b', label='Q1')
-plt.plot(Q2[:, 0]*f, Q2[:, 1], color='r', label='Q2')
-plt.plot(Q4[:, 0]*f, Q4[:, 1], color='y', label='Q4')
+# f = 4.604
+# plt.plot(Q1[:, 0]*f, Q1[:, 1], color='b', label='Q1')
+# plt.plot(Q2[:, 0]*f, Q2[:, 1], color='r', label='Q2')
+# plt.plot(Q4[:, 0]*f, Q4[:, 1], color='y', label='Q4')
+#
+# plt.xlabel('Radiator Josephson Frequency (GHz)')
+# plt.ylabel('PSD (Hz)')
+# plt.yscale('log')
+# plt.xlim([0, 600])
+# plt.ylim([1e1, 1e4])
+# plt.title('SFQ J6 Radiator Sep Orthogonal (maybe J8)')
+# plt.grid()
+# plt.legend(loc=1)
+# plt.show()
 
-plt.xlabel('Radiator Josephson Frequency (GHz)')
-plt.ylabel('PSD (Hz)')
-plt.yscale('log')
-plt.grid()
-plt.legend(loc=1)
-plt.show()
 
 
+np.savetxt('2021SepSFQStrongRadiator_Q1_PSD_Data.txt', Q1)
+np.savetxt('2021SepSFQStrongRadiator_Q2_PSD_Data.txt', Q2)
+np.savetxt('2021SepSFQStrongRadiator_Q4_PSD_Data.txt', Q4)
 

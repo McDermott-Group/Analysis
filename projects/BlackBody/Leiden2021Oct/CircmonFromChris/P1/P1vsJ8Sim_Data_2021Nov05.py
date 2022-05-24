@@ -272,6 +272,13 @@ Q2[:, 0] = (Q2[:, 0])*1000
 Q2_Weighted[:, 0] = (Q2_Weighted[:, 0])*1000
 Q4[:, 0] = (Q4[:, 0])*1000
 
+Q1[:, 2] = Q1[:, 2]/np.sqrt(50)
+Q2[:, 2] = Q2[:, 2]/np.sqrt(50)
+Q4[:, 2] = Q4[:, 2]/np.sqrt(50)
+
+# np.savetxt('2021OctSFQStrongRadiator_Q1_P1_Data.txt', Q1)
+# np.savetxt('2021OctSFQStrongRadiator_Q2_P1_Data.txt', Q2)
+# np.savetxt('2021OctSFQStrongRadiator_Q4_P1_Data.txt', Q4)
 
 # f = 4.604
 f = 0.968

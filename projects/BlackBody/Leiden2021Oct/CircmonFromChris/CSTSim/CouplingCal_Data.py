@@ -5,7 +5,8 @@ import copy
 
 ### parameters to be tuned
 e_eff = 6 # limit (1, 6.5), the voltage can also be built in to have a larger range
-C_eff = 200*1e-21   # Commonly used (50-100)
+C_eff_circ = 75*1e-21   # Commonly used (50-100)
+C_eff_SFQ = 75*1e-21   # Commonly used (50-100)
 Jbias_offset = 0   # mDAC should be +-1 mDAC basically +-5 GHz
 k = 1   # Coupling between radiator and receiver, this could be larger than one due to the
         # fact we can generate QPs locally at the recevier's test pad
@@ -15,62 +16,71 @@ k1 = 0.0   # coupling between on chip phonon mitigation
 f_SIM = 0.968
 ### parameteres tuned done
 
-JSFQ = [16*1e3, None, 0, 100*200]   #[R, L, C, A]
-JQ1 = [16.6*1e3, 18.3*1e-9, 0, 193.8*121.8]   #
-JQ2 = [13.2*1e3, 14.6*1e-9, 0, 350*126.6]   #
-JQ3 = [19*1e3, 21*1e-9, 0, 310*126]   #    some issue with Q3
-JQ4 = [15*1e3, 19.9*1e-9, 0, 184.4*122.5*2]   #    some issue with Q3
+JSFQ = [16*1e3, None, 0, 100*200, "Radiator"]   #[R, L, C, A]
+JQ_l = [16.6*1e3, 18.3*1e-9, 0, 193.8*121.8, "Receiver"]   #
+JQ_s = [13.2*1e3, 14.6*1e-9, 0, 350*126.6, "Receiver"]   #
+JQ3 = [19*1e3, 21*1e-9, 0, 310*126, "Receiver"]   #    some issue with Q3
+JQ_m = [15*1e3, 19.9*1e-9, 0, 184.4*122.5*2, "Receiver"]   #    some issue with Q3
 
 # fileSFQ = "testpad_1.5THz.txt"
+fileSFQ_4 = "SFQ_4rectmons.txt"
 fileSFQ = "SFQ_1THz.txt"
-# fileQ1 = "Q1.txt"
-# fileQ1 = "Q1_with-leads_1.5THz.txt"
-# fileQ2 = "Q2_1.5THz.txt"
+# fileQ_l = "Q_l.txt"
+# fileQ_l = "Q_l_with-leads_1.5THz.txt"
+# fileQ_s = "Q_s_1.5THz.txt"
 # fileQ3 = "Q3_with-leads_1.5THz.txt"
-# fileQ4 = "Q4_1.5THz.txt"
+# fileQ_m = "Q_m_1.5THz.txt"
 
-fileQ1 = "Q1_full-chip.txt"
-fileQ2 = "Q2_full-chip.txt"
+fileQ_l = "Q1_full-chip.txt"
+fileQ_s = "Q2_full-chip.txt"
 fileQ3 = "Q3_full-chip.txt"
-fileQ4 = "Q4_full-chip.txt"
+fileQ_m = "Q4_full-chip.txt"
 
 SFQ = AntennaCoupling()
-SFQ.import_data(fileSFQ, JSFQ, C_eff=100*1e-21)
+SFQ.import_data(fileSFQ, JSFQ, C_eff=C_eff_SFQ)
 f_SFQ = SFQ.Antenna["f"]
-ecSFQ = SFQ.e_c_dB
-eSFQ = SFQ.e_c
-pgSFQ = SFQ.p_g
-refSFQ = SFQ.ref
+ecSFQ = SFQ.Antenna["e_c_dB"]
+eSFQ = SFQ.Antenna["e_c"]
+pgSFQ = SFQ.Radiator["Gamma_rad"]
+refSFQ = SFQ.Al_Wall["Ref"]
+PhotonFlux = SFQ.Al_Wall["PhotonFlux"]
 
-# SFQ.plot()
+SFQ_4 = AntennaCoupling()
+SFQ_4.import_data(fileSFQ_4, JSFQ, C_eff=C_eff_SFQ)
+ecSFQ_4 = SFQ_4.Antenna["e_c_dB"]
+eSFQ_4 = SFQ_4.Antenna["e_c"]
+plt.plot(f_SFQ, eSFQ, label='1')
+plt.plot(f_SFQ, eSFQ_4, '--', label='4')
+plt.legend()
+plt.show()
 
-Q1 = AntennaCoupling()
-Q1.import_data(fileQ1, JQ1, C_eff=C_eff)
-ecQ1 = Q1.e_c_dB
-eQ1 = Q1.e_c
-Z_ReQ1 = Q1.Antenna["Z_Re"]
-f_Q1 = Q1.Antenna["f"]
+Q_l = AntennaCoupling()
+Q_l.import_data(fileQ_l, JQ_l, C_eff=C_eff_circ)
+f_Q_l = Q_l.Antenna["f"]
+eQ_l = Q_l.Antenna["e_c"]
+ecQ_l = Q_l.Antenna["e_c_dB"]
+AreaQ_l = Q_l.Receiver["Area"]
 
-Q2 = AntennaCoupling()
-Q2.import_data(fileQ2, JQ2, C_eff=C_eff)
-ecQ2 = Q2.e_c_dB
-eQ2 = Q2.e_c
-Z_ReQ2 = Q2.Antenna["Z_Re"]
+Q_s = AntennaCoupling()
+Q_s.import_data(fileQ_s, JQ_s, C_eff=C_eff_circ)
+eQ_s = Q_s.Antenna["e_c"]
+ecQ_s = Q_s.Antenna["e_c_dB"]
+AreaQ_s = Q_s.Receiver["Area"]
 
 Q3 = AntennaCoupling()
-Q3.import_data(fileQ3, JQ3, C_eff=C_eff)
-ecQ3 = Q3.e_c_dB
-eQ3 = Q3.e_c
-Z_ReQ3 = Q3.Antenna["Z_Re"]
+Q3.import_data(fileQ3, JQ3, C_eff=C_eff_circ)
+eQ3 = Q3.Antenna["e_c"]
+ecQ3 = Q3.Antenna["e_c_dB"]
+AreaQ3 = Q3.Receiver["Area"]
 
-Q4 = AntennaCoupling()
-Q4.import_data(fileQ4, JQ4, C_eff=C_eff)
-ecQ4 = Q4.e_c_dB
-eQ4 = Q4.e_c
-Z_ReQ4 = Q4.Antenna["Z_Re"]
+Q_m = AntennaCoupling()
+Q_m.import_data(fileQ_m, JQ_m, C_eff=C_eff_circ)
+eQ_m = Q_m.Antenna["e_c"]
+ecQ_m = Q_m.Antenna["e_c_dB"]
+AreaQ_m = Q_m.Receiver["Area"]
 
 
-Q1_PSD = np.array([
+Q_l_PSD = np.array([
     [0, 1009.34], [10, 958.58], [20, 1145.83], [30, 1046.75], [40, 1160.41],
     [50, 944.89], [60, 1210.19], [65, 1009.63], [70, 962.35], [75, 1140.02],
     [80, 1023.09], [85, 950.27], [90, 1115.45], [95, 1010.86], [100, 1010.15],
@@ -95,7 +105,7 @@ Q1_PSD = np.array([
     [550, 5562.97], [555, 6059.17], [560, 5850.5], [565, 6664.39], [570, 7159.78],
     [575, 7547.52], [580, 7821.21]
 ])
-Q2_PSD = np.array([
+Q_s_PSD = np.array([
     [0, 12.86], [10, 11.36], [20, 13.26], [30, 12.21], [40, 12.7], [50, 12.83],
     [60, 12.84], [65, 11.72], [70, 12.77], [75, 13.46], [80,14.29], [85, 11.23],
     [90, 12.81], [95, 12.3], [100, 12.55], [105, 14.13], [110, 13.12], [115, 13.11],
@@ -117,7 +127,7 @@ Q2_PSD = np.array([
     [540, 128.8], [545, 118.93], [550, 126.27], [555, 128.9], [560, 135.61],
     [565, 144.21], [570, 151.43], [575, 153.62], [580, 156.3]
 ])
-Q4_PSD = np.array([
+Q_m_PSD = np.array([
     [0, 201.33], [10, 191.95], [20, 185.84], [30, 184.72], [40, 190.91], [50, 192.32],
     [60, 191.89], [65, 199.26], [70, 185.41], [75, 186.42], [80, 191.55], [85, 187.11],
     [90, 196.13], [95, 192.59], [100, 183.86], [105, 195.27], [110, 173.7], [115, 197.69],
@@ -144,7 +154,7 @@ Q4_PSD = np.array([
 
 
 """P1 data starts"""
-Q1_P1 = np.array([
+Q_l_P1 = np.array([
  [0.0, 0.09298, 0.06221], [0.01, 0.08916, 0.06128], [0.02, 0.089, 0.06147],
  [0.03, 0.0951, 0.06549], [0.04, 0.09745, 0.06667], [0.05, 0.09475, 0.06161],
  [0.06, 0.0965, 0.06219], [0.065, 0.09637, 0.06264], [0.07, 0.09611, 0.06043],
@@ -209,7 +219,7 @@ Q1_P1 = np.array([
  [1.19, 0.17253, 0.09148]
 ])
 
-Q2_P1 = np.array([
+Q_s_P1 = np.array([
  [0.0, 0.07422, 0.03946], [0.01, 0.07915, 0.03969], [0.02, 0.07552, 0.03911],
  [0.03, 0.06982, 0.04172], [0.04, 0.07199, 0.03543], [0.05, 0.07436, 0.03463],
  [0.06, 0.06445, 0.0334], [0.065, 0.0695, 0.0344], [0.07, 0.07728, 0.04118],
@@ -274,7 +284,7 @@ Q2_P1 = np.array([
  [1.19, 0.07334, 0.03155]
 ])
 
-Q2_P1_Weighted = np.array([
+Q_s_P1_Weighted = np.array([
  [0.0, 0.07276, 0.04077], [0.01, 0.07838, 0.03986], [0.02, 0.07452, 0.04294],
  [0.03, 0.06869, 0.04296], [0.04, 0.07088, 0.03847], [0.05, 0.07213, 0.03637],
  [0.06, 0.06309, 0.03419], [0.065, 0.06789, 0.03771], [0.07, 0.07677, 0.04433],
@@ -339,7 +349,7 @@ Q2_P1_Weighted = np.array([
  [1.19, 0.07215, 0.03664]
 ])
 
-Q4_P1 = np.array([
+Q_m_P1 = np.array([
  [0.0, 0.05239, 0.00756], [0.01, 0.0539, 0.00995], [0.02, 0.05282, 0.008],
  [0.03, 0.05198, 0.00927], [0.04, 0.05126, 0.0085], [0.05, 0.05187, 0.0075],
  [0.06, 0.05215, 0.0091], [0.065, 0.05166, 0.00918], [0.07, 0.05272, 0.00837],
@@ -404,193 +414,152 @@ Q4_P1 = np.array([
  [1.19, 0.11939, 0.01308]
 ])
 
-Q1_P1[:, 0] = (Q1_P1[:, 0]) * 1000
-Q2_P1[:, 0] = (Q2_P1[:, 0]) * 1000
-Q4_P1[:, 0] = (Q4_P1[:, 0]) * 1000
+Q_l_P1[:, 0] = (Q_l_P1[:, 0]) * 1000
+Q_s_P1[:, 0] = (Q_s_P1[:, 0]) * 1000
+Q_m_P1[:, 0] = (Q_m_P1[:, 0]) * 1000
 """P1 data ends"""
 
 f_scale = np.sqrt(e_eff/6.0)
 f_SFQ = f_SFQ/1e9
 f_SFQ = f_SFQ*f_scale
-f_Q1 = f_Q1/1e9
-f_Q1 = f_Q1*f_scale
+f_Q_l = f_Q_l/1e9
+f_Q_l = f_Q_l*f_scale
 
-### two vertical plots
-# fig, axs = plt.subplots(4)
-# axs[0].plot(f_SFQ, ecSFQ, color="red", marker="o")
-# axs[0].set_ylabel("Radiator (dB)",color="black", fontsize=10)
-# axs[0].set_xlim([50, 600])
-# axs[0].set_ylim([-60, 0])
-# axs[0].grid()
-#
-# axs[1].plot(f_Q1, ecQ1, color="blue", marker="o", label='Q1')
-# axs[1].plot(f_Q1, ecQ2, color="red", marker="o", label='Q2')
-# axs[1].plot(f_Q1, ecQ4, color="green", marker="o", label='Q4')
-# axs[1].set_ylabel("Receiver QB (dB)",color="black", fontsize=10)
-# axs[1].set_xlim([50, 600])
-# axs[1].grid()
-# axs[1].legend()
-# axs[1].set_ylim([-40, -10])
-#
-# axs[2].plot(f_Q1, ecQ1+ecSFQ*k, color="blue", marker="o", label='Q1')
-# axs[2].plot(f_Q1, ecQ2+ecSFQ*k, color="red", marker="o", label='Q2')
-# axs[2].plot(f_Q1, ecQ4+ecSFQ*k, color="green", marker="o", label='Q4')
-# axs[2].set_ylabel("Receiver QB (dB)", color="black", fontsize=10)
-# axs[2].set_xlim([50, 600])
-# axs[2].grid()
-# axs[2].legend()
-# axs[2].set_ylim([-60, -20])
-#
-#
-# axs[3].plot(Q1_PSD[:, 0]*f_SIM, Q1_PSD[:, 1], color='b', label='Q1_PSD')
-# axs[3].plot(Q2_PSD[:, 0]*f_SIM, Q2_PSD[:, 1], color='r', label='Q1_PSD')
-# axs[3].plot(Q4_PSD[:, 0]*f_SIM, Q4_PSD[:, 1], color='g', label='Q1_PSD')
-# axs[3].set_xlabel("Freq (GHz)", color="black", fontsize=10)
-# axs[3].set_ylabel("PSD (Hz)", color="blue", fontsize=10)
-# axs[3].set_yscale('log')
-# axs[3].set_xlim([50, 600])
-# axs[3].set_ylim([10, 10000])
-#
-# plt.grid()
-# plt.show()
 
 """
-Polished
+Calculate the noise bandwidth starts
+"""
+# Tbb1 = 400e-3
+# Tbb2 = 463e-3
+# Tbb4 = 485e-3
+# PRQ_l = getPhotonRate(eQ_l, f_SFQ, Tbb1)
+# PRQ_s = getPhotonRate(eQ_s, f_SFQ, Tbb2)
+# PRQ_m = getPhotonRate(eQ_m, f_SFQ, Tbb4)
+# print('PRQ_l=', PRQ_l)
+# print('PRQ_s=', PRQ_s)
+# print('PRQ_m=', PRQ_m)
+
+
+# DfQ_l = getNoiseBandwidth(eQ_l, f_SFQ)
+# DfQ_s = getNoiseBandwidth(eQ_s, f_SFQ)
+# DfQ_m = getNoiseBandwidth(eQ_m, f_SFQ)
+# print('DfQ_l=', DfQ_l/1e9)
+# print('DfQ_s=', DfQ_s/1e9)
+# print('DfQ_m=', DfQ_m/1e9)
+
+# TQ_l = getTbb(3.21e9, 1000, 130e9)
+# TQ_s = getTbb(1.21e9, 12, 329e9)
+# TQ_m = getTbb(3.21e9, 190, 213e9)
+# print('TQ_l=', TQ_l)
+# print('TQ_s=', TQ_s)
+# print('TQ_m=', TQ_m)
+"""
+Calculate the noise bandwidth ends
 """
 
-# pgSFQQ1 = []
-# l_i = 1
-# for i in range(len(pgSFQ)):
-#     pgSFQQ1.append(pgSFQ[i]*eQ1[i])
-#
-# pgSFQQ1_scaled = []
-# p2QP = 8e-3 # photon to QP conversion rate
-# base = 1000
-# for i in range(len(pgSFQ)):
-#     pgSFQQ1_scaled.append(pgSFQQ1[i]*eQ1[i]*p2QP+base)
-#
-# fig, axs = plt.subplots(2)
-# axs_02 = axs[0].twinx()
-#
-# axs_02.plot(f_SFQ[l_i:], eSFQ[l_i:], color="red", marker="o", label='Radiator Efficiency')
-# axs_02.plot(f_Q1[l_i:], eQ1[l_i:], color="yellow", marker="o", label='Receiver Efficiency')
-# axs_02.set_ylabel('Coupling Efficiency', color="black", fontsize=10)
-# axs_02.set_yscale('log')
-# axs_02.set_ylim([1e-4, 1e-1])
-# axs_02.legend(loc=1)
-#
-# axs[0].plot(f_Q1[l_i:], pgSFQQ1[l_i:], color="orange", marker="o", label='Photon Rate')
-# axs[0].set_ylabel("Photons/Sec", color="black", fontsize=10)
-# axs[0].set_xlim([50, 700])
-# axs[0].set_ylim([1e5, 1e9])
-# axs[0].set_yscale('log')
-# axs[0].grid(True, which="both")
-# axs[0].legend(loc=4)
-# axs[0].set_xlabel("Antenna Frequency (GHz)", color="black", fontsize=10)
-#
-# axs_12 = axs[1].twinx()
-# axs_12.plot(f_Q1[l_i:], pgSFQQ1_scaled[l_i:], color="orange", linestyle='--', label='Photon Rate Scaled')
-# axs_12.set_ylabel("Scaled Photons Rate (Hz)", color="black", fontsize=10)
-# axs_12.set_xlim([50, 700])
-# axs_12.set_ylim([500, 10000])
-# axs_12.set_yscale('log')
-# axs_12.legend(loc=1)
-#
-# axs[1].plot(Q1_PSD[:, 0]*f_SIM, Q1_PSD[:, 1], color='k', label='Q1 Measurement 200fF')
-# axs[1].set_xlabel("Radiator Josephson Frequency (GHz)", color="black", fontsize=10)
-# axs[1].set_ylabel("Parity Rate (Hz)", color="black", fontsize=10)
-# axs[1].set_yscale('log')
-# axs[1].set_xlim([50, 700])
-# axs[1].set_ylim([500, 10000])
-# axs[1].grid(True, which="both")
-# axs[1].legend(loc=4)
-#
-# plt.show()
+"""Polished 2022Jan15"""
 
-"""
-Calculate the noise bandwidth
-"""
-Tbb1 = 400e-3
-Tbb2 = 463e-3
-Tbb4 = 485e-3
-PRQ1 = getPhotonRate(eQ1, f_SFQ, Tbb1)
-PRQ2 = getPhotonRate(eQ2, f_SFQ, Tbb2)
-PRQ4 = getPhotonRate(eQ4, f_SFQ, Tbb4)
-print('PRQ1=', PRQ1)
-print('PRQ2=', PRQ2)
-print('PRQ4=', PRQ4)
+### Calculating the photons absorbed
 
 
-# DfQ1 = getNoiseBandwidth(eQ1, f_SFQ)
-# DfQ2 = getNoiseBandwidth(eQ2, f_SFQ)
-# DfQ4 = getNoiseBandwidth(eQ4, f_SFQ)
-# print('DfQ1=', DfQ1/1e9)
-# print('DfQ2=', DfQ2/1e9)
-# print('DfQ4=', DfQ4/1e9)
+Gamma_re_Q_l = []
+Gamma_re_Q_s = []
+Gamma_re_Q_m = []
+Gamma_re_withBase_Q_l = []
+Gamma_re_withBase_Q_s = []
+Gamma_re_withBase_Q_m = []
+ratioQ_l = 1.0/18
+ratioQ_s = 1.0/10
+ratioQ_m = 1.0/8
+base_Q_l = 1030.0
+base_Q_s = 12.8
+base_Q_m = 190.0
+for i in range(len(AreaQ_l)):
+    gamma_re_Q_l = 0.5*PhotonFlux[i]*AreaQ_l[i]*eQ_l[i]
+    Gamma_re_Q_l.append(gamma_re_Q_l)
+    gamma_re_Q_s = 0.5*PhotonFlux[i]*AreaQ_s[i]*eQ_s[i]
+    Gamma_re_Q_s.append(gamma_re_Q_s)
+    gamma_re_Q_m = 0.5*PhotonFlux[i]*AreaQ_m[i]*eQ_m[i]
+    Gamma_re_Q_m.append(gamma_re_Q_m)
 
-# TQ1 = getTbb(3.21e9, 1000, 130e9)
-# TQ2 = getTbb(1.21e9, 12, 329e9)
-# TQ4 = getTbb(3.21e9, 190, 213e9)
-# print('TQ1=', TQ1)
-# print('TQ2=', TQ2)
-# print('TQ4=', TQ4)
+    if f_SFQ[i] >= 100:  # pari-breaking photons
+        Gamma_re_withBase_Q_l.append(gamma_re_Q_l * ratioQ_l + base_Q_l)
+        Gamma_re_withBase_Q_s.append(gamma_re_Q_s * ratioQ_s + base_Q_s)
+        Gamma_re_withBase_Q_m.append(gamma_re_Q_m * ratioQ_m + base_Q_m)
+    else:
+        Gamma_re_withBase_Q_l.append(base_Q_l)
+        Gamma_re_withBase_Q_s.append(base_Q_s)
+        Gamma_re_withBase_Q_m.append(base_Q_m)
 
-"""Polished 2021Dec07"""
+# fig, axs = plt.subplots(2, figsize=(8, 8))
+fig, axs = plt.subplots(2, figsize=(6, 9))
+freq_l = 40
+freq_r = 560
 
-### Calculating the photons generated
+axs_02 = axs[0].twinx()
+axs_02.plot(f_SFQ, PhotonFlux, color="black", linestyle='--',
+            linewidth=4, label='Photon Flux')
+axs_02.set_ylabel("Photon flux $=S/hf$ $(m^{-2} sec^{-1})$", color="black", fontsize=10)
+axs_02.set_xlim([freq_l, freq_r])
+axs_02.set_ylim([1e12, 1e15])
+axs_02.set_yscale('log')
+axs_02.legend(loc=4)
 
-pgSFQQ1 = []
-pgSFQQ2 = []
-pgSFQQ4 = []
-for i in range(len(pgSFQ)):
-    pgSFQQ1.append(pgSFQ[i]*eQ1[i])
-    pgSFQQ2.append(pgSFQ[i]*eQ2[i])
-    pgSFQQ4.append(pgSFQ[i]*eQ4[i])
-
-fig, axs = plt.subplots(2)
-
-axs[0].plot(f_SFQ, eQ1, color="blue", marker="o", label='Q1')
-axs[0].plot(f_SFQ, eQ2, color="red", marker="o", label='Q2')
-axs[0].plot(f_SFQ, eQ4, color="green", marker="o", label='Q4')
-axs[0].plot(f_SFQ, eSFQ, color="black", marker="o", label='SFQ')
-# axs[0].plot(f_SFQ, pgSFQQ1, color="blue", marker="o", label='Q1_SFQ')
-# axs[0].plot(f_SFQ, pgSFQQ2, color="red", marker="o", label='Q2_SFQ')
-# axs[0].plot(f_SFQ, pgSFQQ4, color="green", marker="o", label='Q4_SFQ')
-axs[0].set_ylabel("Photon Generation Rate ($s^{-1}$)", color="black", fontsize=10)
-axs[0].set_xlim([50, 500])
-# axs[0].set_ylim([1e3, 1e9])
+axs[0].plot(f_SFQ, eQ_l*AreaQ_l, color="blue", marker="o", label='Q_l')
+axs[0].plot(f_SFQ, eQ_s*AreaQ_s, color="red", marker="o", label='Q_s')
+axs[0].plot(f_SFQ, eQ_m*AreaQ_m, color="green", marker="o", label='Q_m')
+# axs[0].plot(f_SFQ, eSFQ, color="black", marker="o", label='SFQ')
+# axs[0].plot(f_SFQ, eQ_m*eSFQ, color="purple", marker="o", label='Tot')
+axs[0].set_ylabel('$e_{c}^{r}*A_{eff} (sec^{-1})$', color="black", fontsize=10)
+axs[0].set_xlim([freq_l, freq_r])
+axs[0].set_ylim([1e-11, 1e-8])
 axs[0].set_yscale('log')
 axs[0].grid()
-axs[0].legend()
-# axs[0].set_ylim([-60, -20])
+axs[0].legend(loc=1)
 
-Q1_PSD_pure = copy.deepcopy(Q1_PSD)
-Q2_PSD_pure = copy.deepcopy(Q2_PSD)
-Q4_PSD_pure = copy.deepcopy(Q4_PSD)
-e_Q41 = 0.18 # from Q1 to Q4,  e_Q41<=0.18
-e_Q21 = 0.012 # from Q1 to Q2, e_Q21<=0.012
-e_Q24 = 0.032 # from Q4 to Q2, e_Q24<=
-Q4_PSD_pure[:, 1] = Q4_PSD_pure[:, 1] - e_Q41*Q1_PSD[:, 1]
-Q2_PSD_pure[:, 1] = Q2_PSD_pure[:, 1] - e_Q21*Q1_PSD[:, 1]-e_Q24*Q4_PSD[:, 1]
 
-axs[1].plot(Q1_PSD[:, 0]*f_SIM, Q1_PSD[:, 1], color='b', label='Q1')
-axs[1].plot(Q2_PSD[:, 0]*f_SIM, Q2_PSD[:, 1], color='r', label='Q2')
-axs[1].plot(Q4_PSD[:, 0]*f_SIM, Q4_PSD[:, 1], color='g', label='Q4')
-axs[1].plot(Q1_PSD[:, 0]*f_SIM, Q1_PSD_pure[:, 1], 'b--', label='Q1_pure')
-axs[1].plot(Q2_PSD[:, 0]*f_SIM, Q2_PSD_pure[:, 1], 'r--', label='Q2_pure')
-axs[1].plot(Q4_PSD[:, 0]*f_SIM, Q4_PSD_pure[:, 1], 'g--', label='Q4_pure')
+Q_l_PSD_pure = copy.deepcopy(Q_l_PSD)
+Q_s_PSD_pure = copy.deepcopy(Q_s_PSD)
+Q_m_PSD_pure = copy.deepcopy(Q_m_PSD)
+e_Q_m1 = 0.18 # from Q_l to Q_m,  e_Q_m1<=0.18
+e_Q_s1 = 0.012 # from Q_l to Q_s, e_Q_s1<=0.012
+e_Q_s4 = 0.032 # from Q_m to Q_s, e_Q_s4<=
+Q_m_PSD_pure[:, 1] = Q_m_PSD_pure[:, 1] - e_Q_m1*Q_l_PSD[:, 1]
+Q_s_PSD_pure[:, 1] = Q_s_PSD_pure[:, 1] - e_Q_s1*Q_l_PSD[:, 1]-e_Q_s4*Q_m_PSD[:, 1]
+
+axs[1].plot(Q_l_PSD[:, 0]*f_SIM, Q_l_PSD[:, 1], 'b', linewidth=4, label='Q_l')
+axs[1].plot(f_SFQ, Gamma_re_withBase_Q_l, 'b--', label='Q_l Total')
+axs[1].plot(Q_s_PSD[:, 0]*f_SIM, Q_s_PSD[:, 1], 'r', linewidth=4, label='Q_s')
+axs[1].plot(f_SFQ, Gamma_re_withBase_Q_s, 'r--', label='Q_s Total')
+axs[1].plot(Q_m_PSD[:, 0]*f_SIM, Q_m_PSD[:, 1], 'g', linewidth=4, label='Q_m')
+axs[1].plot(f_SFQ, Gamma_re_withBase_Q_m, 'r--', label='Q_m Total')
+
+# scale_Q_l = 0.012
+# scale_Q_m = 0.08
+# axs[1].plot(Q_l_PSD[:, 0]*f_SIM, scale_Q_l*Q_l_PSD[:, 1], 'b-',
+#             linewidth=2, label='Q_l*{}'.format(scale_Q_l))
+# axs[1].plot(Q_l_PSD[:, 0]*f_SIM, scale_Q_m*Q_m_PSD[:, 1], 'g-',
+#             linewidth=2, label='Q_m*{}'.format(scale_Q_m))
+
+# axs[1].plot(f_SFQ, Gamma_re_withBase_Q_m, 'g--', label='Q_m Total')
+# axs[1].plot(Q_l_PSD[:, 0]*f_SIM, Q_l_PSD_pure[:, 1], 'b--', label='Q_l_pure')
+# axs[1].plot(Q_s_PSD[:, 0]*f_SIM, Q_s_PSD_pure[:, 1], 'r--', label='Q_s_pure')
+# axs[1].plot(Q_m_PSD[:, 0]*f_SIM, Q_m_PSD_pure[:, 1], 'g--', label='Q_m_pure')
 
 axs[1].set_xlabel("Freq (GHz)", color="black", fontsize=10)
-axs[1].set_ylabel("PSD (Hz)", color="blue", fontsize=10)
+axs[1].set_ylabel("$\Gamma_{p}$ ($s^{-1}$)", color="black", fontsize=10)
 axs[1].set_yscale('log')
-axs[1].set_xlim([50, 500])
+axs[1].set_xlim([freq_l, freq_r])
 axs[1].set_ylim([10, 10000])
+# axs[1].set_ylim([800, 8000]) # Q_l
+# axs[1].set_ylim([10, 1000]) # Q_s
+# axs[1].set_ylim([100, 5000]) # Q_m
 axs[1].grid(True, which="both")
-axs[1].legend(loc=4)
+axs[1].legend(loc=2)
 
-# axs[2].errorbar(Q1_P1[:, 0]*f_SIM, Q1_P1[:, 1], yerr=Q1_P1[:, 2]/np.sqrt(50), color='b', label='Q1')
-# axs[2].errorbar(Q2_P1[:, 0]*f_SIM, Q2_P1[:, 1], yerr=Q2_P1[:, 2]/np.sqrt(50), color='r', label='Q2')
-# axs[2].errorbar(Q4_P1[:, 0]*f_SIM, Q4_P1[:, 1], yerr=Q4_P1[:, 2]/np.sqrt(50), color='g', label='Q4')
+# axs[2].errorbar(Q_l_P1[:, 0]*f_SIM, Q_l_P1[:, 1], yerr=Q_l_P1[:, 2]/np.sqrt(50), color='b', label='Q_l')
+# axs[2].errorbar(Q_s_P1[:, 0]*f_SIM, Q_s_P1[:, 1], yerr=Q_s_P1[:, 2]/np.sqrt(50), color='r', label='Q_s')
+# axs[2].errorbar(Q_m_P1[:, 0]*f_SIM, Q_m_P1[:, 1], yerr=Q_m_P1[:, 2]/np.sqrt(50), color='g', label='Q_m')
 #
 # axs[2].set_xlabel("Radiator Josephson Frequency (GHz)", color="black",
 #                   fontsize=10)

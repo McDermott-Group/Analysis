@@ -6,7 +6,7 @@ Z:\mcdermott-group\data\Antenna\Circmon\Liu\CW20180514A_Ox2\2021Nov16_QB4_PSD_J6
 Fitting method Chris' no white noise verison
 
 """
-import noiselib
+# import noiselib
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -178,27 +178,32 @@ Q4 = np.array([
 # plt.legend(loc=1)
 # plt.show()
 
-# f = 1
-f = 0.9676
-Al_gap = 380e-6
-DAC_Al = 1e5*Al_gap/0.200
-d = 2 # for plotting purpose only
-# plt.plot(Q1[:, 0]*f, Q1[:, 1]/d, color='b', label='Q1')
-plt.plot(Q1[:, 0]*f, Q1[:, 1], color='b', label='Q1')
-plt.plot(Q1_more[:, 0]*f, Q1_more[:, 1], color='y', label='Q1')
-plt.plot(Q2[:, 0]*f, Q2[:, 1], color='r', label='Q2')
-plt.plot(Q4[:, 0]*f, Q4[:, 1], color='k', label='Q4')
+np.savetxt('2021OctSFQWeakRadiatorWiggles_Q1_PSD_Data.txt', Q1)
+np.savetxt('2021OctSFQWeakRadiatorWiggles_Q2_PSD_Data.txt', Q2)
+np.savetxt('2021OctSFQWeakRadiatorWiggles_Q4_PSD_Data.txt', Q4)
 
-plt.axvline(x=DAC_Al * f, color='k', linestyle='--', linewidth=4, label='JJ Al Gap')
-
-plt.xlabel('Radiator Josephson Frequency (GHz)')
-plt.ylabel('PSD (Hz)')
-plt.yscale('log')
-plt.grid(True, which="both")
-plt.legend(loc=1)
-# plt.xlim([0, 1500])
-# plt.ylim([10, 100000])
-plt.show()
+# # f = 1
+# f = 0.9676
+# Al_gap = 380e-6
+# DAC_Al = 1e5*Al_gap/0.200
+# d = 2 # for plotting purpose only
+# # plt.plot(Q1[:, 0]*f, Q1[:, 1]/d, color='b', label='Q1')
+# plt.plot(Q1[:, 0]*f, Q1[:, 1], color='b', label='Q1')
+# plt.plot(Q1_more[:, 0]*f, Q1_more[:, 1], color='y', label='Q1')
+# plt.plot(Q2[:, 0]*f, Q2[:, 1], color='r', label='Q2')
+# plt.plot(Q4[:, 0]*f, Q4[:, 1], color='k', label='Q4')
+#
+# plt.axvline(x=DAC_Al * f, color='k', linestyle='--', linewidth=4, label='JJ Al Gap')
+#
+# plt.xlabel('Radiator Josephson Frequency (GHz)')
+# plt.ylabel('PSD (Hz)')
+# plt.yscale('log')
+# plt.grid(True, which="both")
+# plt.title('SFQ J6 Wiggles')
+# plt.legend(loc=1)
+# # plt.xlim([0, 1500])
+# # plt.ylim([10, 100000])
+# plt.show()
 
 
 

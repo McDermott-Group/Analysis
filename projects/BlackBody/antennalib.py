@@ -2,13 +2,17 @@
 A library for the antenna model
 """
 
-# import noiselib
+import noiselib
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.constants import *
 from scipy.stats import linregress
 from scipy.stats import sem
 from sklearn.mixture import GaussianMixture
+from scipy.optimize import fsolve
+from scipy.optimize import root
+from scipy.optimize import minimize
+from scipy import interpolate
 
 from scipy.optimize import curve_fit
 
@@ -164,9 +168,9 @@ class QP_Up(object):
         plt.grid()
         plt.legend()
         plt.plot(time[3:], GammaUp_list, 'k-', label='GammaUp')
-        #plt.show(block=False)
+        # plt.show(block=False)
 
-    def plot(self,name='',save=False):
+    def plot(self, name='', save=False):
         time = self.Pre_to_RO_Time * 10 ** 6
         occ = self.occ_1D_avg
         occ_fit = self.occ_1D_avg_fit
@@ -175,7 +179,7 @@ class QP_Up(object):
         temp = str(self.temp) + 'mK'
         if not save:
             plt.figure(3)
-        plt.plot(time, occ_fit, 'o-',
+        plt.errorbar(time, occ_fit, 'o-',
                  label=temp + '_GammaUp={0:.4g} Hz'.format(GammaUp))
         plt.plot(time, occ, 'k-', label=temp)
         plt.fill_between(time, occ - error, occ + error, alpha=0.2)
@@ -190,6 +194,40 @@ class QP_Up(object):
         else:
             plt.show()
 
+    def plotErrorBars(self, name='', save=False):
+        time = self.Pre_to_RO_Time * 10 ** 6
+        occ = self.occ_1D_avg
+        occ_fit = self.occ_1D_avg_fit
+        error = self.occ_1D_avg_error_band
+        GammaUp = self.GammaUp
+        temp = str(self.temp) + 'mK'
+        if not save:
+            plt.figure(3)
+        plt.plot(list([0])+list(time),list([-(time[0])*(10**-6)*GammaUp+occ_fit[0]])+list(occ_fit))
+        plt.errorbar(time, occ, yerr=error,fmt='o', label=temp + '_GammaUp={0:.4g} Hz'.format(GammaUp))
+        plt.xlim([0,15.5])
+        plt.xlabel('time (us)')
+        plt.ylabel('P1')
+        # plt.yscale('log')
+        plt.grid()
+        plt.legend()
+
+        print('#GammaUp=')
+        print(GammaUp)
+        print('time=')
+        print(time)
+        print('occ=')
+        print(occ)
+        print('error=')
+        print(error)
+        print('occ_fit=')
+        print(occ_fit)
+
+        if save:
+            plt.savefig(name)
+            plt.show()
+        else:
+            plt.show()
 
 class Up_array(object):
     """
@@ -285,7 +323,8 @@ class T1(object):
         occ_2D = np.array([])
         Gamma_fit_parameters = np.array([])
         self.QB_Idle_Gate_Time = np.array(
-            noiselib.loadmat(f_l)[data_type2]) * 1e-9
+            noiselib.loadmat(f_l)[data_type2])*1e-6
+
         occ_1D = np.array(noiselib.loadmat(f_l)[data_type1])
         occ_2D = np.hstack((occ_2D, occ_1D))  # for future average use
         # fit_params = np.array([self.fitToExponential(occ_1D)])
@@ -330,7 +369,7 @@ class T1(object):
         time = self.QB_Idle_Gate_Time
         P1 = occ_1D
         # params, covariance = curve_fit(self.f_exp, time, P1, p0=[0.9, 30e4])
-        bounds = [(0.5, 1e4, 0.008), (1.05, 1e6, 0.4)]
+        bounds = [(0.75, 1e4, 0.008), (1.05, 1e6, 0.4)]
         params, covariance = curve_fit(self.f_exp_off, time, P1,
                                        bounds=bounds, p0=[0.9, 1e5, 0.1])
         # params, covariance = curve_fit(self.f_exp, time, P1, p0=[0.9, 3e4])
@@ -407,9 +446,371 @@ class P1(object):
         self.temp = temp
 
 
+class UpAndParity(object):
+    """
+    This is to analyze the up transition rate and the parity rate
+    """
+
+    def __init__(self):
+        self.parity_freq_data = None
+        self.parity_data = None
+        self.parity_data_nobase = None
+
+        self.up_freq_data = None
+        self.up_data = None
+        self.up_data_nobase = None
+
+        self.S_freq = None
+        self.S_Minus = None
+        self.S_Plus = None
+        self.S_MinusOverPlus = None
+
+        self.Delta = 46.0  # 46 GHz one energy gap
+        self.UpRateYale = None
+        self.X_QP = None
+
+        self.f_DAC = 4.604  # DAC to freq conversion
+
+        self.f_interest = None
+        self.up_interest = None
+        self.parity_interest = None
+        self.S_Minus_interest = None
+        self.S_Plus_interest = None
+        self.S_MOP_interest = None
+
+        self.parity_PAT = None
+        self.parity_QPD = None
+        self.up_PAT = None
+        self.up_QPD = None
+
+    def import_data(self, parity_file, up_file, S_file):
+
+        self._importP(parity_file)
+        self._importUP(up_file)
+        self._importS(S_file)
+        self._interpolateToUp()
+        self._separatePATandQPDiffusion()
+        self._getUpYale()
+        # self._getXqp()
+
+    def _importP(self, parity_file):
+        PSD = np.loadtxt(parity_file, skiprows=20)
+        self.parity_freq_data = PSD[:, 0] * self.f_DAC
+        self.parity_data = PSD[:, 1]
+        self.parity_data_nobase = PSD[:, 1] - np.mean(PSD[:, 1][:5])
+
+    def _importUP(self, up_file):
+        UP = np.loadtxt(up_file, skiprows=20)
+        self.up_freq_data = UP[:, 0] * self.f_DAC
+        self.up_data = UP[:, 1]
+        # self.up_data_nobase = UP[:, 1] - np.mean(UP[:, 1][:5])
+        self.up_data_nobase = UP[:, 1] - 200.0    # 200 Hz will make all elements positive
+
+    def _importS(self, S_file):
+        Delta = self.Delta
+        S_param = np.loadtxt(S_file)
+        self.S_freq = S_param[:, 0] * Delta
+        self.S_Minus = S_param[:, 1]
+        self.S_Plus = S_param[:, 2]
+        self.S_MinusOverPlus = np.divide(S_param[:, 1], S_param[:, 2])
+
+    def _interpolateToUp(self):
+        ### Freq aligned
+        ### only data without base
+        ### For data > 100 GHz
+        f_l = 115
+        f_interest = []
+        up_interest = []
+        parity_interest = []
+        S_Minus_interest = []
+        S_Plus_interest = []
+        S_MOP_interest = []
+
+        f_PSD = interpolate.interp1d(self.parity_freq_data, self.parity_data_nobase)
+        f_S_Minus = interpolate.interp1d(self.S_freq, self.S_Minus)
+        f_S_Plus = interpolate.interp1d(self.S_freq, self.S_Plus)
+        f_S_MOP = interpolate.interp1d(self.S_freq, self.S_MinusOverPlus)
+
+        up_freq = self.up_freq_data
+
+        ### data > 100 GHz and without base clean
+        for i in range(len(up_freq)):
+            fi = up_freq[i]
+            if fi > f_l:
+                f_interest.append(fi)
+                up_interest.append(self.up_data_nobase[i])
+                parity_interest.append(f_PSD(fi))
+                S_Minus_interest.append(f_S_Minus(fi))
+                S_Plus_interest.append(f_S_Plus(fi))
+                S_MOP_interest.append(f_S_MOP(fi))
+
+        self.f_interest = f_interest
+        self.up_interest = up_interest
+        self.parity_interest = parity_interest
+        self.S_Minus_interest = S_Minus_interest
+        self.S_Plus_interest = S_Plus_interest
+        self.S_MOP_interest = S_MOP_interest
+
+    def _separatePATandQPDiffusion(self):
+        """
+        Use linear algebra to separate the direct PAT contribution and the QP diffusion
+
+        Gamma_p = Gamma_p_PAT + Gamma_p_QPD
+        Gamma_up = Gamma_up_PAT + Gamma_up_QPD
+
+        Gamma_up_PAT = alpha*Gamma_p_PAT
+        Gamma_up_QPD = Gamma_p_QPD
+
+        :return:
+        """
+
+        parity_PAT = []
+        parity_QPD = []
+        up_PAT = []
+        up_QPD = []
+
+        SOP = self.S_MOP_interest
+        parity = self.parity_interest
+        up = self.up_interest
+
+        EjOverEc = 27.5
+
+        for i in range(len(SOP)):
+            ratio = 1.0/(1.0+np.sqrt(8*EjOverEc)*SOP[i])
+            m = 1 # up_qpd = m*parity_qpd
+            # a = [[1.0, 1.0], [ratio, 1.0]]
+            a = [[1.0, 1.0], [ratio, m]]
+            b = [parity[i], up[i]]
+            parity_pat, parity_qpd = np.linalg.solve(a, b)
+            up_pat = ratio * parity_pat
+            up_qpt = m*parity_qpd
+
+            parity_PAT.append(parity_pat)
+            parity_QPD.append(parity_qpd)
+            up_PAT.append(up_pat)
+            up_QPD.append(up_qpt)
+
+        self.parity_PAT = parity_PAT
+        self.parity_QPD = parity_QPD
+        self.up_PAT = up_PAT
+        self.up_QPD = up_QPD
+
+        # plt.plot(self.f_interest, SOP)
+        # plt.plot(self.f_interest, parity, 'r', linewidth=4, label='parity interet')
+        # plt.plot(self.f_interest, parity_PAT, 'r:', linewidth=2, label='parity PAT')
+        # # plt.plot(self.f_interest, parity_QPD, 'r--', linewidth=2, label='parity QPD')
+        # plt.plot(self.f_interest, up, 'b', linewidth=4, label='up interet')
+        # plt.plot(self.f_interest, up_PAT, 'b:', linewidth=2, label='up PAT')
+        # plt.plot(self.f_interest, up_QPD, 'k', linewidth=2, label='parity/up QPDiffusion')
+        #
+        # plt.yscale('log')
+        # plt.legend()
+        # plt.xlim([100, 600])
+        # plt.xlabel('Frequency (GHz)')
+        # plt.ylabel('Rate (Hz)')
+        # plt.title('Up rate baseline hand chosen 200 Hz')
+        # plt.show()
+
+    def getBaseUpYale(self, antenna, Tbb=543e-3,):
+        """
+        From the e_c of the antenna mode, and effective BB temp
+        get the BB induced upward transition from Yale's model
+        :return:
+        """
+        f = antenna.Antenna["f"]    # GHz
+        e_c = antenna.Antenna["e_c"]
+        f_S_Minus = interpolate.interp1d(self.S_freq, self.S_Minus)
+        f_S_Plus = interpolate.interp1d(self.S_freq, self.S_Plus)
+        # print(f[0]/1e9, f[-1]/1e9)
+        E_ratio = np.sqrt(8.0 * 27.5)
+        Up = []  # up rate
+        for i in range(len(f)):
+
+            if f[i] <= 108*1e9:
+                up = 0.0
+            else:
+                ratio = 1.0 / (1.0 + E_ratio * (f_S_Minus(f[i]/1e9)) / (f_S_Plus(f[i]/1e9)))
+                up = (f[i] - f[i - 1]) * e_c[i] / (np.exp(h * f[i] / (k * Tbb)) - 1) * ratio
+            Up.append(up)
+
+        return np.sum(Up)
+
+    def _getUpYale(self):
+        """
+        Assume all the uprate is from parity correlation
+        :return:
+        """
+        freq = self.parity_freq_data
+        parity = self.parity_data_nobase
+        S_Minus = self.S_Minus
+        S_Plus = self.S_Plus
+        E_ratio = np.sqrt(8.0 * 27.5)
+        UpRateYale = []
+
+        f_S_Minus = interpolate.interp1d(self.S_freq, self.S_Minus)
+        f_S_Plus = interpolate.interp1d(self.S_freq, self.S_Plus)
+        # f_S_MOP = interpolate.interp1d(self.S_freq, self.S_MinusOverPlus)
+
+        for i in range(len(freq)):
+
+            # if freq[i] <= 2 * self.Delta:
+            if freq[i] <= 108:
+                uprateYale = 0.0
+            else:
+                ratio = 1.0 / (1.0 + E_ratio * (f_S_Minus(freq[i])) / (f_S_Plus(freq[i])))
+                uprateYale = parity[i] * ratio
+            UpRateYale.append(uprateYale)
+
+        # plt.plot(freq, UpRate)
+        # plt.show()
+        self.UpRateYale = UpRateYale
+
+    def _getXqp(self):
+        """
+        Get the xp density and claim some 01 transition is proportional to the xqp.
+        From the parity rate measured, we get the QP generation rate
+        g = \Gamma_{p}/(Vol_{Al}n_{cp})
+        :return:
+        """
+        G = []
+        X_QP = []
+        parity = self.parity
+        Vol_Al = 10 * 1 * 0.1  # um^3
+        n_cp = 4.0e6  # cooper pair density, units /um^3
+        r = 1 / (400e-9)  # recombination rate sec^-1
+        for p in parity:
+            g = p / (0.1 * Vol_Al * n_cp)
+            x_qp = (g / r) ** 0.5
+
+            G.append(g)
+            X_QP.append(x_qp)
+
+        self.X_QP = X_QP
+
+    def _getGammaUp(self):
+        """
+        This follows James Wenner 2013 PRL paper
+        needs result for n_{i} and \epsilon_{i}
+        :return:
+        """
+        n = self.n  # n_{i} array
+        epsilon = self.epsilon  # energy array
+
+
+def getGammaUpDownFromQPSpectrum(epsilon, n):
+    Delta = 1.0  # energy gap
+    Myarray_up = np.zeros(len(n))
+    Myarray_down = np.zeros(len(n))
+    Rn = 15.0e3  # normal state resistance
+    C = 3.39e-15  # junction self capacitance
+    E_ge = 0.1076  # =hf_{01}/\Delta, qubit energy normalized to energy gap, 10% of delta
+
+    for i in range(len(n)):
+        e_i = epsilon[i]
+        e_f_up = e_i - E_ge
+        e_f_down = e_i + E_ge
+        if e_f_up >= Delta:
+            element_up = (n[i] / E_ge) * (1 + Delta ** 2 / (e_i * e_f_up)) * \
+                         (e_f_up ** 2 / (e_f_up ** 2 - Delta ** 2)) ** 0.5
+
+            Myarray_up[i] = element_up
+
+        element_down = (n[i] / E_ge) * (1 + Delta ** 2 / (e_i * e_f_down)) * \
+                       (e_f_down ** 2 / (e_f_down ** 2 - Delta ** 2)) ** 0.5
+
+        Myarray_down[i] = element_down
+
+    gammaup = sum(Myarray_up) / (Rn * C)
+    gammadown = sum(Myarray_down) / (Rn * C)
+
+    return gammaup, gammadown
+
+
+class XqpUpDown(object):
+    """
+    This is for QP induced up and down transition rates.
+    First from the Down transition rate, we get the Xqp,
+    then from the Xqp, we get up transition rate.
+    """
+
+    def __init__(self):
+        # self.freq = None
+        self.f01 = 5e9  # 5 GHz, qubit freq
+        self.Delta = 190 * e * 1e-6  # energy gap, 190ueV
+        self.X_QP = None  # QP density
+        self.T_eff = None  # effective temperature
+        self.UpRate = None  # upward transition rate
+        self.DownRate = None  # downward transition rate
+
+    def import_data(self, T1_array):
+        self.DownRate = [1 / t for t in T1_array]
+        self._getX_QP()
+        self._getT_eff()
+        self._getUpRate()
+
+    def _getX_QP(self):
+        """
+        From the downward T1 data, calculate the QP density
+        :return:
+        """
+        DownRate = self.DownRate
+        Delta = self.Delta
+        f01 = self.f01
+        ratio = np.sqrt((2 * f01 * 2 * pi * Delta) / (pi ** 2 * hbar))
+
+        X_QP = []
+        for gamma_down in DownRate:
+            x_QP = gamma_down / ratio
+            X_QP.append(x_QP)
+
+        print('X_QP=', X_QP)
+        self.X_QP = X_QP
+
+    def _getT_eff(self):
+        X_QP = self.X_QP
+        Delta = self.Delta
+        T_eff = []
+
+        ## solve the transcendental equation numerically
+        x = np.linspace(1, 25, 200)
+        y = self._XqpTempFun(x)
+
+        for x_QP in X_QP:
+            idx = (np.abs(y - x_QP)).argmin()
+            res = x[idx]
+            t_eff = Delta / (k * res)
+            T_eff.append(t_eff)
+
+        print('T_eff=', T_eff)
+        self.T_eff = T_eff
+
+    def _getUpRate(self):
+        DownRate = self.DownRate
+        T_eff = self.T_eff
+        f01 = self.f01
+
+        UpRate = []
+        for i in range(len(T_eff)):
+            t_eff = T_eff[i]
+            ratio = np.exp(-h * f01 / (k * t_eff))
+            upRate = DownRate[i] * ratio
+            UpRate.append(upRate)
+
+        print('UpRate=', UpRate)
+        self.UpRate = UpRate
+
+    def _XqpTempFun(self, x):
+        """
+
+        :param x: x=Delta/kT
+        :return:
+        """
+        return np.sqrt(2 * pi / x) * np.exp(-x)
+
+
 class AntennaCoupling(object):
     """
-    This is analyze the CST simulation
+    This is to analyze the CST simulation
     """
 
     def __init__(self):
@@ -419,8 +820,10 @@ class AntennaCoupling(object):
             "Z_Im": [],
             "Z_rad": [],
             "Gamma": [],
+            "e_eff": 6,  # effective permittivity
+            "e_c": [],  # coupling efficiency
+            "e_c_dB": [],  # coupling efficiency in dB
         }
-
         self.Junction = {
             "R": None,
             "L": None,
@@ -430,85 +833,71 @@ class AntennaCoupling(object):
             "Ic": None,
             "ReoRa": None,
         }
-        Gamma = None
-        e_c = None
-        Ic_f = None   # as a function of freq
-        e_c_dB = None
-        p_g = None  # photon generation rate
-        ref = None  # Al sample box reflection array
-        C_eff = 150*1e-21    # F/nm^2
+        self.Receiver = {
+            "Area": None,
+        }
+        self.Radiator = {
+            "X_QP": [],
+            "Ic_f": [],
+            "Gamma_rad": [],  # photon radiated rate
+        }
+        self.Al_Wall = {
+            "Area": 3.15e-3,  # units m^2, all area including under the chip
+            "Ref": [],  # reflection coefficients
+            "Absorption": [],  # Absorption power ratio
+            "S": None,  # poynting vector or related parameters
+            "PhotonFlux": [],  #
+        }
 
-    def import_data(self, file, JJ, C_eff=150*1e-21):
+    def import_data(self, file, JJ, C_eff=75 * 1e-21):
         self.C_eff = C_eff
         self._add_data_from_txt(file)
         self._JJ_Update(JJ)
         self._get_e_c()
-        self._get_Ic()
-        self._get_p_g()
-        self._get_ref()
+        self._ReoRa()
 
     def _add_data_from_txt(self, file):
         f = np.loadtxt(file, usecols=[0], skiprows=3)
         Z_Re = np.loadtxt(file, usecols=[1], skiprows=3)
         Z_Im = np.loadtxt(file, usecols=[2], skiprows=3)
         Z_rad = Z_Re + 1j * Z_Im
-        self.Antenna["f"] = f * 1e9
+        self.Antenna["f"] = f * 1e9  # convert to Hz
         self.Antenna["Z_Re"] = Z_Re
         self.Antenna["Z_Im"] = Z_Im
         self.Antenna["Z_rad"] = Z_rad
 
-    # def _JJ_Update(self, JJ):
-    #     R = JJ[0]
-    #     L = JJ[1]
-    #     C = JJ[2]
-    #     A = JJ[3]  # nm*nm
-    #     Ic = (np.pi/4)*(380*(1e-6)/R)
-    #     C_eff = self.C_eff
-    #     omega = 2 * pi * self.Antenna["f"]
-    #     if not C:
-    #         # print('here!')
-    #         C = A * C_eff
-    #         tau = R * C
-    #         # print('tau=', tau)
-    #         Z_j = [(1 - 1j * w * tau) / (1 + w ** 2 * tau ** 2) * R for w in
-    #                omega]
-    #     else:
-    #         print('Q3')
-    #         Z_j = [-1j / (w * C - 1 / (w * L)) for w in omega]
-    #     self.Junction["R"] = R
-    #     self.Junction["L"] = L
-    #     self.Junction["C"] = C
-    #     self.Junction["A"] = A
-    #     self.Junction["Z_j"] = Z_j
-    #     self.Junction["Ic"] = Ic
-
-    def _JJ_Update(self, JJ):   # Wirebond included
+    def _JJ_Update(self, JJ):  # Wirebond included
         R = JJ[0]
         L = JJ[1]
         C = JJ[2]
         A = JJ[3]  # nm*nm
         ReoRa = JJ[4]
-        Ic = (np.pi/4)*(380*(1e-6)/R)
+        Ic = (np.pi / 4) * (380 * (1e-6) / R)
         C_eff = self.C_eff
         omega = 2 * pi * self.Antenna["f"]
-        # print('here!')
+
         C = A * C_eff
         tau = R * C
-        # print('tau=', tau)
-        length_wb_bias = 0.003   # units mm
-        L_wb_bias = mu_0*length_wb_bias   #wb = wirebond
-        C_wb_bias = epsilon_0*length_wb_bias    #wb = wirebond
-        length_wb_gnd = 0.0003   # units mm
-        L_wb_gnd = mu_0*length_wb_gnd   #wb = wirebond
-        C_wb_gnd = epsilon_0*length_wb_gnd    #wb = wirebond
+        length_wb_bias = 0.003  # units mm
+        L_wb_bias = mu_0 * length_wb_bias  # wb = wirebond
+        C_wb_bias = epsilon_0 * length_wb_bias  # wb = wirebond
+        length_wb_gnd = 0.0003  # units mm
+        L_wb_gnd = mu_0 * length_wb_gnd  # wb = wirebond
+        C_wb_gnd = epsilon_0 * length_wb_gnd  # wb = wirebond
         Z_j = []
         for w in omega:
-            Z_JJ = 1/(1/R+1j*w*C)
+            Z_JJ = 1 / (1 / R + 1j * w * C)
             # Z_wirebonda_gnd = 1/(1/1j*w*L_wb_gnd+1j*w*C_wb_gnd)
             # Z_wirebonda_bias = 1/(1/1j*w*L_wb_bias+1j*w*C_wb_bias)
             # Z_wirebond = 0
             # Z = 1/(1/(Z_JJ + Z_wirebonda_gnd)+1/(Z_wirebonda_bias+50))
-            Z = 1/(1/R+1j*w*C)    # no wirebond included
+            if ReoRa == "Receiver":
+                Z = 1 / (1 / R + 1j * w * C)  # no wirebond included
+            elif ReoRa == "Radiator":  # radiator wire bond and input 50 ohm included
+                # print('R=', R)
+                # Z_wire = 1j*w*1e-9  # 1 nH
+                # Z = 1 / (1/(Z_JJ+0.5*Z_wire) + 1/(10*Z_wire + 50))
+                Z = Z_JJ
             Z_j.append(Z)
         self.Junction["R"] = R
         self.Junction["L"] = L
@@ -521,159 +910,222 @@ class AntennaCoupling(object):
     def _get_e_c(self):
 
         f = self.Antenna["f"]
-
         Z_j = self.Junction["Z_j"]
         Z_rad = self.Antenna["Z_rad"]
         Gamma = []
         for i in range(len(Z_rad)):
             Gamma.append((Z_rad[i] - np.conj(Z_j[i])) / (Z_rad[i] + Z_j[i]))
         e_c = 1 - (np.abs(Gamma)) ** 2
-        if self.Junction["ReoRa"] == "Receiver":
-            for i in range(len(f)):
-                # print('f[i]=', f[i])
-                e_c[i] = e_c[i]/((f[i]/1e11)**2)
         e_c_dB = 10 * np.log10(e_c)
-        self.Gamma = Gamma
-        self.e_c = e_c
-        self.e_c_dB = e_c_dB
 
-    # def _get_p_g(self):
-    #     e_c = self.e_c
-    #     f = self.Antenna["f"]
-    #     Ic = self.Junction["Ic"]
-    #     R = self.Junction["R"]
-    #     p_g = []
-    #
-    #     P = Ic**2*R
-    #     Pf = P * e_c
-    #     for i in range(len(f)):
-    #         p_g_f = Pf[i]/(h*f[i])
-    #         p_g.append(p_g_f)
-    #
-    #     # print("p_g_f=", p_g_f)
-    #     # print("P=", P)
-    #     # print("p_g[100:110]", p_g[100:110])
-    #     # print("f[100:110]", f[100:110])
-    #     # print(len(p_g))
-    #     self.p_g = p_g
+        self.Antenna["Gamma"] = np.asarray(Gamma)
+        self.Antenna["e_c"] = np.asarray(e_c)
+        self.Antenna["e_c_dB"] = np.asarray(e_c_dB)
+
+    def _ReoRa(self):
+        """
+        For receiver, calculate the effective area.
+        For radiator, calculate the Ic, X_QP, and photon generated
+        :return:
+        """
+        type = self.Junction["ReoRa"]
+        if type == "Receiver":
+            self._getEffectiveArea()
+        if type == "Radiator":
+            self._get_Ic()
+            self._get_p_rad()
+            self._get_Al_ref()
+            self._get_photon_flux()
+
+    def _getEffectiveArea(self):
+        """
+        A = wavelength^2/(4*pi)
+        :return: Get effective area of the receiving antenna
+        """
+        f = self.Antenna["f"]
+        e_eff = self.Antenna["e_eff"]
+        # if 0: # Xmon
+        #     f_gap = 380e-6*e/h
+        # else:   # Circmon
+        #     f_gap = 400e-6 * e / h
+        # # print('f_gap=', f_gap)
+        Area = []
+        for fi in f:
+            w = c / (fi * e_eff ** 0.5)  # wavelength
+            a = w ** 2 / (4 * pi)   # effective area for this wavelength
+            # if fi > f_gap:
+            #     a = w**2/(4*pi)
+            # else:
+            #     a = 0.0
+            Area.append(a)
+        Area = np.asarray(Area)
+        # print('f=', f[270:280])   # for 270 GHz, area=1.6*10^-8 m^2
+        # print('Area=', Area[270:280])
+        self.Receiver["Area"] = Area  # units m^2
 
     def _get_Ic(self):
         """
-        get Ic as a function of radiation freq, consider critical current
-        as a function of temperature temp is a function of power dissipated on chip
+        get Ic as a function of radiation freq. If the bias voltage is above the 2Delta/e,
+        QPs will be generated locally and suppress the energy and reduce the critical current
         :return:
         """
-        Omega = 40*1e-6 * 1.6*1e-6 * 50*1e-15   # volume of the junction
-        Sigma = 2.4*1e9 # the single parameter from Wellstood and Clarke's 1994 paper
+        if 1:  # Xmon
+            Vol = 40 * 0.6 * 0.118 # volume of the junction units um^3
+            r = 1 / (438e-9)  # recombination rate sec^-1, Kaplan 1976
+            Vol = Vol
+            # the recombination rate and vol of the leads can be reconsidered
+        else:  # Circmon
+            Vol = 36 * 1 * 0.1  # volume of the junction units um^3
+            r = 10 / (438e-9)  # recombination rate sec^-1
+            Vol = Vol * 1  # QP peak at the center, effective volume
+        n_cp = 4e6  # cooper pair density, units /um^3
+        phi_0 = h / (2 * e)  # flux quantum
 
         Ic_f = []
-        T_f = []
         X_QP = []
-        P_heat_f = []
+        G0 = []
 
         f = self.Antenna["f"]
-        R = self.Junction["R"]*1.0
-        phi_0 = h/(2*e)
-        r = 1/(300e-9)   # recombination rate
+        R = self.Junction["R"] * 1.0
 
-        for fi in f:    # x_QP and I_c calculation
+        for fi in f:  # x_QP and I_c calculation
             vb = fi * phi_0  # convert photon frequency to voltage bias
-            Delta_Al = 190e-6*e
+            Delta_Al = 190e-6 * e  # At the gap, the QP energy
             v_Al = 190e-6
-            if vb <= 2*v_Al:
-                vb = vb*0.0
-            power_inj = 0.57*(vb**2/R)
-            n=1
-            r1 = power_inj/(1*4e6*r*Delta_Al)
-            p = [n, -1, 0, r1]
-            # p = [-1, 2, -1, 0, r1]
+            if vb <= 2 * v_Al:  # below the energy gap, no QP generated
+                vb = vb * 0.0
+            # power_inj = 0.57 * (vb ** 2 / R)
+            # g0 = power_inj / (Delta_Al * Vol * n_cp)
+            # print('g0=', g0)
+
+            g0 = vb/(e*R*Vol*n_cp)
+
+            ### solve the equation
+            g0Overr = g0 / r
+
+            p = [1, -1, 0, g0Overr]
             roots = np.roots(p)
-            # print('roots=', roots)
             x_qp = np.real(roots[1])
-            Delta_Al_qp = Delta_Al*(1-n*x_qp)   # naive approximation
-            ic = (pi/4)*(2*Delta_Al_qp/e)*(1/R)
-            Ic_f.append(ic)
+
+            # p = [1, -2, 1, 0, -g0Overr]
+            # roots = np.roots(p)
+            # x_qp = np.real(roots[2])
+
+            Delta_Al_qp = Delta_Al * (1 - x_qp)  # naive approximation
+            ic = (pi / 4) * (2 * Delta_Al_qp / e) * (1 / R)
+            ic0 = (pi / 4) * (2 * Delta_Al / e) * (1 / R)
+            if 0:  # no ic suppression
+                Ic_f.append(ic0)
+            else:
+                # Ic_f.append(ic)
+                Ic_f.append(ic0*0.9177) # 8.3 nA
             X_QP.append(x_qp)
-        if self.Junction["ReoRa"] == "Radiator":
-            # plt.plot(Ic_f)
-            plt.plot(X_QP)
+            G0.append(g0)
+
+        X_QP = np.array(X_QP)
+        Ic_f = np.array(Ic_f)
+        if 0:
+            plt.figure(figsize=(4, 3))
+            if 0:  # plot Ic
+                plt.plot(Ic_f * 1.0e9)
+                plt.ylabel('Ic (nA)')
+                plt.ylim([4.5, 9.5])
+            else:  # plot x_QP
+                plt.plot(X_QP)
+                plt.ylabel('x_qp')
+                plt.ylim([-0.01, 0.5])
+
             plt.xlabel('freq (GHz)')
-            plt.ylabel('x_qp')
-            # plt.ylabel('I_c')
+            plt.xlim([50, 700])
             plt.grid(True)
-            # plt.show()
+            # # plt.xscale('log')
+            # # plt.yscale('log')
+            plt.show()
 
-        self.Ic_f = Ic_f
+        self.Radiator["X_QP"] = X_QP
+        self.Radiator["Ic_f"] = Ic_f
 
-    def _get_p_g(self):
+    def _get_p_rad(self):
         """
-        photons generated,
+        photons radiated,
         :return:
         """
-        e_c = self.e_c
+        e_c = self.Antenna["e_c"]
         f = self.Antenna["f"]
-        Ic = self.Junction["Ic"]
-        Ic_f = self.Ic_f
+        Ic_f = self.Radiator["Ic_f"]
         R = self.Junction["R"]
-        p_g = []
+        Gamma_rad = []
 
-        # P = Ic**2*R
-        # Pf = P * e_c
+        subtrate_air_factor = 1.0
+        rms_factor = 0.5
+        currrent_distribution_factor = 0.5
         for i in range(len(f)):
-            P = Ic_f[i]**2 * e_c[i] * R
-            # P = Ic**2 * e_c[i] * R
-            p_g_f = P/(h*f[i])
-            p_g.append(p_g_f)
+            gamma_g = rms_factor * (currrent_distribution_factor * Ic_f[i]) ** 2 * R / (h * f[i])
+            gamma_rad = subtrate_air_factor * gamma_g * e_c[i]
+            Gamma_rad.append(gamma_rad)
 
-        self.p_g = p_g
+        self.Radiator["Gamma_rad"] = Gamma_rad
+        # print('f=', f[260:280])   # for 270 GHz
+        # print('Gamma_rad=', Gamma_rad[260:280])
 
-    def _get_ref(self):
+    def _get_Al_ref(self):
         """
-        reflection coefficient
+        The reflection coefficient of Al walls due the surface impedance
         :return:
         """
         f = self.Antenna["f"]
-        omega = 2*np.pi*f
-        sigma = 1e9
-        Z0 = 377    # vacuum impedance
-        # mu_0
-        # print("mu_0=", mu_0)
-        Gamma = []
-        Gamma_square = []
+        omega = 2 * np.pi * f
+        sigma = 7.2 * 1e7   # conductivity 1/resistivity
+        Z0 = 377  # vacuum impedance
+        Z_Al_list = []
+        Ref = []
+        Absorption = []
         for i in range(len(omega)):
-            Z_Al = (1+1j)*np.sqrt((omega[i]*mu_0)/(2*sigma))
-            gamma = (Z_Al-Z0)/(Z_Al+Z0)
-            Gamma.append(gamma)
-            Gamma_square.append(np.abs(gamma))
+            Z_Al = (1 + 1j) * np.sqrt((omega[i] * mu_0) / (2 * sigma))  # Al surface impedance
+            ref = (Z_Al - Z0) / (Z_Al + Z0)  # reflection coefficient
+            Ref.append(ref)
+            Absorption.append(1 - np.abs(ref) ** 2)
+            Z_Al_list.append(np.sqrt((omega[i] * mu_0) / (2 * sigma)))
 
-        # plt.plot(Gamma_square)
+        # print('f=', f[265:275])   # for 270 GHz
+        # print('Ref=', Ref[265:275])
+
+        # plt.plot(Z_Al_list)
+        # plt.plot(Absorption)
+        # # # # plt.plot(T_square)
         # plt.xlabel('freq (GHz)')
-        # plt.ylabel('Gamma_square')
+        # plt.ylabel('Absorption')
         # plt.show()
 
-        # print(Gamma_square)
-        self.ref = Gamma_square
+        self.Al_Wall["Ref"] = Ref
+        self.Al_Wall["Absorption"] = Absorption
 
-        # Gamma = []
-        # for i in range(len(Z_rad)):
-        #     Gamma.append((Z_rad[i] - np.conj(Z_j[i])) / (Z_rad[i] + Z_j[i]))
-
-    def _getIcFromTemp(self, T):
+    def _get_photon_flux(self):
         """
-        Get critical current from temperature
-        :param T:
+        radiation_power = Area_{Al, walls}*PoyntingVector*Absorption
+        radiation_photon_rate = Area_{Al, walls}*PhotonFlux*Absorption
         :return:
         """
-        Rn = self.Junction["R"]
-        Delta = 190.0*1e-6*e
-        IcRn = (pi/4)*(2*Delta/e)*np.tanh(Delta / (2 * k * T))
-        Ic = IcRn/Rn
-        # if T > 0.202 and T < 0.203:
-        #     print('T=', T)
-        #     print('IcRn=', IcRn)
-        #     print('Delta / (2 * k * T)=', Delta / (2 * k * T))
-        #     print('Ic=', Ic)
-        return Ic
+        f = self.Antenna["f"]
+        Absorption = self.Al_Wall["Absorption"]
+        Area = self.Al_Wall["Area"]
+        Gamma_rad = self.Radiator["Gamma_rad"]
+
+        P_f = []  # photon flux array
+        S_f = []    # energy flux, poynting vector
+        for i in range(len(Absorption)):
+            p_f = Gamma_rad[i] / (Area * Absorption[i])
+            s_f = p_f * h * f[i]
+            P_f.append(p_f)
+            S_f.append(s_f)
+
+        P_f = np.asarray(P_f)
+        S_f = np.asarray(S_f)
+        # print('f=', f[265:275])   # for 270 GHz
+        # print('PhotonFlux=', P_f[265:275])
+        # print('S=', S_f[265:275])
+        self.Al_Wall["PhotonFlux"] = P_f
+        self.Al_Wall["S"] = S_f
 
     def plot(self):
         f = self.Antenna["f"]
@@ -681,18 +1133,27 @@ class AntennaCoupling(object):
         plt.plot(f, e_c_dB)
         plt.show()
 
-    # def plot_Q3Mode(self):
-    #     f = self.Antenna["f"]
-    #     Z_j = self.Junction["Z_j"]
-    #     Z_rad = self.Antenna["Z_rad"]
-    #     Y_j = [1 / Z for Z in Z_j]
-    #     Y_rad = [1 / Z for Z in Z_rad]
-    #     Y_tot = np.add(Y_j, Y_rad)
-    #     plt.plot(f, Y_tot.real, label='Re')
-    #     plt.plot(f, Y_tot.imag, label='Im')
-    #     plt.grid()
-    #     plt.legend()
-    #     plt.show()
+
+class EffectiveArea(object):
+    """
+    Calculating the effective area of the receiving antenna.
+    CST Simulation with circular polarization
+    """
+
+    def __init__(self):
+        self.f = []
+        self.P_absorbed = []
+        self.P_input = []
+
+    def import_data(self, file):
+        self._add_data_from_txt(file)
+
+    def _add_data_from_txt(self, file):
+        f = np.loadtxt(file, usecols=[0], skiprows=3)
+        P_absorbed = np.loadtxt(file, usecols=[1], skiprows=3)
+
+        self.f = f
+        self.P_absorbed = P_absorbed
 
 
 class P1_JSweep(object):
@@ -761,6 +1222,7 @@ class P1_Avg_vs_Any(object):
         self.p1_1D_std = np.std(p1_2D, axis=0)
         self.var = np.array(var)
         self.var_name = data_type2
+
 
 class P1_JSweep_Q2(object):
     """
@@ -1086,7 +1548,7 @@ class GMMFit(object):
             n_components=N,
             covariance_type='spherical',
             max_iter=300, tol=5e-7,
-            means_init=minit, n_init=5)\
+            means_init=minit, n_init=5) \
             .fit(combined_bucket)
 
         state['gmm'] = gmm
@@ -1509,19 +1971,21 @@ def getBBTensity(f, T):
     Intensity = (2 * h * f ** 3 / c ** 2) * (1 / (np.exp(h * f / (k * T)) - 1))
     return Intensity
 
+
 def getXqp():
-    Vb = 1e-3   # bias voltage
-    Rn = 10e3   # normal resistance
-    E_Al = 190*e*1e-6   # one QP energy in Joule
-    Pin = Vb**2/Rn   # bias power
-    Gamma_e = 0.57*Pin/E_Al # number of QPs generated per second
-    Vol = 1 # Al leads volume in units of um^3
+    Vb = 1e-3  # bias voltage
+    Rn = 10e3  # normal resistance
+    E_Al = 190 * e * 1e-6  # one QP energy in Joule
+    Pin = Vb ** 2 / Rn  # bias power
+    Gamma_e = 0.57 * Pin / E_Al  # number of QPs generated per second
+    Vol = 1  # Al leads volume in units of um^3
     n_cp = 4e6  # cooper pair density in um^3
-    g = Gamma_e/(Vol*n_cp)  # normalized QP generation rate
+    g = Gamma_e / (Vol * n_cp)  # normalized QP generation rate
     print('g=', g)
-    r = 1/100e-9   # recombination rate
-    x_qp = (g/r)**(0.5)
+    r = 1 / 100e-9  # recombination rate
+    x_qp = (g / r) ** (0.5)
     return x_qp
+
 
 def getNoiseBandwidth(ec, f):
     """
@@ -1530,39 +1994,43 @@ def getNoiseBandwidth(ec, f):
     :param f: frequency array
     :return: noise bandwith
     """
-    f = f*1.0e9 # convert things to GHz
+    f = f * 1.0e9  # convert things to GHz
     # print('f[:10]=', f[:10])
     # print('ec[:10]=', ec[:10])
     ### get two index, the peak and the two 3dB points
     i_l, i_max, i_right = find3dBValueandIndex(ec=ec)
     Df = 0
     print(i_l, i_max, i_right)
-    print(f[i_l]/1e9, f[i_max]/1e9, f[i_right]/1e9)
+    print(f[i_l] / 1e9, f[i_max] / 1e9, f[i_right] / 1e9)
     for i in range(i_l, i_right):
-        df = (f[i]-f[i-1])*ec[i]
+        df = (f[i] - f[i - 1]) * ec[i]
         Df = Df + df
     return Df
 
+
 def getPhotonRate(ec, f, Tbb):
     """
-
+    With certain BB temperature, calculate the photon rate from that
     :param ec: coupling efficiency array
     :param f: frequency array
     :param Tbb: effective blackboday temperature
     :return: Photon Assisted pair breaking rate
     """
-    f = f*1.0e9 # convert things to GHz
+    f = f * 1.0e9  # convert things to GHz
     # print('f[:10]=', f[:10])
     # print('ec[:10]=', ec[:10])
     ### get two index, the peak and the two 3dB points
-    i_l, i_right = 100, 1000    # integration boundary
-    PR = 0  # photon rate
+    i_l, i_right = 100, 1000  # integration boundary
+    PR = []  # photon rate
+    f_used = []
     # print(i_l, i_right)
     # print(f[i_l]/1e9, f[i_right]/1e9)
     for i in range(i_l, i_right):
-        dPR = (f[i]-f[i-1])*ec[i]/(np.exp(h*f[i]/(k*Tbb))-1)
-        PR = PR + dPR
-    return PR
+        pr = (f[i] - f[i - 1]) * ec[i] / (np.exp(h * f[i] / (k * Tbb)) - 1)
+        PR.append(pr)
+        f_used.append(f[i])
+    return [sum(PR), PR, f_used]
+
 
 def find3dBValueandIndex(ec):
     """
@@ -1571,7 +2039,7 @@ def find3dBValueandIndex(ec):
     :return: indices for two 3 dB points and max point, [i_l, i_max, i_right]
     """
     ec_max = max(ec[50:])
-    ec_3dB = 0.5*ec_max
+    ec_3dB = 0.5 * ec_max
     i_max = np.where(ec == ec_max)
     i_max = i_max[0][0]
     # print('i_max=', i_max)
@@ -1585,6 +2053,7 @@ def find3dBValueandIndex(ec):
             break
     return i_left, i_max, i_right
 
+
 def getGamma_pa(T, dfn=2e9, f0=120e9):
     """
     To calculate the theoretic photon assisted QP poisoning events based on
@@ -1597,6 +2066,7 @@ def getGamma_pa(T, dfn=2e9, f0=120e9):
     Gamma_pa = dfn / (np.exp(h * f0 / (k * T)) - 1)
     return Gamma_pa
 
+
 def getTbb(Dfn=2e9, Gamma=100, f0=200e9):
     """
 
@@ -1605,10 +2075,10 @@ def getTbb(Dfn=2e9, Gamma=100, f0=200e9):
     :param f0: mode frequency
     :return: effective blackbody temperautre
     """
-    r = Dfn/Gamma
-    r1 = np.log(r+1)
+    r = Dfn / Gamma
+    r1 = np.log(r + 1)
     # print('r1=1', r1)
-    r2 = h*f0/k
+    r2 = h * f0 / k
     # print('r2=1', r2)
-    Tbb = r2/r1
+    Tbb = r2 / r1
     return Tbb

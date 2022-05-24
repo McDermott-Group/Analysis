@@ -1,0 +1,59 @@
+"""
+2021Jul
+"""
+import noiselib
+from QPTunneling_LIU import QPTunneling_Wilen, plotMultiFittedPSD, QPTunneling_Liu, QPTunneling_Harrison, \
+    OneStateCleanDirty, plotFittedPSD_Harrison
+import matplotlib.pyplot as plt
+import numpy as np
+
+"""Q2"""
+QP_path = ('Z:/mcdermott-group/data/testProject/Keysight/DCH/NA/{}/{}/MATLABData/{}')
+# Z:\mcdermott-group\data\BlackBody\Circmon\LIU\CW20180514A_Ox2\08-19-21
+# date = '08-19-21'
+# date = 'JJRadiatorQPT_2021Aug19'
+date = '02-22-22'
+# QBs = ['Q1','Q2','Q4']
+QBs=['Q3']
+#J2Biaslist = np.arange(35000,80001,500)
+# J2Biaslist = [40, 42, 44]
+fparity = {}
+uparity = {}
+fidelity={}
+# for J2Bias in J2Biaslist:
+JB_Bias_3=np.sort(list(np.arange(-88,693,20))+list(np.arange(-298,243,20)))
+
+average_data=[]
+
+for QB_id in QBs:
+    for bias in JB_Bias_3:
+        experiment_name_PSD = ('QuasiT1_Cal_'+QB_id+'_'+str(bias)+'mDAC_J3')
+        fileNo = np.arange(0, 10, 1)
+        files = [QP_path.format(date, experiment_name_PSD, experiment_name_PSD) + '_{:03d}.mat'.format(i) for i in fileNo]
+        data_single_bias=None
+        data_type='Projected_Occupation'
+
+        for f in files:
+            data = noiselib.loadmat(f)
+            if data_single_bias is None:
+                data_single_bias = data[data_type]
+            else:
+                data_single_bias = data_single_bias + data[data_type]
+
+        num_in_file = len(data_single_bias)
+        avg = np.sum(data_single_bias)/len(files)/num_in_file
+        average_data.append(avg)
+
+
+plt.figure(figsize=(8, 6))
+plt.title('P1 vs Radiator Frequency')
+plt.xlabel('Radiator Frequency (GHz)')
+plt.ylabel('P1')
+plt.plot([1.6*(4.8*2*(bias)/10-160) for bias in JB_Bias_3],list(average_data),'o-')
+plt.grid(True,which='both')
+plt.axes().tick_params(direction='in',which='both')
+plt.show()
+
+print(list(JB_Bias_3))
+print(list([1.6*(4.8*2*(bias)/10-160) for bias in JB_Bias_3]))
+print(list(average_data))

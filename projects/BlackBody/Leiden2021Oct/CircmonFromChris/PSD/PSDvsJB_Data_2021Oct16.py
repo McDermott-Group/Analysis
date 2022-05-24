@@ -142,6 +142,10 @@ Q4[:, 0] = (Q4[:, 0])/1000
 # plt.legend(loc=1)
 # plt.show()
 
+np.savetxt('2021OctSFQStrongRadiator_Q1_PSD_Data.txt', Q1)
+np.savetxt('2021OctSFQStrongRadiator_Q2_PSD_Data.txt', Q2)
+np.savetxt('2021OctSFQStrongRadiator_Q4_PSD_Data.txt', Q4)
+
 f = 4.604
 # f = 1
 Al_gap = 380e-6
@@ -158,12 +162,12 @@ plt.axvline(x=DAC_Al * f, color='k', linestyle='--', linewidth=4, label='JJ Al G
 
 plt.xlabel('J8 Strong Radiator Josephson Frequency (GHz)')
 plt.ylabel('PSD (Hz)')
-plt.xscale('log')
+# plt.xscale('log')
 plt.yscale('log')
 plt.grid(True, which="both")
 plt.legend(loc=2)
-plt.xlim([0, 1500])
-plt.ylim([10, 100000])
+plt.xlim([0, 600])
+plt.ylim([10, 10000])
 plt.show()
 
 

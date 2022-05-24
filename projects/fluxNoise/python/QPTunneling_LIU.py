@@ -440,16 +440,16 @@ class QPTunneling_Harrison(object):
             psd=psd[excluded_points:len(psd)]
             initial_guess_knee = np.logspace(-4,-1,50)
             # initial_guess_fidelity = np.linspace(0.2,1,8)
-            initial_guess_fidelity =np.linspace(0.0,1,10)
+            initial_guess_fidelity =np.linspace(0.0,0.8,10)
             # initial_guess = [0.7]
             rs = np.NINF #negative infinity is the lowest r2 value
             best_params=None
             for ig_knee in initial_guess_knee:
                 for ig_fidelity in initial_guess_fidelity:
-                    sigma = None#f**-2
+                    sigma = None
                     params_curr, params_covariance_curr = curve_fit(
                         fit_PSD_target_function, f, psd,
-                        bounds=[(10**(-5), 0), (10**(-1), 1.0)], p0=[ig_knee, ig_fidelity],
+                        bounds=[(10**(-5), 0), (10**(-1), 1)], p0=[ig_knee, ig_fidelity],
                         sigma=sigma)
                     #just minimize r^2 to determine best fit. previously used covariance[0][0] which gave worse fits.
                     residuals = psd - fit_PSD_target_function(f, *params_curr)
@@ -612,7 +612,7 @@ def plotMultiFittedPSD(QPT_List, one_over_f=False, save=False, name=''):
     # plt.draw()
 
 
-def plotFittedPSD_Harrison(QPT, one_over_f=False, save=False, name='', concatenate_records=1, excluded_points=1,ylim=[]):
+def plotFittedPSD_Harrison(QPT, one_over_f=False, save=False, name='', concatenate_records=1, excluded_points=1,ylim=[],number=9):
     """
     plot multi fitted PSD for comparison
     :param QPT_List: a list of QPT object, e.g. [QPT_NoPoison, QPT_Neg10dBmPoison]
@@ -622,7 +622,7 @@ def plotFittedPSD_Harrison(QPT, one_over_f=False, save=False, name='', concatena
     linestyle = ['--', '+', 'o', 'v', 's', 'p', '*', 'h', 'x', 'D']
     # wa = False
 
-    psd, f1 = QPT.get_psd(number=9, window_averaging=True, concatenate_records=concatenate_records)
+    psd, f1 = QPT.get_psd(number=number, window_averaging=True, concatenate_records=concatenate_records)
     fit, f2 = QPT.get_fit(excluded_points=excluded_points, ignore_fidelity=False)
 
     avg_fidelity=np.mean(QPT.fidelity)
@@ -634,7 +634,7 @@ def plotFittedPSD_Harrison(QPT, one_over_f=False, save=False, name='', concatena
     average_log_ratio = np.mean([np.log10(single_fit[0]/single_fit[-1]) for single_fit in fit])
     for i in range(0,len(QPT.fidelity)):
         #are we seeing a reaonable size jump? This should not vary by very much
-        if np.log10(fit[i][0]/fit[i][-1]) < 0.75*average_log_ratio:
+        if np.log10(fit[i][0]/fit[i][-1]) < 0.75*average_log_ratio:# or (1/QPT.T_parity[i])>5000:
             continue
         else:
             filtered_fidelity.append(QPT.fidelity[i])
@@ -642,12 +642,15 @@ def plotFittedPSD_Harrison(QPT, one_over_f=False, save=False, name='', concatena
             filtered_psd.append(psd[i])
             filtered_fit.append(fit[i])
 
-    # #goal is to only remove outliers
-    if len(filtered_psd) < 0.7*len(psd):
-        filtered_fidelity = QPT.fidelity
-        filtered_parity = QPT.T_parity
-        filtered_psd = psd
-        filtered_fit = fit
+    # #goal is to only remove outliers ## 2022/02 You gotta do what you gotta do...
+    # if len(filtered_psd) < 0.7*len(psd):
+    #     filtered_fidelity = QPT.fidelity
+    #     filtered_parity = QPT.T_parity
+    #     filtered_psd = psd
+    #     filtered_fit = fit
+
+    # if len(filtered_parity)==0:
+    #     return 0,0,0
 
     avg_fidelity = np.mean(filtered_fidelity)
     avg_parity=np.mean(np.true_divide(1.0, filtered_parity))
@@ -657,6 +660,7 @@ def plotFittedPSD_Harrison(QPT, one_over_f=False, save=False, name='', concatena
     for i in range(0, len(filtered_psd)):
         plt.loglog(f1, filtered_psd[i], label=r"{} PSD".format(QPT.name))
         plt.loglog(f2, filtered_fit[i], '-')
+
         plt.title(name+' \n(Fidelity = {:.2f} and Parity = {:.5f} +/- {:.5f} Hz)'.format(avg_fidelity, avg_parity, parity_uncertainty))
         plt.grid(axis='both')
         if ylim != []:
@@ -691,7 +695,6 @@ def plotFittedPSD_Harrison(QPT, one_over_f=False, save=False, name='', concatena
         plt.ylim(ylim)
     plt.xlabel('Frequency (Hz)')
     plt.ylabel('S (1/Hz)')
-
 
     if save:
         plt.savefig('Figures/'+name + '.png')
