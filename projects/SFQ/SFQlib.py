@@ -161,7 +161,7 @@ class T1_QP_2D(object):
         self.sweep_variable_name = None
 
     def add_data_from_matlab(self, file_path,
-                             # data_type='Weighted_Occupation',
+                             data_type='Weighted_Occupation',
                              data_P1_2D='Projected_Occupation',
                              data_Idle_Time='QB_Idle_Gate_Time',
                              data_sweep_variable='SFQ_Pulse_Duration'
@@ -210,8 +210,8 @@ class T1_QP_2D(object):
         sweep_variable_list = self.sweep_variable_list
         sweep_variable_name = self.sweep_variable_name
         # print('params_2D=', params_2D)
-        numberofJJs = 3
-        CW_freq = 1.2355  # units in GHz
+        numberofJJs = 4
+        CW_freq = 1.200  # units in GHz
         ps = numberofJJs * CW_freq  # phase slips conversion, 3 is the junction number,
         # ps = 1
         plt.figure()
@@ -280,6 +280,122 @@ class T1_QP_2D(object):
         return amp * np.exp(-t / T) + off
 
 
+class T1_QP_2D_Linear(object):
+    def __init__(self):
+        self.P1_2D = None
+
+        self.T1_2D_stats = None
+        self.T1_1D_avg = None
+        self.T1_1D_se = None
+        self.NoF = 1    # number of files
+
+        self.params_2D = None
+        self.std_2D = None
+
+        self.QB_Idle_Gate_Time = None
+        self.sweep_variable_list = None
+        self.sweep_variable_name = None
+
+    def add_data_from_matlab(self, file_path,
+                             data_P1_2D='Weighted_Occupation',
+                             data_Idle_Time='QB_Idle_Gate_Time',
+                             data_sweep_variable='SFQ_Pulse_Duration'
+                             ):
+
+
+        f0= file_path[0]
+        data = noiselib.loadmat(f0)
+        P1_2D = np.array(data[data_P1_2D])
+        QB_Idle_Gate_Time = np.array(data[data_Idle_Time]) / 1e9
+        sweep_variable_list = np.array(data[data_sweep_variable])
+        self.QB_Idle_Gate_Time = QB_Idle_Gate_Time
+        self.sweep_variable_list = sweep_variable_list
+        self.sweep_variable_name = data_sweep_variable
+        T1_1D = self._analyze(P1_2D)
+        T1_2D_stats = T1_1D
+
+        for f in file_path[1:]:
+            self.NoF = self.NoF + 1
+            data = noiselib.loadmat(f)
+            P1_2D = np.array(data[data_P1_2D])
+            T1_1D = self._analyze(P1_2D)
+            T1_2D_stats = np.vstack((T1_2D_stats, T1_1D))
+
+        self.T1_2D_stats = T1_2D_stats
+        self._T1Stats()
+        return None
+
+    def _analyze(self, P1_2D):
+        t = self.QB_Idle_Gate_Time
+        params_2D = []
+        std_2D = []
+        ### 1D fit
+        for i in range(len(P1_2D)):
+            P1_1D = P1_2D[i]
+            params, std = self._fitToLinear(P1_1D, t)
+            params_2D.append(params)
+            std_2D.append(std)
+
+        ### 2D data update
+        params_2D = np.asarray(params_2D)
+        std_2D = np.asarray(std_2D)
+        self.params_2D = params_2D
+        self.std_2D = std_2D
+        # print('params_2D[:, 0]=', params_2D[:, 0])
+        return params_2D[:, 0]
+
+    def _T1Stats(self):
+        T1_2D_stats = self.T1_2D_stats
+        NoF = self.NoF
+        if self.NoF == 1:
+            self.T1_1D_avg = T1_2D_stats
+        else:   # more than one file is processed
+            self.T1_1D_avg = np.average(self.T1_2D_stats, axis=0)
+            T1_1D_std = np.std(self.T1_2D_stats, axis=0)
+            self.T1_1D_se = T1_1D_std/np.sqrt(NoF)
+
+        return None
+
+    def plot(self):
+        # params_2D = self.params_2D
+        # std_2D = self.std_2D
+        sweep_variable_list = self.sweep_variable_list
+        sweep_variable_name = self.sweep_variable_name
+        # numberofJJs = 4
+        f_on = 1.22617  # on resonant drive freq
+        # f_off = 1.200  # off resonant drive freq
+        f_off = 1.0810  # off resonant drive freq
+        avgClen_on = 91   # ns avg clifford gate length = 91 ns on resonance
+        avgClen_off = (f_on/f_off)*avgClen_on   # ns off resonance
+        if self.NoF == 1:
+            plt.plot(sweep_variable_list/avgClen_off, self.T1_1D_avg)
+        else:
+            plt.errorbar(sweep_variable_list/avgClen_off, self.T1_1D_avg, yerr=self.T1_1D_se)
+
+        plt.xlabel('Equivalent Clifford sequence length')
+        plt.ylabel('T1 (us)')
+        plt.title('T1 vs Off resonant poisoning')
+        plt.show()
+        return
+
+    def _fitToLinear(self, P1_1D, time):
+        """
+        extract recovery rate
+        :param n_qp:
+        :param time:
+        :return:
+        """
+        n = 50  # first 20 elements
+        time = time[:n]
+        P1_1D = P1_1D[:n]
+        # p0 = [20e3, 2, 0]  # initial guess
+        # bounds = [(1e3, 0, 0), (1e5, 10, 1)]  # bounds
+        [[gamma, b], cov] = np.polyfit(time, P1_1D, 1, cov=True)
+        std = np.sqrt(np.diag(cov))  # one standard deviation errors
+        return list([-1e6 / gamma, b]), list(std)  # converts to T1 with us as
+        # units
+
+
 class T2_1D(object):
     """
     This is for extract 1D T1 value from the matlab data
@@ -297,8 +413,8 @@ class T2_1D(object):
         self.params = None
 
     def add_data_from_matlab(self, file_path,
-                             data_type1='Weighted_Occupation',
-                             # data_type1='Projected_Occupation',
+                             # data_type1='Weighted_Occupation',
+                             data_type1='Projected_Occupation',
                              data_type2='QB_Idle_Gate_Time'):
         f_l = file_path[0]
         occ_2D = np.array([])
@@ -332,13 +448,15 @@ class T2_1D(object):
         """
         time = self.QB_Idle_Gate_Time
         P1 = occ_1D
-        bounds = [(0.3, 1e3, 1e3, 100, 0, 0), (1.05, 1e7, 1e10, 1000, pi, 0.5)]
-        p0 = [1, 10e4, 10e4, 300, 0, 0]
-        params, covariance = curve_fit(self.f_Ramsey, time, P1, bounds=bounds,
+        bounds = [(0.0, 1e4, 1e4, 500, 0, 0.0), (1.0, 1e6, 1e6, 2000, pi, 0.8)]
+        p0 = [0.8, 10e4, 10e4, 1000, 0, 0.5]
+        # params, covariance = curve_fit(self.f_Ramsey, time, P1, bounds=bounds,
+        #                                p0=p0)
+        params, covariance = curve_fit(self.f_Ramsey, time, P1,
                                        p0=p0)
         self.occ_1D_avg = occ_1D
         self.params = params
-        self._plot_fit(file_number, save=True)
+        self._plot_fit(file_number, save=False)
 
         return params
 
@@ -371,7 +489,7 @@ class T2_1D(object):
             plt.savefig(file_number + '.png')
         else:
             plt.show()
-        plt.close()
+        # plt.close()
 
     def plot_Detuning(self):
         Detuning = 1e3 / (self.fit_parameters)  # units in MHz
@@ -485,12 +603,20 @@ class DeepSubharmonics(object):
     def __init__(self):
         self.occ_1D = []
         self.occ_1D_avg = []
+        self.occ_1D_std = []
         self.Time_Dep = []
 
     def add_data_from_matlab(self, file_path,
+                             data_type1='Projected_Occupation',
+                             # data_type1='Single_Shot_Occupation',
+                             # data_type1='I',
+                             # data_type1='Q',
+                             # data_type1='Amplitude',
+                             # data_type1='Phase',
                              # data_type1='Projected_Occupation',
-                             data_type1='Weighted_Occupation',
-                             data_type2='SFQ_Pulse_Duration'):
+                             # data_type1='Weighted_Occupation',
+                             # data_type2='SFQ_Pulse_Duration'):
+                             data_type2='SFQ_Drive_to_RO'):
         f0 = file_path[0]
         data0 = noiselib.loadmat(f0)
         occ_2D = data0[data_type1]
@@ -503,12 +629,15 @@ class DeepSubharmonics(object):
         """Update parameters"""
         self.Time_Dep = Time_Dep
         self.occ_1D_avg = np.average(occ_2D, axis=0)
+        self.occ_1D_std = np.std(occ_2D, axis=0)/np.sqrt(len(file_path))
 
     def plot(self, name='', save=False):
         time = self.Time_Dep
         occ = self.occ_1D_avg
+        std = self.occ_1D_std
         plt.figure()
-        plt.plot(time, occ, 'k-')
+        # plt.plot(time, occ, 'k-')
+        plt.errorbar(time, occ, yerr=std)
         plt.xlabel('time (ns)', fontsize=24)
         plt.ylabel('P1', fontsize=24)
         plt.xticks(fontsize=16)
@@ -654,13 +783,18 @@ class RB(object):
 
         """real plot"""
         plt.figure()
-        plt.errorbar(NoC, NIP_avg, yerr=NIP_ste, fmt="o", color='k')
-        plt.plot(NoC_fit, self._function(NoC_fit, *params_NIP), 'k', label=
-        'Interleaved Gate: {}, AvgError = {:.3f} %'.format('None', r_NI * 100))
+        plt.errorbar(
+            NoC, NIP_avg, yerr=NIP_ste, fmt="o", color='k', capsize=3.0,
+            ms=5.0,
+            label='Interleaved Gate: {}, AvgError = {:.3f} %'.format('None',
+                                                                     r_NI * 100))
+        plt.plot(NoC_fit, self._function(NoC_fit, *params_NIP), 'k')
 
-        plt.errorbar(NoC, IP_avg, yerr=IP_ste, fmt="o", color='r')
-        plt.plot(NoC_fit, self._function(NoC_fit, *params_IP), 'r', label=
-        'Interleaved Gate: {}, AvgError = {:.3f} %'.format(IntGate, r_I * 100))
+        plt.errorbar(
+            NoC, IP_avg, yerr=IP_ste, fmt="o", color='r', capsize=3.0, ms=5.0,
+            label='Interleaved Gate: {}, AvgError = {:.3f} %'.format(IntGate,
+                                                                     r_I * 100))
+        plt.plot(NoC_fit, self._function(NoC_fit, *params_IP), 'r')
 
         plt.title('{} Gate Fidelity = {:.3f} $\pm$ {:.3f} %'.
                   format(IntGate, F * 100, F_std * 100))
@@ -668,6 +802,164 @@ class RB(object):
         plt.legend()
         plt.xlabel('Number of Cliffords')
         plt.ylabel('Sequence Fidelity')
+        plt.show()
+
+
+class Purity(object):
+    """
+    Analyze the qubit gate incoherent. Import population data, fit, and
+    extract the gate fidelity.
+    """
+
+    def __init__(self):
+        self.NoC = np.array([])  # number of cliffords
+        self.PP_2D = np.array([])  # purity probability
+        self.NoF = 1    # number of files
+
+        self.params_2D = None
+        self.cov_2D = None
+        self.std_2D = None
+
+        self.r_inc = None
+        self.r_inc_std = None
+
+    def add_data_from_matlab(self, file_path,
+                             data_type0='Number_of_Cliffords',
+                             # data_type1='Purity_Probability'
+                             data_type1='Purity_Normalized_Probability'
+                             ):
+        f0 = file_path[0]  # first file
+        data0 = noiselib.loadmat(f0)
+        self.NoC = data0[data_type0]
+        for i in range(len(self.NoC)):
+            self.NoC[i] = self.NoC[i] - 1
+        # PP_2D = data0[data_type1]   # purity probability
+        PP_2D = data0[data_type1]   # purity probability
+        # print('PP_2D=', PP_2D)
+        # for i in range(len(PP_2D)):
+        #     PP_2D[i] = ((PP_2D[i]+1.0)**2.0)/4.0
+        # PP_2D = np.array([(y+1)**2.0/4] for y in PP_2D)
+        # print('PP_2D=', PP_2D)
+
+        for f in file_path[1:]:
+            self.NoF = self.NoF + 1
+            data = noiselib.loadmat(f)
+            # PP_1D = np.array(data[data_type1])
+            PP_1D = data[data_type1]
+            # for i in range(len(PP_1D)):
+            #     PP_1D[i] = ((PP_1D[i] + 1.0) ** 2.0) / 4.0
+            PP_2D = np.vstack((PP_2D, PP_1D))
+
+        self.PP_2D = PP_2D
+
+    def data_analysis(self):
+        self._fit_data()
+        self._extractErrorAndFidelity()
+        return
+
+    def _fit_data(self):
+        """
+        Fit the (non) interleaved sequences
+        :return:
+        """
+        PP_2D = self.PP_2D
+        NoC = self.NoC
+
+        params_2D = []
+        cov_2D = []
+        std_2D = []
+
+        p0 = [0.9, 0.985, 0.01]
+        if self.NoF == 1:
+            PP_1D = PP_2D
+            params, cov = curve_fit(self._function, NoC, PP_1D, p0=p0)
+            params_2D.append(params)
+            cov_2D.append(cov)
+            std_2D.append(np.sqrt(np.diag(cov)))
+        else:
+            for i in range(len(PP_2D)):
+                PP_1D = PP_2D[i]
+                params, cov = curve_fit(self._function, NoC, PP_1D, p0=p0)
+                params_2D.append(params)
+                cov_2D.append(cov)
+                std_2D.append(np.sqrt(np.diag(cov)))
+        ### 2D data update
+        params_2D = np.asarray(params_2D)
+        cov_2D = np.asarray(cov_2D)
+        self.params_2D = params_2D
+        self.cov_2D = cov_2D
+        self.std_2D = std_2D
+
+    def _function(self, NoC, A, u, B):
+        # print('NoC=', NoC)
+        # for i in range(len(NoC)):
+        #     NoC[i] = NoC[i] - 1
+        # print('NoC=', NoC)
+        return A * u ** NoC + B
+
+    def _extractErrorAndFidelity(self):
+        """
+        To extract the incoherent error and std or se
+        :return:
+        """
+        params_2D = self.params_2D
+        std_2D = self.std_2D
+        print('std_2D=', std_2D)
+        if self.NoF == 1:
+            u = params_2D[0][1]
+            r_inc = 0.5*(1-np.sqrt(u))
+            r_inc_std = r_inc * 0.5 * std_2D[0][1]/u
+        else:
+            u_list = params_2D[:, 1]
+            r = [0.5*(1-np.sqrt(ur)) for ur in u_list]
+            print('r=', r)
+            r_inc = np.mean(r)
+            r_inc_std = np.std(r)/np.sqrt(len(r))
+
+        self.r_inc = r_inc
+        self.r_inc_std = r_inc_std
+
+    def plot(self):
+        """Data, avg and err"""
+        NoC = self.NoC
+        NoC_fit = np.arange(1, 97, 1)
+        PP_2D = self.PP_2D
+        params = self.params_2D
+        std_2D = self.std_2D
+        print('params=', params)
+        print('std_2D=', std_2D)
+
+        r_inc = self.r_inc
+        r_inc_std = self.r_inc_std
+
+        """real plot"""
+        if self.NoF == 1:
+            plt.errorbar(NoC, PP_2D, fmt="o")
+            plt.plot(NoC_fit, self._function(NoC_fit, *params[0]), 'k')
+        else:
+            for i in range(self.NoF):
+                plt.errorbar(NoC, PP_2D[i])
+                plt.plot(NoC_fit, self._function(NoC_fit, *params[i]))
+        # plt.figure()
+        # plt.errorbar(
+        #     NoC, NIP_avg, yerr=NIP_ste, fmt="o", color='k', capsize=3.0,
+        #     ms=5.0,
+        #     label='Interleaved Gate: {}, AvgError = {:.3f} %'.format('None',
+        #                                                              r_NI * 100))
+        # plt.plot(NoC_fit, self._function(NoC_fit, *params), 'k')
+        #
+        # plt.errorbar(
+        #     NoC, IP_avg, yerr=IP_ste, fmt="o", color='r', capsize=3.0, ms=5.0,
+        #     label='Interleaved Gate: {}, AvgError = {:.3f} %'.format(IntGate,
+        #                                                              r_I * 100))
+        # plt.plot(NoC_fit, self._function(NoC_fit, *params_IP), 'r')
+
+        plt.title('Incoherent error = {:.3f} $\pm$ {:.3f} %'.
+                  format(r_inc * 100, r_inc_std * 100))
+
+        plt.legend()
+        plt.xlabel('Number of Cliffords')
+        plt.ylabel('Purity Probability')
         plt.show()
 
 
@@ -782,6 +1074,7 @@ class RB_AllGates(object):
         self.YOver2Neg_sf_avg = np.average(self.YOver2Neg_sf_2D, axis=0)
         self.YOver2Neg_sf_std = np.std(self.YOver2Neg_sf_2D, axis=0)
         self.YOver2Neg_sf_ste = self.YOver2Neg_sf_std / np.sqrt(NoS)
+
     def _fit_data(self):
         """
         Fit the (non) interleaved sequences
@@ -797,32 +1090,40 @@ class RB_AllGates(object):
         self.err_Ref = np.sqrt(np.diag(covariance_Ref))
 
         X_sf_avg = self.X_sf_avg
-        params_X, covariance_X = curve_fit(self._function, NoC, X_sf_avg, p0=p0)
+        params_X, covariance_X = curve_fit(self._function, NoC, X_sf_avg,
+                                           p0=p0)
         self.params_X = params_X
         self.err_X = np.sqrt(np.diag(covariance_X))
 
         Y_sf_avg = self.Y_sf_avg
-        params_Y, covariance_Y = curve_fit(self._function, NoC, Y_sf_avg, p0=p0)
+        params_Y, covariance_Y = curve_fit(self._function, NoC, Y_sf_avg,
+                                           p0=p0)
         self.params_Y = params_Y
         self.err_Y = np.sqrt(np.diag(covariance_Y))
 
         XOver2_sf_avg = self.XOver2_sf_avg
-        params_XOver2, covariance_XOver2 = curve_fit(self._function, NoC, XOver2_sf_avg, p0=p0)
+        params_XOver2, covariance_XOver2 = curve_fit(self._function, NoC,
+                                                     XOver2_sf_avg, p0=p0)
         self.params_XOver2 = params_XOver2
         self.err_XOver2 = np.sqrt(np.diag(covariance_XOver2))
 
         XOver2Neg_sf_avg = self.XOver2Neg_sf_avg
-        params_XOver2Neg, covariance_XOver2Neg = curve_fit(self._function, NoC, XOver2Neg_sf_avg, p0=p0)
+        params_XOver2Neg, covariance_XOver2Neg = curve_fit(self._function, NoC,
+                                                           XOver2Neg_sf_avg,
+                                                           p0=p0)
         self.params_XOver2Neg = params_XOver2Neg
         self.err_XOver2Neg = np.sqrt(np.diag(covariance_XOver2Neg))
 
         YOver2_sf_avg = self.YOver2_sf_avg
-        params_YOver2, covariance_YOver2 = curve_fit(self._function, NoC, YOver2_sf_avg, p0=p0)
+        params_YOver2, covariance_YOver2 = curve_fit(self._function, NoC,
+                                                     YOver2_sf_avg, p0=p0)
         self.params_YOver2 = params_YOver2
         self.err_YOver2 = np.sqrt(np.diag(covariance_YOver2))
 
         YOver2Neg_sf_avg = self.YOver2Neg_sf_avg
-        params_YOver2Neg, covariance_YOver2Neg = curve_fit(self._function, NoC, YOver2Neg_sf_avg, p0=p0)
+        params_YOver2Neg, covariance_YOver2Neg = curve_fit(self._function, NoC,
+                                                           YOver2Neg_sf_avg,
+                                                           p0=p0)
         self.params_YOver2Neg = params_YOver2Neg
         self.err_YOver2Neg = np.sqrt(np.diag(covariance_YOver2Neg))
 
@@ -838,7 +1139,11 @@ class RB_AllGates(object):
         p_Ref = self.params_Ref[1]
         err_Ref = self.err_Ref[1]
         r_Ref = (1 - p_Ref) / 2  # non-interleaved sequence error
+        F_Ref = 1 - r_Ref
+        F_Ref_std = err_Ref
         self.r_Ref = r_Ref  # avg gate error
+        self.F_Ref = F_Ref  # avg gate fidelity
+        self.F_Ref_std = F_Ref_std  # avg gate fidelity standard error
 
         p_X = self.params_X[1]
         err_X = self.err_X[1]
@@ -862,7 +1167,8 @@ class RB_AllGates(object):
         err_XOver2 = self.err_XOver2[1]
         r_XOver2 = (1 - p_XOver2) / 2
         F_XOver2 = (1 + p_XOver2 / p_Ref) / 2.0
-        F_XOver2_std = F_XOver2 * np.sqrt((err_Ref / p_Ref) ** 2 + (err_XOver2 / p_XOver2) ** 2)
+        F_XOver2_std = F_XOver2 * np.sqrt(
+            (err_Ref / p_Ref) ** 2 + (err_XOver2 / p_XOver2) ** 2)
         self.r_XOver2 = r_XOver2
         self.F_XOver2 = F_XOver2
         self.F_XOver2_std = F_XOver2_std
@@ -871,7 +1177,8 @@ class RB_AllGates(object):
         err_XOver2Neg = self.err_XOver2Neg[1]
         r_XOver2Neg = (1 - p_XOver2Neg) / 2
         F_XOver2Neg = (1 + p_XOver2Neg / p_Ref) / 2.0
-        F_XOver2Neg_std = F_XOver2Neg * np.sqrt((err_Ref / p_Ref) ** 2 + (err_XOver2Neg / p_XOver2Neg) ** 2)
+        F_XOver2Neg_std = F_XOver2Neg * np.sqrt(
+            (err_Ref / p_Ref) ** 2 + (err_XOver2Neg / p_XOver2Neg) ** 2)
         self.r_XOver2Neg = r_XOver2Neg
         self.F_XOver2Neg = F_XOver2Neg
         self.F_XOver2Neg_std = F_XOver2Neg_std
@@ -899,48 +1206,65 @@ class RB_AllGates(object):
     def plot(self):
         """Data, avg and err"""
         NoC = self.NoC
-        NoC_fit = np.arange(1, 96, 1)
+        NoC_fit = np.arange(1, 97, 1)
 
         """real plot"""
         plt.figure()
-        plt.errorbar(NoC, self.Ref_sf_avg, yerr=self.Ref_sf_ste, fmt="o", color='k')
+        # plt.errorbar(
+        #     NoC, NIP_avg, yerr=NIP_ste, fmt="o", color='k', capsize=3.0, ms=5.0,
+        #     label='Interleaved Gate: {}, AvgError = {:.3f} %'.format('None', r_NI * 100))
+        plt.errorbar(NoC, self.Ref_sf_avg, yerr=self.Ref_sf_ste, fmt="o",
+                     color='k'
+                     , capsize=3.0, ms=5.0)
+        # plt.plot(NoC_fit, self._function(NoC_fit, *self.params_Ref), 'k',
+        #          label='Ref, AvgError = {:.3f} %'.format(self.r_Ref * 100))
         plt.plot(NoC_fit, self._function(NoC_fit, *self.params_Ref), 'k',
-                 label='Ref, AvgError = {:.3f} %'.format(self.r_Ref * 100))
+                 label='Ref, AvgError = {:.3f} %. Fidelity= {:.3f} $\pm$ {:.3f} %'
+                 .format(self.r_Ref * 100, self.F_Ref * 100,
+                         self.F_Ref_std * 100))
 
-        plt.errorbar(NoC, self.X_sf_avg, yerr=self.X_sf_ste, fmt="o", color='r')
+        plt.errorbar(NoC, self.X_sf_avg, yerr=self.X_sf_ste, fmt="o", color='r'
+                     , capsize=3.0, ms=5.0)
         plt.plot(NoC_fit, self._function(NoC_fit, *self.params_X), 'r',
                  label='X, AvgError = {:.3f} %. Fidelity= {:.3f} $\pm$ {:.3f} %'
                  .format(self.r_X * 100, self.F_X * 100, self.F_X_std * 100))
-
-        plt.errorbar(NoC, self.Y_sf_avg, yerr=self.Y_sf_ste, fmt="o", color='b')
+        #
+        plt.errorbar(NoC, self.Y_sf_avg, yerr=self.Y_sf_ste, fmt="o", color='b'
+                     , capsize=3.0, ms=5.0)
         plt.plot(NoC_fit, self._function(NoC_fit, *self.params_Y), 'b',
                  label='Y, AvgError = {:.3f} %. Fidelity= {:.3f} $\pm$ {:.3f} %'
                  .format(self.r_Y * 100, self.F_Y * 100, self.F_Y_std * 100))
 
-        plt.errorbar(NoC, self.XOver2_sf_avg, yerr=self.XOver2_sf_ste, fmt="o", color='y')
+        plt.errorbar(NoC, self.XOver2_sf_avg, yerr=self.XOver2_sf_ste, fmt="o",
+                     color='y'
+                     , capsize=3.0, ms=5.0)
         plt.plot(NoC_fit, self._function(NoC_fit, *self.params_XOver2), 'y',
                  label='X/2, AvgError = {:.3f} %. Fidelity= {:.3f} $\pm$ {:.3f} %'
-                 .format(self.r_XOver2 * 100, self.F_XOver2 * 100, self.F_XOver2_std * 100))
+                 .format(self.r_XOver2 * 100, self.F_XOver2 * 100,
+                         self.F_XOver2_std * 100))
 
-        plt.errorbar(NoC, self.XOver2Neg_sf_avg, yerr=self.XOver2Neg_sf_ste, fmt="o", color='g')
+        plt.errorbar(NoC, self.XOver2Neg_sf_avg, yerr=self.XOver2Neg_sf_ste,
+                     fmt="o", color='g', capsize=3.0, ms=5.0)
         plt.plot(NoC_fit, self._function(NoC_fit, *self.params_XOver2Neg), 'g',
                  label='-X/2, AvgError = {:.3f} %. Fidelity= {:.3f} $\pm$ {:.3f} %'
-                 .format(self.r_XOver2Neg * 100, self.F_XOver2Neg * 100, self.F_XOver2Neg_std * 100))
+                 .format(self.r_XOver2Neg * 100, self.F_XOver2Neg * 100,
+                         self.F_XOver2Neg_std * 100))
 
         plt.errorbar(NoC, self.YOver2_sf_avg, yerr=self.YOver2_sf_ste, fmt="o",
-                     color='r')
-        plt.plot(NoC_fit, self._function(NoC_fit, *self.params_YOver2), 'r',
+                     color='b', capsize=3.0, ms=5.0)
+        plt.plot(NoC_fit, self._function(NoC_fit, *self.params_YOver2), 'b',
                  label='Y/2, AvgError = {:.3f} %. Fidelity= {:.3f} $\pm$ {:.3f} %'
                  .format(self.r_YOver2 * 100, self.F_YOver2 * 100,
                          self.F_YOver2_std * 100))
 
         plt.errorbar(NoC, self.YOver2Neg_sf_avg, yerr=self.YOver2Neg_sf_ste,
-                     fmt="o", color='r')
+                     fmt="o", color='r', capsize=3.0, ms=5.0)
         plt.plot(NoC_fit, self._function(NoC_fit, *self.params_YOver2Neg), 'r',
                  label='-Y/2, AvgError = {:.3f} %. Fidelity= {:.3f} $\pm$ {:.3f} %'
                  .format(self.r_YOver2Neg * 100, self.F_YOver2Neg * 100,
                          self.F_YOver2Neg_std * 100))
 
+        plt.title('SFQ-Based Gate Fidelities')
         plt.legend()
         plt.xlabel('Number of Cliffords')
         plt.ylabel('Sequence Fidelity')

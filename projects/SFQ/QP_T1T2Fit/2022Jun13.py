@@ -41,23 +41,23 @@ T1 2D Fit
 """
 T2 fit
 """
-# file_path = ('Z:/mcdermott-group/data/sfq/MCM_NIST/LIU/MCM13/{}/{}/MATLABData/{}')
-# # date = '12-29-21'
-# date = '05-19-22'
-# # experiment_name_T2 = 'T2_SFQ_Poison_Time_Sweep_1D_Study'
-# # experiment_name_T2 = 'T2_SFQ_Poison_During_Study'
-# experiment_name_T2 = 'T2_SFQ_Poison_During_Study_Q2'
-# # file_Number = np.arange(20, 21, 1)
+file_path = ('Z:/mcdermott-group/data/sfq/MCM_NIST/LIU/MCM13/{}/{}/MATLABData/{}')
+# date = '12-29-21'
+date = '06-13-22'
+# experiment_name_T2 = 'T2_SFQ_Poison_Time_Sweep_1D_Study'
+# experiment_name_T2 = 'T2_SFQ_Poison_During_Study'
+experiment_name_T2 = 'T2_Poison_CheckParameters'
+# file_Number = np.arange(20, 21, 1)
 # file_Number = np.arange(0, 5, 1)
-# # file_Number = np.arange(0, 1, 1)
-# # file_Number = [30]
-# T2_file = [file_path.format(date, experiment_name_T2, experiment_name_T2) + '_{:03d}.mat'.format(i) for i in file_Number]
-# T2_data = T2_1D()
-# T2_data.add_data_from_matlab(T2_file)
-# # T2_data.plot()
+# file_Number = np.arange(0, 1, 1)
+file_Number = [5]
+T2_file = [file_path.format(date, experiment_name_T2, experiment_name_T2) + '_{:03d}.mat'.format(i) for i in file_Number]
+T2_data = T2_1D()
+T2_data.add_data_from_matlab(T2_file)
+# T2_data.plot()
 # fitParameters = T2_data.fit_parameters
 # T2_data.plot_Detuning()
-# # T2_data.plot()
-# # print(fitParameters)
+# T2_data.plot()
+# print(fitParameters)
 
 
