@@ -162,14 +162,14 @@ class T1_QP_2D(object):
 
     def add_data_from_matlab(self, file_path,
                              data_type='Weighted_Occupation',
-                             data_P1_2D='Projected_Occupation',
+                             # data_type='Projected_Occupation',
                              data_Idle_Time='QB_Idle_Gate_Time',
                              data_sweep_variable='SFQ_Pulse_Duration'
                              # data_sweep_variable='SFQ_Drive_to_QB'
                              ):
         f = file_path[0]
         data = noiselib.loadmat(f)
-        P1_2D = np.array(data[data_P1_2D])
+        P1_2D = np.array(data[data_type])
         QB_Idle_Gate_Time = np.array(data[data_Idle_Time])
         sweep_variable_list = np.array(data[data_sweep_variable])
 
@@ -180,11 +180,7 @@ class T1_QP_2D(object):
         self.sweep_variable_name = data_sweep_variable
 
         self._analyze()
-        self._plot()
-        # sweep_variable_name =
-        # print('P1_2D=', P1_2D)
-        # print('QB_Idle_Gate_Time=', QB_Idle_Gate_Time)
-        # print('sweep_variable_list=', sweep_variable_list)
+        # self._plot()
         return
 
     def _analyze(self):
@@ -198,6 +194,12 @@ class T1_QP_2D(object):
             params, std = self._fitToQPDecay(P1_1D, t)
             params_2D.append(params)
             std_2D.append(std)
+            # if i == 0:
+            #     print('params=', params)
+            #     print('params=', "n_qp, T_qp, T_1r, amp, off")
+            #     plt.plot(t, P1_1D)
+            #     plt.plot(t, self._f_QP(t, *params))
+            #     plt.show()
 
         ### 2D data update
         self.params_2D = np.array(params_2D)
@@ -218,6 +220,7 @@ class T1_QP_2D(object):
         plt.errorbar(sweep_variable_list * ps, params_2D[:, 0],
                      yerr=std_2D[:, 0], ls='none')
         plt.scatter(sweep_variable_list * ps, params_2D[:, 0])
+        print(repr(params_2D[:, 0]))
         if 0:  # recovery rate fitting
             r = 22
             t = sweep_variable_list[:r]
@@ -234,12 +237,12 @@ class T1_QP_2D(object):
             [m, b] = np.polyfit(ps, params_2D[:, 0], 1)
             # plt.plot(ps, ps*m + b, label='QPs/slip={0:.4g}'.format(m), c='k')
             plt.xlabel('SFQ phase slips', fontsize=14)
-        plt.tick_params(labelsize=14)
-        plt.ylabel('$n_{\mathrm{QP}}$', fontsize=14)
-        # plt.xticks([0, 4000, 8000, 12000, 16000, 20000])
-        # plt.ylim([0, 2])
-        plt.legend(frameon=False, loc=2, prop={'size': 14})
-        plt.show()
+        # plt.tick_params(labelsize=14)
+        # plt.ylabel('$n_{\mathrm{QP}}$', fontsize=14)
+        # # plt.xticks([0, 4000, 8000, 12000, 16000, 20000])
+        # # plt.ylim([0, 2])
+        # plt.legend(frameon=False, loc=2, prop={'size': 14})
+        # plt.show()
         return
 
     def _fitToQPDecay(self, P1_1D, time):
@@ -250,8 +253,8 @@ class T1_QP_2D(object):
         """
         time = time
         P1 = P1_1D
-        p0 = [0.1, 20e3, 20e3, 0.95, 0.1]  # initial guess
-        bounds = [(0, 1e3, 1e3, 0.5, 0), (10, 1e6, 1e6, 1.05, 0.5)]  # bounds
+        p0 = [0.2, 6e3, 20e3, 0.95, 0.1]  # initial guess
+        bounds = [(0, 5e3, 15e3, 0.5, 0), (2, 9e3, 30e3, 1.05, 0.3)]  # bounds
         params, covariance = curve_fit(self._f_QP, time, P1, p0=p0,
                                        bounds=bounds)
         std = np.sqrt(np.diag(covariance))  # one standard deviation errors
@@ -1268,4 +1271,57 @@ class RB_AllGates(object):
         plt.legend()
         plt.xlabel('Number of Cliffords')
         plt.ylabel('Sequence Fidelity')
+        plt.show()
+
+
+class RB_ORBIT(object):
+    """
+    Use OBRIT to optimize parameters
+    """
+
+    def __init__(self):
+        self.paramOfInterest = np.array([])  # the parameter of interest
+        self.seqFidelity_2D = np.array([])  # sequence fidelity 2D
+        self.seqFidelity_avg = np.array([])  # sequence fidelity avg
+        self.seqFidelity_se = np.array([])  # sequence fidelity standard error
+        self.NoF = 1    # number of files
+        self.paramOfInterest_Name = ''
+
+    def add_data_from_matlab(self, file_path,
+                             data_type0='SFQ_Y_Gate_Phase_Offset',
+                             data_type1='Sequence_Fidelity'
+                             ):
+        f0 = file_path[0]  # first file
+        data0 = noiselib.loadmat(f0)
+        self.paramOfInterest = data0[data_type0]
+        self.paramOfInterest_Name = data_type0
+        # for i in range(len(self.paramOfInterest)):
+        #     self.paramOfInterest[i] = self.paramOfInterest[i] - 1
+        seqF_2D = data0[data_type1]   # sequence fidelity
+        NoF = self.NoF
+        for f in file_path[1:]:
+            NoF = NoF + 1
+            data = noiselib.loadmat(f)
+            seqF_1D = data[data_type1]
+            seqF_2D = np.vstack((seqF_2D, seqF_1D))
+
+        self.seqFidelity_2D = seqF_2D
+        self.NoF = NoF
+
+        if NoF == 1:    # no avg needed
+            self.seqFidelity_avg = seqF_2D
+            self.seqFidelity_se = 0 * seqF_2D
+        else:
+            self.seqFidelity_avg = np.average(seqF_2D, axis=0)
+            self.seqFidelity_se = np.std(seqF_2D, axis=0)/np.sqrt(NoF)
+
+    def plot(self):
+        paramOfInterest = self.paramOfInterest
+        paramOfInterest_Name = self.paramOfInterest_Name
+        seqFidelity_avg = self.seqFidelity_avg
+        seqFidelity_se = self.seqFidelity_se
+
+        plt.xlabel(paramOfInterest_Name)
+        plt.ylabel('Sequence Fidelity')
+        plt.errorbar(paramOfInterest, seqFidelity_avg, yerr=seqFidelity_se)
         plt.show()

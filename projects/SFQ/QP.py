@@ -24,19 +24,22 @@ T1 2D Fit
 """
 # file_path = ('Z:/mcdermott-group/data/sfq/MCM_NIST/LIU/MCM13/{}/{}/MATLABData/{}')
 # # date = '12-28-21'
-# date = '06-02-22'
+# # date = '06-02-22'
 # # date = '2022Jun01_QPStudy'
+# date = 'T1PoisonSweep'
 # # experiment_name_T1 = 'T1_SFQ_Poison_Time_Sweep'
-# experiment_name_T1 = 'T1_SFQ_Poison_Time_Sweep_Q1'
+# # experiment_name_T1 = 'T1_SFQ_Poison_Time_Sweep_Q1'
+# experiment_name_T1 = 'T1_SFQ_Poison_Time_Sweep_Over4'
 # # experiment_name_T1 = 'T1_Q1_SFQ2_Poison'
 # # experiment_name_T1 = 'T1_SFQ_Poison_Recovery'
 # # experiment_name_T1 = 'T1_Q1_SFQ2_Poison_Long'
-# # file_Number = np.arange(0, 9, 1)
-# file_Number = [0, 1, 2, 3, 4]
+# # file_Number = np.arange(1, 13, 1)
+# file_Number = [7]
 # T1_2D_file = [file_path.format(date, experiment_name_T1, experiment_name_T1) + '_{:03d}.mat'.format(i) for i in file_Number]
-# T1_2D_data = T1_QP_2D_Linear()
+# # T1_2D_data = T1_QP_2D_Linear()
+# T1_2D_data = T1_QP_2D()
 # T1_2D_data.add_data_from_matlab(T1_2D_file)
-# T1_2D_data.plot()
+# # T1_2D_data.plot()
 
 """
 T2 fit
