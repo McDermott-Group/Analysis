@@ -30,12 +30,15 @@ file_path = ('Z:/mcdermott-group/data/sfq/MCM_NIST/LIU/MCM13/{}/{}/MATLABData/{}
 # date = '2022Jun05_PurityVsRB'
 # date = '2022Jun19Q2'
 # date = '2022Jun20Over39nQ1'
-date = '2022Jun23Over2'
+# date = '2022Jun24Q1Over2'
+date = '2022Jun25Q1Over2' # Good 1.54, but some of 90 is lower than 180
+# date = '2022Jun25Q1Over2V3' # np.arange(6, 9, 1) 1.78
+# date = '2022Jun26Q1Over2' #
 # exp_name = 'RB_AfterCalStats'
 exp_name = 'RB_All'
 # exp_name = 'Purity2D'
 # file_Number = [0, 1, 2]
-file_Number = np.arange(5, 10, 1)
+file_Number = np.arange(0, 4, 1)
 RB_file = [file_path.format(date, exp_name, exp_name) + '_{:03d}.mat'.format(i) for i in file_Number]
 RB_data = RB_AllGates()
 RB_data.add_data_from_matlab(RB_file)
