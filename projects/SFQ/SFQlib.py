@@ -610,13 +610,11 @@ class DeepSubharmonics(object):
         self.Time_Dep = []
 
     def add_data_from_matlab(self, file_path,
-                             data_type1='Projected_Occupation',
-                             # data_type1='Single_Shot_Occupation',
                              # data_type1='I',
                              # data_type1='Q',
                              # data_type1='Amplitude',
                              # data_type1='Phase',
-                             # data_type1='Projected_Occupation',
+                             data_type1='Projected_Occupation',
                              # data_type1='Weighted_Occupation',
                              # data_type2='SFQ_Pulse_Duration'):
                              data_type2='SFQ_Drive_to_RO'):
@@ -627,6 +625,8 @@ class DeepSubharmonics(object):
         for f in file_path[1:]:
             data = noiselib.loadmat(f)
             occ_1D = np.array(data[data_type1])
+            # print('occ_1D[0]=', occ_1D[0])
+            # if occ_1D[0] > 0.2:
             occ_2D = np.vstack((occ_2D, occ_1D))
 
         """Update parameters"""
