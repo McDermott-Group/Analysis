@@ -310,7 +310,6 @@ class T1(object):
         self.QB_Idle_Gate_Time = []
         self.T1 = None
         self.Gamma_fit_parameters = []  # save each file's fitting parameteres
-        self.Gamma_fit_parameters = []  # save each file's fitting parameteres
         self.temp = None  # units mK
         self.fit_number_list = []
         self.T1_list = []
