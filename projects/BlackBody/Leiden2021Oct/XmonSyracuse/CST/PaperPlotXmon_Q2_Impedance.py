@@ -11,7 +11,7 @@ import os
 ### parameters to be tuned
 e_eff = 6  # limit (1, 6.5), the voltage can also be built in to have a larger range
 C_eff = 75 * 1e-21  # Commonly used (50-100) 75, 88
-JQ2 = [16.6 * 1e3, None, 0, 360 * 150, "Receiver"]  #
+JQ2 = [16.6 * 1e3 * 100, None, 0, 360 * 150, "Receiver"]  #
 
 fileQ2 = "xmon_full-chip_Q2.txt"
 
@@ -44,7 +44,7 @@ phfont = {'fontname': 'Times New Roman'}
 #   "text.usetex": True,
 #   "font.family": "Times New Roman"
 # })
-if 0:
+if 1:
     fig, axs = plt.subplots(3, sharex='col', figsize=(7.5, 8),
                             gridspec_kw={'hspace': 0.15})
 
@@ -97,11 +97,11 @@ if 0:
     fig.align_ylabels(axs[:])
     plt.tight_layout()
 
-    path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
-    plt.savefig(path+'\AntennaImpedance.pdf', format='pdf', bbox_inches='tight', dpi=1200)
+    # path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
+    # plt.savefig(path+'\AntennaImpedance.pdf', format='pdf', bbox_inches='tight', dpi=1200)
     plt.show()
 
-if 1:   # zoom in
+if 0:   # zoom in
     fig = plt.figure(figsize=(5, 3))
     plt.plot(f_Q2, Z_Re, linewidth=ld2, color="blue", label='$Z_{\\rm rad}$')
     plt.plot(f_Q2, Z_j_star_real, linewidth=ld2+2, color="red", label='$Z_{j}^*$')
