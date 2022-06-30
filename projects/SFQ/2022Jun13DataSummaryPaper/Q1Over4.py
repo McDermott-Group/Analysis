@@ -1,9 +1,9 @@
-from SFQlib import RB, RB_AllGates, Purity, T1_QP_2D_Linear, T1_QP_2D
+from SFQlib import RB, RB_AllGates, Purity, T1_QP_2D_Linear, T1_QP_2D, RB_AllGates_Paper
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
-if 0:  # IRB the optimized result 1.19% error/clifford gate
+if 1:  # IRB the optimized result 1.19% error/clifford gate
     file_path = (
         'Z:/mcdermott-group/data/sfq/MCM_NIST/LIU/MCM13/{}/{}/MATLABData/{}')
     date = '2022May30RB'  #
@@ -12,7 +12,7 @@ if 0:  # IRB the optimized result 1.19% error/clifford gate
     RB_file = [
         file_path.format(date, exp_name, exp_name) + '_{:03d}.mat'.format(i)
         for i in file_Number]
-    RB_data = RB_AllGates()
+    RB_data = RB_AllGates_Paper()
     RB_data.add_data_from_matlab(RB_file)
     RB_data.data_analysis()
     RB_data.plot()
@@ -167,7 +167,7 @@ if 0:  # QP data
     plt.legend(frameon=False, loc=2, prop={'size': 14})
     plt.show()
 
-if 1:  # QP processed data
+if 0:  # QP processed data
     n_QP_avg = np.array([
         0.07380851, 0.1883708, 0.20277472, 0.21447975, 0.30098651,
         0.30824001, 0.30831531, 0.32838444, 0.35551269, 0.39528372,
