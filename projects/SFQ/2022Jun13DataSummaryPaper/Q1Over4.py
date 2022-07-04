@@ -1,9 +1,11 @@
-from SFQlib import RB, RB_AllGates, Purity, T1_QP_2D_Linear, T1_QP_2D, RB_AllGates_Paper
+from SFQlib import RB, RB_AllGates, Purity, T1_QP_2D_Linear, T1_QP_2D
+from SFQlib import RB_AllGates_Paper, Purity_Paper, Purity_Paper_ErrorBudget, T1_QP_Paper
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 from scipy.optimize import curve_fit
 
-if 1:  # IRB the optimized result 1.19% error/clifford gate
+if 0:  # IRB the optimized result 1.19% error/clifford gate
     file_path = (
         'Z:/mcdermott-group/data/sfq/MCM_NIST/LIU/MCM13/{}/{}/MATLABData/{}')
     date = '2022May30RB'  #
@@ -26,7 +28,8 @@ if 0:  # purity data, with 0.964 % incoherence error/clifford
     file = [
         file_path.format(date, exp_name, exp_name) + '_{:03d}.mat'.format(i)
         for i in file_Number]
-    Purity_data = Purity()
+    # Purity_data = Purity_Paper()
+    Purity_data = Purity_Paper_ErrorBudget()
     Purity_data.add_data_from_matlab(file)
     Purity_data.data_analysis()
     Purity_data.plot()
@@ -165,6 +168,199 @@ if 0:  # QP data
     plt.plot(t[:n], t[:n] * rate + offset,
              label='QPs/slip={0:.4g}'.format(rate), c='k')
     plt.legend(frameon=False, loc=2, prop={'size': 14})
+    plt.show()
+
+if 0:  # QP processed data for single paper plot
+    n_QP_avg = np.array([
+        0.07380851, 0.1883708, 0.20277472, 0.21447975, 0.30098651,
+        0.30824001, 0.30831531, 0.32838444, 0.35551269, 0.39528372,
+        0.34032246, 0.35153184, 0.33951708, 0.36688728, 0.39757237,
+        0.32735222, 0.37960038, 0.4004139, 0.41697842, 0.4049541,
+        0.38849663, 0.32200013, 0.33726678, 0.44671311, 0.39102447,
+        0.35429655, 0.39054762, 0.38914731, 0.34114217, 0.4246627,
+        0.3550035, 0.36221882, 0.33660496, 0.37218557, 0.39228922,
+        0.3995606, 0.32713506, 0.43436966, 0.36348592, 0.36509012,
+        0.3987119])
+    n_QP_se = np.array([
+        0.01963403, 0.02365465, 0.03646389, 0.035712, 0.01705155,
+        0.04693009, 0.03483148, 0.03106157, 0.03394227, 0.03039478,
+        0.02839453, 0.04214491, 0.03395795, 0.04577062, 0.05306064,
+        0.04080479, 0.05910785, 0.03825893, 0.0390526, 0.04640127,
+        0.05420951, 0.03128001, 0.0207645, 0.04505482, 0.04009673,
+        0.0320043, 0.03328958, 0.04879816, 0.02480708, 0.03648037,
+        0.03684882, 0.03801308, 0.03028644, 0.02998843, 0.02728779,
+        0.03990929, 0.02155169, 0.04324755, 0.03817371, 0.03885415,
+        0.04022622])
+    n = 21
+    norm_constant = 4.0*1e6
+    x_QP_avg = n_QP_avg/norm_constant
+    x_QP_se = n_QP_se/norm_constant
+    t = np.arange(0, 41, 1)*1.0
+    fOver2 = 1.22643
+    t_cliff = 2.333*39  # one Clifford gate sequence
+    t_cliff_eq = t_cliff*1.22643/1.21/1000  # equivalent Clifford gate sequence us
+
+    # if 1: # just trapping, ignore recombination
+    #         # working in n_QP, not x_QP, g=> G=g*n_cp
+    t = t*1e-6  # convert time to units of second
+    def n_qp(t, G, s):
+        return (G/s)*(1-np.exp(-t*s))
+
+    params, covariance = curve_fit(n_qp, t[:n], n_QP_avg[:n])
+    std = np.sqrt(np.diag(covariance))  # one standard deviation errors
+    [G, s] = params
+    n_qp_perPhaseSlip = G/(1.21*3*1e9)
+    n_qp_perPhaseSlip_std = std[0]/(1.21*3*1e9)
+    s_rate = 1/s
+    s_rate_std = (std[1]/s)*s_rate
+    print('n_QP per phase slip=', n_qp_perPhaseSlip)
+    print('n_QP per phase slip std=', n_qp_perPhaseSlip_std)
+    print('s_rate=', s_rate)
+    print('s_rate_std=', s_rate_std)
+
+    label_font = 20
+    tick_font = 20
+    legend_font = 16
+
+    fig = plt.figure(figsize=(8, 5))
+    mpl.rc('font', family='Arial')
+
+    ax1 = fig.add_subplot(111)
+    ax2 = ax1.twiny()
+
+    t_fit = np.arange(0, 20.1, 0.1)
+    ax1.plot(t_fit, n_qp(t_fit/1e6, *params), c='k')
+    ax1.errorbar(t[:n]*1e6, n_QP_avg[:n], yerr=n_QP_se[:n], fmt="o", color='k', capsize=3.0, ms=5.0)
+
+
+    ax1.tick_params(labelsize=tick_font, direction="in", width=1.5, length=6)
+    ax1.set_xlabel(r'Poisoning Pulse Length ($\mu$s)', fontsize=label_font)
+    ax1.set_ylabel('$n_{qp}$', fontsize=label_font)
+
+    ax2.set_xlim(ax1.get_xlim())
+    ax2array = np.arange(0, 250, 50)
+    ax2.set_xticks(ax2array*t_cliff_eq)
+    ax2.set_xticklabels(ax2array)
+    ax2.tick_params(labelsize=tick_font, direction="in", width=1.5, length=6)
+    ax2.set_xlabel(r"Equivalent Clifford Sequence Length", fontsize=label_font)
+
+    path = 'Z:\mcdermott-group\data\sfq\SFQMCMPaperWriting\FromPython'
+    # plt.savefig(path + '\QPTrapping.pdf', format='pdf', bbox_inches='tight', dpi=1200)
+    plt.show()
+
+if 1:  # QP processed data for paper plot with T1 fitting
+    """T1 fit starts"""
+    file_path = (
+        'Z:/mcdermott-group/data/sfq/MCM_NIST/LIU/MCM13/{}/{}/MATLABData/{}')
+    date = 'T1PoisonSweep'
+    experiment_name_T1 = 'T1_SFQ_Poison_Time_Sweep_Over4'
+    n_QP_2D = np.array([])
+    # for i in [0, 1, 2, 3, 4, 5, 6, 7]:
+    file_Number = [2]
+    T1_2D_file = [file_path.format(date, experiment_name_T1,
+                                   experiment_name_T1) + '_{:03d}.mat'.format(
+        i) for i in file_Number]
+    T1_QP_data = T1_QP_Paper()
+    T1_QP_data.add_data_from_matlab(T1_2D_file)
+    # n_QP_1D = T1_QP_data.params_2D[:, 0]
+    T1_1D_t = T1_QP_data.T1_1D_t/1000
+    T1_1D_noPoison = T1_QP_data.T1_1D_noPoison
+    T1_1D_noPoisonFit = T1_QP_data.T1_1D_noPoisonFit
+    T1_1D_Poison = T1_QP_data.T1_1D_Poison
+    T1_1D_PoisonFit = T1_QP_data.T1_1D_PoisonFit
+
+    """T1 fit ends"""
+
+    n_QP_avg = np.array([
+        0.07380851, 0.1883708, 0.20277472, 0.21447975, 0.30098651,
+        0.30824001, 0.30831531, 0.32838444, 0.35551269, 0.39528372,
+        0.34032246, 0.35153184, 0.33951708, 0.36688728, 0.39757237,
+        0.32735222, 0.37960038, 0.4004139, 0.41697842, 0.4049541,
+        0.38849663, 0.32200013, 0.33726678, 0.44671311, 0.39102447,
+        0.35429655, 0.39054762, 0.38914731, 0.34114217, 0.4246627,
+        0.3550035, 0.36221882, 0.33660496, 0.37218557, 0.39228922,
+        0.3995606, 0.32713506, 0.43436966, 0.36348592, 0.36509012,
+        0.3987119])
+    n_QP_se = np.array([
+        0.01963403, 0.02365465, 0.03646389, 0.035712, 0.01705155,
+        0.04693009, 0.03483148, 0.03106157, 0.03394227, 0.03039478,
+        0.02839453, 0.04214491, 0.03395795, 0.04577062, 0.05306064,
+        0.04080479, 0.05910785, 0.03825893, 0.0390526, 0.04640127,
+        0.05420951, 0.03128001, 0.0207645, 0.04505482, 0.04009673,
+        0.0320043, 0.03328958, 0.04879816, 0.02480708, 0.03648037,
+        0.03684882, 0.03801308, 0.03028644, 0.02998843, 0.02728779,
+        0.03990929, 0.02155169, 0.04324755, 0.03817371, 0.03885415,
+        0.04022622])
+    n = 21
+    norm_constant = 4.0*1e6
+    x_QP_avg = n_QP_avg/norm_constant
+    x_QP_se = n_QP_se/norm_constant
+    t = np.arange(0, 41, 1)*1.0
+    fOver2 = 1.22643
+    t_cliff = 2.333*39  # one Clifford gate sequence
+    t_cliff_eq = t_cliff*1.22643/1.21/1000  # equivalent Clifford gate sequence us
+
+    t = t*1e-6  # convert time to units of second
+    def n_qp(t, G, s):
+        return (G/s)*(1-np.exp(-t*s))
+
+    params, covariance = curve_fit(n_qp, t[:n], n_QP_avg[:n])
+    std = np.sqrt(np.diag(covariance))  # one standard deviation errors
+    [G, s] = params
+    n_qp_perPhaseSlip = G/(1.21*3*1e9)
+    n_qp_perPhaseSlip_std = std[0]/(1.21*3*1e9)
+    s_rate = 1/s
+    s_rate_std = (std[1]/s)*s_rate
+    # print('n_QP per phase slip=', n_qp_perPhaseSlip)
+    # print('n_QP per phase slip std=', n_qp_perPhaseSlip_std)
+    # print('s_rate=', s_rate)
+    # print('s_rate_std=', s_rate_std)
+
+    label_font = 20
+    tick_font = 20
+    legend_font = 18
+
+    fig, axs = plt.subplots(2, figsize=(8, 12)
+                            # )
+                            ,gridspec_kw = {'hspace': 0.4})
+    mpl.rc('font', family='Arial')
+
+    axs[0].scatter(T1_1D_t, T1_1D_noPoison, c='b', label='no poisoning')
+    axs[0].plot(T1_1D_t, T1_1D_noPoisonFit, c='b')
+    axs[0].scatter(T1_1D_t, T1_1D_Poison, c='r', label='7 $\mu$s poisoning')
+    axs[0].plot(T1_1D_t, T1_1D_PoisonFit, c='r')
+    axs[0].tick_params(labelsize=tick_font, direction="in", width=1.5, length=6)
+    axs[0].legend(loc=(0.36, 0.56), frameon=False, prop={'size': legend_font}, handletextpad=0)
+    axs[0].set_xlabel(r'Delay ($\mu$s)', fontsize=label_font)
+    axs[0].set_ylabel('$P_{1}$', fontsize=label_font)
+    axs[0].set_xlim([-3, 101])
+    axs[0].set_ylim([-0.05, 0.95])
+    # axs[0].set_yscale('log')
+
+    ax2 = axs[1].twiny()
+
+
+    t_fit = np.arange(0, 20.1, 0.1)
+    axs[1].plot(t_fit, n_qp(t_fit/1e6, *params), c='k')
+    axs[1].errorbar(t[:n]*1e6, n_QP_avg[:n], yerr=n_QP_se[:n], fmt="o", color='k', capsize=3.0, ms=5.0)
+
+
+    axs[1].tick_params(labelsize=tick_font, direction="in", width=1.5, length=6)
+    axs[1].set_xlabel(r'Poisoning Pulse Length ($\mu$s)', fontsize=label_font)
+    axs[1].set_ylabel('$n_{qp}$', fontsize=label_font)
+    axs[1].set_xlim([-0.5, 20.5])
+    axs[1].set_ylim([-0.02, 0.48])
+
+    ax2.set_xlim(axs[1].get_xlim())
+    ax2array = np.arange(0, 250, 50)
+    ax2.set_xticks(ax2array*t_cliff_eq)
+    ax2.set_xticklabels(ax2array)
+    ax2.tick_params(labelsize=tick_font, direction="in", width=1.5, length=6)
+    ax2.set_xlabel(r"Equivalent Clifford Sequence Length", fontsize=label_font)
+
+    path = 'Z:\mcdermott-group\data\sfq\SFQMCMPaperWriting\FromPython'
+    plt.savefig(path + '\QPTrapping.pdf', format='pdf', bbox_inches='tight', dpi=1200)
+    # plt.savefig(path + '\QPTrapping.pdf', format='pdf', dpi=1200)
     plt.show()
 
 if 0:  # QP processed data
