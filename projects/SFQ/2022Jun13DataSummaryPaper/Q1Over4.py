@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
-if 1:  # IRB the optimized result 1.19% error/clifford gate
+if 0:  # IRB the optimized result 1.19% error/clifford gate
     file_path = (
         'Z:/mcdermott-group/data/sfq/MCM_NIST/LIU/MCM13/{}/{}/MATLABData/{}')
     date = '2022May30RB'  #
