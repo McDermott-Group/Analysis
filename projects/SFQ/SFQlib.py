@@ -15,6 +15,30 @@ from sklearn.mixture import GaussianMixture
 from scipy.optimize import curve_fit
 
 
+def add_2Ddata_from_matlab(file_path, v1, v2, d):
+    """
+
+    :param file_path:
+    :param v1: variable one
+    :param v2: variable two
+    :param d: dependent
+    :return: v1, v2, and d arrays
+    """
+    data = noiselib.loadmat(file_path)
+    datav1 = data[v1]
+    datav2 = data[v2]
+    datad = data[d]
+
+    datad = np.rot90(datad)
+
+    return datav1, datav2, datad
+
+def add_CST_SimResultFromTxt(file):
+    t = np.loadtxt(file, usecols=[0], skiprows=3)
+    d = np.loadtxt(file, usecols=[1], skiprows=3)
+    return [t, d]
+
+
 class T1_QP_1D(object):
     """
     This is for extract 1D T1 value from the matlab data
@@ -150,6 +174,7 @@ class T1_QP_1D(object):
         plt.grid()
         plt.legend()
         plt.show()
+
 
 class T1_QP_Paper(object):
     def __init__(self):
@@ -936,6 +961,7 @@ class RB(object):
         plt.xlabel('Number of Cliffords')
         plt.ylabel('Sequence Fidelity')
         plt.show()
+
 
 class Purity_Paper(object):
     """
