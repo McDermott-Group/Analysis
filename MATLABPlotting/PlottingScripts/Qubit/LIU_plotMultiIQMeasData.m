@@ -32,7 +32,7 @@ plts_path = makeDirPlots(pathnames{1});
 for data_index = 1:length(data{1}.dep)
     I_name = data{1}.dep{data_index};
     if ~contains(I_name, 'Is')
-        continue
+        continue 
     end
     Q_name = strrep(I_name, 'I', 'Q');
     if ~isfield(data{1}, Q_name)
