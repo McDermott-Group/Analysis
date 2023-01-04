@@ -158,7 +158,7 @@ class Struct:
             self.__dict__.update (argd)
         else:
             # Update by position
-            attrs = filter (lambda x: x[0:2] != "__", dir(self))
+            attrs = [x for x in dir(self) if x[0:2] != "__"]
             for n in range(len(argv)):
                 setattr(self, attrs[n], argv[n])
 
@@ -298,7 +298,7 @@ class Scan(object):
         slope = fit[0]
         R = 1/(slope)
         self.scaleFactor = R/self.radius
-        print "Scale factor:" , self.scaleFactor
+        print("Scale factor:" , self.scaleFactor)
 
     @property
     def bow(self):
@@ -400,11 +400,11 @@ class ScanImporter(object):
         lExpected = nRecords*Scan.RECORD_LENGTH + ScanImporter.OFFSET
         magic = struct.unpack('<I', d[0:4])[0]
         if magic != 0x00C8A5A5:
-            print "Warning: Incorrect magic bytes in header!"
+            print("Warning: Incorrect magic bytes in header!")
         if l < lExpected:
-            print "Warning: File seems to be too short. Missing %d bytes." % lExpected-l
+            print("Warning: File seems to be too short. Missing %d bytes." % lExpected-l)
         elif l > lExpected:
-            print "Warning: File seems to be too long. Have %d extra bytes." % l-lExpected
+            print("Warning: File seems to be too long. Have %d extra bytes." % l-lExpected)
         for n in range(nRecords):
             data = d[ScanImporter.OFFSET+Scan.RECORD_LENGTH*n:ScanImporter.OFFSET+Scan.RECORD_LENGTH*(n+1)]
             scan = Scan()

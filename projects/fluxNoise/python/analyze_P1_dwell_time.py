@@ -1,14 +1,15 @@
 import os
 import numpy as np
 import noiselib
-reload(noiselib)
+import importlib
+importlib.reload(noiselib)
 from noiselib import matpaths
 from dataChest import *
 import general.calibration as cal
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 import datasets
-reload(datasets)
+importlib.reload(datasets)
 from datasets import *
 
 # q, date, filesP1, filesT1, thresh = 'Q3', '04-29-20', range(112,493), range(0,381), 0.33 # really bad
@@ -42,7 +43,7 @@ for i,f in enumerate(fP1_I):
     try:
         data = noiselib.loadmat( f )
     except:
-        print 'corrupted file:', f
+        print('corrupted file:', f)
         data = {'Single_Shot_Occupations': [np.nan],
                 'Single_Shot_Occupation': [np.nan]}
     if 'recalibrate' in ds and ds['recalibrate']:

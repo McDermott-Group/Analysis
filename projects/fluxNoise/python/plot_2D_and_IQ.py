@@ -1,8 +1,9 @@
 import noiselib
-reload(noiselib)
+import importlib
+importlib.reload(noiselib)
 import numpy as np
 import matplotlib.pyplot as plt
-import tkFileDialog
+import tkinter.filedialog
 import os
 
 def _circle(xy, r):
@@ -16,7 +17,7 @@ if 'last_file_opened' in locals():
     last_path = last_file_opened
 else:
     last_path = os.getenv('DATA_ROOT').replace('\\','/')
-path = tkFileDialog.askopenfilename(initialdir=last_path)
+path = tkinter.filedialog.askopenfilename(initialdir=last_path)
 # path = r'Z:\mcdermott-group\data\fluxNoise2\DR1 - 2019-12-17\CorrFar\Q2\General\05-10-20\Qubit_spectroscopy\MATLABData\Qubit_spectroscopy_002.mat'
 last_file_opened = path
 data = noiselib.loadmat(path)

@@ -133,7 +133,7 @@ f = max(y) - y
 fitness_best[0] = np.sum(f[(1000 - 4):(1000 + 4)])
 
 for i in range(n_gen):
-    print '{:03.1f}%'.format(float(i + 1)/float(n_gen) * 100)
+    print('{:03.1f}%'.format(float(i + 1)/float(n_gen) * 100))
     for j in range(n_offspring):
 
         shifts[j] = gen_shifts(shifts_best)

@@ -10,9 +10,10 @@ import matplotlib.pyplot as plt
 from dataChest import *
 from scipy.optimize import curve_fit
 from scipy.signal import periodogram
-#from Markov_Python2.analyze_QPTunneling_pomegranate import observed_to_recovered_signal_BW, generate_hidden_signal, hidden_to_observed_signal, generate_hidden_signal_highP1
+from Markov_Python2.analyze_QPTunneling_pomegranate import observed_to_recovered_signal_BW, generate_hidden_signal, hidden_to_observed_signal, generate_hidden_signal_highP1
+import importlib
 
-reload(noiselib)
+importlib.reload(noiselib)
 
 
 class QPTunneling_Wilen(object):
@@ -29,7 +30,6 @@ class QPTunneling_Wilen(object):
         self.one_over_f = False
 
     def add_datasets(self, file_path, data_str='Charge_Parity_Trace', simulate=False):
-    # def add_datasets(self, file_path, data_str='Single_Shot_Occupations', simulate=False):
         if type(file_path) == str:
             file_path = [file_path]
         f_l = file_path[0]
@@ -39,24 +39,13 @@ class QPTunneling_Wilen(object):
         for f in file_path:
             data = noiselib.loadmat(f)
             o = np.array(data[data_str])
-            Serniak = False # This is used for fast measurement, M1 and M2's product
             # convertto10 = False   # This is for 1, -1 data to 0, 1 value conversion
             convertto10 = True
             if convertto10:
                 o = o * 0.5 + 0.5
                 for j in range(len(o)):
-                    o[j] = map(int, o[j])
+                    o[j] = list(map(int, o[j]))
                 # o = o * 0.5 + 0.5
-            if Serniak:
-                for j in range(len(o)):
-                    innerProduct = [(2*o[j][k-1]-1)*(2*o[j][k]-1) for k in range(len(o[j]))]
-                    # innerProduct = np.array(innerProduct)
-                    innerProduct = map(int, innerProduct)
-                    # print('type(innerProduct)=', type(innerProduct))
-                    # o[j] = map(int, innerProduct)
-                    o[j] = innerProduct
-                # print('len(o[j])-1=', len(o[j])-1)
-                # print('len(o[0])=', len(o[0]))
             if simulate:
                 T_parity = 2 * 10 ** (-3)  # parity switching time
                 p_QP = 1 - np.exp(-sample_rate / T_parity)  # converted to Poisson probability
@@ -108,16 +97,13 @@ class QPTunneling_Wilen(object):
         f = f[~np.isnan(psd)]
         psd = psd[~np.isnan(psd)]
         # print('len(f)=', len(f))
-        #
-        l = 50
-        r = 500
-        # print('f[l]', f[l])
-        # print('f[r]', f[r])
+        # print('f=[500:]', f[500:])
+
+        # l = 300
         # f = f[l:]
         # psd = psd[l:]
 
-
-        # params, covariance = curve_fit(y, f[l:r], psd[l: r], p0=[2000, 0.1],
+        # params, covariance = curve_fit(y, f[500:], psd[500:], p0=[0.1, 5000],
         params, covariance = curve_fit(y, f, psd, p0=[5000, 0.1],
                                        bounds=[(1e1, 0), (1e6, 1)])# method='trf')
 
@@ -127,7 +113,6 @@ class QPTunneling_Wilen(object):
         f_RO = self.params[1]
         self.f_or_t = 'f'
         self.T_parity = 1/f_QP
-        # f = f[l:r]  # for partial fit
         return y(f, f_QP, f_RO), f
 
     # def get_fit_one_over_f(self, window_averaging=True):
@@ -259,7 +244,7 @@ class QPTunneling_Liu(object):
             sigma = f**1
             params_curr, params_covariance_curr = curve_fit(
                 fit_PSD_target_function, f, psd,
-                bounds=[(0.5*10**(-3), 0), (50*10**(-3), 1.0)], p0=[1.5*10**(-3), ig], method='trf',
+                bounds=[(0.5*10**(-3), 0), (5*10**(-3), 1.0)], p0=[1.5*10**(-3), ig], method='trf',
                 sigma=sigma)
             if params_covariance_curr[0][0] < covariance:
                 self.params = params_curr
@@ -317,11 +302,10 @@ class QPTunneling_Harrison(object):
         self.parity_string_array = []
         self.psd_avg = []
         self.f_data = None
-        self.params = []
+        self.params = None
         self.name = name
         self.f_or_t = 't'   # the PSD extraction is frequency or time
-        self.T_parity = []
-        self.fidelity = []
+        self.T_parity = None
 
     def add_datasets(self, file_path, data_type='Charge_Parity_Trace', HMM=False, simulate=False):
         """
@@ -359,114 +343,69 @@ class QPTunneling_Harrison(object):
         parity_string = [int((i - 0.5) * 2) for i in parity_string]
         return parity_string
 
-    def get_psd(self, window_averaging=False, number=1, concatenate_records=1):
+    def get_psd(self, window_averaging=False):
         parity_string_array = self.parity_string_array
-        numRecords = len(parity_string_array)
-        if concatenate_records < 1:
-            #this means to DIVIDE each record into 1/concatenate_records parts
-            temp = []
-            for record in parity_string_array:
-                for splitRecord in np.split(record, int(1/concatenate_records)):
-                    temp.append(splitRecord)
-            parity_string_array = temp
-        elif concatenate_records > 1:
-            #this means to COMBINE concatenate_records
-            temp = []
-            for i in range(0, numRecords, concatenate_records):
-                temp.append([])
-                for j in range(0, concatenate_records):
-                    temp[len(temp)-1] = np.concatenate([temp[len(temp)-1], parity_string_array[i+j]])
-            parity_string_array=temp
-        numRecords = len(parity_string_array)
-        #now we have a resized parity_string_array.  Now, we can computer the PSD of each string.
-        #we will then divide the array into 'number" parts and  take each part and average.
-        #We will return an array (length 'number') containing all of the PSDs
+        n = len(parity_string_array)
 
-        #this computes the psd of each record and puts it into psds
-        psds = []
-        firstLoop = True
-        for parity_string in parity_string_array:
+        for i in range(n):
+            parity_string = parity_string_array[i]
+
             freq, psd = periodogram(parity_string, self.fs, return_onesided=True)
-            psds.append(psd)
-            if(firstLoop):
-                firstLoop = False
+            if i == 0:
+                self.psd_avg = psd
                 self.f_data = freq
-
-        #this averages the proper number of psds and puts the averaged values into psd_ave
-        psd_avg = []
-        if numRecords < number:
-            number = numRecords
-        for i in np.arange(0, numRecords-int(np.floor(1.0*numRecords/number))+1, int(np.floor(1.0*numRecords/number))):
-            psd_avg.append(np.zeros(len(psds[0])))
-            for j in range(0, int(1.0*numRecords/number)):
-                psd_avg[len(psd_avg) - 1] = np.add(psd_avg[len(psd_avg) - 1], psds[i + j])
-            psd_avg[len(psd_avg) - 1] = psd_avg[len(psd_avg) - 1]/int(1.0*numRecords/number)
-
-        self.psd_avg = psd_avg
-
+            else:
+                for j in range(len(self.psd_avg)):
+                    self.psd_avg[j] += psd[j]
+        for i in range(len(self.psd_avg)):
+            self.psd_avg[i] = self.psd_avg[i] / n
 
         single_to_double = 0.5  # FFT single to double sided amplitude
-        for i in range(0, len(psd_avg)):
-            self.psd_avg[i] = single_to_double * self.psd_avg[i][1:]
-            if window_averaging:
-                # print('self.psd_avg=', self.psd_avg)
-                self.psd_avg[i] = noiselib.window_averaging(self.psd_avg[i])
-                # N = 20
-                # self.psd_avg = np.convolve(self.psd_avg, np.ones((N,)) / N, mode='same')
-
+        self.psd_avg = single_to_double * self.psd_avg[1:]
         self.f_data = self.f_data[1:]
+
+        if window_averaging:
+            # print('self.psd_avg=', self.psd_avg)
+            self.psd_avg = noiselib.window_averaging(self.psd_avg)
+            # N = 20
+            # self.psd_avg = np.convolve(self.psd_avg, np.ones((N,)) / N, mode='same')
         return self.psd_avg, self.f_data
 
-    def get_fit(self,excluded_points=1,ignore_fidelity=False):
+    def get_fit(self):
         """
         Exactly the same as Serniak's thesis fit and parameters selection
         :return:
         """
         def fit_PSD_target_function(f, T_parity, F_map):
-            return ((4 * 1 * F_map ** 2 / T_parity) / ((2 / T_parity) ** 2 + (2 * np.pi * f) ** 2) + 1 * (1 - F_map ** 2) / self.fs)
-        self.T_parity=[]
-        self.fidelity=[]
-        toReturn = []
+            return (4 * 1 * F_map ** 2 / T_parity) / ((2 / T_parity) ** 2 + (2 * np.pi * f) ** 2) + 1 * (1 - F_map ** 2) / self.fs
 
-        f=[]
-        for psd in self.psd_avg:
-            f=self.f_data
-            psd = psd[~np.isnan(f)]
-            f = f[~np.isnan(f)]
-            f = f[~np.isnan(psd)]
-            psd = psd[~np.isnan(psd)]
+        psd, f = self.psd_avg, self.f_data
+        psd = psd[~np.isnan(f)]
+        f = f[~np.isnan(f)]
+        f = f[~np.isnan(psd)]
+        psd = psd[~np.isnan(psd)]
 
-            f=f[excluded_points:len(f)]
-            psd=psd[excluded_points:len(psd)]
-            initial_guess_knee = np.logspace(-4,-1,50)
-            # initial_guess_fidelity = np.linspace(0.2,1,8)
-            initial_guess_fidelity =np.linspace(0.0,0.8,10)
-            # initial_guess = [0.7]
-            rs = np.NINF #negative infinity is the lowest r2 value
-            best_params=None
-            for ig_knee in initial_guess_knee:
-                for ig_fidelity in initial_guess_fidelity:
-                    sigma = None
-                    params_curr, params_covariance_curr = curve_fit(
-                        fit_PSD_target_function, f, psd,
-                        bounds=[(10**(-5), 0), (10**(-1), 1)], p0=[ig_knee, ig_fidelity],
-                        sigma=sigma)
-                    #just minimize r^2 to determine best fit. previously used covariance[0][0] which gave worse fits.
-                    residuals = psd - fit_PSD_target_function(f, *params_curr)
-                    ss_res = np.sum(residuals**2)
-                    ss_tot = np.sum((psd - np.mean(psd)) ** 2)
-                    r_squared = 1 - (ss_res / ss_tot)
-                    if rs < r_squared and r_squared <= 1:
-                    # if params_covariance_curr[0][0] < covariance:
-                        rs = r_squared
-                        best_params=params_curr
-            #need to convert these to 2d
-            self.params.append(best_params)
-            self.T_parity.append(self.params[len(self.params)-1][0])
-            self.fidelity.append(self.params[len(self.params)-1][1])
-            toReturn.append(fit_PSD_target_function(f, self.T_parity[len(self.T_parity)-1], self.fidelity[len(self.fidelity)-1]))
-
-        return toReturn, f
+        f=f[0:len(f)]
+        psd=psd[0:len(psd)]
+        initial_guess = [0.3,0.5,0.7,0.9]
+        # initial_guess = [0.7]
+        covariance = float('inf')
+        for ig in initial_guess:
+            sigma = f**1
+            params_curr, params_covariance_curr = curve_fit(
+                fit_PSD_target_function, f, psd,
+                bounds=[(1*10**(-5), 0), (1*10**(-2), 1.0)], p0=[1.5*10**(-3), ig], method='trf',
+                sigma=sigma)
+            if params_covariance_curr[0][0] < covariance:
+                self.params = params_curr
+                params_covariance = params_covariance_curr
+                covariance = params_covariance_curr[0][0]
+                print('CV')
+                print(params_covariance_curr)
+        T_parity = self.params[0]
+        F_map = self.params[1]
+        self.T_parity = T_parity
+        return fit_PSD_target_function(f, T_parity, F_map), f
 
     def get_fit_old(self):
         """
@@ -557,7 +496,7 @@ class OneStateCleanDirty(object):
         print('clean avg=', self.clean_P1)
         print('dirty avg=', self.dirty_P1)
 
-def plotMultiFittedPSD(QPT_List, one_over_f=False, save=False, name=''):
+def plotMultiFittedPSD(QPT_List, one_over_f=False):
     """
     plot multi fitted PSD for comparison
     :param QPT_List: a list of QPT object, e.g. [QPT_NoPoison, QPT_Neg10dBmPoison]
@@ -582,8 +521,8 @@ def plotMultiFittedPSD(QPT_List, one_over_f=False, save=False, name=''):
                     T_parity = QPT.params[0]
                 else:
                     T_parity = (1/QPT.params[0])
-                # print('T_parity=', T_parity)
-                # print(psd_fit)
+                print('T_parity=', T_parity)
+                print(psd_fit)
                 plt.loglog(f_fit, psd_fit, '-',
                            label='{} fit [{:.5f} ms], fidelity={:.2f}'.format(
                                QPT.name, (T_parity)*10**3, F_map))
@@ -594,7 +533,7 @@ def plotMultiFittedPSD(QPT_List, one_over_f=False, save=False, name=''):
                     T_parity = QPT.params[0]
                 else:
                     T_parity = (1/QPT.params[0])
-                # print('T_parity=', T_parity)
+                print('T_parity=', T_parity)
                 plt.loglog(f_fit, psd_fit, '-',
                            label='{} fit [{:.5f} ms], fidelity={:.2f}'.format(
                                QPT.name, (T_parity)*10**3, F_map))
@@ -604,106 +543,7 @@ def plotMultiFittedPSD(QPT_List, one_over_f=False, save=False, name=''):
     plt.grid()
     plt.grid()
     plt.legend()
-    if save:
-        plt.savefig(name+'.png')
-    else:
-        plt.show()
+    plt.show()
     # plt.pause(1)
     # plt.draw()
 
-
-def plotFittedPSD_Harrison(QPT, one_over_f=False, save=False, name='', concatenate_records=1, excluded_points=1,ylim=[],number=9):
-    """
-    plot multi fitted PSD for comparison
-    :param QPT_List: a list of QPT object, e.g. [QPT_NoPoison, QPT_Neg10dBmPoison]
-    :return: plot
-    """
-    plt.ioff()
-    linestyle = ['--', '+', 'o', 'v', 's', 'p', '*', 'h', 'x', 'D']
-    # wa = False
-
-    psd, f1 = QPT.get_psd(number=number, window_averaging=True, concatenate_records=concatenate_records)
-    fit, f2 = QPT.get_fit(excluded_points=excluded_points, ignore_fidelity=False)
-
-    avg_fidelity=np.mean(QPT.fidelity)
-
-    filtered_fidelity = []
-    filtered_parity = []
-    filtered_psd =[]
-    filtered_fit =[]
-    average_log_ratio = np.mean([np.log10(single_fit[0]/single_fit[-1]) for single_fit in fit])
-    for i in range(0,len(QPT.fidelity)):
-        #are we seeing a reaonable size jump? This should not vary by very much
-        if np.log10(fit[i][0]/fit[i][-1]) < 0.75*average_log_ratio:# or (1/QPT.T_parity[i])>5000:
-            continue
-        else:
-            filtered_fidelity.append(QPT.fidelity[i])
-            filtered_parity.append(QPT.T_parity[i])
-            filtered_psd.append(psd[i])
-            filtered_fit.append(fit[i])
-
-    # #goal is to only remove outliers ## 2022/02 You gotta do what you gotta do...
-    # if len(filtered_psd) < 0.7*len(psd):
-    #     filtered_fidelity = QPT.fidelity
-    #     filtered_parity = QPT.T_parity
-    #     filtered_psd = psd
-    #     filtered_fit = fit
-
-    # if len(filtered_parity)==0:
-    #     return 0,0,0
-
-    avg_fidelity = np.mean(filtered_fidelity)
-    avg_parity=np.mean(np.true_divide(1.0, filtered_parity))
-
-    parity_uncertainty=np.std(np.true_divide(1.0/np.sqrt(len(filtered_parity)),filtered_parity))
-    fig = plt.figure(figsize=(8, 6))
-    for i in range(0, len(filtered_psd)):
-        plt.loglog(f1, filtered_psd[i], label=r"{} PSD".format(QPT.name))
-        plt.loglog(f2, filtered_fit[i], '-')
-
-        plt.title(name+' \n(Fidelity = {:.2f} and Parity = {:.5f} +/- {:.5f} Hz)'.format(avg_fidelity, avg_parity, parity_uncertainty))
-        plt.grid(axis='both')
-        if ylim != []:
-            plt.ylim(ylim)
-        plt.xlabel('Frequency (Hz)')
-        plt.ylabel('S (1/Hz)')
-    if save:
-        plt.savefig('Figures/'+name + '_multi.png')
-        #plt.show()
-    else:
-        pass
-        #plt.show()
-
-    plt.close(fig)
-
-    fig = plt.figure(figsize=(8, 6))
-    linestyle = ['--', '+', 'o', 'v', 's', 'p', '*', 'h', 'x', 'D']
-    # wa = False
-
-    psd = np.average(filtered_psd,axis=0)
-    fit = [(4 * avg_fidelity ** 2 * avg_parity) / ((2 * avg_parity) ** 2 + (2 * np.pi * f) ** 2) + (1 - avg_fidelity ** 2) / QPT.fs for f in f2]
-
-    # psd, f1 = QPT.get_psd(number=1, window_averaging=True, concatenate_records=concatenate_records)
-    # fit, f2 = QPT.get_fit(excluded_points=excluded_points, ignore_fidelity=False)
-    # fidelity = np.mean(QPT.fidelity)
-    # parity = np.mean(np.true_divide(1.0, QPT.T_parity))
-    plt.loglog(f1, psd, label=r"{} PSD".format(QPT.name))
-    plt.loglog(f2, fit, '-')
-    plt.title(name + ' \n(Fidelity = {:.2f} and Parity = {:.5f} Hz)'.format(avg_fidelity, avg_parity))
-    plt.grid(axis='both')
-    if ylim != []:
-        plt.ylim(ylim)
-    plt.xlabel('Frequency (Hz)')
-    plt.ylabel('S (1/Hz)')
-
-    if save:
-        plt.savefig('Figures/'+name + '.png')
-    else:
-        pass
-        #plt.show()
-
-    plt.close(fig)
-
-
-
-    return avg_fidelity,avg_parity,parity_uncertainty

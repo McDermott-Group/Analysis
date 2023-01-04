@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import noiselib
-reload(noiselib)
+import importlib
+importlib.reload(noiselib)
 from noiselib import movingmean
 
 class TwoMeasDataFile(object):

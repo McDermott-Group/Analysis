@@ -101,7 +101,7 @@ class QP_PSD(object):
                 self.fit_PSD_target_function, self.f_data, self.Spp_avg,
                 bounds=[(10, 0), (10000, 1.2)], p0=[1000, ig], method='trf',
                 sigma=sigma)
-            print params_covariance_curr
+            print(params_covariance_curr)
             if params_covariance_curr[0][0] < covariance:
                 self.params = params_curr
                 params_covariance = params_covariance_curr

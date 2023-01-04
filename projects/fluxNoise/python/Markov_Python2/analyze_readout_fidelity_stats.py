@@ -24,7 +24,7 @@ for r in range(len(p_0g_pool)):
             error_1D.append((float(transitions_count(Recovered_Signal) - transitions_count(Hidden_Signal)) /
                              transitions_count(Hidden_Signal))*100)
             # print transitions_count(Recovered_Signal), transitions_count(Hidden_Signal)
-        print error_1D
+        print(error_1D)
         error[r][c] = average(error_1D).round(decimals=2)
 
 fig, ax = plt.subplots(figsize=(10, 10))

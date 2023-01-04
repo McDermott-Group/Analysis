@@ -4,19 +4,20 @@ import matplotlib as mpl
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import patches, ticker, gridspec
 import noiselib
-reload(noiselib)
+import importlib
+importlib.reload(noiselib)
 from noiselib import movingmean
 from QPTunneling import *
 import ChargeOffset
-reload(ChargeOffset)
+importlib.reload(ChargeOffset)
 from ChargeOffset import *
 import TwoMeasDataFile
-reload(TwoMeasDataFile)
+importlib.reload(TwoMeasDataFile)
 from TwoMeasDataFile import *
 from dataChest import dataChest
 from random import randrange
 import datasets
-reload(datasets)
+importlib.reload(datasets)
 import datasets as ds
 import re
 import pickle
@@ -24,7 +25,7 @@ from scipy.optimize import curve_fit
 from scipy import asarray as ar,exp,constants
 from scipy.special import erfc
 import impact_lib
-reload(impact_lib)
+importlib.reload(impact_lib)
 from impact_lib import *
 import gc
 from scipy.ndimage.filters import gaussian_filter
@@ -142,9 +143,9 @@ def format_hist2d(i, ax, cprofile, log=False, range=None, title=True):
         ax.set_ylim(range[0], range[1])
 
     if title:
-        title_str = ( u'$340\ \mathrm{\mu m}$',
-                      u'$640\ \mathrm{\mu m}$',
-                     u'$3195\ \mathrm{\mu m}$')
+        title_str = ( '$340\ \mathrm{\mu m}$',
+                      '$640\ \mathrm{\mu m}$',
+                     '$3195\ \mathrm{\mu m}$')
         ax.set_title(title_str[i])
 
     if log == True:
@@ -163,8 +164,8 @@ def format_hist2d(i, ax, cprofile, log=False, range=None, title=True):
             ax.set_ylim(-0.5, 0.5)
         ax.set_xticks([-0.5,-0.25,0,0.25,0.5])
         ax.set_yticks([-0.5,-0.25,0,0.25,0.5])
-        ax.set_xticklabels([u'\u22120.5','',0,'',0.5])
-        ax.set_yticklabels([u'\u22120.5','',0,'',0.5])
+        ax.set_xticklabels(['\u22120.5','',0,'',0.5])
+        ax.set_yticklabels(['\u22120.5','',0,'',0.5])
         ax.xaxis.labelpad = 0
         ax.yaxis.labelpad = -12
 
@@ -308,8 +309,8 @@ def plot_charge_offset_large(ax):
         ax.plot( time, offset[q], label=q, color=qcolors[q])#, linewidth=1. )
     ax.set_xlim(time[t0], time[t0]+10)
     trange = np.where( (time>time[t0]) & (time<(time[t0]+10)) )[0]
-    y_max = np.vstack(offset.values())[:,trange].max()
-    y_min = np.vstack(offset.values())[:,trange].min()
+    y_max = np.vstack(list(offset.values()))[:,trange].max()
+    y_min = np.vstack(list(offset.values()))[:,trange].min()
     ax.set_ylim(y_min, y_max)
     # ax.legend()
     ax.set_xlabel('Time (hours)')
@@ -343,8 +344,8 @@ def plot_charge_offset_zoom(ax1,ax2):
     ax1.set_xlim(60, 105)
     ax2.set_xlim(175, 195)
     trange = np.where( (time>time[t0]) & (time<(time[t0]+10)) )[0]
-    y_max = np.vstack(offset.values())[:,trange].max()
-    y_min = np.vstack(offset.values())[:,trange].min()
+    y_max = np.vstack(list(offset.values()))[:,trange].max()
+    y_min = np.vstack(list(offset.values()))[:,trange].min()
     ax1.set_ylim(1.5, 3)
     ax2.set_ylim(-1, 1)
     # ax.legend()
@@ -446,7 +447,7 @@ if 'ramsey_jump' in run_plots:
 
 """Plot Muon and Gamma tracks"""
 def plot_tracks(ax1,ax2,ax3,ax4,plot_charge):
-    _range = {'Muons':range(3,33),'Gamma':range(0,60)}
+    _range = {'Muons':list(range(3,33)),'Gamma':list(range(0,60))}
     for k,hit_type in enumerate(['Muons','Gamma']):
         app = Controller(sys.argv, fQ=0.01, calc_all=False, plot=False,
                             pdfs_file='{}/ChargePDFs_{}r_vhs_fine.npy'.format(sim_data_path,500),
@@ -814,8 +815,8 @@ if 'hist2d_err_phase' in run_plots:
     # for ax in np.ravel(axs):
         # ax.set_xticks([1e-12,1e-9,1e-6,1e-3])
         # ax.set_yticks([1e-12,1e-9,1e-6,1e-3])
-    edges_tick_labels(axs, xlabel=u'$\epsilon_{\phi,1}$',
-                           ylabel=u'$\epsilon_{\phi,2}$')
+    edges_tick_labels(axs, xlabel='$\epsilon_{\phi,1}$',
+                           ylabel='$\epsilon_{\phi,2}$')
     fig.savefig(fig_path+r'\hist2d_err_phase.pdf')
 
 def plot_err_phase_joint(ax, q_induced):
@@ -848,7 +849,7 @@ if 'err_phase_joint' in run_plots:
     for ax in axs:
         ax.axvline(x=1e-4, color='k', linestyle=':')
         ax.axvline(x=1e-6, color='k', linestyle=':')
-        ax.set_xlabel(u'$\epsilon_\phi$')
+        ax.set_xlabel('$\epsilon_\phi$')
         ax.set_ylabel('Normalized Integrated Counts')
     # edges_tick_labels(axs, xlabel=u'$\epsilon_\phi$', ylabel='Normalized Integrated Counts')
     fig.savefig(fig_path+r'\err_phase_joint.pdf')
@@ -1162,7 +1163,7 @@ if 'spectra_emitted' in run_plots:
     ax.step(E_mad/1e3, rate_mad, 'C3', where='mid')
     ax.step(E_lngs/1e3, rate_lngs, 'C0', where='mid')
     # add labels
-    for energy,label in elem_labels.items():
+    for energy,label in list(elem_labels.items()):
         v_mad  =  rate_mad[np.searchsorted(E_mad, energy)]
         v_lngs = rate_lngs[np.searchsorted(E_lngs,energy)]
         # ax.text( energy, 2*max(v_mad,v_lngs), label, horizontalalignment='center')

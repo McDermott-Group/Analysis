@@ -1,14 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import noiselib
-reload(noiselib)
+import importlib
+importlib.reload(noiselib)
 from noiselib import movingmean
 from QPTunneling import *
 import ChargeOffset
-reload(ChargeOffset)
+importlib.reload(ChargeOffset)
 from ChargeOffset import *
 import TwoMeasDataFile
-reload(TwoMeasDataFile)
+importlib.reload(TwoMeasDataFile)
 from TwoMeasDataFile import *
 from dataChest import dataChest
 from random import randrange
@@ -66,7 +67,7 @@ n_trace = np.zeros(2*10000+1)
 # whitelist = [2,7,16,44,46,51,52,61,106,114,124] # selected from average graph LOW
 whitelist = [28,67,80] # selected from average graph HIGH
 # whitelist = [2,7,16,28,44,51,52,61,106,114,124] # selected in zoom with robert by looking at events
-blacklist = {74:range(10), 90:range(10), 92:range(10), 145:[3]}
+blacklist = {74:list(range(10)), 90:list(range(10)), 92:list(range(10)), 145:[3]}
 data_files = {}
 
 # for k,f in enumerate(files):
@@ -76,10 +77,10 @@ for k,f in [(i,files[i]) for i in whitelist]:
     DF.set_trigger_params(100000., 100, 2)
     # DF.apply_infidelity_correction(7)
     trigs = DF.get_triggers()
-    trigs = [(t,r) for t,r in trigs if k not in blacklist.keys() 
+    trigs = [(t,r) for t,r in trigs if k not in list(blacklist.keys()) 
                                     or t not in blacklist[k]]
     data_files[f] = DF
-    print k, trigs
+    print(k, trigs)
     for trial, rep in trigs:
         DF.plot(trial)
         P1 = DF.get_P1_around_trig((trial,rep))
@@ -134,7 +135,7 @@ ax.plot(avg_trial_before, label='previous')
 ax.plot(avg_trial_after, label='next')
 # ax.plot(avg_prev_file, label='prev file')
 ax.legend()
-ax.set_xticks(range(len(avg_before))) 
+ax.set_xticks(list(range(len(avg_before)))) 
 ax.set_xticklabels(whitelist)
 
 plt.draw()

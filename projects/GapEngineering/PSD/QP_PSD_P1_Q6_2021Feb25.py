@@ -33,4 +33,4 @@ QPT_List = [QPT_Q6_Poison_Clean, QPT_Q6_Poison_Dirty]
 plotMultiFittedPSD(QPT_List)
 
 p1_psd = [P1CleanDirty.clean_P1, P1CleanDirty.dirty_P1, QPT_Q6_Poison_Clean.T_parity, QPT_Q6_Poison_Dirty.T_parity]
-print (power, p1_psd)
+print(power, p1_psd)
