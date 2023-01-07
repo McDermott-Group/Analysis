@@ -7,7 +7,7 @@ function [data, maxFidelity, singleShotFidelity, probOne, rotInfo] = ...
 % distribution.
 
 % Number of bins in a histogram.
-Nbins = 250;
+Nbins = 100;
 
 % Check to see if gate data was fed into the function or needs to be.
 if ~exist('GATE_I','var')
@@ -22,8 +22,8 @@ if ~exist('GATE_I','var')
     % Read the data files, convert the variable names, and specify the units.
     fileI = fullfile(pathnames{1}, filenames{1});
     fileX = fullfile(pathnames{2}, filenames{2});
-    gateI = processMeasurementData(importMeasurementData(fileI));
-    gateX = processMeasurementData(importMeasurementData(fileX));
+    gateI = loadMeasurementData(fileI);
+    gateX = loadMeasurementData(fileX);
 else
     gateI = GATE_I;
     gateX = GATE_X;
@@ -136,17 +136,17 @@ intX_interp = interp1(xValuesX,intX,xValuesI);
 
 if plotHist
     createFigure([.9, .1, .88, .8]);
-    histogram(data.allIQsRot(1:end/2,1), Nbins); 
+    histogram(data.allIQsRot(1:end/2,1), Nbins, 'DisplayName', 'dataset A'); 
     hold on
-    histogram(data.allIQsRot(end/2:end,1), Nbins);
+    histogram(data.allIQsRot(end/2:end,1), Nbins, 'DisplayName', 'dataset B');
     hold on
-    histogram(fulldata,Nbins)
+    histogram(fulldata,Nbins, 'FaceAlpha', 0.25, 'DisplayName', 'Combined Data')
 
     
 
-    h = plot(xValuesI,fittwogaussianI);
+    h = plot(xValuesI,fittwogaussianI, 'DisplayName', 'gaussian fit to A');
     set(h, 'LineWidth',2);   
-    h = plot(xValuesX,fittwogaussianX);
+    h = plot(xValuesX,fittwogaussianX, 'DisplayName', 'gaussian fit to B');
     set(h, 'LineWidth',2);     
     
 
@@ -156,12 +156,12 @@ if plotHist
     % Note: yyaxis not available before 2016a
     try
         yyaxis right
-        h = plot(xValuesI, intI/max(intI), '--b');
+        h = plot(xValuesI, intI/max(intI), '--b', 'DisplayName', 'integrated dataset A');
         ylabel('Occupation Probability', 'FontSize', 14)
         ax = gca;
         ax.YColor = [0,0,0];
         set(h, 'LineWidth',2);
-        h = plot(xValuesX, intX/max(intX), '--r');
+        h = plot(xValuesX, intX/max(intX), '--r', 'DisplayName', 'integrated dataset B');
         set(h, 'LineWidth',2);
         line([xValuesI(SSFMax_idx), xValuesI(SSFMax_idx)],...
              [intI(SSFMax_idx)/max(intI), intX_interp(SSFMax_idx)/max(intX)],...
@@ -183,10 +183,7 @@ if plotHist
             ' [', gateI.Timestamp, ']'],...
            ['Dataset B: ', strrep(filenameX, '_', '\_'), extX,...
             ' [', gateX.Timestamp, ']']}, 'FontSize', 14)
-     legend('dataset A', 'dataset B',...
-         'gaussian fit to A', 'gaussian fit to B',...
-         'integrated dataset A', 'integrated dataset B',...
-         'Location', 'NorthWest')
+        legend;
 end
 end
 

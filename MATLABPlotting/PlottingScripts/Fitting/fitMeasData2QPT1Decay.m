@@ -113,14 +113,24 @@ if length(dep_rels) == 1
         '_expfit_simple']));
 
 elseif length(dep_rels) == 2 % Plot 2D data.
-    if  ~isempty(strfind(dep_rels{1}, 'Qubit_Drive_to_Readout'))
+%    if  ~isempty(strfind(dep_rels{1}, 'Qubit_Drive_to_Readout'))
+    if ~isempty(strfind(dep_rels{1}, 'Time')) ||...
+            ~isempty(strfind(dep_rels{1}, 'Duration')) ||...
+            ~isempty(strfind(dep_rels{1}, 'Qubit_Drive_to_Readout')) ||...
+            ~isempty(strfind(dep_rels{1}, 'QB_Idle_Gate_Time')) ||...
+            ~isempty(strfind(dep_rels{1}, 'QB_Drive_to_RO'))
         indep_name1 = dep_rels{2};
         indep_name2 = dep_rels{1};
         indep_vals1 = data.(dep_rels{2});
         indep_vals2 = data.(dep_rels{1});
         dep_vals = dep_vals';
         flip_fit = true;
-    elseif ~isempty(strfind(dep_rels{2}, 'Qubit_Drive_to_Readout'))
+%    elseif ~isempty(strfind(dep_rels{2}, 'Qubit_Drive_to_Readout'))
+    elseif ~isempty(strfind(dep_rels{2}, 'Time')) ||...
+            ~isempty(strfind(dep_rels{2}, 'Duration')) ||...
+            ~isempty(strfind(dep_rels{2}, 'Qubit_Drive_to_Readout')) ||...
+            ~isempty(strfind(dep_rels{2}, 'QB_Idle_Gate_Time')) ||...
+            ~isempty(strfind(dep_rels{2}, 'QB_Drive_to_RO'))
         indep_name1 = dep_rels{1};
         indep_name2 = dep_rels{2};
         indep_vals1 = data.(dep_rels{1});

@@ -1,6 +1,6 @@
 function fitMeasData2RamseyTest(data_variable, data)
 %fitMeasData2Ramsey(DATA_VARIABLE, DATA)  Fit Ramsey data to a decaying
-%sinusoid.
+%sinusoid. Good for CPMG with off-resonant drive
 %   fitMeasData2Ramsey(DATA_VARIABLE, DATA) fits data for
 %   DATA_VARIABLE to an exponent, plots the data and the fit, and saves
 %   the data structure containing the fit.
