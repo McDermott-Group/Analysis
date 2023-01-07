@@ -80,7 +80,7 @@ if 1:
                                              'hspace': 0.25}
                                 )
 
-        axs[0].errorbar(Up_1D_Time, Up_1D_P1*100, yerr=Up_1D_Std/np.sqrt(20), fmt='o', c='k')
+        axs[0].errorbar(Up_1D_Time, Up_1D_P1*100, yerr=100*Up_1D_Std/np.sqrt(20), fmt='o', c='k')
         axs[0].plot(Up_1D_Time, Up_1D_P1Fit*100, c='k')
         axs[0].set_xlim([3.8, 15.2])
         axs[0].set_ylim([1.15, 2.01])
@@ -98,9 +98,15 @@ if 1:
         f_r = 620
         loc = 2
 
+        start = 26
+
+        # axs[1].plot(parity_freq_data, (parity_data-600)*0.22, 'r', linewidth=3, label='         ')
+        # axs[1].plot(up_freq_data, up_data-300, 'b', linewidth=3, label='         ')
+        # axs[1].plot(parity_freq_data[start:], UpRateYale[start:], 'b--', linewidth=3, label='         ')
+
         axs[1].plot(parity_freq_data, parity_data, 'r', linewidth=3, label='         ')
         axs[1].plot(up_freq_data, up_data, 'b', linewidth=3, label='         ')
-        axs[1].plot(parity_freq_data[27:], UpRateYale[27:], 'b--', linewidth=3, label='         ')
+        axs[1].plot(parity_freq_data[start:], UpRateYale[start:], 'b--', linewidth=3, label='         ')
 
         # axs[1].plot(f_interest, parity, 'r', linewidth=3, label='             ')
         # axs[1].plot(f_interest, up, 'b', linewidth=3, label='             ')
@@ -120,7 +126,7 @@ if 1:
         axs[1].tick_params(axis="y", width=1, length=6, which='major')
         fig.align_ylabels(axs)
         plt.tight_layout()
-        path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
-        plt.savefig(path + '\ParityUpCorrelation.pdf', format='pdf', bbox_inches='tight', dpi=1200)
+        # path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
+        # plt.savefig(path + '\ParityUpCorrelation.pdf', format='pdf', bbox_inches='tight', dpi=1200)
         plt.show()
 

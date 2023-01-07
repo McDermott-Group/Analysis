@@ -310,7 +310,6 @@ class T1(object):
         self.QB_Idle_Gate_Time = []
         self.T1 = None
         self.Gamma_fit_parameters = []  # save each file's fitting parameteres
-        self.Gamma_fit_parameters = []  # save each file's fitting parameteres
         self.temp = None  # units mK
         self.fit_number_list = []
         self.T1_list = []
@@ -574,7 +573,7 @@ class UpAndParity(object):
         parity = self.parity_interest
         up = self.up_interest
 
-        EjOverEc = 27.0
+        EjOverEc = 27.5
 
         for i in range(len(SOP)):
             ratio = 1.0/(1.0+np.sqrt(8*EjOverEc)*SOP[i])
@@ -623,7 +622,7 @@ class UpAndParity(object):
         f_S_Minus = interpolate.interp1d(self.S_freq, self.S_Minus)
         f_S_Plus = interpolate.interp1d(self.S_freq, self.S_Plus)
         # print(f[0]/1e9, f[-1]/1e9)
-        E_ratio = np.sqrt(8.0 * 27.0)
+        E_ratio = np.sqrt(8.0 * 27.5)
         Up = []  # up rate
         for i in range(len(f)):
 
@@ -645,7 +644,7 @@ class UpAndParity(object):
         parity = self.parity_data_nobase
         S_Minus = self.S_Minus
         S_Plus = self.S_Plus
-        E_ratio = np.sqrt(8.0 * 27.0)
+        E_ratio = np.sqrt(8.0 * 27.5)
         UpRateYale = []
 
         f_S_Minus = interpolate.interp1d(self.S_freq, self.S_Minus)
@@ -971,13 +970,13 @@ class AntennaCoupling(object):
         :return:
         """
         if 1:  # Xmon
-            Vol = 46 * 0.6 * 0.118  # volume of the junction units um^3
+            Vol = 40 * 0.6 * 0.118 # volume of the junction units um^3
             r = 1 / (438e-9)  # recombination rate sec^-1, Kaplan 1976
             Vol = Vol
             # the recombination rate and vol of the leads can be reconsidered
         else:  # Circmon
             Vol = 36 * 1 * 0.1  # volume of the junction units um^3
-            r = 10 / (400e-9)  # recombination rate sec^-1
+            r = 10 / (438e-9)  # recombination rate sec^-1
             Vol = Vol * 1  # QP peak at the center, effective volume
         n_cp = 4e6  # cooper pair density, units /um^3
         phi_0 = h / (2 * e)  # flux quantum
@@ -995,14 +994,22 @@ class AntennaCoupling(object):
             v_Al = 190e-6
             if vb <= 2 * v_Al:  # below the energy gap, no QP generated
                 vb = vb * 0.0
-            power_inj = 0.57 * (vb ** 2 / R)
-            g0 = power_inj / (Delta_Al * Vol * n_cp)
+            # power_inj = 0.57 * (vb ** 2 / R)
+            # g0 = power_inj / (Delta_Al * Vol * n_cp)
+            # print('g0=', g0)
+
+            g0 = vb/(e*R*Vol*n_cp)
 
             ### solve the equation
             g0Overr = g0 / r
+
             p = [1, -1, 0, g0Overr]
             roots = np.roots(p)
             x_qp = np.real(roots[1])
+
+            # p = [1, -2, 1, 0, -g0Overr]
+            # roots = np.roots(p)
+            # x_qp = np.real(roots[2])
 
             Delta_Al_qp = Delta_Al * (1 - x_qp)  # naive approximation
             ic = (pi / 4) * (2 * Delta_Al_qp / e) * (1 / R)
@@ -1010,7 +1017,8 @@ class AntennaCoupling(object):
             if 0:  # no ic suppression
                 Ic_f.append(ic0)
             else:
-                Ic_f.append(ic)
+                # Ic_f.append(ic)
+                Ic_f.append(ic0*0.9177) # 8.3 nA
             X_QP.append(x_qp)
             G0.append(g0)
 

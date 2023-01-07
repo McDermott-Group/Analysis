@@ -2786,7 +2786,7 @@ legend = font_manager.FontProperties(family='Times New Roman',
                                    weight='bold',
                                    style='normal', size=legend_font)
 
-fig, axs = plt.subplots(2, figsize=(6, 8))
+fig, axs = plt.subplots(2, figsize=(6, 7.5))
 
 axs[0].plot(parity_x, parity_y_even, linewidth=ld, color="blue")
 axs[0].plot(parity_x, parity_y_odd, linewidth=ld, color="red")
@@ -2810,7 +2810,7 @@ axs[1].set_xscale('log')
 axs[1].set_yscale('log')
 axs[1].set_xlim([2e1, 1e4])
 axs[1].set_ylim([1e-5, 1e-3])
-axs[1].set_xlabel('Frequency (Hz)', fontsize=label_font)
+# axs[1].set_xlabel('Frequency (Hz)', fontsize=label_font, font)
 axs[1].set_ylabel('$S_{\mathrm{P}}$ (Hz$^{-1}$)', fontsize=label_font)
 axs[1].tick_params(labelsize=tick_font)
 # axs[1].legend(loc=1, prop=legend, frameon=False)

@@ -152,10 +152,14 @@ if 1:
     freq_l = 175
     freq_r = 310
 
-    axs[0].plot(f, X_QP, 'k-', linewidth=4,
+    # axs[0].plot(f, X_QP, 'k-', linewidth=4,
+    #             label='$I_{c}$')
+    axs[0].plot(f, np.multiply(X_QP, X_QP), 'k-', linewidth=4,
                 label='$I_{c}$')
-    axs[0].set_xlim([100, 700])
-    axs[0].set_ylim([-0.02, 0.25])
+    # axs[0].set_xlim([100, 700])
+    # axs[0].set_ylim([-0.02, 0.25])
+    # axs[0].set_ylim([-0.02, 0.55])
+    axs[0].set_ylim([-0.02, 0.75])
     # axs[0].set_ylabel('$x_{\mathrm{QP}}$', fontsize=label_font)
     axs[0].tick_params(labelsize=tick_font)
     axs[0].tick_params(axis="x", direction="in", which='both')
@@ -165,12 +169,14 @@ if 1:
 
     axs[1].plot(f, Ic_f*1e9, 'k-', linewidth=4,
                 label='$I_{c}$')
-    axs[1].set_xlim([150, 650])
-    axs[1].set_ylim([6.5, 9.5])
+    # axs[1].set_xlim([150, 650])
+    # axs[1].set_ylim([6.5, 9.5])
+    axs[1].set_xlim([150, 1000])
+    axs[1].set_ylim([3, 9.5])
     # axs[1].set_ylabel('$I_{c}$ (nA)', fontsize=label_font)
     axs[1].tick_params(labelsize=tick_font)
     axs[1].set_xlabel('Transmitter frequency (GHz)', fontsize=label_font)
-    axs[1].set_xticks([200, 300, 400, 500, 600])
+    # axs[1].set_xticks([200, 300, 400, 500, 600])
     axs[1].tick_params(axis="x", direction="in", which='both')
     axs[1].tick_params(axis="y", direction="in", which='both')
     axs[1].tick_params(axis="x", width=1, length=6, which='both')
