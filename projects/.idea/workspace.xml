@@ -37,7 +37,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/.." />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
@@ -74,6 +74,9 @@
       <module name="projects" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/GapEngineering" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -159,6 +162,9 @@
       <module name="projects" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fluxNoise/python" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -234,6 +240,7 @@
       <workItem from="1590440101543" duration="7501000" />
       <workItem from="1590594338914" duration="6549000" />
       <workItem from="1590692918001" duration="13068000" />
+      <workItem from="1673126513687" duration="45000" />
     </task>
     <task id="LOCAL-00001" summary="Update- LIU">
       <created>1587742832457</created>
