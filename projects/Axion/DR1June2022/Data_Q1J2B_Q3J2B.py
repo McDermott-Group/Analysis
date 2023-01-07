@@ -42,14 +42,15 @@ for i in range(len(parity_rate_data_Q3)):
 
 plt.title('Parity Rate vs Radiator Bias')
 # plt.plot(4*times, np.abs(I + Q * 1j))
-plt.semilogy([(b-0.028)*(490)*(0.02)*484 for b in biases_Q3], parity_rate_Q3,marker='+',linestyle='None')
-plt.semilogy([(b-0.028)*(490)*(0.02)*484 for b in biases], parity_rate,marker='.',linestyle='None')
-plt.semilogy([(b-0.028)*(490)*(0.02)*484 for b in biases_in], parity_rate_in,marker='x',linestyle='None')
+plt.semilogy([np.abs(b-0.028)*(490)*(0.02)*484 for b in biases_Q3], parity_rate_Q3,marker='.',linestyle='None',label='Qubit+Reference',color='tab:purple')
+plt.semilogy([np.abs(b-0.028)*(490)*(0.02)*484 for b in biases], parity_rate,marker='+',linestyle='None',label='Qubit+Detector',color='r')
+#plt.semilogy([np.abs(b-0.028)*(490)*(0.02)*484 for b in biases_in], parity_rate_in,marker='x',linestyle='None')
 
 
 plt.grid(which='both')
 plt.ylim(4e2,4e3)
 plt.xlim(0,500)
+plt.legend()
 # plt.xlabel('Radiator Bias (mV)')
 plt.xlabel('Radiator Frequency (GHz)')
 plt.ylabel('Parity Rate (Hz)')

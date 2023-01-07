@@ -5,14 +5,17 @@ import os
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
-qb_id =3
+import matplotlib
+matplotlib.use('TkAgg')
+
+qb_id =1
 rad_id = 2
 
 base_path = ['Axion', '2022-09-22 - DR2']
 user = 'DCH'
 device_name = 'Axion3A'
-date = '09-28-22'
-experiment_base_name = 'PSD_Q{:d}_J{:d}B'.format(qb_id,rad_id)
+date = '09-30-22'
+experiment_base_name = 'PSD_Q{:d}_J{:d}B_Retightened'.format(qb_id,rad_id)
 
 expt_path = base_path + [user] + [device_name] + [date] + [experiment_base_name.replace(" ", "_")]
 
@@ -54,15 +57,16 @@ def getPSD(state,N_max,bias):
     T_parity = params[0]
     F_map = params[1]
     fit_psd = fit_PSD_target_function(freqs, T_parity, F_map)
-    plt.figure(figsize=(5, 4))
-    plt.loglog(freqs[1:], ave_psd[1:])
-    plt.loglog(freqs[1:], fit_psd[1:])
-    plt.title('Bias = {0:2.0f} mV | Parity Rate = {1:.0f} Hz | Fidelity = {2:2.0f}%'.format(1000*bias,1/T_parity,100*F_map))
-    plt.xlabel('Frequency (Hz)')
-    plt.ylabel('PSD (1/Hz)')
-    #plt.ylim([4e-5, 4e-3])
-    plt.tight_layout()
-    plt.show()
+    if False:
+        plt.figure(figsize=(5, 4))
+        plt.loglog(freqs[1:], ave_psd[1:])
+        plt.loglog(freqs[1:], fit_psd[1:])
+        plt.title('Bias = {0:2.0f} mV | Parity Rate = {1:.0f} Hz | Fidelity = {2:2.0f}%'.format(1000*bias,1/T_parity,100*F_map))
+        plt.xlabel('Frequency (Hz)')
+        plt.ylabel('PSD (1/Hz)')
+        #plt.ylim([4e-5, 4e-3])
+        plt.tight_layout()
+        plt.show()
     return 1/T_parity,F_map
 
     # return T_parity
@@ -113,7 +117,7 @@ print(parity_rate)
 plt.title('Parity Rate vs Radiator Bias')
 # plt.plot(4*times, np.abs(I + Q * 1j))
 plt.semilogy([b for b in biases], parity_rate,marker='.',linestyle='None')#(b-0.062)*(490)*(0.02)*484
-plt.xlabel('Radiator Frequency (GHz)')
+plt.xlabel('Radiator Bias (V from DAC)')
 plt.ylabel('Parity Rate (Hz)')
 plt.pause(0.1)
 
