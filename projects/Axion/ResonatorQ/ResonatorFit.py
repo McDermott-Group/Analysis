@@ -1,5 +1,7 @@
 from IQfit import *
 
+import matplotlib
+matplotlib.use('TkAgg')
 
 p = r"Axion\2022-09-08 - ADR3\Dave\Axion3A_20220802D_Ox3\09-08-22\CavitySpectroscopy_Power\HDF5Data"
 

@@ -3,11 +3,11 @@ from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 
 #Z:\mcdermott-group\data\Micromachining\2022-09-22 - DR2\MAS\MM_1\11-10-22\T1_Poisoning_vary_idle
-path = ['Micromachining', '2022-09-22 - DR2', 'MAS','MM_1','11-14-22', 'T1_Poisoning_vary_idle']
+path = ['Micromachining', '2023-02-28 - DR2', 'MAS','MM_sc_1.1','03-01-23', 'T1_Poisoning_vary_idle']
 dc = dataChest(path)
 contents = dc.ls()
 files = contents[0]
-f = files[3]
+f = files[1]
 print(f)
 dc.openDataset(f)
 varsList = dc.getVariables()
@@ -50,7 +50,7 @@ for j in range(dim_delay):
     # plt.plot(idle_sep, state_sep[:][j])
     # plt.show
     #fit to f(t)=A*exp(-B*t)+C
-    popt, pcov = curve_fit(func, idle_sep, state_sep[:][j], [0.7, 1/20000, 0.2])
+    popt, pcov = curve_fit(func, idle_sep, state_sep[:][j], [0.7, 1/60000, 0.2])
     gamma.append(popt[1])
 
 gamma = np.array(gamma)*1000
