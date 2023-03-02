@@ -9,19 +9,21 @@ psd=[7.98026915e-04,7.76034826e-04,7.44770116e-04,7.67770251e-04,7.85239702e-04,
 #('Q4_J2ParityUncertainty=', [4.484381178011137])
 #('Q4_J2Fidelity=', [0.6806103028660097])
 
-# plt.plot(f,psd)
-# plt.xlabel('Frequency,(Hz)')
-# plt.ylabel('PSD,(1/Hz)'),
-# plt.yscale('log')
-# plt.xscale('log')
-# plt.grid()
-# plt.legend()
-# plt.draw()
-# plt.show()
+plt.plot(f,psd,linewidth=1.5,color='b',marker='o',label='Data')
+plt.plot(f[:],[((4 * 1 * 612.4 * 0.6806** 2) / ((2 * 612.4) ** 2 + (2 * np.pi * freq) ** 2) + 1 * (1 -  0.6806 ** 2)/20000) for freq in f[:]],linewidth=2,color='r',label='Fit')
+plt.xlabel('Frequency,(Hz)')
+plt.ylabel('PSD,(1/Hz)'),
+plt.yscale('log')
+plt.xscale('log')
+plt.ylim([1e-5,1e-3])
+plt.grid()
+plt.legend()
+plt.draw()
+plt.show()
 
-"""Convert Data to 2D array"""
-Q4_PSD_1D_Data = []
-for i in range(len(f)):
-    d = [f[i], psd[i]]
-    Q4_PSD_1D_Data.append(d)
-np.savetxt('2021CircRadiator_Q4_PSD_1D_Data.txt', Q4_PSD_1D_Data)
+# """Convert Data to 2D array"""
+# Q4_PSD_1D_Data = []
+# for i in range(len(f)):
+#     d = [f[i], psd[i]]
+#     Q4_PSD_1D_Data.append(d)
+# np.savetxt('2021CircRadiator_Q4_PSD_1D_Data.txt', Q4_PSD_1D_Data)

@@ -12,13 +12,13 @@ QP_path = ('Z:/mcdermott-group/data/testProject/Keysight/DCH/NA/{}/{}/MATLABData
 # Z:\mcdermott-group\data\BlackBody\Circmon\LIU\CW20180514A_Ox2\08-19-21
 # date = '08-19-21'
 # date = 'JJRadiatorQPT_2021Aug19'
-date = '02-18-22'
+date = '02-13-22'
 # QBs = ['Q1','Q2','Q4']
-QBs=['Q3']
+QBs=['Q1']
 #J2Biaslist = np.arange(35000,80001,500)
-J2Biaslist=list(np.arange(684,909,4))+list(np.arange(916,1160,4))#list(np.arange(382,559,4))
+J2Biaslist=[0]#list(np.arange(684,909,4))+list(np.arange(916,1160,4))#list(np.arange(382,559,4))
 start_file = 0
-num_files =30
+num_files =25
 # J2Biaslist = [40, 42, 44]
 fparity = {}
 uparity = {}
@@ -35,12 +35,12 @@ for QB_id in QBs:
     if QB_id=='Q4':
         ylim=[10 ** (-5), 10 ** (-3)]
     for J2Bias in J2Biaslist:
-        experiment_name_PSD = ('PSD_'+str(J2Bias)+'mVJB2_'+QB_id+'_Narrow')
+        experiment_name_PSD = ('PSD_'+str(J2Bias)+'mVJB2_'+QB_id)
         PSD_file_Number = np.arange(start_file, start_file + num_files, 1)
         if(J2Bias < 909):
-            date = '02-18-22'
+            date = '02-14-22'
         else:
-            date = '02-17-22'
+            date = '02-14-22'
         PSD_file = [QP_path.format(date, experiment_name_PSD, experiment_name_PSD) + '_{:03d}.mat'.format(i) for i in PSD_file_Number]
         QPT_Q = QPTunneling_Harrison(name='{} with J2 = {} mV, {}GHz'.
                                   format(QB_id, str(J2Bias), str(0.48*2*(J2Bias-30))))
