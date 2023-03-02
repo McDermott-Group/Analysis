@@ -27,9 +27,9 @@ popt_1, pcov_1 = curve_fit(exponential, time, mean_1, p0=[0.6, 40000, 0.2])
 popt_2, pcov_2 = curve_fit(exponential, time, mean_2, p0=[0.6, 40000, 0.2])
 popt_4, pcov_4 = curve_fit(exponential, time, mean_4, p0=[0.6, 40000, 0.2])
 
-print popt_1
-print popt_2
-print popt_4
+print(popt_1)
+print(popt_2)
+print(popt_4)
 
 fig, ax = plt.subplots(1,1)
 ax.plot(time, data_1.T, 'C0', alpha=0.3)

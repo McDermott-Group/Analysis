@@ -1,6 +1,7 @@
 import numpy as np
 import noiselib
-reload(noiselib)
+import importlib
+importlib.reload(noiselib)
     
 class ve(object):
 
@@ -144,8 +145,8 @@ class ChargeJumps(object):
         q1 = noiselib.alias(q1, 0.5)
         q2 = noiselib.alias(q2, 0.5)
         n_corr = pve( np.sum( ( np.abs(q1) > thresh1 ) & ( np.abs(q2) > thresh2 ) ) )
-        print 1.*n_corr/pve( np.sum( ( np.abs(q1) > thresh1 ) ) )
-        print 1.*n_corr/pve( np.sum( ( np.abs(q2) > thresh2 ) ) )
+        print(1.*n_corr/pve( np.sum( ( np.abs(q1) > thresh1 ) ) ))
+        print(1.*n_corr/pve( np.sum( ( np.abs(q2) > thresh2 ) ) ))
         pABo = 1.*n_corr / pve(q1.size)
         return pABo
     

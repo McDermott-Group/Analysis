@@ -32,7 +32,7 @@ QP_path = ('Z:/mcdermott-group/data/fluxNoise2/DR1 - 2019-12-17/CorrFar/'
 CO = ChargeOffset()
 CO.add_dataset(charge_path)
 jumps, sigma = CO.get_jump_sizes()
-large_jumps = {l: np.append(False, np.abs(jumps[l]) > 0.1) for l in jumps.keys()}
+large_jumps = {l: np.append(False, np.abs(jumps[l]) > 0.1) for l in list(jumps.keys())}
 
 date = '03-21-20'
 QP_files_Q1 = np.arange(0, 489+1, 2)

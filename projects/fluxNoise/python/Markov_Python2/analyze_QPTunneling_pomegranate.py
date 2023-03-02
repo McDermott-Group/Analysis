@@ -269,7 +269,7 @@ def observed_to_recovered_signal_LIU(observed_signal,
     p_1e_VTB = np.log(readout_fidelity[1])
     p_0e_VTB = np.log(1.0 - readout_fidelity[1])
 
-    print p_0g_VTB, p_1g_VTB, p_0e_VTB, p_1e_VTB
+    print(p_0g_VTB, p_1g_VTB, p_0e_VTB, p_1e_VTB)
 
     probabilities = []
     if observed_signal[0] == 0:

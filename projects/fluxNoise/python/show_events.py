@@ -12,7 +12,8 @@ import noiselib
 from numba import jit
 import time
 import impact_lib
-reload(impact_lib)
+import importlib
+importlib.reload(impact_lib)
 from impact_lib import *
 import pickle
 import gc

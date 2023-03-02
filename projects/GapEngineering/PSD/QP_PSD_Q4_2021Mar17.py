@@ -24,4 +24,4 @@ QPT_List = [QPT_Q4]
 plotMultiFittedPSD(QPT_List)
 
 p1_psd = [QPT_Q4.T_parity]
-print (power, p1_psd)
+print(power, p1_psd)

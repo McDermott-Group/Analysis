@@ -1,19 +1,20 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import noiselib
-reload(noiselib)
+import importlib
+importlib.reload(noiselib)
 from noiselib import movingmean
 from QPTunneling import *
 import ChargeOffset
-reload(ChargeOffset)
+importlib.reload(ChargeOffset)
 from ChargeOffset import *
 import TwoMeasDataFile
-reload(TwoMeasDataFile)
+importlib.reload(TwoMeasDataFile)
 from TwoMeasDataFile import *
 from dataChest import dataChest
 from random import randrange
 import datasets
-reload(datasets)
+importlib.reload(datasets)
 import datasets as ds
 import re
 import pickle
@@ -244,7 +245,7 @@ reg = re.compile('Q1(Q\d)(Q\d)*')
 
 with open(dump_path+'dump_T1_files.dat', 'rb') as f:
     files = pickle.load(f)
-print len(files)
+print(len(files))
 qs = {('Q2',):0, ('Q4',):0, ('Q2','Q4'):0}
 for k,f in enumerate(files[:]): # 290
     Qs = list(reg.findall(f)[0])
@@ -283,7 +284,7 @@ for k,f in enumerate(files[:]): # 290
                                     or num not in blacklist[date]
                                     or t not in blacklist[date][num]]
     # data_files[f] = DF
-    print k, date, num, trigs
+    print(k, date, num, trigs)
     for trial, rep in trigs:
         DF.add_base_ramsey_trace(base_trace)
         # plt.figure()
@@ -339,5 +340,5 @@ ax.legend()
 plt.draw()
 plt.pause(0.05)
 
-print np.mean(M1_before_trig['Q2'])
-print np.mean(M1_before_trig['Q4'])
+print(np.mean(M1_before_trig['Q2']))
+print(np.mean(M1_before_trig['Q4']))

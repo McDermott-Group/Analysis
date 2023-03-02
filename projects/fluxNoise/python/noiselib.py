@@ -62,7 +62,7 @@ def loadmat(filename):
     data = spio.loadmat(filename, struct_as_record=False, squeeze_me=True, 
                                   verify_compressed_data_integrity=False)
     data = _check_keys(data)
-    keys = [key for key in data.keys() if key[0] != '_']
+    keys = [key for key in list(data.keys()) if key[0] != '_']
     if len(keys) == 1:
         data = data[keys[0]]['Data']
     return data
@@ -121,7 +121,7 @@ def loadmat_Liu(filename):
     data = spio.loadmat(filename, struct_as_record=False, squeeze_me=True,
                                   verify_compressed_data_integrity=False)
     data = _check_keys(data)
-    keys = [key for key in data.keys() if key[0] != '_']
+    keys = [key for key in list(data.keys()) if key[0] != '_']
     if len(keys) == 1:
         print(len(keys))
         data = data[keys[0]]    # Liu this is the difference
@@ -181,7 +181,7 @@ def loadmat_ExptVars(filename):
     data = spio.loadmat(filename, struct_as_record=False, squeeze_me=True,
                                   verify_compressed_data_integrity=False)
     data = _check_keys(data)
-    keys = [key for key in data.keys() if key[0] != '_']
+    keys = [key for key in list(data.keys()) if key[0] != '_']
     if len(keys) == 1:
         data = data[keys[0]]['ExptVars']
     return data
@@ -363,7 +363,7 @@ def matpaths(Q, date, fileName, fileNums, fluxNoise='fluxNoise2', **kwargs):
     if not isinstance(date, list):
         date = [date]
     if len(date) != len(fileNums):
-        print len(date), len(fileNums)
+        print(len(date), len(fileNums))
         raise Exception('The number of dates must match the number of lists of file numbers')
     dataroot = os.getenv('DATA_ROOT').replace('\\','/')
     file_paths = []

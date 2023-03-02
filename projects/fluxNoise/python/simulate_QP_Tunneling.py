@@ -2,7 +2,8 @@ import numpy as np
 from scipy.optimize import curve_fit
 from scipy.signal import periodogram
 import noiselib
-reload(noiselib)
+import importlib
+importlib.reload(noiselib)
 import matplotlib.pyplot as plt
 
 N = 5*8192 # length of line to calc self cpsd
@@ -29,7 +30,7 @@ rotation = 2. * np.pi * detuning * idle_time
 M = np.random.rand(n, N) < (0.5 + 0.3*np.sin(rotation))
 print('n=', n)
 print('N=', N)
-print (len(M))
+print(len(M))
 
 # avg_cpsd, f = noiselib.partition_and_avg_psd(M, fs)
 f, avg_cpsd = periodogram(M, fs=fs, return_onesided=True, axis=1)
@@ -46,7 +47,7 @@ f = f[~np.isnan(f)]
 f = f[~np.isnan(window_avg_psd)]
 window_avg_psd = window_avg_psd[~np.isnan(window_avg_psd)]
 popt, pcov = curve_fit(y, f, window_avg_psd, bounds=(0,np.inf))
-print popt[-1], 1./popt[-1], np.sum(dP)/(N*n*cycle_time)
+print(popt[-1], 1./popt[-1], np.sum(dP)/(N*n*cycle_time))
 
 # Plot
 fig, ax = plt.subplots()

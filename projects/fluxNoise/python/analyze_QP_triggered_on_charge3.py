@@ -1,19 +1,20 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import noiselib
-reload(noiselib)
+import importlib
+importlib.reload(noiselib)
 from noiselib import movingmean
 from QPTunneling import *
 import ChargeOffset
-reload(ChargeOffset)
+importlib.reload(ChargeOffset)
 from ChargeOffset import *
 import TwoMeasDataFile
-reload(TwoMeasDataFile)
+importlib.reload(TwoMeasDataFile)
 from TwoMeasDataFile import *
 from dataChest import dataChest
 from random import randrange
 import datasets
-reload(datasets)
+importlib.reload(datasets)
 import datasets as ds
 import shutil
 
@@ -82,7 +83,7 @@ whitelist = None
 blacklist = {}
 data_files = {}
 
-print len(files_QP)
+print(len(files_QP))
 for k,f in enumerate(files_QP[10:70]):
     path, num = noiselib.path_to_num(f)
     num = num + Q_A
@@ -130,7 +131,7 @@ for k,f in enumerate(files_QP[10:70]):
         # print XIY_upper, XIY_lower
         # print
         
-    print k, date, num, trigs
+    print(k, date, num, trigs)
     for trial, rep in trigs:
         # copy_path = 'C:\\Users\\lab_user\\Desktop\\for_livermore'
         # shutil.copy2( path.format(num), copy_path )
