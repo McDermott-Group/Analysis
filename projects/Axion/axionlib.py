@@ -55,13 +55,14 @@ class T1(object):
     def fit(self, save):
         popt, pcov = curve_fit(lambda t, a, b, c: a * np.exp(b * t) + c, self._idle_gate_times, self._dependent_variable_values,p0=[1,(-1/15),0])
         if save:
-            self.update_dataChest(int(-100/popt[1])/100)
+            self.update_dataChest(int(-100/popt[1])/100,round(popt[2],4))
         return popt
 
-    def update_dataChest(self, value):
+    def update_dataChest(self, t1,p1):
         d = dataChest(self._path)
         d.openDataset(self._file, modify = True)
-        d.addParameter('Fit T1', value, 'us', overwrite = True)
+        d.addParameter('Fit T1', t1, 'us', overwrite = True)
+        d.addParameter('Fit P1', p1, overwrite=True)
         d.addParameter('Fit Date Stamp', datetime.now().strftime("%Y-%m-%d"), overwrite = True)
 
 class T2(object):
