@@ -5,8 +5,13 @@ import os
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 import matplotlib
+matplotlib.use("TkAgg")
 
 DATACHEST_ROOT = 'Z:\\mcdermott-group\\data\\'
+
+def save_or_show_fig(save_path, save_name):
+    pass
+
 
 class T1(object):
 
@@ -38,22 +43,33 @@ class T1(object):
         plt.ylabel(self._dependent_variable_name)
         if fit:
             fit_parameters = self.fit(save)
-            plt.title('Q{:1d}: T1 = {:2d}us'.format(self._qubit_id,int(-1/fit_parameters[1])))
+            t1=(-1/fit_parameters[1])
+            if t1 > 2:
+                plt.title('Q{:1d}: T1 = {:2d}us'.format(self._qubit_id,int(t1)))
+            else:
+                plt.title('Q{:1d}: T1 = {:.2f}us'.format(self._qubit_id, t1))
             plt.plot(self._idle_gate_times, [fit_parameters[0]*np.exp(fit_parameters[1]*t)+fit_parameters[2] for t in self._idle_gate_times])
         if save:
             if save_path is None:
-                save_path = os.path.dirname(os.path.abspath(__file__))
+                save_path = os.path.join(*self._path[:-1])
             if save_name is None:
-                save_name = self._file.replace('.','_')
+                save_name =self._file.replace('.','_')
             plt.ioff()
-            plt.savefig(save_path+ '\\Figures\\' + save_name)
+            if not os.path.exists(DATACHEST_ROOT + save_path + '\\Figures\\'):
+                os.makedirs(DATACHEST_ROOT + save_path + '\\Figures\\')
+            plt.savefig(DATACHEST_ROOT + save_path + '\\Figures\\' + save_name)
             plt.close(fig)
         else:
             plt.ion()
             plt.show()
 
     def fit(self, save):
-        popt, pcov = curve_fit(lambda t, a, b, c: a * np.exp(b * t) + c, self._idle_gate_times, self._dependent_variable_values,p0=[1,(-1/15),0])
+        try:
+            popt, pcov = curve_fit(lambda t, a, b, c: a * np.exp(b * t) + c, self._idle_gate_times, self._dependent_variable_values,p0=[1,(-1/15),0])
+        except:
+            #The fit above tends to fail in the BB experiments when T1 is small and P1 is big. This is a quick fix:
+            popt, pcov = curve_fit(lambda t, a, b, c: a * np.exp(b * t) + c, self._idle_gate_times,
+                                   self._dependent_variable_values, p0=[0.5, (-1 / 1), 0.5])
         if save:
             self.update_dataChest(int(-100/popt[1])/100,round(popt[2],4))
         return popt
@@ -81,6 +97,7 @@ class P1(object):
         dependents = variables[1]
         #there absolutely has to be a better way of doing this, but:
         self._file = file
+        self._path = path
         self._biases = data[:,0]
         self._dependent_variable_values = []
         self._dependent_variable_name = dependent_variable
@@ -98,11 +115,13 @@ class P1(object):
         plt.ylabel(self._dependent_variable_name)
         if save:
             if save_path is None:
-                save_path = os.path.dirname(os.path.abspath(__file__))
+                save_path = os.path.join(*self._path[:-1])
             if save_name is None:
-                save_name = self._file.replace('.','_')
+                save_name =self._file.replace('.','_')
             plt.ioff()
-            plt.savefig(save_path+ '\\Figures\\' + save_name)
+            if not os.path.exists(DATACHEST_ROOT + save_path + '\\Figures\\'):
+                os.makedirs(DATACHEST_ROOT + save_path + '\\Figures\\')
+            plt.savefig(DATACHEST_ROOT + save_path + '\\Figures\\' + save_name)
             plt.close(fig)
         else:
             plt.ion()
@@ -181,15 +200,15 @@ class Parity(object):
             return 2 * (4 * F_map ** 2 / T_parity) / ((2 / T_parity) ** 2 + (2 * np.pi * f) ** 2) + 2 * (
                         1 - F_map ** 2) / fs
 
-        initial_guess_fidelity = np.arange(0.1, 1, 0.05)
-        initial_guess_parity = np.logspace(-4, -1, 5)
+        initial_guess_fidelity = np.arange(0, 1, 0.05)
+        initial_guess_parity = np.logspace(-4, 1, 5)
         covariance = float('inf')
         best_r_squared = float('inf')
         freqs,ave_psd = self.psd()
         for igf in initial_guess_fidelity:
             for igp in initial_guess_parity:
                 params_curr, params_covariance_curr = curve_fit(
-                    fit_PSD_target_function, freqs, ave_psd, p0=[igp, igf], bounds=([0.0001, 0], [0.1, 1]),
+                    fit_PSD_target_function, freqs, ave_psd, p0=[igp, igf], bounds=([0.0001, 0], [10, 1]),
                     method='trf')
 
                 residuals = ave_psd - fit_PSD_target_function(freqs, *params_curr)
@@ -247,3 +266,113 @@ class Parity(object):
         d.addParameter('Fit Fidelity', self._fit_fidelity, overwrite=True)
         d.addParameter('Fit Date Stamp', datetime.now().strftime("%Y-%m-%d"), overwrite = True)
         d.addParameter('Time Per Iteration', int(1e9/self._repetition_rate), overwrite=True)
+
+class IQBlobs(object):
+    _Igs = []
+    _Qgs = []
+    _Ies = []
+    _Qes = []
+    _qubit_id = 0
+
+    def __init__(self, path, files):
+        d = dataChest(path)
+        self._path = path
+        for file in files:
+            d.openDataset(file)
+            self._qubit_id = d.getParameter('Qubit ID')
+            variables = d.getVariables()
+            data = d.getData().transpose()
+            dependents = [variables[i][0][0].decode() for i in range(2)]
+            for i,var in enumerate(dependents):
+                if var == 'Ig':
+                    self._Igs = data[i]
+                elif var == 'Ie':
+                    self._Ies= data[i]
+                elif var == 'Qg':
+                    self._Qgs = data[i]
+                elif var == 'Qe':
+                    self._Qes = data[i]
+                else:
+                    raise Exception('Problem with Dependent Variables. Check that this is the right experiment.')
+
+    def plot(self, save=False, save_path=None, save_name=None):
+        fig = plt.figure()
+        plt.title('Q{:1d}: IQ Data'.format(self._qubit_id))
+        plt.xlabel('I (a.u.)')
+        plt.ylabel('Q (a.u.)')
+        plt.plot(self._Igs,self._Qgs,linestyle="None",marker='o',markersize='1')
+        plt.plot(self._Ies,self._Qes,linestyle="None",marker='o',markersize='1')
+        if save:
+            if save_path is None:
+                save_path = os.path.join(*self._path[:-1])
+            if save_name is None:
+                save_name = 'Q{:1d} IQ Data.png'.format(self._qubit_id)
+            plt.ioff()
+            if not os.path.exists(DATACHEST_ROOT + save_path + '\\Figures\\'):
+                os.makedirs(DATACHEST_ROOT + save_path + '\\Figures\\')
+            plt.savefig(DATACHEST_ROOT + save_path + '\\Figures\\' + save_name)
+            plt.close(fig)
+        else:
+            plt.ion()
+            plt.show()
+
+class TwoDimensionalRamsey(object):
+
+    def __init__(self, path, file, dependent_variable="Single Shot Occupation", sequence_name="X/2-Idle-Y/2"):
+        d = dataChest(path)
+        d.openDataset(file)
+        variables = d.getVariables()
+        data = d.getData()
+        independents = variables[0]
+        dependents = variables[1]
+        self._path = path
+        self._file = file
+        self._sequence_name = sequence_name
+        self._qubit_id = d.getParameter('Qubit ID')
+        transposed_data = np.transpose(data)
+        self._independent_1 = independents[0]
+        self._independent_2 = independents[1]
+        self._independent_1_values = np.sort(np.unique(transposed_data[0]))
+        self._independent_2_values = np.sort(np.unique(transposed_data[1]))
+        len_1 = len(self._independent_1_values)
+        len_2 = len(self._independent_2_values)
+        self._dependent_variable_values = np.empty([len_1,len_2])
+        data = data[np.lexsort((data[:,1],data[:,0]))]
+
+        idx = 0
+        for i,dependent in enumerate(dependents):
+            if dependent[0] == dependent_variable.encode():
+                idx = i + 2
+                self._dependent_variable = dependent
+                break
+        for i in range(len_1):
+            for j in range(len_2):
+                self._dependent_variable_values[i][j] = data[i*len_2+j][idx]
+        self._dependent_variable_values = self._dependent_variable_values.transpose()
+
+    def plot(self, save=False, save_path=None, save_name=None):
+        fig = plt.figure()
+        plt.xlabel('{0} ({1})'.format(self._independent_1[0].decode(),self._independent_1[3].decode()))
+        plt.ylabel('{0} ({1})'.format(self._independent_2[0].decode(),self._independent_2[3].decode()))
+        if self._dependent_variable[3].decode() != '':
+            plt.title('{0} \n {1} ({2})'.format(self._sequence_name,self._dependent_variable[0].decode(),self._dependent_variable[3].decode()))
+        else:
+            plt.title('{0} \n {1}'.format(self._sequence_name,self._dependent_variable[0].decode()))
+        c = plt.pcolor(np.log(self._independent_1_values),self._independent_2_values,self._dependent_variable_values)
+        fig.colorbar(c)
+        plt.show()
+
+class AxionTools:
+
+    def __init__(self, base_path, user, device_name, dates, experiment_base_name):
+        self._base_path = base_path
+        self._user = user
+        self._device_name = device_name
+        self._dates = dates
+        self._experiment_base_name = experiment_base_name
+
+        self._expt_paths = [base_path + [user] + [device_name] + [d] + [experiment_base_name.replace(" ", "_")] for d in dates]
+        self._paths = [os.path.join(*([r'Z:\mcdermott-group\data'] + expt_path)) for expt_path in self._expt_paths]
+
+    def filter_and_enumerate(self, qb_ids):
+        pass

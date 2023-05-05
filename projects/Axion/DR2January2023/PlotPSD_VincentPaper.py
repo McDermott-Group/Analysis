@@ -8,27 +8,27 @@ from scipy.optimize import curve_fit
 import matplotlib
 matplotlib.use('TkAgg')
 
-qb_id = 4
-rad_id = 1
+base_path = ['Blackbody', 'Circmon']
+user = 'LIU'
+device_name = 'CW20180514A_Ox2'
+dates = ['JJRadiatorQPT_2021Aug19_HighDensity']
+experiment_base_name ='Q2_PSD_39000uDACJ2/HDF5Data'
 
-base_path = ['Axion', '2023-01-23 - DR2']
-user = 'DCH'
-device_name = 'Axion4A'
-dates = ['01-30-23']
-experiment_base_name ='PSD_Q{:d}_J{:d}B'.format(qb_id,rad_id)
+expt_paths =  [base_path + [user] + [device_name] + [d] + [experiment_base_name.replace(" ", "_")] for d in dates]
+paths = [os.path.join(*([r'Z:\mcdermott-group\data'] + expt_path)) for expt_path in expt_paths]
 
 expt_paths =  [base_path + [user] + [device_name] + [d] + [experiment_base_name.replace(" ", "_")] for d in dates]
 
 paths = [os.path.join(*([r'Z:\mcdermott-group\data'] + expt_path)) for expt_path in expt_paths]
 
-time_per_iteration = 100000
+time_per_iteration = 50e-6
 
-#
+
 def getPSD(state,N_max,bias):
     print(np.average(state))
     psd = [None]*N_max
     for i in range(N_max):
-        freqs, psd[i] = signal.periodogram(state[i],fs=1e9/time_per_iteration,return_onesided=True)
+        freqs, psd[i] = signal.periodogram(state[i],fs=1/time_per_iteration,return_onesided=True)
     ave_psd = np.average(psd,axis=0)
     fs = 1e9/time_per_iteration
     def fit_PSD_target_function(f, T_parity, F_map):
@@ -79,12 +79,10 @@ for i in range(len(paths)):
     path = paths[i]
     expt_path = expt_paths[i]
     for dataSet in os.listdir(path):
-        if r'ejo0455jet' not in str(dataSet):
-            continue
         try:
             print(dataSet)
             d = dataChest(os.path.join(path),dataSet)
-            d.cd(expt_path)zz
+            d.cd(expt_path)
             d.openDataset(dataSet)
         except Exception as e:
             print(e)
@@ -92,11 +90,6 @@ for i in range(len(paths)):
             continue
         try:
             bias=100
-            #bias = d.getParameter('J3 Voltage Bias')[0]
-            # if np.abs(bias/0.49)>=0.178:#bias/0.49 < -0.20:
-            #     continue
-            # if bias <=-0.06699999999999992 or bias in np.arange(-0.30,-.345,0.01):#in np.arange(-.23,.275,0.01):
-            #     continue
             data = d.getData()
             data = data.transpose()
             N_max = int(np.amax(data[0]) + 1) # Number of Iterations
@@ -112,25 +105,6 @@ for i in range(len(paths)):
         except:
             print('Error retreiving data')
             continue
-        try:
-            rate, fidelity = getPSD(a,N_max,bias=1)
-            if (rate < 10000  or fidelity < 0.9) and rate > 900:
-                biases.append(bias)
-                parity_rate.append(rate)
-        except Exception as e:
-            print(e)
-            print('Fitting Failed')
-            continue
-
-print(biases)
-print(parity_rate)
-
-plt.figure()
-plt.title('Parity Rate vs Radiator Bias')
-# plt.plot(4*times, np.abs(I + Q * 1j))
-plt.semilogy([b for b in biases], parity_rate,marker='.',linestyle='None')#(b-0.062)*(490)*(0.02)*484
-plt.xlabel('Radiator Bias (V from DAC)')
-plt.ylabel('Parity Rate (Hz)')
-plt.pause(0.1)
+        print(getPSD(a,N_max,bias=1))
 
 
