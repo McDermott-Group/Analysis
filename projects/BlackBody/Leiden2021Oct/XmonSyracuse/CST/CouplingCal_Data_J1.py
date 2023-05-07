@@ -57,6 +57,8 @@ if 1: # import CST data
     Q3.import_data(fileQ3, JQ3, C_eff=C_eff)
     f_Q3 = Q3.Antenna["f"]
     eQ3 = Q3.Antenna["e_c"]
+    Z_Re = Q3.Antenna["Z_Re"]
+    Z_Im = Q3.Antenna["Z_Im"]
 
     f_scale = np.sqrt(e_eff / 6.0)
     f = f / 1e9
@@ -71,11 +73,13 @@ if 1: # import CST data
     # plt.plot(f, eQ1, color="red", marker="o", markersize=4, label='Q1')
     # plt.plot(f, eQ2, color="blue", marker="o", markersize=4, label='Q2')
     # plt.plot(f, eQ3, color="black", marker="o", markersize=4, label='Q3')
-    #
-    # plt.legend()
-    # plt.show()
+    plt.plot(f, Z_Re, color="red", marker="o", markersize=4, label='Q2')
+    plt.plot(f, Z_Im, color="yellow", marker="o", markersize=4, label='Q2')
 
-if 1:
+    plt.legend()
+    plt.show()
+
+if 0:
     """
     Import measurement data starts
     """
@@ -114,7 +118,7 @@ Calculate the noise bandwidth
 """
 Q2 # polished
 """
-if 1:
+if 0:
 
     label_font = 16
     tick_font = 13

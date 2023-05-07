@@ -13,6 +13,9 @@ from scipy.stats import linregress
 from scipy.stats import sem
 from sklearn.mixture import GaussianMixture
 from scipy.optimize import curve_fit
+from scipy.linalg import expm
+import random
+from numpy import copy
 
 
 def add_2Ddata_from_matlab(file_path, v1, v2, d):
@@ -37,6 +40,345 @@ def add_CST_SimResultFromTxt(file):
     t = np.loadtxt(file, usecols=[0], skiprows=3)
     d = np.loadtxt(file, usecols=[1], skiprows=3)
     return [t, d]
+
+
+class SFQ_3level_sweep(object):
+    """
+    From Robert's matlab code
+    """
+
+    def __init__(self):
+        # qubit parameters
+        self.w01 = 2*pi*4.903e9     # 01 transition
+        self.w12 = 2*pi*4.625e9   # 12 transition
+        self.c_qb = 77*1e-15    # qb capacitance
+        self.c_sfq = 200*1e-18    # sfq-qb coupling capacitance
+        self.t0 = 2 * (2*pi/self.w01)   # subharmonics * clock time
+
+        # qubit states vectors
+        self.g = np.array([1.0, 0, 0])  # ground state
+        self.p = (1/np.sqrt(2))*np.array([1.0, 1.0, 0])  #
+        self.p_i = (1/np.sqrt(2))*np.array([1.0, 1.0j, 0])  #
+        self.m = (1/np.sqrt(2))*np.array([1.0, -1.0, 0])  #
+        self.m_i = (1/np.sqrt(2))*np.array([1.0, -1.0j, 0])  #
+        self.e = np.array([0.0, 1.0, 0])  # excited state
+
+        self.proj1 = np.array([0.0, 1.0, 0])  # 1 state projection
+        self.proj2 = np.array([0.0, 0.0, 1.0])  # 2 state projection
+
+        #
+        self.a = np.array([[0, 1.0, 0], [0, 0, np.sqrt(2)], [0, 0, 0]])
+        self.a_dag = np.array([[0, 0, 0], [1.0, 0, 0], [0, np.sqrt(2), 0]])
+        self.ufr = np.array([[1.0, 0, 0],
+                             [0, np.exp(-1j*self.w01*self.t0), 0],
+                             [0, 0, np.exp(-1j*(self.w01+self.w12)*self.t0)]])
+
+    def analyze(self):
+        # n = np.linspace(10, 500, 491)
+        n = np.arange(10, 501, 1)
+        # print(n)
+
+        F_g = np.zeros(len(n))
+        F_e = np.zeros(len(n))
+        F_m = np.zeros(len(n))
+        F_mi = np.zeros(len(n))
+        F_p = np.zeros(len(n))
+        F_pi = np.zeros(len(n))
+        F_avg = np.zeros(len(n))
+
+        p2_g = np.zeros(len(n))
+        p2_e = np.zeros(len(n))
+        p2_m = np.zeros(len(n))
+        p2_mi = np.zeros(len(n))
+        p2_p = np.zeros(len(n))
+        p2_pi = np.zeros(len(n))
+        p2_avg = np.zeros(len(n))
+
+        ufr = 1.0*self.ufr
+        proj2 = 1.0*self.proj2
+
+        uni = np.array([[1.0, 0, 0], [0, 1.0, 0], [0, 0, 1.0]])  # unitary matrix
+
+        for i in range(len(n)):
+
+            psi_g = 1.0*self.g
+            psi_e = 1.0*self.e
+            psi_m = 1.0*self.m
+            psi_mi = 1.0*self.m_i
+            psi_p = 1.0*self.p
+            psi_pi = 1.0*self.p_i
+
+            phi = pi / (2.0 * n[i])
+            # print('phi=', phi)
+            usfq = expm((phi / 2) * (self.a - self.a_dag))
+            # usfq = expm(self.a-self.a_dag)
+            # print('usfq=', usfq)
+            for ii in range(n[i]):
+                psi_g = usfq.dot(psi_g)
+                psi_e = usfq.dot(psi_e)
+                psi_m = usfq.dot(psi_m)
+                psi_mi = usfq.dot(psi_mi)
+                psi_p = usfq.dot(psi_p)
+                psi_pi = usfq.dot(psi_pi)
+                uni = usfq.dot(uni)
+
+                if ii < n[i]:   # free evolution
+                    psi_g = ufr.dot(psi_g)
+                    psi_e = ufr.dot(psi_e)
+                    psi_m = ufr.dot(psi_m)
+                    psi_mi = ufr.dot(psi_mi)
+                    psi_p = ufr.dot(psi_p)
+                    psi_pi = ufr.dot(psi_pi)
+                    uni = ufr.dot(uni)
+
+            F_g[i] = np.abs(np.dot(self.m, psi_g))**2
+            F_e[i] = np.abs(np.dot(self.p, psi_e))**2
+            F_m[i] = np.abs(np.dot(self.e, psi_m))**2
+            F_mi[i] = np.abs(np.dot(self.m_i, psi_pi))**2
+            F_p[i] = np.abs(np.dot(self.g, psi_p))**2
+            F_pi[i] = np.abs(np.dot(self.p_i, psi_mi))**2
+            F_avg[i] = (1/6.0)*(F_g[i]+F_e[i]+F_m[i]+F_mi[i]+F_p[i]+F_pi[i])
+
+            p2_g[i] = np.abs(np.dot(proj2, psi_g))**2
+            p2_e[i] = np.abs(np.dot(proj2, psi_e))**2
+            p2_m[i] = np.abs(np.dot(proj2, psi_m))**2
+            p2_mi[i] = np.abs(np.dot(proj2, psi_mi))**2
+            p2_p[i] = np.abs(np.dot(proj2, psi_p))**2
+            p2_pi[i] = np.abs(np.dot(proj2, psi_pi))**2
+            p2_avg[i] = (1/6.0)*(p2_g[i]+p2_e[i]+p2_m[i]+p2_mi[i]+p2_p[i]+p2_pi[i])
+
+        plt.plot(n, p2_g, 'b.', label='p2_g')
+        plt.plot(n, p2_e, 'r-', label='p2_e')
+        # plt.plot(n, p2_avg, 'r--')
+        plt.plot(n, 1.0-F_avg, 'k--', label='avg error')
+        # plt.plot(n, 1.0-F_g, label='avg error')
+        # plt.plot(n, 1.0-F_e, label='avg error')
+        # plt.plot(n, 1.0-F_m, label='F_m avg error')
+        # plt.plot(n, 1.0-F_mi, label='F_mi avg error')
+        # plt.plot(n, 1.0-F_p, label='F_p avg error')
+        # plt.plot(n, 1.0-F_pi, label='F_pi avg error')
+        plt.xscale('log')
+        plt.yscale('log')
+        plt.legend()
+        plt.show()
+
+
+class SFQ_3level_sweep_error(object):
+    """
+    From Robert's matlab code
+    """
+
+    def __init__(self):
+        # qubit parameters
+        self.w01 = 2*pi*4.903e9     # 01 transition
+        self.w12 = 2*pi*4.625e9   # 12 transition
+        # self.w01 = 2*pi*5e9     # 01 transition
+        self.w12 = 2*pi*4.8e9   # 12 transition
+        self.c_qb = 77*1e-15    # qb capacitance
+        self.c_sfq = 200*1e-18    # sfq-qb coupling capacitance
+        self.t0 = 4 * (2*pi/self.w01)   # subharmonics * clock time
+
+        # qubit states vectors
+        self.g = np.array([1.0, 0, 0])  # ground state
+        self.p = (1/np.sqrt(2))*np.array([1.0, 1.0, 0])  #
+        self.p_i = (1/np.sqrt(2))*np.array([1.0, 1.0j, 0])  #
+        self.m = (1/np.sqrt(2))*np.array([1.0, -1.0, 0])  #
+        self.m_i = (1/np.sqrt(2))*np.array([1.0, -1.0j, 0])  #
+        self.e = np.array([0.0, 1.0, 0])  # excited state
+
+        self.proj0 = np.array([1.0, 0.0, 0])  # 0 state projection
+        self.proj1 = np.array([0.0, 1.0, 0])  # 1 state projection
+        self.proj2 = np.array([0.0, 0.0, 1.0])  # 2 state projection
+
+        self.a = np.array([[0, 1.0, 0], [0, 0, np.sqrt(2)], [0, 0, 0]])
+        self.a_dag = np.array([[0, 0, 0], [1.0, 0, 0], [0, np.sqrt(2), 0]])
+        self.ufr = np.array([[1.0, 0, 0],
+                             [0, np.exp(-1j*self.w01*self.t0), 0],
+                             [0, 0, np.exp(-1j*(self.w01+self.w12)*self.t0)]])
+
+    def analyze_3D(self):
+        data_2D = []
+        p2data_2D = []
+        # p_SFQ = np.linspace(0.75, 1.0, 26)
+        # p_SFQ = np.linspace(0.0, 0.05, 26)
+        p_SFQ = np.linspace(0.96, 0.98, 6)
+        for i in range(len(p_SFQ)):
+            print('analyze_3D', p_SFQ[i])
+            data = self._analyze_2D(P_SFQ=p_SFQ[i])
+            data_1D = [p_SFQ[i], data[0][0], data[1][0]]
+            p2data_1D = [p_SFQ[i], data[2][0], data[3][0]]
+            data_2D.append(data_1D)
+            p2data_2D.append(p2data_1D)
+            # print('data_1D=', data_1D)
+        # print('data_2D=', data_2D)
+        # np.savetxt('SFQ_Error_LosePulses.txt', data_2D)
+        # np.savetxt('SFQ_Error_GainPulses.txt', data_2D)
+        # np.savetxt('SFQ_Error_GainPulses.txt', data_2D)
+        # np.savetxt('SFQ_P2_GainPulses.txt', p2data_2D)
+        # np.savetxt('SFQ_Error_LosePulses.txt', data_2D)
+        # np.savetxt('SFQ_P2_LosePulses.txt', p2data_2D)
+        data_2D = np.array(data_2D)
+        p2data_2D = np.array(p2data_2D)
+        plt.errorbar(p2data_2D[:, 0], p2data_2D[:, 1], yerr=p2data_2D[:, 2])
+        plt.errorbar(data_2D[:, 0], data_2D[:, 1], yerr=data_2D[:, 2])
+        plt.show()
+
+    def _analyze_2D(self, P_SFQ = 1.0):
+        n_SFQ_len = 75
+        F_avg_2D_len = 1 # number of average
+        n_SFQ = np.arange(0, n_SFQ_len, 1)
+        F_avg_2D = np.zeros((F_avg_2D_len, n_SFQ_len))
+        p2_avg_2D = np.zeros((F_avg_2D_len, n_SFQ_len))
+        p_SFQ = P_SFQ
+        # print(len(F_avg_2D))
+        for i in range(len(F_avg_2D)):
+            f_avg_1D = self._analyze_1D(n_SFQ_Len=n_SFQ_len, P_SFQ=p_SFQ)[0]
+            p2_avg_1D = self._analyze_1D(n_SFQ_Len=n_SFQ_len, P_SFQ=p_SFQ)[1]
+            F_avg_2D[i] = f_avg_1D
+            p2_avg_2D[i] = p2_avg_1D
+
+        F_avg_2D_avg = np.average(F_avg_2D, axis=0)
+        F_avg_2D_se = np.std(F_avg_2D, axis=0)
+        p2_avg_2D_avg = np.average(p2_avg_2D, axis=0)
+        p2_avg_2D_se = np.std(p2_avg_2D, axis=0)
+        # print('F_avg_2D_se=', F_avg_2D_se)
+        max_ind = np.where(F_avg_2D_avg == F_avg_2D_avg.max())
+
+        # print('max_ind=', max_ind)
+        # print('1-F_avg_2D_avg[max_ind]=', (1-F_avg_2D_avg[max_ind])*1e3)
+        # print('F_avg_2D_se[max_ind]=', 1e3*F_avg_2D_se[max_ind]/np.sqrt(F_avg_2D_len))
+        # plt.plot(n_SFQ, 1-F_avg_2D_avg)
+        # # plt.plot(n_SFQ, F_avg_2D_se)
+        # # plt.xscale('log')
+        # plt.yscale('log')
+        # plt.legend()
+        # plt.show()
+        return 1-F_avg_2D_avg[max_ind], F_avg_2D_se[max_ind]/np.sqrt(F_avg_2D_len), p2_avg_2D_avg[max_ind]\
+            , p2_avg_2D_se[max_ind]/np.sqrt(F_avg_2D_len)
+
+    def _analyze_1D(self, n_SFQ_Len=100, P_SFQ=1.0):
+        n_SFQ = np.arange(0, n_SFQ_Len, 1)   # number of SFQ pulses applied
+
+        F_g = np.zeros(n_SFQ_Len)
+        F_e = np.zeros(n_SFQ_Len)
+        F_m = np.zeros(n_SFQ_Len)
+        F_mi = np.zeros(n_SFQ_Len)
+        F_p = np.zeros(n_SFQ_Len)
+        F_pi = np.zeros(n_SFQ_Len)
+        F_avg = np.zeros(n_SFQ_Len)
+
+        p0_g = np.zeros(n_SFQ_Len)
+        p0_e = np.zeros(n_SFQ_Len)
+        p1_g = np.zeros(n_SFQ_Len)
+        p1_e = np.zeros(n_SFQ_Len)
+        p2_g = np.zeros(n_SFQ_Len)
+        p2_e = np.zeros(n_SFQ_Len)
+
+        p2_m = np.zeros(n_SFQ_Len)
+        p2_mi = np.zeros(n_SFQ_Len)
+        p2_p = np.zeros(n_SFQ_Len)
+        p2_pi = np.zeros(n_SFQ_Len)
+        p2_avg = np.zeros(n_SFQ_Len)
+
+        ufr = 1.0*self.ufr
+        proj0 = 1.0*self.proj0
+        proj1 = 1.0*self.proj1
+        proj2 = 1.0*self.proj2
+
+        uni = np.array([[1.0, 0, 0], [0, 1.0, 0], [0, 0, 1.0]])  # unitary matrix
+        n_pi = 96  # need 100 pulses to achieve pi gate
+        phi = pi / n_pi
+        usfq = expm((phi / 2) * (self.a - self.a_dag))
+
+        psi_g = 1.0 * self.g
+        psi_e = 1.0 * self.e
+        psi_m = 1.0 * self.m
+        psi_mi = 1.0 * self.m_i
+        psi_p = 1.0 * self.p
+        psi_pi = 1.0 * self.p_i
+
+        p_SFQ = P_SFQ
+
+        for i in n_SFQ:
+            # print('i=', i)
+            run_SFQ = np.random.choice(np.array([0, 1]), p=[1-p_SFQ, p_SFQ])
+            # print('run_SFQ=', run_SFQ)
+            if run_SFQ: # if run_SFQ==1, then apply the SFQ pulses, otherwise lose the pulse
+                # H_SFQ
+                psi_g = usfq.dot(psi_g)
+                psi_e = usfq.dot(psi_e)
+                psi_m = usfq.dot(psi_m)
+                psi_mi = usfq.dot(psi_mi)
+                psi_p = usfq.dot(psi_p)
+                psi_pi = usfq.dot(psi_pi)
+                uni = usfq.dot(uni)
+
+            ## H_SFQ
+            # psi_g = usfq.dot(psi_g)
+            # psi_e = usfq.dot(psi_e)
+            # psi_m = usfq.dot(psi_m)
+            # psi_mi = usfq.dot(psi_mi)
+            # psi_p = usfq.dot(psi_p)
+            # psi_pi = usfq.dot(psi_pi)
+            # uni = usfq.dot(uni)
+
+            # H_fr
+            psi_g = ufr.dot(psi_g)
+            psi_e = ufr.dot(psi_e)
+            psi_m = ufr.dot(psi_m)
+            psi_mi = ufr.dot(psi_mi)
+            psi_p = ufr.dot(psi_p)
+            psi_pi = ufr.dot(psi_pi)
+            uni = ufr.dot(uni)
+
+            F_g[i] = np.abs(np.dot(self.m, psi_g))**2
+            F_e[i] = np.abs(np.dot(self.p, psi_e))**2
+            F_m[i] = np.abs(np.dot(self.e, psi_m))**2
+            F_mi[i] = np.abs(np.dot(self.m_i, psi_pi))**2
+            F_p[i] = np.abs(np.dot(self.g, psi_p))**2
+            F_pi[i] = np.abs(np.dot(self.p_i, psi_mi))**2
+            F_avg[i] = (1/6.0)*(F_g[i]+F_e[i]+F_m[i]+F_mi[i]+F_p[i]+F_pi[i])
+
+            p0_g[i] = np.abs(np.dot(proj0, psi_g))**2
+            p0_e[i] = np.abs(np.dot(proj0, psi_e))**2
+
+            p1_g[i] = np.abs(np.dot(proj1, psi_g))**2
+            p1_e[i] = np.abs(np.dot(proj1, psi_e))**2
+
+            p2_g[i] = np.abs(np.dot(proj2, psi_g))**2
+            p2_e[i] = np.abs(np.dot(proj2, psi_e))**2
+
+            p2_m[i] = np.abs(np.dot(proj2, psi_m))**2
+            p2_mi[i] = np.abs(np.dot(proj2, psi_mi))**2
+            p2_p[i] = np.abs(np.dot(proj2, psi_p))**2
+            p2_pi[i] = np.abs(np.dot(proj2, psi_pi))**2
+            p2_avg[i] = (1/6.0)*(p2_g[i]+p2_e[i]+p2_m[i]+p2_mi[i]+p2_p[i]+p2_pi[i])
+
+        # plt.plot(n_SFQ, p0_g+p1_g+p2_g, 'b.', label='p_g')
+        # plt.plot(n_SFQ, p0_e+p1_e+p2_e, 'r-', label='p_e')
+
+        # plt.plot(n_SFQ, p0_g, 'b.', label='p1_g')
+        # plt.plot(n_SFQ, p0_e, 'r-', label='p1_e')
+
+        # plt.plot(n_SFQ, p1_g, 'b.', label='p1_g')
+        # plt.plot(n_SFQ, p1_e, 'r-', label='p1_e')
+        #
+        # plt.plot(n_SFQ, p2_g, 'b.', label='p2_g')
+        # plt.plot(n_SFQ, p2_e, 'r-', label='p2_e')
+        plt.plot(n_SFQ, 1.0-F_avg, 'k--', label='avg error')
+        # plt.plot(n_SFQ, 1.0-F_g, label='avg error')
+        # plt.plot(n_SFQ, 1.0-F_e, label='avg error')
+        # plt.plot(n_SFQ, 1.0-F_m, label='F_m avg error')
+        # plt.plot(n_SFQ, 1.0-F_mi, label='F_mi avg error')
+        # plt.plot(n_SFQ, 1.0-F_p, label='F_p avg error')
+        # plt.plot(n_SFQ, 1.0-F_pi, label='F_pi avg error')
+        # plt.xscale('log')
+
+        # plt.yscale('log')
+        plt.legend()
+        plt.show()
+        return F_avg, p2_avg
+        # return p2_g
 
 
 class T1_QP_1D(object):
@@ -522,7 +864,8 @@ class T1_QP_2D_Linear(object):
         # numberofJJs = 4
         f_on = 1.22617  # on resonant drive freq
         # f_off = 1.200  # off resonant drive freq
-        f_off = 1.0810  # off resonant drive freq
+        # f_off = 1.0810  # off resonant drive freq
+        f_off = 1.21  # off resonant drive freq
         avgClen_on = 91   # ns avg clifford gate length = 91 ns on resonance
         avgClen_off = (f_on/f_off)*avgClen_on   # ns off resonance
         if self.NoF == 1:
@@ -543,7 +886,7 @@ class T1_QP_2D_Linear(object):
         :param time:
         :return:
         """
-        n = 50  # first 20 elements
+        n = 20  # first 20 elements
         time = time[:n]
         P1_1D = P1_1D[:n]
         # p0 = [20e3, 2, 0]  # initial guess
@@ -769,20 +1112,23 @@ class DeepSubharmonics(object):
                              # data_type1='Q',
                              # data_type1='Amplitude',
                              # data_type1='Phase',
-                             data_type1='Projected_Occupation',
-                             # data_type1='Weighted_Occupation',
+                             # data_type1='Projected_Occupation',
+                             data_type1='Weighted_Occupation',
                              # data_type2='SFQ_Pulse_Duration'):
                              data_type2='SFQ_Drive_to_RO'):
         f0 = file_path[0]
         data0 = noiselib.loadmat(f0)
         occ_2D = data0[data_type1]
         Time_Dep = data0[data_type2]
+        icheck = 0
         for f in file_path[1:]:
             data = noiselib.loadmat(f)
             occ_1D = np.array(data[data_type1])
             # print('occ_1D[0]=', occ_1D[0])
-            # if occ_1D[0] > 0.2:
+            # if occ_1D[0] > 0.1 and occ_1D[0] < 0.22:
             occ_2D = np.vstack((occ_2D, occ_1D))
+                # icheck = icheck + 1
+        # print('icheck=', icheck)
 
         """Update parameters"""
         self.Time_Dep = Time_Dep
@@ -1251,9 +1597,10 @@ class Purity_Paper_ErrorBudget(object):
         axs[0].set_ylabel('Sequence Purity', fontsize=label_font)
 
         time = np.arange(0, 101, 1)
-        t_Cliff = 39*2.33333
+        t_Cliff = 90.4
         T1_base = 26.0  # us
-        Twhite_base = 2 * T1_base  # us
+        # Twhite_base = 2 * T1_base  # us
+        Twhite_base = 20.0  # us
         Texp_base = 3 / (1 / T1_base + 1 / Twhite_base)
         k_base = 1 / (Texp_base * 1000) * 100  # from Zijun Chen's thesis
 
@@ -1266,19 +1613,25 @@ class Purity_Paper_ErrorBudget(object):
         # axs[1].plot(time, time * k_base, 'k--',
         #          label='Base incoherent error= {:.3f} % (per 10 ns)'
         #          .format(k_base * 10))
-        plt.errorbar(t_Cliff, 100-98.810, yerr=0.09, fmt="o", color='r', capsize=3.0, ms=8, label='Cliff total')
-        plt.errorbar(t_Cliff, 0.96429, yerr=0.0156259, fmt="d", color='k', capsize=3.0, ms=10, label='Cliff incoherent')
-        plt.errorbar(t_Cliff, t_Cliff * k_base, fmt="*", color='b', capsize=3.0, ms=12, label='Cliff base incoherent')
+        plt.errorbar(t_Cliff, 100-98.810, yerr=0.09, fmt="o", color='r', capsize=3.0, ms=8, label='Total Clifford error')
+        plt.errorbar(t_Cliff, 0.96429, yerr=0.0156259, fmt="d", color='k', capsize=3.0, ms=10, label='Incoherent error')
+        # plt.errorbar(t_Cliff, t_Cliff * k_base, fmt="*", color='b', capsize=3.0, ms=12, label='Cliff base incoherent')
+        plt.errorbar(time, time * k_base, fmt="--", color='b', capsize=3.0, ms=12, label='Baseline incoherent error')
 
-        plt.errorbar(79, 100-99.151, yerr=0.169, fmt="s", color='r', capsize=3.0, ms=8, label='X')
-        plt.errorbar(39, 100-99.503, yerr=0.160, fmt="s", color='y', capsize=3.0, ms=8, label='X/2')
-        plt.errorbar(39, 100-99.383, yerr=0.128, fmt="s", color='g', capsize=3.0, ms=8, label='-X/2')
+        plt.errorbar(80, 100-99.151, yerr=0.169, fmt="s", color='r', capsize=3.0, ms=8, label='X')
+        plt.errorbar(40, 100-99.503, yerr=0.160, fmt="s", color='y', capsize=3.0, ms=8, label='X/2')
+        plt.errorbar(40, 100-99.383, yerr=0.128, fmt="s", color='g', capsize=3.0, ms=8, label='-X/2')
 
-        plt.errorbar(79, 100-99.125, yerr=0.179, fmt="v", color='b', capsize=3.0, ms=8, label='Y')
-        plt.errorbar(39, 100-99.377, yerr=0.180, fmt="v", color='c', capsize=3.0, ms=8, label='Y/2')
-        plt.errorbar(39, 100-99.338, yerr=0.169, fmt="v", color='m', capsize=3.0, ms=8, label='-Y/2')
+        plt.errorbar(80, 100-99.125, yerr=0.179, fmt="v", color='b', capsize=3.0, ms=8, label='Y')
+        plt.errorbar(40, 100-99.377, yerr=0.180, fmt="v", color='c', capsize=3.0, ms=8, label='Y/2')
+        plt.errorbar(40, 100-99.338, yerr=0.169, fmt="v", color='m', capsize=3.0, ms=8, label='-Y/2')
 
-        plt.legend(loc=2, prop={'size': legend_font}, frameon=False)
+
+        ax = plt.gca()
+        handles, labels = ax.get_legend_handles_labels()
+        # remove the errorbars
+        handles = [h[0] for h in handles]
+        plt.legend(handles, labels, loc=2, prop={'size': legend_font}, frameon=False)
         axs[1].set_xlim([0, 100])
         axs[1].set_ylim([0.0, 1.3])
         axs[1].set_yticks([0.0, 0.4, 0.8, 1.2])
@@ -1749,15 +2102,24 @@ class RB_AllGates_Paper(object):
         tick_font = 20
         legend_font = 16
 
-        plt.legend(loc=(0.64, 0.32), frameon=False, prop={'size': legend_font}, handletextpad=0)
+        ax = plt.gca()
+        handles, labels = ax.get_legend_handles_labels()
+        # remove the errorbars
+        handles = [h[0] for h in handles]
+
+        ax.legend(handles, labels, loc=(0.64, 0.32), frameon=False, prop={'size': legend_font}, handletextpad=0)
         plt.xlim([0, 100])
-        plt.ylim([0.33, 0.9])
+        # plt.ylim([0.33, 0.9]) # over4
+        plt.ylim([0.31, 0.94])   # over2
+        plt.yticks([0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
         plt.tick_params(labelsize=tick_font, direction="in", width=1.5, length=6)
         plt.xlabel('m - Number of Cliffords', fontsize=label_font)
         plt.ylabel('Sequence Fidelity', fontsize=label_font)
+
         path = 'Z:\mcdermott-group\data\sfq\SFQMCMPaperWriting\FromPython'
-        plt.savefig(path + '\RBIRB.pdf', format='pdf', bbox_inches='tight', dpi=1200)
-        plt.show()
+        # plt.savefig(path + '\RBIRB.pdf', format='pdf', bbox_inches='tight', dpi=1200)
+        # plt.savefig(path + '\RBIRBOver2.pdf', format='pdf', bbox_inches='tight', dpi=1200)
+        # plt.show()
 
 
 class RB_AllGates(object):
