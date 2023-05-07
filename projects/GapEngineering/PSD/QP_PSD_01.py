@@ -86,7 +86,7 @@ class QP_PSD(object):
         for ig in initial_guess:
             # print f_data[:10]
             params_curr, params_covariance_curr = optimize.curve_fit(self.fit_PSD_target_function, self.f_data, self.Spp_avg, p0=[100, ig], method='trf')
-            print params_covariance_curr
+            print(params_covariance_curr)
             if params_covariance_curr[0][0] < covariance:
                 self.params = params_curr
                 params_covariance = params_covariance_curr

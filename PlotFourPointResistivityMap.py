@@ -107,11 +107,11 @@ if __name__ == '__main__':
 
     t=None
     if t is None:
-        rhoUnits = u'$\Omega$/▫'
+        rhoUnits = '$\Omega$/▫'
         rhoScale = 1
         thickness = ''
     else:
-        rhoUnits = u'$\mu\Omega\cdot$cm'
+        rhoUnits = '$\mu\Omega\cdot$cm'
         rhoScale = t/(uOhm*cm)
         thickness = '(t=%.1f$\AA$)' % (t/Angstrom)
 
@@ -129,15 +129,15 @@ if __name__ == '__main__':
     r = np.sqrt(fpp.x**2+fpp.y**2)
     i = np.amin(r)
     rhoCenter = fpp.rho[i]
-    print "At center:", rhoCenter, "Ohm/sq"
-    print "Min:", rhoMin
-    print "Mean:", rhoMean
-    print "Max:", rhoMax
+    print("At center:", rhoCenter, "Ohm/sq")
+    print("Min:", rhoMin)
+    print("Mean:", rhoMean)
+    print("Max:", rhoMax)
     #exit()
 
     #title = '%s %s- recipe: %s (%d points)\n' % (wafer, thickness, recipe, nPoints)
     #title += u'mean: %.3f %s (%.3f - %.3f %s)' % (rhoMean, rhoUnits, rhoMin, rhoMax, rhoUnits)
-    title = u'Wafer %s\nmean %.3f %s (%.3f - %.3f %s)' % (wafer, rhoMean, rhoUnits, rhoMin, rhoMax, rhoUnits)
+    title = 'Wafer %s\nmean %.3f %s (%.3f - %.3f %s)' % (wafer, rhoMean, rhoUnits, rhoMin, rhoMax, rhoUnits)
     mpl.figure()
     mpl.suptitle(title)
     mpl.imshow(onWafer, extent=extent, origin='lower')
@@ -164,7 +164,7 @@ if __name__ == '__main__':
     mpl.xlabel('x [mm]')
     mpl.ylabel('y [mm]')
     cb = mpl.colorbar(im)
-    cb.set_label(u'%')
+    cb.set_label('%')
     mpl.savefig('%s_Percent.pdf' % wafer)
     mpl.savefig('%s_Percent.png' % wafer)
     mpl.show()

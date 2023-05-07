@@ -1,9 +1,10 @@
 import noiselib
-reload(noiselib)
+import importlib
+importlib.reload(noiselib)
 import numpy as np
 import matplotlib.pyplot as plt
 
-files = noiselib.matpaths('Q2', '05-07-20', 'Calibration_split', range(22,279+1))
+files = noiselib.matpaths('Q2', '05-07-20', 'Calibration_split', list(range(22,279+1)))
 o = None
 
 for i,f in enumerate(files):

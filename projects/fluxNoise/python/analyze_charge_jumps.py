@@ -3,13 +3,14 @@ import matplotlib.pyplot as plt
 import noiselib
 from QPTunneling import *
 import ChargeOffset
-reload(ChargeOffset)
+import importlib
+importlib.reload(ChargeOffset)
 from ChargeOffset import *
 import ChargeJumps
-reload(ChargeJumps)
+importlib.reload(ChargeJumps)
 from ChargeJumps import *
 import datasets
-reload(datasets)
+importlib.reload(datasets)
 import datasets as ds
 import pickle
 
@@ -50,7 +51,7 @@ def make_CO_from_datasets(ds_list):
             base = 'fluxNoise2'
         CO.add_dataset(charge_path.format(base, d['Q'], d['path_charge']))
         if 'exclude_data' in d and type(d['exclude_data'])==dict:
-            for q,ex in d['exclude_data'].items():
+            for q,ex in list(d['exclude_data'].items()):
                 for start,end in ex:
                     CO.limit_dataset(q,start=start,end=end)
         if 'exclude_data' in d and type(d['exclude_data'])==list:
@@ -114,7 +115,7 @@ def pubplot_err_2d():
         ax.scatter(err1[np.abs(dq2)>0.1], err2[np.abs(dq2)>0.1], marker='.', s=4)
         # ax.scatter(err1, err2, c='k', marker='.', s=4)
         noiselib.format_hist2d(i, ax, log=True, cprofile=qcolors)
-    noiselib.edges_tick_labels([ax1,ax2,ax3], xlabel=u'$\epsilon_1$', ylabel=u'$\epsilon_1$')
+    noiselib.edges_tick_labels([ax1,ax2,ax3], xlabel='$\epsilon_1$', ylabel='$\epsilon_1$')
     
     plt.draw()
     plt.pause(0.05)
@@ -124,24 +125,24 @@ def pubplot_hist_1d():
     fig, ax = plt.subplots(1, 1, figsize=(fullwidth,3.), num=700)
     jumps, sigma = CO.get_jump_sizes(plot=True, ax=ax, qubits='Q1')
     ax.lines[1].set_visible(False)
-    print np.sum(np.abs(jumps['Q1'])>0.05)
-    print sigma
+    print(np.sum(np.abs(jumps['Q1'])>0.05))
+    print(sigma)
 
 def pubplot_hist_2d():
     CO = make_CO_from_datasets(ds_all4)
     jumps, sigma = CO.get_jump_sizes(plot=False)
-    print sigma
+    print(sigma)
     fig,(ax1,ax2,ax3) = plt.subplots(1,3, figsize=(fullwidth,2.6))
     CJ = ChargeJumps()
-    print CO.plot_charge_correlation('Q3','Q4',ax=ax1, thresh=(thresh,thresh), plot=False)
-    print CJ.plot_charge_correlation(CO, 'Q3','Q4',ax=ax1, thresh=(thresh,thresh), plot=False)
+    print(CO.plot_charge_correlation('Q3','Q4',ax=ax1, thresh=(thresh,thresh), plot=False))
+    print(CJ.plot_charge_correlation(CO, 'Q3','Q4',ax=ax1, thresh=(thresh,thresh), plot=False))
     _,_,_,_,g3,dg3,g4,dg4 = CO.plot_charge_correlation('Q3','Q4',ax=ax1, thresh=(thresh,thresh))
     _,_,_,_,g1,dg1,g2,dg2 = CO.plot_charge_correlation('Q1','Q2',ax=ax2, thresh=(thresh,thresh))
     CO.plot_charge_correlation('Q1','Q3',ax=ax3, thresh=(thresh,thresh))
     # ax2.get_yaxis().set_visible(False); ax3.get_yaxis().set_visible(False);
     for i,ax in enumerate([ax1,ax2,ax3]):
         noiselib.format_hist2d(i, ax, cprofile=qcolors)
-        ax.set_xticklabels([u'\u22120.5','',0,'',0.5])
+        ax.set_xticklabels(['\u22120.5','',0,'',0.5])
         ax.set_yticklabels(['','','','',''])
         ax.set_xlabel('')
         ax.set_ylabel('')
@@ -151,15 +152,15 @@ def pubplot_hist_2d():
         ax.plot( line_x, -line_y, 'k:' )
         ax.plot(-line_y,  line_x, 'k:' )
         ax.plot( line_y,  line_x, 'k:' )
-    ax1.set_yticklabels([u'\u22120.5','',0,'',0.5])
+    ax1.set_yticklabels(['\u22120.5','',0,'',0.5])
     ax1.set_xlabel('$\Delta q_\mathrm{1}$ ($e$)')
     ax1.set_ylabel('$\Delta q_\mathrm{2}$ ($e$)')
     ax1.xaxis.labelpad = 0
     ax1.yaxis.labelpad = -12
     fig.savefig(fig_path+'\qq.pdf')
-    print 'jump assymetry:'
+    print('jump assymetry:')
     for q in ('Q1','Q2','Q3','Q4'):
-        print '    {}: {:.3f}'.format( q, 1.*np.sum(jumps[q]>thresh)/np.sum(np.abs(jumps[q])>thresh) )
+        print('    {}: {:.3f}'.format( q, 1.*np.sum(jumps[q]>thresh)/np.sum(np.abs(jumps[q])>thresh) ))
     plt.draw()
     plt.pause(0.05)
     return np.array([g1,g2,g3,g4]), np.array([dg1,dg2,dg3,dg4])

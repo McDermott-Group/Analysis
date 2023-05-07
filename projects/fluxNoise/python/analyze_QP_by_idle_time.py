@@ -1,14 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import noiselib
-reload(noiselib)
+import importlib
+importlib.reload(noiselib)
 from noiselib import movingmean
 from QPTunneling import *
 import ChargeOffset
-reload(ChargeOffset)
+importlib.reload(ChargeOffset)
 from ChargeOffset import *
 import TwoMeasDataFile
-reload(TwoMeasDataFile)
+importlib.reload(TwoMeasDataFile)
 from TwoMeasDataFile import *
 
 """This analyzes a single set of data to try to look at the white noise floor 

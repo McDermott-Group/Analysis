@@ -85,7 +85,7 @@ def meas_trace_recover(meas_trace, readout_fidelity):
     p_e0_VTB = -p_e1_VTB
     p_g0_VTB = np.log(0.95)
     p_g1_VTB = -p_g0_VTB
-    print p_g0_VTB, p_g1_VTB, p_e0_VTB, p_e1_VTB
+    print(p_g0_VTB, p_g1_VTB, p_e0_VTB, p_e1_VTB)
 
 
     probabilities = []

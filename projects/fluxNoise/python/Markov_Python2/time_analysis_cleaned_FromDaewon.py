@@ -1,4 +1,4 @@
-from __future__ import print_function, division
+
 import pomegranate as pome
 import numpy as np
 from numpy import *

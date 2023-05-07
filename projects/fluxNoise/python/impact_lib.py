@@ -286,7 +286,7 @@ class MainWindow(gl.GLViewWidget):
 
         inner_circle = self._circle((x,y), r_inner)
         vertexes = np.concatenate([[[x,y,h]], inner_circle])
-        pts = range(1,len(vertexes))
+        pts = list(range(1,len(vertexes)))
         faces = np.array([ [0,pts[i],pts[i+1]] for i in range(-1,len(pts)-1) ])
         self.addItem( gl.GLMeshItem(vertexes=vertexes, faces=faces, color=pg.glColor('k')) )
 
@@ -465,7 +465,7 @@ class Controller(QtGui.QApplication):
         n = self.n_events
         for i in range(n):
             try:
-                e = track_gen.next()
+                e = next(track_gen)
             except StopIteration:
                 print('extra event attempt')
                 continue

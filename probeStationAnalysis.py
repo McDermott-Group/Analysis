@@ -37,7 +37,7 @@ class probeTest(object):
         chest = dataChest(path[:-1])
         chest.openDataset(path[-1])
         dataOrder = ('die', 'index', 'area', 'range', 'resistance')
-        self.data = [dict(zip(dataOrder,row)) for row in chest.getData()
+        self.data = [dict(list(zip(dataOrder,row))) for row in chest.getData()
                      if not np.isnan(row[2]) \
                      and (row[2] not in bounds \
                           or (row[4]>bounds[row[2]][0] \
@@ -68,7 +68,7 @@ class probeTest(object):
         chest = dataChest(path[:-1])
         chest.openDataset(path[-1])
         dataOrder = ('die', 'index', 'area', 'range', 'resistance')
-        self.calibration_data = [dict(zip(dataOrder,row)) for row in chest.getData()]
+        self.calibration_data = [dict(list(zip(dataOrder,row))) for row in chest.getData()]
         cal_dict = {row['index']:row['resistance'] for row in self.calibration_data}
         for row in self.data:
             row['resistance_cal_file'] = 1./( 1./row['resistance'] - 1./cal_dict[row['index']] )
@@ -104,7 +104,7 @@ class probeTest(object):
         """Returns a dictionary of {area:average Jc}.  Uses gap 2\Delta/e (in uV),
         and returns critical current density (in A/cm^2)."""
         avg = self.meanR()
-        for a in avg.keys():
+        for a in list(avg.keys()):
             r = avg[a]
             avg[a] = np.pi/4*gap*1e-6/r/(a*1e-12) /1e4
         return avg
