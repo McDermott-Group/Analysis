@@ -671,7 +671,7 @@ Calculate effective blackbody temperature
 # Tbb1 = 407e-3   # 407,408
 # Tbb2 = 459e-3   # 458,460
 # Tbb4 = 488e-3   # 487,489
-# PRQ1 = getPhotonRate(eQ1, f_SFQ, Tbb1)
+PRQ1 = getPhotonRate(eQ1, f_SFQ, Tbb1)
 # PRQ2 = getPhotonRate(eQ2, f_SFQ, Tbb2)
 # PRQ4 = getPhotonRate(eQ4, f_SFQ, Tbb4)
 # print('PRQ1=', PRQ1[0])

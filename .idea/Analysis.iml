@@ -6,8 +6,10 @@
       <sourceFolder url="file://$MODULE_DIR$/projects/fluxNoise/python" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/projects/BlackBody" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/projects/SFQ" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/projects/Axion" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/IQfit" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 2.7" jdkType="Python SDK" />
+    <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PyDocumentationSettings">

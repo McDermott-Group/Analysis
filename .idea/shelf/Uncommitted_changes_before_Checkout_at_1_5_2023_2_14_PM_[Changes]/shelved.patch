@@ -1,0 +1,380 @@
+Index: projects/.idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"84d2569e-8c60-4380-b499-09e41eda5a32\" name=\"Default\" comment=\"Make things into a class. Well done!.- LIU\">\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"CoverageDataManager\">\r\n    <SUITE FILE_PATH=\"coverage/projects$projects.coverage\" NAME=\"projects Coverage Results\" MODIFIED=\"1586273060118\" SOURCE_PROVIDER=\"com.intellij.coverage.DefaultCoverageFileProvider\" RUNNER=\"coverage.py\" COVERAGE_BY_TEST_ENABLED=\"true\" COVERAGE_TRACING_ENABLED=\"false\" WORKING_DIRECTORY=\"\" />\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"Jupyter Notebook\" />\r\n        <option value=\"Python Script\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$/..\" />\r\n  </component>\r\n  <component name=\"JupyterTrust\" id=\"797a6c2a-c039-486c-baff-110363fe7315\" />\r\n  <component name=\"ProjectId\" id=\"1axSy41EhhRLH9uMhNziQJCoueu\" />\r\n  <component name=\"ProjectLevelVcsManager\" settingsEditedManually=\"true\">\r\n    <ConfirmationsSetting value=\"2\" id=\"Add\" />\r\n  </component>\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\">\r\n    <property name=\"RunOnceActivity.OpenProjectViewOnStart\" value=\"true\" />\r\n    <property name=\"RunOnceActivity.ShowReadmeOnStart\" value=\"true\" />\r\n    <property name=\"SHARE_PROJECT_CONFIGURATION_FILES\" value=\"true\" />\r\n    <property name=\"WebServerToolWindowFactoryState\" value=\"false\" />\r\n    <property name=\"last_opened_file_path\" value=\"$PROJECT_DIR$/..\" />\r\n    <property name=\"nodejs_interpreter_path.stuck_in_default_project\" value=\"undefined stuck path\" />\r\n    <property name=\"nodejs_npm_path_reset_for_default_project\" value=\"true\" />\r\n    <property name=\"settings.editor.selected.configurable\" value=\"com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable\" />\r\n  </component>\r\n  <component name=\"RecentsManager\">\r\n    <key name=\"CopyFile.RECENT_KEYS\">\r\n      <recent name=\"C:\\Repositories\\Analysis\\projects\\GapEngineering\\Markov_Python2\" />\r\n      <recent name=\"C:\\Repositories\\Analysis\\projects\\GapEngineering\" />\r\n    </key>\r\n    <key name=\"MoveFile.RECENT_KEYS\">\r\n      <recent name=\"C:\\Repositories\\Analysis\\projects\\GapEngineering\\Arxiv\" />\r\n      <recent name=\"C:\\Repositories\\Analysis\\projects\" />\r\n    </key>\r\n  </component>\r\n  <component name=\"RunManager\" selected=\"Python.QP_PSD\">\r\n    <configuration name=\"projects\" type=\"JupiterNotebook\" factoryName=\"Jupyter Notebook\">\r\n      <module name=\"projects\" />\r\n      <option name=\"INTERPRETER_OPTIONS\" value=\"\" />\r\n      <option name=\"PARENT_ENVS\" value=\"true\" />\r\n      <envs>\r\n        <env name=\"PYTHONUNBUFFERED\" value=\"1\" />\r\n      </envs>\r\n      <option name=\"SDK_HOME\" value=\"\" />\r\n      <option name=\"WORKING_DIRECTORY\" value=\"\" />\r\n      <option name=\"IS_MODULE_SDK\" value=\"false\" />\r\n      <option name=\"ADD_CONTENT_ROOTS\" value=\"true\" />\r\n      <option name=\"ADD_SOURCE_ROOTS\" value=\"true\" />\r\n      <EXTENSION ID=\"PythonCoverageRunConfigurationExtension\" runner=\"coverage.py\" />\r\n      <option name=\"additionalOptions\" value=\"\" />\r\n      <option name=\"ipnbHost\" value=\"127.0.0.1\" />\r\n      <option name=\"ipnbPort\" value=\"8888\" />\r\n    </configuration>\r\n    <configuration name=\"QP_PSD\" type=\"PythonConfigurationType\" factoryName=\"Python\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <module name=\"projects\" />\r\n      <option name=\"INTERPRETER_OPTIONS\" value=\"\" />\r\n      <option name=\"PARENT_ENVS\" value=\"true\" />\r\n      <option name=\"SDK_HOME\" value=\"\" />\r\n      <option name=\"WORKING_DIRECTORY\" value=\"$PROJECT_DIR$/GapEngineering\" />\r\n      <option name=\"IS_MODULE_SDK\" value=\"true\" />\r\n      <option name=\"ADD_CONTENT_ROOTS\" value=\"true\" />\r\n      <option name=\"ADD_SOURCE_ROOTS\" value=\"true\" />\r\n      <EXTENSION ID=\"PythonCoverageRunConfigurationExtension\" runner=\"coverage.py\" />\r\n      <option name=\"SCRIPT_NAME\" value=\"C:\\Repositories\\Analysis\\projects\\GapEngineering\\QP_PSD.py\" />\r\n      <option name=\"PARAMETERS\" value=\"\" />\r\n      <option name=\"SHOW_COMMAND_LINE\" value=\"true\" />\r\n      <option name=\"EMULATE_TERMINAL\" value=\"false\" />\r\n      <option name=\"MODULE_MODE\" value=\"false\" />\r\n      <option name=\"REDIRECT_INPUT\" value=\"false\" />\r\n      <option name=\"INPUT_FILE\" value=\"\" />\r\n      <method v=\"2\" />\r\n    </configuration>\r\n    <configuration default=\"true\" type=\"PythonConfigurationType\" factoryName=\"Python\">\r\n      <module name=\"projects\" />\r\n      <option name=\"INTERPRETER_OPTIONS\" value=\"\" />\r\n      <option name=\"PARENT_ENVS\" value=\"true\" />\r\n      <envs>\r\n        <env name=\"PYTHONUNBUFFERED\" value=\"1\" />\r\n      </envs>\r\n      <option name=\"SDK_HOME\" value=\"\" />\r\n      <option name=\"WORKING_DIRECTORY\" value=\"\" />\r\n      <option name=\"IS_MODULE_SDK\" value=\"false\" />\r\n      <option name=\"ADD_CONTENT_ROOTS\" value=\"true\" />\r\n      <option name=\"ADD_SOURCE_ROOTS\" value=\"true\" />\r\n      <EXTENSION ID=\"PythonCoverageRunConfigurationExtension\" runner=\"coverage.py\" />\r\n      <option name=\"SCRIPT_NAME\" value=\"\" />\r\n      <option name=\"PARAMETERS\" value=\"\" />\r\n      <option name=\"SHOW_COMMAND_LINE\" value=\"true\" />\r\n      <option name=\"EMULATE_TERMINAL\" value=\"false\" />\r\n      <option name=\"MODULE_MODE\" value=\"false\" />\r\n      <option name=\"REDIRECT_INPUT\" value=\"false\" />\r\n      <option name=\"INPUT_FILE\" value=\"\" />\r\n      <method v=\"2\" />\r\n    </configuration>\r\n    <configuration name=\"analyze_QP_rate_stats\" type=\"PythonConfigurationType\" factoryName=\"Python\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <module name=\"projects\" />\r\n      <option name=\"INTERPRETER_OPTIONS\" value=\"\" />\r\n      <option name=\"PARENT_ENVS\" value=\"true\" />\r\n      <envs>\r\n        <env name=\"PYTHONUNBUFFERED\" value=\"1\" />\r\n      </envs>\r\n      <option name=\"SDK_HOME\" value=\"\" />\r\n      <option name=\"WORKING_DIRECTORY\" value=\"$PROJECT_DIR$/GapEngineering/Markov_Python2\" />\r\n      <option name=\"IS_MODULE_SDK\" value=\"true\" />\r\n      <option name=\"ADD_CONTENT_ROOTS\" value=\"true\" />\r\n      <option name=\"ADD_SOURCE_ROOTS\" value=\"true\" />\r\n      <EXTENSION ID=\"PythonCoverageRunConfigurationExtension\" runner=\"coverage.py\" />\r\n      <option name=\"SCRIPT_NAME\" value=\"$PROJECT_DIR$/GapEngineering/Markov_Python2/analyze_QP_rate_stats.py\" />\r\n      <option name=\"PARAMETERS\" value=\"\" />\r\n      <option name=\"SHOW_COMMAND_LINE\" value=\"true\" />\r\n      <option name=\"EMULATE_TERMINAL\" value=\"false\" />\r\n      <option name=\"MODULE_MODE\" value=\"false\" />\r\n      <option name=\"REDIRECT_INPUT\" value=\"false\" />\r\n      <option name=\"INPUT_FILE\" value=\"\" />\r\n      <method v=\"2\" />\r\n    </configuration>\r\n    <configuration name=\"analyze_QP_triggered_on_charge2\" type=\"PythonConfigurationType\" factoryName=\"Python\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <module name=\"projects\" />\r\n      <option name=\"INTERPRETER_OPTIONS\" value=\"\" />\r\n      <option name=\"PARENT_ENVS\" value=\"true\" />\r\n      <envs>\r\n        <env name=\"PYTHONUNBUFFERED\" value=\"1\" />\r\n      </envs>\r\n      <option name=\"SDK_HOME\" value=\"\" />\r\n      <option name=\"WORKING_DIRECTORY\" value=\"$PROJECT_DIR$/fluxNoise/python\" />\r\n      <option name=\"IS_MODULE_SDK\" value=\"true\" />\r\n      <option name=\"ADD_CONTENT_ROOTS\" value=\"true\" />\r\n      <option name=\"ADD_SOURCE_ROOTS\" value=\"true\" />\r\n      <EXTENSION ID=\"PythonCoverageRunConfigurationExtension\" runner=\"coverage.py\" />\r\n      <option name=\"SCRIPT_NAME\" value=\"$PROJECT_DIR$/fluxNoise/python/analyze_QP_triggered_on_charge2.py\" />\r\n      <option name=\"PARAMETERS\" value=\"\" />\r\n      <option name=\"SHOW_COMMAND_LINE\" value=\"true\" />\r\n      <option name=\"EMULATE_TERMINAL\" value=\"false\" />\r\n      <option name=\"MODULE_MODE\" value=\"false\" />\r\n      <option name=\"REDIRECT_INPUT\" value=\"false\" />\r\n      <option name=\"INPUT_FILE\" value=\"\" />\r\n      <method v=\"2\" />\r\n    </configuration>\r\n    <configuration name=\"analyze_charge_QP\" type=\"PythonConfigurationType\" factoryName=\"Python\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <module name=\"projects\" />\r\n      <option name=\"INTERPRETER_OPTIONS\" value=\"\" />\r\n      <option name=\"PARENT_ENVS\" value=\"true\" />\r\n      <option name=\"SDK_HOME\" value=\"\" />\r\n      <option name=\"WORKING_DIRECTORY\" value=\"$PROJECT_DIR$/fluxNoise/python\" />\r\n      <option name=\"IS_MODULE_SDK\" value=\"true\" />\r\n      <option name=\"ADD_CONTENT_ROOTS\" value=\"true\" />\r\n      <option name=\"ADD_SOURCE_ROOTS\" value=\"true\" />\r\n      <EXTENSION ID=\"PythonCoverageRunConfigurationExtension\" runner=\"coverage.py\" />\r\n      <option name=\"SCRIPT_NAME\" value=\"$PROJECT_DIR$/fluxNoise/python/analyze_charge_QP.py\" />\r\n      <option name=\"PARAMETERS\" value=\"\" />\r\n      <option name=\"SHOW_COMMAND_LINE\" value=\"true\" />\r\n      <option name=\"EMULATE_TERMINAL\" value=\"false\" />\r\n      <option name=\"MODULE_MODE\" value=\"false\" />\r\n      <option name=\"REDIRECT_INPUT\" value=\"false\" />\r\n      <option name=\"INPUT_FILE\" value=\"\" />\r\n      <method v=\"2\" />\r\n    </configuration>\r\n    <configuration name=\"analyze_readout_fidelity_stats (1)\" type=\"PythonConfigurationType\" factoryName=\"Python\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <module name=\"projects\" />\r\n      <option name=\"INTERPRETER_OPTIONS\" value=\"\" />\r\n      <option name=\"PARENT_ENVS\" value=\"true\" />\r\n      <envs>\r\n        <env name=\"PYTHONUNBUFFERED\" value=\"1\" />\r\n      </envs>\r\n      <option name=\"SDK_HOME\" value=\"\" />\r\n      <option name=\"WORKING_DIRECTORY\" value=\"$PROJECT_DIR$/GapEngineering/Markov_Python2\" />\r\n      <option name=\"IS_MODULE_SDK\" value=\"true\" />\r\n      <option name=\"ADD_CONTENT_ROOTS\" value=\"true\" />\r\n      <option name=\"ADD_SOURCE_ROOTS\" value=\"true\" />\r\n      <EXTENSION ID=\"PythonCoverageRunConfigurationExtension\" runner=\"coverage.py\" />\r\n      <option name=\"SCRIPT_NAME\" value=\"$PROJECT_DIR$/GapEngineering/Markov_Python2/analyze_readout_fidelity_stats.py\" />\r\n      <option name=\"PARAMETERS\" value=\"\" />\r\n      <option name=\"SHOW_COMMAND_LINE\" value=\"true\" />\r\n      <option name=\"EMULATE_TERMINAL\" value=\"false\" />\r\n      <option name=\"MODULE_MODE\" value=\"false\" />\r\n      <option name=\"REDIRECT_INPUT\" value=\"false\" />\r\n      <option name=\"INPUT_FILE\" value=\"\" />\r\n      <method v=\"2\" />\r\n    </configuration>\r\n    <recent_temporary>\r\n      <list>\r\n        <item itemvalue=\"Python.QP_PSD\" />\r\n        <item itemvalue=\"Python.analyze_charge_QP\" />\r\n        <item itemvalue=\"Python.analyze_QP_triggered_on_charge2\" />\r\n        <item itemvalue=\"Python.analyze_readout_fidelity_stats (1)\" />\r\n        <item itemvalue=\"Python.analyze_QP_rate_stats\" />\r\n      </list>\r\n    </recent_temporary>\r\n  </component>\r\n  <component name=\"SvnConfiguration\">\r\n    <configuration />\r\n  </component>\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"84d2569e-8c60-4380-b499-09e41eda5a32\" name=\"Default\" comment=\"\" />\r\n      <created>1586271915372</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1586271915372</updated>\r\n      <workItem from=\"1587676006138\" duration=\"1094000\" />\r\n      <workItem from=\"1587678402906\" duration=\"20618000\" />\r\n      <workItem from=\"1587758273720\" duration=\"23000\" />\r\n      <workItem from=\"1587758553176\" duration=\"66000\" />\r\n      <workItem from=\"1587759464200\" duration=\"3000\" />\r\n      <workItem from=\"1587760604966\" duration=\"64000\" />\r\n      <workItem from=\"1587760680728\" duration=\"8612000\" />\r\n      <workItem from=\"1587830347779\" duration=\"6088000\" />\r\n      <workItem from=\"1588047133352\" duration=\"13888000\" />\r\n      <workItem from=\"1588611680859\" duration=\"745000\" />\r\n      <workItem from=\"1588617982430\" duration=\"179000\" />\r\n      <workItem from=\"1588778964497\" duration=\"1264000\" />\r\n      <workItem from=\"1588780795296\" duration=\"2080000\" />\r\n      <workItem from=\"1590000737299\" duration=\"12491000\" />\r\n      <workItem from=\"1590437741007\" duration=\"2350000\" />\r\n      <workItem from=\"1590440101543\" duration=\"7501000\" />\r\n      <workItem from=\"1590594338914\" duration=\"6549000\" />\r\n      <workItem from=\"1590692918001\" duration=\"13068000\" />\r\n    </task>\r\n    <task id=\"LOCAL-00001\" summary=\"Update- LIU\">\r\n      <created>1587742832457</created>\r\n      <option name=\"number\" value=\"00001\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00001\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1587742832457</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00002\" summary=\"Pomegranate summarized- LIU\">\r\n      <created>1587753244621</created>\r\n      <option name=\"number\" value=\"00002\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00002\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1587753244621</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00003\" summary=\"Pomegranate works for the python 2 now- LIU\">\r\n      <created>1587763512678</created>\r\n      <option name=\"number\" value=\"00003\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00003\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1587763512678</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00004\" summary=\"Add the HMM correction model to noiselib.py- LIU\">\r\n      <created>1587768492044</created>\r\n      <option name=\"number\" value=\"00004\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00004\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1587768492044</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00005\" summary=\"Everything works in the virtual environment. Next make it compatible with lab computers' default environment- LIU\">\r\n      <created>1587833124298</created>\r\n      <option name=\"number\" value=\"00005\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00005\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1587833124298</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00006\" summary=\"Compatible with lab computer default setup.- LIU\">\r\n      <created>1588779519375</created>\r\n      <option name=\"number\" value=\"00006\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00006\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1588779519375</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00007\" summary=\"Compatible with lab computer default setup.- LIU\">\r\n      <created>1590000485168</created>\r\n      <option name=\"number\" value=\"00007\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00007\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1590000485168</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00008\" summary=\"Start ChargeReset play.- LIU\">\r\n      <created>1590006723042</created>\r\n      <option name=\"number\" value=\"00008\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00008\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1590006723042</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00009\" summary=\"Fix the initial guess issue by passing 5-10 guesses and choose the best fit. Need to find a way to make deal with the period.- LIU\">\r\n      <created>1590077380928</created>\r\n      <option name=\"number\" value=\"00009\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00009\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1590077380928</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00010\" summary=\"Start playing with PSD fit. The code starts working but the fit looks not optimized.- LIU\">\r\n      <created>1590447070495</created>\r\n      <option name=\"number\" value=\"00010\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00010\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1590447070495</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00011\" summary=\"Data has can be imported from matlab scalablly. Fit can be further improved in the future.- LIU\">\r\n      <created>1590700012096</created>\r\n      <option name=\"number\" value=\"00011\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00011\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1590700012096</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00012\" summary=\"Make things into a class. Well done!.- LIU\">\r\n      <created>1590717585252</created>\r\n      <option name=\"number\" value=\"00012\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00012\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1590717585252</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00013\" summary=\"Make things into a class. Well done!.- LIU\">\r\n      <created>1590717626432</created>\r\n      <option name=\"number\" value=\"00013\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00013\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1590717626432</updated>\r\n    </task>\r\n    <option name=\"localTasksCounter\" value=\"14\" />\r\n    <servers />\r\n  </component>\r\n  <component name=\"TodoView\">\r\n    <todo-panel id=\"selected-file\">\r\n      <is-autoscroll-to-source value=\"true\" />\r\n    </todo-panel>\r\n    <todo-panel id=\"all\">\r\n      <are-packages-shown value=\"true\" />\r\n      <is-autoscroll-to-source value=\"true\" />\r\n    </todo-panel>\r\n  </component>\r\n  <component name=\"TypeScriptGeneratedFilesManager\">\r\n    <option name=\"version\" value=\"2\" />\r\n  </component>\r\n  <component name=\"VcsManagerConfiguration\">\r\n    <MESSAGE value=\"Update- LIU\" />\r\n    <MESSAGE value=\"Pomegranate summarized- LIU\" />\r\n    <MESSAGE value=\"Pomegranate works for the python 2 now- LIU\" />\r\n    <MESSAGE value=\"Add the HMM correction model to noiselib.py- LIU\" />\r\n    <MESSAGE value=\"Everything works in the virtual environment. Next make it compatible with lab computers' default environment- LIU\" />\r\n    <MESSAGE value=\"Compatible with lab computer default setup.- LIU\" />\r\n    <MESSAGE value=\"Start ChargeReset play.- LIU\" />\r\n    <MESSAGE value=\"Fix the initial guess issue by passing 5-10 guesses and choose the best fit. Need to find a way to make deal with the period.- LIU\" />\r\n    <MESSAGE value=\"Start playing with PSD fit. The code starts working but the fit looks not optimized.- LIU\" />\r\n    <MESSAGE value=\"Data has can be imported from matlab scalablly. Fit can be further improved in the future.- LIU\" />\r\n    <MESSAGE value=\"Make things into a class. Well done!.- LIU\" />\r\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"Make things into a class. Well done!.- LIU\" />\r\n  </component>\r\n  <component name=\"WindowStateProjectService\">\r\n    <state x=\"817\" y=\"350\" key=\"#Notifications\" timestamp=\"1588271134142\">\r\n      <screen x=\"0\" y=\"0\" width=\"1920\" height=\"1040\" />\r\n    </state>\r\n    <state x=\"817\" y=\"350\" key=\"#Notifications/0.0.1920.1040@0.0.1920.1040\" timestamp=\"1588271134142\" />\r\n    <state x=\"130\" y=\"5\" key=\"CommitChangelistDialog2\" timestamp=\"1590717624804\">\r\n      <screen x=\"0\" y=\"0\" width=\"1920\" height=\"1040\" />\r\n    </state>\r\n    <state x=\"130\" y=\"5\" key=\"CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040\" timestamp=\"1590717624804\" />\r\n    <state x=\"686\" y=\"214\" width=\"762\" height=\"648\" key=\"FileChooserDialogImpl\" timestamp=\"1590717795829\">\r\n      <screen x=\"0\" y=\"0\" width=\"1920\" height=\"1040\" />\r\n    </state>\r\n    <state x=\"686\" y=\"214\" width=\"762\" height=\"648\" key=\"FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040\" timestamp=\"1590717795829\" />\r\n    <state width=\"1865\" height=\"254\" key=\"GridCell.Tab.0.bottom\" timestamp=\"1588606925554\">\r\n      <screen x=\"0\" y=\"0\" width=\"1920\" height=\"1040\" />\r\n    </state>\r\n    <state width=\"1865\" height=\"254\" key=\"GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040\" timestamp=\"1588606925554\" />\r\n    <state width=\"1865\" height=\"254\" key=\"GridCell.Tab.0.center\" timestamp=\"1588606925553\">\r\n      <screen x=\"0\" y=\"0\" width=\"1920\" height=\"1040\" />\r\n    </state>\r\n    <state width=\"1865\" height=\"254\" key=\"GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040\" timestamp=\"1588606925553\" />\r\n    <state width=\"1865\" height=\"254\" key=\"GridCell.Tab.0.left\" timestamp=\"1588606925553\">\r\n      <screen x=\"0\" y=\"0\" width=\"1920\" height=\"1040\" />\r\n    </state>\r\n    <state width=\"1865\" height=\"254\" key=\"GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040\" timestamp=\"1588606925553\" />\r\n    <state width=\"1865\" height=\"254\" key=\"GridCell.Tab.0.right\" timestamp=\"1588606925553\">\r\n      <screen x=\"0\" y=\"0\" width=\"1920\" height=\"1040\" />\r\n    </state>\r\n    <state width=\"1865\" height=\"254\" key=\"GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040\" timestamp=\"1588606925553\" />\r\n    <state x=\"500\" y=\"353\" width=\"1188\" height=\"461\" key=\"MultipleFileMergeDialog\" timestamp=\"1590000494522\">\r\n      <screen x=\"0\" y=\"0\" width=\"1920\" height=\"1040\" />\r\n    </state>\r\n    <state x=\"500\" y=\"353\" width=\"1188\" height=\"461\" key=\"MultipleFileMergeDialog/0.0.1920.1040@0.0.1920.1040\" timestamp=\"1590000494522\" />\r\n    <state x=\"336\" y=\"77\" key=\"SettingsEditor\" timestamp=\"1590695456959\">\r\n      <screen x=\"0\" y=\"0\" width=\"1920\" height=\"1040\" />\r\n    </state>\r\n    <state x=\"336\" y=\"77\" key=\"SettingsEditor/0.0.1920.1040@0.0.1920.1040\" timestamp=\"1590695456959\" />\r\n    <state x=\"452\" y=\"187\" key=\"Vcs.Push.Dialog.v2\" timestamp=\"1590717640524\">\r\n      <screen x=\"0\" y=\"0\" width=\"1920\" height=\"1040\" />\r\n    </state>\r\n    <state x=\"452\" y=\"187\" key=\"Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040\" timestamp=\"1590717640524\" />\r\n    <state x=\"931\" y=\"-19\" width=\"716\" height=\"1040\" key=\"find.popup\" timestamp=\"1588087426623\">\r\n      <screen x=\"0\" y=\"0\" width=\"1920\" height=\"1040\" />\r\n    </state>\r\n    <state x=\"931\" y=\"-19\" width=\"716\" height=\"1040\" key=\"find.popup/0.0.1920.1040@0.0.1920.1040\" timestamp=\"1588087426623\" />\r\n    <state x=\"584\" y=\"258\" key=\"git4idea.merge.GitPullDialog\" timestamp=\"1590717652116\">\r\n      <screen x=\"0\" y=\"0\" width=\"1920\" height=\"1040\" />\r\n    </state>\r\n    <state x=\"584\" y=\"258\" key=\"git4idea.merge.GitPullDialog/0.0.1920.1040@0.0.1920.1040\" timestamp=\"1590717652116\" />\r\n  </component>\r\n  <component name=\"XDebuggerManager\">\r\n    <breakpoint-manager>\r\n      <breakpoints>\r\n        <line-breakpoint enabled=\"true\" suspend=\"THREAD\" type=\"python-line\">\r\n          <url>file://$PROJECT_DIR$/fluxNoise/python/Markov_Python2/analyze_QPTunneling_pomegranate.py</url>\r\n          <line>3</line>\r\n          <option name=\"timeStamp\" value=\"1\" />\r\n        </line-breakpoint>\r\n      </breakpoints>\r\n    </breakpoint-manager>\r\n  </component>\r\n  <component name=\"com.intellij.coverage.CoverageDataManagerImpl\">\r\n    <SUITE FILE_PATH=\"coverage/projects$Doctests_in_analyze_QPTunneling_Markov.coverage\" NAME=\"Doctests in analyze_QPTunneling_Markov Coverage Results\" MODIFIED=\"1588087641178\" SOURCE_PROVIDER=\"com.intellij.coverage.DefaultCoverageFileProvider\" RUNNER=\"coverage.py\" COVERAGE_BY_TEST_ENABLED=\"true\" COVERAGE_TRACING_ENABLED=\"false\" WORKING_DIRECTORY=\"$PROJECT_DIR$/GapEngineering/Markov_Python2/Arxiv\" />\r\n  </component>\r\n</project>
+===================================================================
+diff --git a/projects/.idea/workspace.xml b/projects/.idea/workspace.xml
+--- a/projects/.idea/workspace.xml	
++++ b/projects/.idea/workspace.xml	
+@@ -1,7 +1,28 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+   <component name="ChangeListManager">
+-    <list default="true" id="84d2569e-8c60-4380-b499-09e41eda5a32" name="Default" comment="Make things into a class. Well done!.- LIU">
++    <list default="true" id="84d2569e-8c60-4380-b499-09e41eda5a32" name="Default" comment="Leiden Data for Axion3 and Axion4">
++      <change afterPath="$PROJECT_DIR$/Axion/DR2December2022/Data_Q1J1B.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/Axion/DR2December2022/Data_Q1J3B.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/Axion/DR2December2022/PlotPSD.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/Axion/DR2September2022/Data_J1BJ2B_Compiled.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/Axion/DR2September2022/Data_J1B_Compiled.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/Axion/DR2September2022/Data_J2B_Compiled.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/Axion/DR2September2022/Data_Q1J1B.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/Axion/DR2September2022/Data_Q1J2B.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/Axion/DR2September2022/Data_Q3J1B.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/Axion/DR2September2022/Data_Q3J2B.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/Axion/DR2September2022/Data_Q4J1B.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/Axion/DR2September2022/Data_Q4J2B.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/Axion/DR2September2022/Data_Q5J1B.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/Axion/DR2September2022/Data_Q5J2B.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/Axion/DR2September2022/PlotPSD.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/Axion/ResonatorQ/ResonatorFit.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/MM/T1_Poisoning_Fit.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/MM/T1_Poisoning_bias_Fit.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/MM/T1_Poisoning_bias_time_Fit.py" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../.idea/Analysis.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/Analysis.iml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/misc.xml" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+@@ -24,6 +45,9 @@
+     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+   </component>
+   <component name="JupyterTrust" id="797a6c2a-c039-486c-baff-110363fe7315" />
++  <component name="MarkdownSettingsMigration">
++    <option name="stateVersion" value="1" />
++  </component>
+   <component name="ProjectId" id="1axSy41EhhRLH9uMhNziQJCoueu" />
+   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+     <ConfirmationsSetting value="2" id="Add" />
+@@ -37,13 +61,14 @@
+     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+     <property name="WebServerToolWindowFactoryState" value="false" />
+-    <property name="last_opened_file_path" value="$PROJECT_DIR$/.." />
++    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../measurement/projects" />
+     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
++    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PythonContentEntriesConfigurable" />
+   </component>
+   <component name="RecentsManager">
+     <key name="CopyFile.RECENT_KEYS">
++      <recent name="C:\Repositories\Analysis\projects\Axion\DR2December2022" />
+       <recent name="C:\Repositories\Analysis\projects\GapEngineering\Markov_Python2" />
+       <recent name="C:\Repositories\Analysis\projects\GapEngineering" />
+     </key>
+@@ -52,7 +77,7 @@
+       <recent name="C:\Repositories\Analysis\projects" />
+     </key>
+   </component>
+-  <component name="RunManager" selected="Python.QP_PSD">
++  <component name="RunManager" selected="Python.Data_Q1J1B">
+     <configuration name="projects" type="JupiterNotebook" factoryName="Jupyter Notebook">
+       <module name="projects" />
+       <option name="INTERPRETER_OPTIONS" value="" />
+@@ -70,17 +95,20 @@
+       <option name="ipnbHost" value="127.0.0.1" />
+       <option name="ipnbPort" value="8888" />
+     </configuration>
+-    <configuration name="QP_PSD" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
++    <configuration name="Data_J1B_Compiled" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+       <module name="projects" />
+       <option name="INTERPRETER_OPTIONS" value="" />
+       <option name="PARENT_ENVS" value="true" />
+-      <option name="SDK_HOME" value="" />
+-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/GapEngineering" />
+-      <option name="IS_MODULE_SDK" value="true" />
++      <envs>
++        <env name="PYTHONUNBUFFERED" value="1" />
++      </envs>
++      <option name="SDK_HOME" value="C:\Users\lab_user\PycharmProjects\QM\venvqm\Scripts\python.exe" />
++      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Axion/DR2September2022" />
++      <option name="IS_MODULE_SDK" value="false" />
+       <option name="ADD_CONTENT_ROOTS" value="true" />
+       <option name="ADD_SOURCE_ROOTS" value="true" />
+       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+-      <option name="SCRIPT_NAME" value="C:\Repositories\Analysis\projects\GapEngineering\QP_PSD.py" />
++      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Axion/DR2September2022/Data_J1B_Compiled.py" />
+       <option name="PARAMETERS" value="" />
+       <option name="SHOW_COMMAND_LINE" value="true" />
+       <option name="EMULATE_TERMINAL" value="false" />
+@@ -89,20 +117,20 @@
+       <option name="INPUT_FILE" value="" />
+       <method v="2" />
+     </configuration>
+-    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
++    <configuration name="Data_J2B_Compiled" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+       <module name="projects" />
+       <option name="INTERPRETER_OPTIONS" value="" />
+       <option name="PARENT_ENVS" value="true" />
+       <envs>
+         <env name="PYTHONUNBUFFERED" value="1" />
+       </envs>
+-      <option name="SDK_HOME" value="" />
+-      <option name="WORKING_DIRECTORY" value="" />
++      <option name="SDK_HOME" value="C:\Users\lab_user\PycharmProjects\QM\venvqm\Scripts\python.exe" />
++      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Axion/DR2September2022" />
+       <option name="IS_MODULE_SDK" value="false" />
+       <option name="ADD_CONTENT_ROOTS" value="true" />
+       <option name="ADD_SOURCE_ROOTS" value="true" />
+       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+-      <option name="SCRIPT_NAME" value="" />
++      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Axion/DR2September2022/Data_J2B_Compiled.py" />
+       <option name="PARAMETERS" value="" />
+       <option name="SHOW_COMMAND_LINE" value="true" />
+       <option name="EMULATE_TERMINAL" value="false" />
+@@ -111,20 +139,17 @@
+       <option name="INPUT_FILE" value="" />
+       <method v="2" />
+     </configuration>
+-    <configuration name="analyze_QP_rate_stats" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
++    <configuration name="Data_Q1J1B" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+       <module name="projects" />
+       <option name="INTERPRETER_OPTIONS" value="" />
+       <option name="PARENT_ENVS" value="true" />
+-      <envs>
+-        <env name="PYTHONUNBUFFERED" value="1" />
+-      </envs>
+-      <option name="SDK_HOME" value="" />
+-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/GapEngineering/Markov_Python2" />
+-      <option name="IS_MODULE_SDK" value="true" />
++      <option name="SDK_HOME" value="C:\Users\lab_user\PycharmProjects\QM\venvqm\Scripts\python.exe" />
++      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Axion/DR2December2022" />
++      <option name="IS_MODULE_SDK" value="false" />
+       <option name="ADD_CONTENT_ROOTS" value="true" />
+       <option name="ADD_SOURCE_ROOTS" value="true" />
+       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/GapEngineering/Markov_Python2/analyze_QP_rate_stats.py" />
++      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Axion/DR2December2022/Data_Q1J1B.py" />
+       <option name="PARAMETERS" value="" />
+       <option name="SHOW_COMMAND_LINE" value="true" />
+       <option name="EMULATE_TERMINAL" value="false" />
+@@ -133,20 +158,20 @@
+       <option name="INPUT_FILE" value="" />
+       <method v="2" />
+     </configuration>
+-    <configuration name="analyze_QP_triggered_on_charge2" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
++    <configuration name="Data_Q1J3B" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+       <module name="projects" />
+       <option name="INTERPRETER_OPTIONS" value="" />
+       <option name="PARENT_ENVS" value="true" />
+       <envs>
+         <env name="PYTHONUNBUFFERED" value="1" />
+       </envs>
+-      <option name="SDK_HOME" value="" />
+-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fluxNoise/python" />
+-      <option name="IS_MODULE_SDK" value="true" />
++      <option name="SDK_HOME" value="C:\Users\lab_user\PycharmProjects\QM\venvqm\Scripts\python.exe" />
++      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Axion/DR2December2022" />
++      <option name="IS_MODULE_SDK" value="false" />
+       <option name="ADD_CONTENT_ROOTS" value="true" />
+       <option name="ADD_SOURCE_ROOTS" value="true" />
+       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/fluxNoise/python/analyze_QP_triggered_on_charge2.py" />
++      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Axion/DR2December2022/Data_Q1J3B.py" />
+       <option name="PARAMETERS" value="" />
+       <option name="SHOW_COMMAND_LINE" value="true" />
+       <option name="EMULATE_TERMINAL" value="false" />
+@@ -155,17 +180,20 @@
+       <option name="INPUT_FILE" value="" />
+       <method v="2" />
+     </configuration>
+-    <configuration name="analyze_charge_QP" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
++    <configuration name="PlotPSD" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+       <module name="projects" />
+       <option name="INTERPRETER_OPTIONS" value="" />
+       <option name="PARENT_ENVS" value="true" />
+-      <option name="SDK_HOME" value="" />
+-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fluxNoise/python" />
+-      <option name="IS_MODULE_SDK" value="true" />
++      <envs>
++        <env name="PYTHONUNBUFFERED" value="1" />
++      </envs>
++      <option name="SDK_HOME" value="C:\Users\lab_user\PycharmProjects\QM\venvqm\Scripts\python.exe" />
++      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Axion/DR2December2022" />
++      <option name="IS_MODULE_SDK" value="false" />
+       <option name="ADD_CONTENT_ROOTS" value="true" />
+       <option name="ADD_SOURCE_ROOTS" value="true" />
+       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/fluxNoise/python/analyze_charge_QP.py" />
++      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Axion/DR2December2022/PlotPSD.py" />
+       <option name="PARAMETERS" value="" />
+       <option name="SHOW_COMMAND_LINE" value="true" />
+       <option name="EMULATE_TERMINAL" value="false" />
+@@ -174,7 +202,7 @@
+       <option name="INPUT_FILE" value="" />
+       <method v="2" />
+     </configuration>
+-    <configuration name="analyze_readout_fidelity_stats (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
++    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
+       <module name="projects" />
+       <option name="INTERPRETER_OPTIONS" value="" />
+       <option name="PARENT_ENVS" value="true" />
+@@ -182,12 +210,12 @@
+         <env name="PYTHONUNBUFFERED" value="1" />
+       </envs>
+       <option name="SDK_HOME" value="" />
+-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/GapEngineering/Markov_Python2" />
+-      <option name="IS_MODULE_SDK" value="true" />
++      <option name="WORKING_DIRECTORY" value="" />
++      <option name="IS_MODULE_SDK" value="false" />
+       <option name="ADD_CONTENT_ROOTS" value="true" />
+       <option name="ADD_SOURCE_ROOTS" value="true" />
+       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/GapEngineering/Markov_Python2/analyze_readout_fidelity_stats.py" />
++      <option name="SCRIPT_NAME" value="" />
+       <option name="PARAMETERS" value="" />
+       <option name="SHOW_COMMAND_LINE" value="true" />
+       <option name="EMULATE_TERMINAL" value="false" />
+@@ -196,16 +224,24 @@
+       <option name="INPUT_FILE" value="" />
+       <method v="2" />
+     </configuration>
++    <list>
++      <item itemvalue="Python.Data_J1B_Compiled" />
++      <item itemvalue="Python.Data_J2B_Compiled" />
++      <item itemvalue="Python.PlotPSD" />
++      <item itemvalue="Python.Data_Q1J1B" />
++      <item itemvalue="Python.Data_Q1J3B" />
++    </list>
+     <recent_temporary>
+       <list>
+-        <item itemvalue="Python.QP_PSD" />
+-        <item itemvalue="Python.analyze_charge_QP" />
+-        <item itemvalue="Python.analyze_QP_triggered_on_charge2" />
+-        <item itemvalue="Python.analyze_readout_fidelity_stats (1)" />
+-        <item itemvalue="Python.analyze_QP_rate_stats" />
++        <item itemvalue="Python.Data_Q1J1B" />
++        <item itemvalue="Python.Data_Q1J3B" />
++        <item itemvalue="Python.PlotPSD" />
++        <item itemvalue="Python.Data_J2B_Compiled" />
++        <item itemvalue="Python.Data_J1B_Compiled" />
+       </list>
+     </recent_temporary>
+   </component>
++  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+   <component name="SvnConfiguration">
+     <configuration />
+   </component>
+@@ -340,6 +376,17 @@
+   </component>
+   <component name="TypeScriptGeneratedFilesManager">
+     <option name="version" value="2" />
++  </component>
++  <component name="Vcs.Log.Tabs.Properties">
++    <option name="TAB_STATES">
++      <map>
++        <entry key="MAIN">
++          <value>
++            <State />
++          </value>
++        </entry>
++      </map>
++    </option>
+   </component>
+   <component name="VcsManagerConfiguration">
+     <MESSAGE value="Update- LIU" />
+@@ -353,57 +400,8 @@
+     <MESSAGE value="Start playing with PSD fit. The code starts working but the fit looks not optimized.- LIU" />
+     <MESSAGE value="Data has can be imported from matlab scalablly. Fit can be further improved in the future.- LIU" />
+     <MESSAGE value="Make things into a class. Well done!.- LIU" />
+-    <option name="LAST_COMMIT_MESSAGE" value="Make things into a class. Well done!.- LIU" />
+-  </component>
+-  <component name="WindowStateProjectService">
+-    <state x="817" y="350" key="#Notifications" timestamp="1588271134142">
+-      <screen x="0" y="0" width="1920" height="1040" />
+-    </state>
+-    <state x="817" y="350" key="#Notifications/0.0.1920.1040@0.0.1920.1040" timestamp="1588271134142" />
+-    <state x="130" y="5" key="CommitChangelistDialog2" timestamp="1590717624804">
+-      <screen x="0" y="0" width="1920" height="1040" />
+-    </state>
+-    <state x="130" y="5" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1590717624804" />
+-    <state x="686" y="214" width="762" height="648" key="FileChooserDialogImpl" timestamp="1590717795829">
+-      <screen x="0" y="0" width="1920" height="1040" />
+-    </state>
+-    <state x="686" y="214" width="762" height="648" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1590717795829" />
+-    <state width="1865" height="254" key="GridCell.Tab.0.bottom" timestamp="1588606925554">
+-      <screen x="0" y="0" width="1920" height="1040" />
+-    </state>
+-    <state width="1865" height="254" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1588606925554" />
+-    <state width="1865" height="254" key="GridCell.Tab.0.center" timestamp="1588606925553">
+-      <screen x="0" y="0" width="1920" height="1040" />
+-    </state>
+-    <state width="1865" height="254" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1588606925553" />
+-    <state width="1865" height="254" key="GridCell.Tab.0.left" timestamp="1588606925553">
+-      <screen x="0" y="0" width="1920" height="1040" />
+-    </state>
+-    <state width="1865" height="254" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1588606925553" />
+-    <state width="1865" height="254" key="GridCell.Tab.0.right" timestamp="1588606925553">
+-      <screen x="0" y="0" width="1920" height="1040" />
+-    </state>
+-    <state width="1865" height="254" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1588606925553" />
+-    <state x="500" y="353" width="1188" height="461" key="MultipleFileMergeDialog" timestamp="1590000494522">
+-      <screen x="0" y="0" width="1920" height="1040" />
+-    </state>
+-    <state x="500" y="353" width="1188" height="461" key="MultipleFileMergeDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1590000494522" />
+-    <state x="336" y="77" key="SettingsEditor" timestamp="1590695456959">
+-      <screen x="0" y="0" width="1920" height="1040" />
+-    </state>
+-    <state x="336" y="77" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1590695456959" />
+-    <state x="452" y="187" key="Vcs.Push.Dialog.v2" timestamp="1590717640524">
+-      <screen x="0" y="0" width="1920" height="1040" />
+-    </state>
+-    <state x="452" y="187" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1590717640524" />
+-    <state x="931" y="-19" width="716" height="1040" key="find.popup" timestamp="1588087426623">
+-      <screen x="0" y="0" width="1920" height="1040" />
+-    </state>
+-    <state x="931" y="-19" width="716" height="1040" key="find.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1588087426623" />
+-    <state x="584" y="258" key="git4idea.merge.GitPullDialog" timestamp="1590717652116">
+-      <screen x="0" y="0" width="1920" height="1040" />
+-    </state>
+-    <state x="584" y="258" key="git4idea.merge.GitPullDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1590717652116" />
++    <MESSAGE value="Leiden Data for Axion3 and Axion4" />
++    <option name="LAST_COMMIT_MESSAGE" value="Leiden Data for Axion3 and Axion4" />
+   </component>
+   <component name="XDebuggerManager">
+     <breakpoint-manager>
+@@ -416,7 +414,4 @@
+       </breakpoints>
+     </breakpoint-manager>
+   </component>
+-  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+-    <SUITE FILE_PATH="coverage/projects$Doctests_in_analyze_QPTunneling_Markov.coverage" NAME="Doctests in analyze_QPTunneling_Markov Coverage Results" MODIFIED="1588087641178" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GapEngineering/Markov_Python2/Arxiv" />
+-  </component>
+ </project>
+\ No newline at end of file
+Index: .idea/Analysis.iml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<module type=\"PYTHON_MODULE\" version=\"4\">\r\n  <component name=\"NewModuleRootManager\">\r\n    <content url=\"file://$MODULE_DIR$\">\r\n      <sourceFolder url=\"file://$MODULE_DIR$/projects/fluxNoise\" isTestSource=\"false\" />\r\n      <sourceFolder url=\"file://$MODULE_DIR$/projects/fluxNoise/python\" isTestSource=\"false\" />\r\n      <sourceFolder url=\"file://$MODULE_DIR$/projects/BlackBody\" isTestSource=\"false\" />\r\n      <sourceFolder url=\"file://$MODULE_DIR$/projects/SFQ\" isTestSource=\"false\" />\r\n    </content>\r\n    <orderEntry type=\"jdk\" jdkName=\"Python 2.7\" jdkType=\"Python SDK\" />\r\n    <orderEntry type=\"sourceFolder\" forTests=\"false\" />\r\n  </component>\r\n  <component name=\"PyDocumentationSettings\">\r\n    <option name=\"renderExternalDocumentation\" value=\"true\" />\r\n  </component>\r\n</module>
+===================================================================
+diff --git a/.idea/Analysis.iml b/.idea/Analysis.iml
+--- a/.idea/Analysis.iml	
++++ b/.idea/Analysis.iml	
+@@ -6,8 +6,9 @@
+       <sourceFolder url="file://$MODULE_DIR$/projects/fluxNoise/python" isTestSource="false" />
+       <sourceFolder url="file://$MODULE_DIR$/projects/BlackBody" isTestSource="false" />
+       <sourceFolder url="file://$MODULE_DIR$/projects/SFQ" isTestSource="false" />
++      <sourceFolder url="file://$MODULE_DIR$/IQfit" isTestSource="false" />
+     </content>
+-    <orderEntry type="jdk" jdkName="Python 2.7" jdkType="Python SDK" />
++    <orderEntry type="inheritedJdk" />
+     <orderEntry type="sourceFolder" forTests="false" />
+   </component>
+   <component name="PyDocumentationSettings">
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"JavaScriptSettings\">\r\n    <option name=\"languageLevel\" value=\"ES6\" />\r\n  </component>\r\n  <component name=\"ProjectRootManager\" version=\"2\" project-jdk-name=\"Python 2.7\" project-jdk-type=\"Python SDK\" />\r\n</project>
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+--- a/.idea/misc.xml	
++++ b/.idea/misc.xml	
+@@ -3,5 +3,5 @@
+   <component name="JavaScriptSettings">
+     <option name="languageLevel" value="ES6" />
+   </component>
+-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 2.7" project-jdk-type="Python SDK" />
++  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.7" project-jdk-type="Python SDK" />
+ </project>
+\ No newline at end of file
