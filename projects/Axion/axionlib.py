@@ -7,7 +7,7 @@ from scipy.optimize import curve_fit
 import matplotlib
 matplotlib.use("TkAgg")
 
-DATACHEST_ROOT = 'Z:\\mcdermott-group\\data\\'
+DATACHEST_ROOT = 'C:\\Local Data\\' #'Z:\\mcdermott-group\\data\\'
 
 def save_or_show_fig(save_path, save_name):
     pass
@@ -168,8 +168,8 @@ class Parity(object):
         self._file = file
         self._qubit_id = d.getParameter('Qubit ID')
         self._rad_id = rad_id if rad_id is not None else d.getParameter('Radiator ID')
-        self._bias = d.getParameter('JB{:1d} Voltage Bias'.format(rad_id))[0]
-        try:
+        self._bias = d.getParameter('JB{:1d} Voltage Bias'.format(self._rad_id))[0]
+        try:            #For Older Data
             self._repetition_rate = 1e9/d.getParameter('Time Per Iteration')[0]
         except:
             self._repetition_rate = 1e9/100000
@@ -201,14 +201,14 @@ class Parity(object):
                         1 - F_map ** 2) / fs
 
         initial_guess_fidelity = np.arange(0, 1, 0.05)
-        initial_guess_parity = np.logspace(-4, 1, 5)
+        initial_guess_parity = np.logspace(-1, 1, 4)
         covariance = float('inf')
         best_r_squared = float('inf')
         freqs,ave_psd = self.psd()
         for igf in initial_guess_fidelity:
             for igp in initial_guess_parity:
                 params_curr, params_covariance_curr = curve_fit(
-                    fit_PSD_target_function, freqs, ave_psd, p0=[igp, igf], bounds=([0.0001, 0], [10, 1]),
+                    fit_PSD_target_function, freqs[20:], ave_psd[20:], p0=[igp, igf], bounds=([0.1, 0], [10, 1]),
                     method='trf')
 
                 residuals = ave_psd - fit_PSD_target_function(freqs, *params_curr)
@@ -252,6 +252,7 @@ class Parity(object):
             plt.ioff()
             if not os.path.exists(DATACHEST_ROOT+save_path+'\\Figures\\'):
                 os.makedirs(DATACHEST_ROOT+save_path+'\\Figures\\')
+            print((DATACHEST_ROOT+save_path+ '\\Figures\\' + save_name))
             plt.savefig(DATACHEST_ROOT+save_path+ '\\Figures\\' + save_name)
             plt.close(fig)
         else:

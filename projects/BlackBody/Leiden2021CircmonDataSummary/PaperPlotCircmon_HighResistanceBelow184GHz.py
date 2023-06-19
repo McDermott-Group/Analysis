@@ -14,6 +14,8 @@ if 1:
 
     JCirc = [4.8 * 1e3, None, 0, 320 * 123 * 2, "Radiator"]  # [R, L, C, A]
     JSFQ_weak = [16 * 1e3, None, 0, 100 * 200, "Radiator"]  # [R, L, C, A]
+    JSFQ_weak_10Rn = [10*16 * 1e3, None, 0, 100 * 200, "Radiator"]  # [R, L, C, A]
+    JSFQ_weak_100Rn = [100*16 * 1e3, None, 0, 100 * 200, "Radiator"]  # [R, L, C, A]
     JSFQ_weak_qp = [16 * 1e3 * 100, None, 0, 100 * 200, "Radiator"]  # [R, L, C, A]
     JSFQ_strong = [8 * 1e3, None, 0, 100 * 200 * 2, "Radiator"]  # [R, L, C, A]
 
@@ -68,10 +70,23 @@ if 1:
     ecSFQ_strong = SFQ_strong.Antenna["e_c_dB"]
     eSFQ_strong = SFQ_strong.Antenna["e_c"]
 
+    #Radiator:
     SFQ_4 = AntennaCoupling()
     SFQ_4.import_data(fileSFQ_4, JSFQ_weak, C_eff=C_eff_SFQ)
     ecSFQ_4 = SFQ_4.Antenna["e_c_dB"]
     eSFQ_4 = SFQ_4.Antenna["e_c"]
+    PhotonFlux = SFQ_4.Al_Wall["PhotonFlux"]
+
+    SFQ_4_10Rn = AntennaCoupling()
+    SFQ_4.import_data(fileSFQ_4, JSFQ_weak_10Rn, C_eff=C_eff_SFQ)
+    ecSFQ_4_10Rn = SFQ_4.Antenna["e_c_dB"]
+    eSFQ_4_10Rn = SFQ_4.Antenna["e_c"]
+    PhotonFlux = SFQ_4.Al_Wall["PhotonFlux"]
+
+    SFQ_4_100Rn = AntennaCoupling()
+    SFQ_4.import_data(fileSFQ_4, JSFQ_weak_100Rn, C_eff=C_eff_SFQ)
+    ecSFQ_4_100Rn = SFQ_4.Antenna["e_c_dB"]
+    eSFQ_4_100Rn = SFQ_4.Antenna["e_c"]
     PhotonFlux = SFQ_4.Al_Wall["PhotonFlux"]
 
     SFQ_4_qp = AntennaCoupling()
@@ -278,7 +293,7 @@ Calculate effective blackbody temperature
 
 
 label_font = 14
-tick_font = 14
+tick_font = 24
 legend_font = 12
 
 f_SIM_OctW = 0.96758 * 0.95  # Xmon match data
@@ -291,21 +306,24 @@ Q1_base = np.mean(Q1_PSD_OctWeak[:, 1][:8])
 Q2_base = np.mean(Q2_PSD_OctWeak[:, 1][:8])
 Q4_base = np.mean(Q4_PSD_OctWeak[:, 1][:8])
 
-fig, axs = plt.subplots(2, figsize=(6, 7),
+fig, axs = plt.subplots(2, figsize=(12, 14),
                         gridspec_kw={'height_ratios': [2.5, 3],
                                      'hspace': 0.15})
 
 f_l = 50
 f_r = 535
 
-ld1=3
-ld2=3
+ld1=6
+ld2=6
 
 
 # axs[0].plot(f_SFQ, eSFQ_4, color="green", linestyle='--', linewidth=ld2, label='Transmitter')
 # axs[0].plot(f_SFQ, eSFQ_4, color=[0, 1, 0], linestyle='--', linewidth=ld2, label='Transmitter')
 axs[0].plot(f_SFQ, eSFQ_4, color="darkgreen", linestyle='--', linewidth=ld2, label='            ')
-axs[0].plot(f_SFQ, eSFQ_4_qp, color="green", linestyle='--', linewidth=ld2, label='            ')
+axs[0].plot(f_SFQ[0:185], list(eSFQ_4_10Rn[0:184])+list([eSFQ_4[185]]), color="darkgreen", linestyle='-.', linewidth=ld2, label='            ')
+axs[0].plot(f_SFQ[0:185], list(eSFQ_4_100Rn[0:184])+list([eSFQ_4_10Rn[185]]), color="darkgreen", linestyle='dotted', linewidth=ld2, label='            ')
+
+# axs[0].plot(f_SFQ, eSFQ_4_qp, color="green", linestyle='--', linewidth=ld2, label='            ')
 
 axs[0].plot(f_SFQ, eQ1, linewidth=ld2, color="red", label='            ')
 axs[0].plot(f_SFQ, eQ4, linewidth=ld2, color="black", label='   ')
@@ -344,6 +362,6 @@ axs[1].tick_params(axis="y", width=1, length=3, which='minor')
 axs[1].tick_params(axis="y", width=1, length=6, which='major')
 
 plt.tight_layout()
-# path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
-# plt.savefig(path + '\Circmon.pdf', bbox_inches='tight', format='pdf', dpi=1200, transparent=True)
+path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
+plt.savefig(path + '\CircmonResistance.pdf', bbox_inches='tight', format='pdf', dpi=1200, transparent=True)
 plt.show()

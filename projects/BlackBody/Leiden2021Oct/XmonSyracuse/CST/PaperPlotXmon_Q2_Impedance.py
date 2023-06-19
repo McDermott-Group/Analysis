@@ -6,6 +6,8 @@ import matplotlib.font_manager as font_manager
 from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
 from mpl_toolkits.axes_grid1.inset_locator import mark_inset
 import os
+import matplotlib
+matplotlib.use("QtAgg")
 
 
 ### parameters to be tuned

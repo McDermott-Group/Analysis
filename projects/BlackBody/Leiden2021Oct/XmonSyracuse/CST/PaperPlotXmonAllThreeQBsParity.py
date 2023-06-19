@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.font_manager as font_manager
 import os
+import matplotlib
+matplotlib.use("QtAgg")
 
 if 1: # import CST data
     ### parameters to be tuned
@@ -155,7 +157,7 @@ if 1:   # one plot
     plt.tick_params(axis="y", width=1, length=3, which='minor')
     plt.tick_params(axis="y", width=1, length=6, which='major')
 
-    plt.xlabel("Transmitter frequency (GHz)", color="black",
+    plt.xlabel("Transmitter Josephson frequency (GHz)", color="black",
                       fontsize=label_font)
 
 
@@ -195,7 +197,7 @@ if 0:   # one plot+zoom in
     axs[0].tick_params(axis="y", width=1, length=3, which='minor')
     axs[0].tick_params(axis="y", width=1, length=6, which='major')
 
-    axs[0].set_xlabel("Transmitter frequency (GHz)", color="black",
+    axs[0].set_xlabel("Transmitter Josephson frequency (GHz)", color="black",
                       fontsize=label_font)
 
     # axs[1].plot([J * f_SIM for J in Q1_J1Bias], Q1_J1ParityRate, color='r',
@@ -218,7 +220,7 @@ if 0:   # one plot+zoom in
     axs[1].tick_params(axis="y", width=1, length=3, which='minor')
     axs[1].tick_params(axis="y", width=1, length=6, which='major')
 
-    axs[1].set_xlabel("Transmitter frequency (GHz)", color="black",
+    axs[1].set_xlabel("Transmitter Josephson frequency (GHz)", color="black",
                       fontsize=label_font)
 
 

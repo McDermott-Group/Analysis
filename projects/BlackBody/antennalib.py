@@ -840,6 +840,7 @@ class AntennaCoupling(object):
             "X_QP": [],
             "Ic_f": [],
             "Gamma_rad": [],  # photon radiated rate
+            "Gamma_rad_ShotNoise": {} #spectrum of radiated photons at each coherent frequency
         }
         self.Al_Wall = {
             "Area": 3.15e-3,  # units m^2, all area including under the chip
@@ -847,6 +848,7 @@ class AntennaCoupling(object):
             "Absorption": [],  # Absorption power ratio
             "S": None,  # poynting vector or related parameters
             "PhotonFlux": [],  #
+            "PhotonFlux_ShotNoise": {}
         }
 
     def import_data(self, file, JJ, C_eff=75 * 1e-21):
@@ -1014,8 +1016,9 @@ class AntennaCoupling(object):
             Delta_Al_qp = Delta_Al * (1 - x_qp)  # naive approximation
             ic = (pi / 4) * (2 * Delta_Al_qp / e) * (1 / R)
             ic0 = (pi / 4) * (2 * Delta_Al / e) * (1 / R)
-            if 0:  # no ic suppression
+            if 1:  # no ic suppression
                 Ic_f.append(ic0)
+                print(ic0)
             else:
                 # Ic_f.append(ic)
                 Ic_f.append(ic0*0.9177) # 8.3 nA
@@ -1055,16 +1058,33 @@ class AntennaCoupling(object):
         Ic_f = self.Radiator["Ic_f"]
         R = self.Junction["R"]
         Gamma_rad = []
+        Gamma_rad_ShotNoise = {}
+
+        phi_0 = h / (2 * e)  # flux quantum
 
         subtrate_air_factor = 1.0
         rms_factor = 0.5
         currrent_distribution_factor = 0.5
+
+        # for shot noise integral, compute once. (This will ususally be 92, but keep general in case sim changes)
+        lower_bound_index = next(i for i, val in enumerate(f) if val >= 92e9)
+        df=np.mean([f[i+1]-f[i] for i in range(len(f)-1)])
+
         for i in range(len(f)):
+            #Coherent Radiation:
             gamma_g = rms_factor * (currrent_distribution_factor * Ic_f[i]) ** 2 * R / (h * f[i])
             gamma_rad = subtrate_air_factor * gamma_g * e_c[i]
             Gamma_rad.append(gamma_rad)
+            #Incoherent Shot Noise Contribution:
+            Gamma_rad_ShotNoise[i] = [0 for fi in f]
+            if f[i] > 368e9: #QP Shot Noise turns on here
+                upper_bound_index = next(j for j, val in enumerate(f) if val >= f[i]/2 - 92e9)
+                for j in range(lower_bound_index,upper_bound_index+1):
+                    #Gamma_rad_ShotNoise[i][j] = 0.25 * subtrate_air_factor * e_c[j] * (f[i]/f[j])* df
+                    Gamma_rad_ShotNoise[i][j] = 0.25 * subtrate_air_factor * e_c[j] * (0.5*(f[i]/f[j])+1)* df
 
         self.Radiator["Gamma_rad"] = Gamma_rad
+        self.Radiator["Gamma_rad_ShotNoise"] = Gamma_rad_ShotNoise
         # print('f=', f[260:280])   # for 270 GHz
         # print('Gamma_rad=', Gamma_rad[260:280])
 
@@ -1110,14 +1130,25 @@ class AntennaCoupling(object):
         Absorption = self.Al_Wall["Absorption"]
         Area = self.Al_Wall["Area"]
         Gamma_rad = self.Radiator["Gamma_rad"]
+        Gamma_Rad_ShotNoise = self.Radiator["Gamma_rad_ShotNoise"]
 
         P_f = []  # photon flux array
         S_f = []    # energy flux, poynting vector
+
+        SN_f = {}
         for i in range(len(Absorption)):
+            SN_f[i] = [0 for fi in f]
+
+        for i in range(len(Absorption)):
+            # coherent radiation:
             p_f = Gamma_rad[i] / (Area * Absorption[i])
             s_f = p_f * h * f[i]
             P_f.append(p_f)
             S_f.append(s_f)
+            # incoherent radiation:
+            for j in Gamma_Rad_ShotNoise.keys():
+                #at josephson frequency f[j]...
+                SN_f[j][i] = Gamma_Rad_ShotNoise[j][i] / (Area * Absorption[i])
 
         P_f = np.asarray(P_f)
         S_f = np.asarray(S_f)
@@ -1125,6 +1156,7 @@ class AntennaCoupling(object):
         # print('PhotonFlux=', P_f[265:275])
         # print('S=', S_f[265:275])
         self.Al_Wall["PhotonFlux"] = P_f
+        self.Al_Wall["PhotonFlux_ShotNoise"] = SN_f
         self.Al_Wall["S"] = S_f
 
     def plot(self):

@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.font_manager as font_manager
 import os
 
+
 if 1: # import CST data
     ### parameters to be tuned
     e_eff = 6  # limit (1, 6.5), the voltage can also be built in to have a larger range
@@ -114,7 +115,7 @@ Calculate the noise bandwidth
 """
 Q2 # polished
 """
-if 0:
+if 1:
 
     label_font = 16
     tick_font = 13
@@ -264,7 +265,7 @@ if 1:
 
     fig.align_ylabels(axs)
     plt.tight_layout()
-    path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
-    plt.savefig(path+'\XmonQ123Parity_P1.pdf', format='pdf', bbox_inches='tight', dpi=1200)
+    #path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
+    #plt.savefig(path+'\XmonQ123Parity_P1.pdf', format='pdf', bbox_inches='tight', dpi=1200)
     plt.show()
 

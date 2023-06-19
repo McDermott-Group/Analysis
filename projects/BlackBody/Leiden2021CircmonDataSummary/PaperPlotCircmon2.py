@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 from antennalib import AntennaCoupling, getPhotonRate
 import numpy as np
+import matplotlib
+matplotlib.use("QtAgg")
 
 if 1:
     """
