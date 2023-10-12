@@ -16,6 +16,8 @@ from scipy import interpolate
 
 from scipy.optimize import curve_fit
 
+from scipy.special import ellipk,ellipe
+
 """First import matlab data to python"""
 
 
@@ -839,6 +841,7 @@ class AntennaCoupling(object):
         self.Radiator = {
             "X_QP": [],
             "Ic_f": [],
+            "I_QP": [],
             "Gamma_rad": [],  # photon radiated rate
             "Gamma_rad_ShotNoise": {} #spectrum of radiated photons at each coherent frequency
         }
@@ -993,59 +996,21 @@ class AntennaCoupling(object):
         for fi in f:  # x_QP and I_c calculation
             vb = fi * phi_0  # convert photon frequency to voltage bias
             Delta_Al = 190e-6 * e  # At the gap, the QP energy
+
             v_Al = 190e-6
             if vb <= 2 * v_Al:  # below the energy gap, no QP generated
                 vb = vb * 0.0
-            # power_inj = 0.57 * (vb ** 2 / R)
-            # g0 = power_inj / (Delta_Al * Vol * n_cp)
-            # print('g0=', g0)
 
-            g0 = vb/(e*R*Vol*n_cp)
-
-            ### solve the equation
-            g0Overr = g0 / r
-
-            p = [1, -1, 0, g0Overr]
-            roots = np.roots(p)
-            x_qp = np.real(roots[1])
-
-            # p = [1, -2, 1, 0, -g0Overr]
-            # roots = np.roots(p)
-            # x_qp = np.real(roots[2])
-
-            Delta_Al_qp = Delta_Al * (1 - x_qp)  # naive approximation
-            ic = (pi / 4) * (2 * Delta_Al_qp / e) * (1 / R)
             ic0 = (pi / 4) * (2 * Delta_Al / e) * (1 / R)
-            if 1:  # no ic suppression
-                Ic_f.append(ic0)
-                print(ic0)
-            else:
-                # Ic_f.append(ic)
-                Ic_f.append(ic0*0.9177) # 8.3 nA
-            X_QP.append(x_qp)
-            G0.append(g0)
 
-        X_QP = np.array(X_QP)
+            #From Barone and Paterno
+            x=fi/92e9
+            prefactor = ((1.0 / x) * ellipk(1.0 / x ** 2) + (1.0 / x) * ellipk((x ** 2 - 1) / x ** 2)) / ellipk(0) if x>1 else 1.0*ellipk(x**2)/ellipk(0)
+            Ic_f.append(ic0*prefactor)
+
+
         Ic_f = np.array(Ic_f)
-        if 0:
-            plt.figure(figsize=(4, 3))
-            if 0:  # plot Ic
-                plt.plot(Ic_f * 1.0e9)
-                plt.ylabel('Ic (nA)')
-                plt.ylim([4.5, 9.5])
-            else:  # plot x_QP
-                plt.plot(X_QP)
-                plt.ylabel('x_qp')
-                plt.ylim([-0.01, 0.5])
 
-            plt.xlabel('freq (GHz)')
-            plt.xlim([50, 700])
-            plt.grid(True)
-            # # plt.xscale('log')
-            # # plt.yscale('log')
-            plt.show()
-
-        self.Radiator["X_QP"] = X_QP
         self.Radiator["Ic_f"] = Ic_f
 
     def _get_p_rad(self):
@@ -1080,9 +1045,9 @@ class AntennaCoupling(object):
             if f[i] > 368e9: #QP Shot Noise turns on here
                 upper_bound_index = next(j for j, val in enumerate(f) if val >= f[i]/2 - 92e9)
                 for j in range(lower_bound_index,upper_bound_index+1):
+                    x=f[i]/92e9
                     #Gamma_rad_ShotNoise[i][j] = 0.25 * subtrate_air_factor * e_c[j] * (f[i]/f[j])* df
-                    Gamma_rad_ShotNoise[i][j] = 0.25 * subtrate_air_factor * e_c[j] * (0.5*(f[i]/f[j])+1)* df
-
+                    Gamma_rad_ShotNoise[i][j] = 0.25 * subtrate_air_factor * e_c[j] * (0.5*(f[i]/f[j])-1)* df* (40/x*(2*x*ellipe((x**2-1)/x**2)-(1/x)*ellipk((x**2-1)/x**2))/(2*40*ellipe((40**2-1)/40**2)-(1/40)*ellipk((40**2-1)/40**2)))
         self.Radiator["Gamma_rad"] = Gamma_rad
         self.Radiator["Gamma_rad_ShotNoise"] = Gamma_rad_ShotNoise
         # print('f=', f[260:280])   # for 270 GHz

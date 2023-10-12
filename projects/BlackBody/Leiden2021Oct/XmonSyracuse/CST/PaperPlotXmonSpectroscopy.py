@@ -7,10 +7,10 @@ import matplotlib.font_manager as font_manager
 from matplotlib.ticker import ScalarFormatter, NullFormatter
 import os
 import matplotlib
-matplotlib.use("QtAgg")
+matplotlib.use("tkAgg")
 
 # plot for main text or for supplement?
-supplement = False
+supplement = True
 
 if 1: # import CST data
     ### parameters to be tuned
@@ -284,5 +284,5 @@ if 1:   # inset
 
     path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
     #plt.savefig(path+'\XmonSpectroscopyInset.pdf', format='pdf', bbox_inches='tight', dpi=1200, transparent='True')
-    plt.show()
+    # plt.show()
 
