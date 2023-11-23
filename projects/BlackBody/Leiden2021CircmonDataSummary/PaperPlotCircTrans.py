@@ -26,7 +26,7 @@ if 1:
     fileQ3Aug = "2021Aug_Q3.txt"
     fileQ4Aug = "2021Aug_Q4.txt"
 
-    ### up to 1000 GHz
+    ### up to 1000 GHzz
     fileCircTest = "testpad_circmon1THz.txt"    # with wirebonds and RC and short in other ports
     fileCircTest1 = "testpad_circmon_lump-ele_wirebond.txt"    # with wirebonds and all RC in other ports
     # fileCircTest2 = "testpad_circmon_lump-ele_nowirebond.txt"    # without wirebonds, with RC in other ports
@@ -169,7 +169,6 @@ if 1:  # parity data cross talk for Aug
     plt.yscale('log')
 
     plt.tight_layout()
-    path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
-    plt.savefig(path+'\CircTrans.pdf', format='pdf', bbox_inches='tight', dpi=1200)
-
+    #path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
+    #plt.savefig(path+'\CircTrans.pdf', format='pdf', bbox_inches='tight', dpi=1200)
     plt.show()

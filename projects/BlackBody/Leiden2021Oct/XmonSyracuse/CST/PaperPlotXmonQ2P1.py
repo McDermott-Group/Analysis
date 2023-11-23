@@ -129,11 +129,35 @@ if 1:
     plt.tick_params(axis="y", direction="in", which='both')
     plt.tick_params(axis="x", width=1, length=6, which='both')
     plt.tick_params(axis="y", width=1, length=6, which='both')
-    plt.xlabel("Transmitter frequency (GHz)", color="black",
+    plt.xlabel("Transmitter Josephson Frequency (GHz)", color="black",
                       fontsize=label_font)
 
+    axs = plt.gca()
+    axs.axvspan(368,620, facecolor='0.2', alpha=0.1)
+
+    def fj_to_delta(f):
+        return f / 92
+
+    def delta_to_fj(delta):
+        return 92 * delta
+
+    secax = axs.secondary_xaxis('top', functions=(fj_to_delta, delta_to_fj))
+    secax.set_xticks(np.arange(0, 10, 1))
+    secax.tick_params(labelsize=tick_font)
+    secax.set_xlabel("Transmitter Voltage Bias ($\Delta/e$)", fontsize=label_font, labelpad=10)
+    secax.tick_params(axis="x", direction="in", which='both')
+    secax.tick_params(axis="y", direction="in", which='both')
+
+    secax.tick_params(axis="x", width=1, length=6, which='both')
+    secax.tick_params(axis="y", width=1, length=3, which='minor')
+    secax.tick_params(axis="y", width=1, length=6, which='major')
+
+
+
     plt.tight_layout()
-    path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
-    plt.savefig(path+'\XmonQ2_P1.pdf', format='pdf', bbox_inches='tight', dpi=1200)
+    #path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
+    #plt.savefig(path+'\XmonQ2_P1.pdf', format='pdf', bbox_inches='tight', dpi=1200)
+    plt.savefig('XmonQ2_P1.pdf', format='pdf', bbox_inches='tight', dpi=1200)
+
     plt.show()
 

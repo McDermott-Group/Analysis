@@ -47,7 +47,7 @@ if 1:
         Up_1D_P1Fit = Q4_Up_1D[:, 3]
 
         S_param_file = "S_minusplus.txt"
-        S_param_file = "S_minusplus_1THz.txt"
+        #S_param_file = "S_minusplus_1THz.txt"
 
         """Working on the theory"""
         UpParity = UpAndParity()
@@ -71,13 +71,13 @@ if 1:
         up_QPD = np.array(UpParity.up_QPD)
 
         ### plot start
-        label_font = 18
-        tick_font = 16
+        label_font = 22
+        tick_font = 20
         legend_font = 14
 
-        fig, axs = plt.subplots(2, figsize=(6, 8),
+        fig, axs = plt.subplots(2, figsize=(10, 8),
                                 gridspec_kw={'height_ratios': [3, 4],
-                                             'hspace': 0.25}
+                                             'hspace': 0.65}
                                 )
 
         axs[0].errorbar(Up_1D_Time, Up_1D_P1*100, yerr=100*Up_1D_Std/np.sqrt(20), fmt='o', c='k')
@@ -124,9 +124,36 @@ if 1:
         axs[1].tick_params(axis="x", width=1, length=4, which='both')
         axs[1].tick_params(axis="y", width=1, length=3, which='minor')
         axs[1].tick_params(axis="y", width=1, length=6, which='major')
+
+        axs[1].axvspan(368, 620, facecolor='0.2', alpha=0.1)
+
+
+        def fj_to_delta(f):
+            return f / 92
+
+
+        def delta_to_fj(delta):
+            return 92 * delta
+
+
+        secax = axs[1].secondary_xaxis('top', functions=(fj_to_delta, delta_to_fj))
+        secax.tick_params(labelsize=tick_font)
+        secax.set_xticks(np.arange(0, 10, 1))
+        secax.set_xlabel("Transmitter Voltage Bias ($\Delta/e$)", fontsize=label_font, labelpad=10)
+        secax.tick_params(axis="x", direction="in", which='both')
+        secax.tick_params(axis="y", direction="in", which='both')
+
+        secax.tick_params(axis="x", width=1, length=6, which='both')
+        secax.tick_params(axis="y", width=1, length=3, which='minor')
+        secax.tick_params(axis="y", width=1, length=6, which='major')
+
         fig.align_ylabels(axs)
         plt.tight_layout()
         # path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
         # plt.savefig(path + '\ParityUpCorrelation.pdf', format='pdf', bbox_inches='tight', dpi=1200)
+
+
+        plt.savefig('ParityUpCorrelation.pdf', format='pdf', bbox_inches='tight', dpi=1200)
+
         plt.show()
 

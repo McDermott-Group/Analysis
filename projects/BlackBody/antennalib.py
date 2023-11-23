@@ -1,6 +1,7 @@
 """
 A library for the antenna model
 """
+from scipy.integrate import quad
 
 import noiselib
 import numpy as np
@@ -8,18 +9,19 @@ import matplotlib.pyplot as plt
 from scipy.constants import *
 from scipy.stats import linregress
 from scipy.stats import sem
-from sklearn.mixture import GaussianMixture
+#from sklearn.mixture import GaussianMixture
 from scipy.optimize import fsolve
 from scipy.optimize import root
 from scipy.optimize import minimize
 from scipy import interpolate
+from scipy.misc import derivative
+
 
 from scipy.optimize import curve_fit
 
 from scipy.special import ellipk,ellipe
 
 """First import matlab data to python"""
-
 
 class QP_Up(object):
     """
@@ -230,6 +232,7 @@ class QP_Up(object):
             plt.show()
         else:
             plt.show()
+
 
 class Up_array(object):
     """
@@ -853,6 +856,10 @@ class AntennaCoupling(object):
             "PhotonFlux": [],  #
             "PhotonFlux_ShotNoise": {}
         }
+        self.Model = {
+            "Receiver": [],#"j1", "j2", "qp1", "qp"
+            "Radiator": []#
+        }
 
     def import_data(self, file, JJ, C_eff=75 * 1e-21):
         self.C_eff = C_eff
@@ -890,18 +897,80 @@ class AntennaCoupling(object):
         L_wb_gnd = mu_0 * length_wb_gnd  # wb = wirebond
         C_wb_gnd = epsilon_0 * length_wb_gnd  # wb = wirebond
         Z_j = []
+
+        def qp(x):
+            return (2 * x * ellipe((x ** 2 - 1) / x ** 2) - (1 / x) * ellipk((x ** 2 - 1) / x ** 2)) / 2 if x > 1 else 0
+
+        def qp1(x):
+            return ((ellipk(x ** 2) - 2 * ellipe(x ** 2)) if x < 1 else (2 * x - 1 / x) * ellipk(
+                1 / x ** 2) - 2 * x * ellipe(1 / x ** 2)) / 2
+
+        def j1(x):
+            return ((-1.0 * ellipk(x ** 2) if x < 1 else (-1.0 / x) * ellipk((1 / x) ** 2))) / 2
+
+        def j2(x):
+            return ((-1.0 / x) * ellipk((x ** 2 - 1) / x ** 2) if x > 1 else 0) / 2
+
         for w in omega:
-            Z_JJ = 1 / (1 / R + 1j * w * C)
-            # Z_wirebonda_gnd = 1/(1/1j*w*L_wb_gnd+1j*w*C_wb_gnd)
-            # Z_wirebonda_bias = 1/(1/1j*w*L_wb_bias+1j*w*C_wb_bias)
-            # Z_wirebond = 0
-            # Z = 1/(1/(Z_JJ + Z_wirebonda_gnd)+1/(Z_wirebonda_bias+50))
             if ReoRa == "Receiver":
-                Z = 1 / (1 / R + 1j * w * C)  # no wirebond included
-            elif ReoRa == "Radiator":  # radiator wire bond and input 50 ohm included
-                # print('R=', R)
-                # Z_wire = 1j*w*1e-9  # 1 nH
-                # Z = 1 / (1/(Z_JJ+0.5*Z_wire) + 1/(10*Z_wire + 50))
+                x = w / 2 / np.pi / 92e9
+                diff = False
+                if diff:
+                    ReZ_inverse = 0
+                    ImZ_inverse = 0
+                    for term in self.Model["Receiver"]:
+                        if term == "qp" and x > 1:
+                            ReZ_inverse += derivative(qp, x, 1e-8)
+                        elif term == "j2":
+                            ReZ_inverse += derivative(j2, x, 1e-8)
+                        elif term == "qp1":
+                            ImZ_inverse += derivative(qp1, x, 1e-8)
+                        elif term == "j1":
+                            ImZ_inverse += derivative(j1, x, 1e-8)
+                    if ReZ_inverse == 0 and x > 1:
+                        ReZ = R
+                    elif ReZ_inverse == 0 and x < 1:
+                        ReZ = np.infty
+                    else:
+                        ReZ = R/ReZ_inverse
+                    ImZ = np.infty if ImZ_inverse ==0 else R / ImZ_inverse
+                        # ReZ = R / (derivative(qp, x, 1e-8))
+                        # ImZ = R / (derivative(j1, x, 1e-8))
+                else:
+                    ReZ = R
+                    ImZ = np.infty
+                #derivative(qp1, x, 1e-2) (IM)+ + derivative(j2, x, 1e-8) (RE)
+                Z_JJ = 1 / (1 / ReZ + 1j * (w * C + 1/ ImZ))
+                Z = Z_JJ
+            elif ReoRa == "Radiator":
+                # need to include annoying JJ stuff...
+                x = w / 2 / np.pi / 92e9
+                diff = False
+                if diff:
+                    ReZ_inverse = 0
+                    ImZ_inverse = 0
+                    for term in self.Model["Radiator"]:
+                        if term == "qp" and x > 1:
+                            ReZ_inverse += derivative(qp, x, 1e-8)
+                        elif term == "j2":
+                            ReZ_inverse += derivative(j2, x, 1e-8)
+                        elif term == "qp1":
+                            ImZ_inverse += derivative(qp1, x, 1e-8)
+                        elif term == "j1":
+                            ImZ_inverse += derivative(j1, x, 1e-8)
+                    if ReZ_inverse == 0 and x >= 1:
+                        ReZ = R
+                    elif ReZ_inverse == 0 and x <= 1:
+                        ReZ = np.infty
+                    else:
+                        ReZ = R / ReZ_inverse
+                    #ReZ = R / ReZ_inverse
+                    ImZ = np.infty if ImZ_inverse ==0 else R / ImZ_inverse
+                else:
+                    ReZ = R
+                    ImZ = np.infty
+                #derivative(qp1, x, 1e-2) +(IM)  + derivative(j2, x, 1e-8) (RE)
+                Z_JJ = 1 / (1 / ReZ + 1j * (w * C + 1/ ImZ))
                 Z = Z_JJ
             Z_j.append(Z)
         self.Junction["R"] = R
@@ -1004,8 +1073,9 @@ class AntennaCoupling(object):
             ic0 = (pi / 4) * (2 * Delta_Al / e) * (1 / R)
 
             #From Barone and Paterno
-            x=fi/92e9
-            prefactor = ((1.0 / x) * ellipk(1.0 / x ** 2) + (1.0 / x) * ellipk((x ** 2 - 1) / x ** 2)) / ellipk(0) if x>1 else 1.0*ellipk(x**2)/ellipk(0)
+            x=fi/184e9
+            prefactor = (((1.0 / x) * ellipk(1.0 / x ** 2))**2 + ((1.0 / x) * ellipk((x ** 2 - 1) / x ** 2))**2)**0.5 / ellipk(0) if x>1 else 1.0*ellipk(x**2)/ellipk(0)
+            #prefactor = 1
             Ic_f.append(ic0*prefactor)
 
 
@@ -1035,9 +1105,39 @@ class AntennaCoupling(object):
         lower_bound_index = next(i for i, val in enumerate(f) if val >= 92e9)
         df=np.mean([f[i+1]-f[i] for i in range(len(f)-1)])
 
+        def qp(x):
+            return (2 * x * ellipe((x ** 2 - 1) / x ** 2) - (1 / x) * ellipk((x ** 2 - 1) / x ** 2)) / 2 if x > 1 else 0
+
+        def qp1(x):
+            return ((ellipk(x ** 2) - 2 * ellipe(x ** 2)) if x < 1 else (2 * x - 1 / x) * ellipk(
+                1 / x ** 2) - 2 * x * ellipe(1 / x ** 2)) / 2
+
+        def j1(x):
+            return ((-1.0 * ellipk(x ** 2) if x < 1 else (-1.0 / x) * ellipk((1 / x) ** 2))) / 2
+
+        def j2(x):
+            return ((-1.0 / x) * ellipk((x ** 2 - 1) / x ** 2) if x > 1 else 0) / 2
+
+
         for i in range(len(f)):
             #Coherent Radiation:
-            gamma_g = rms_factor * (currrent_distribution_factor * Ic_f[i]) ** 2 * R / (h * f[i])
+            x=f[i]/92e9
+            diff = False
+            if diff:
+                ReZ_inverse = 0
+                for term in self.Model["Radiator"]:
+                    if term == "qp":
+                        ReZ_inverse += derivative(qp, x, 1e-8)
+                    elif term == "j2":
+                        ReZ_inverse += derivative(j2, x, 1e-8)
+                if ReZ_inverse == 0:
+                    ReZ_inverse = 1
+                ReZ = R / ReZ_inverse
+                #ReZ = R / (derivative(qp, x, 1e-8) + derivative(j2, x, 1e-8))
+            else:
+                ReZ = R
+
+            gamma_g = rms_factor * (currrent_distribution_factor * Ic_f[i]) ** 2 * ReZ / (h * f[i])
             gamma_rad = subtrate_air_factor * gamma_g * e_c[i]
             Gamma_rad.append(gamma_rad)
             #Incoherent Shot Noise Contribution:
@@ -1045,9 +1145,8 @@ class AntennaCoupling(object):
             if f[i] > 368e9: #QP Shot Noise turns on here
                 upper_bound_index = next(j for j, val in enumerate(f) if val >= f[i]/2 - 92e9)
                 for j in range(lower_bound_index,upper_bound_index+1):
-                    x=f[i]/92e9
                     #Gamma_rad_ShotNoise[i][j] = 0.25 * subtrate_air_factor * e_c[j] * (f[i]/f[j])* df
-                    Gamma_rad_ShotNoise[i][j] = 0.25 * subtrate_air_factor * e_c[j] * (0.5*(f[i]/f[j])-1)* df* (40/x*(2*x*ellipe((x**2-1)/x**2)-(1/x)*ellipk((x**2-1)/x**2))/(2*40*ellipe((40**2-1)/40**2)-(1/40)*ellipk((40**2-1)/40**2)))
+                    Gamma_rad_ShotNoise[i][j] = 0.25 * subtrate_air_factor * e_c[j] * (0.5*(f[i]/f[j])-1)* df
         self.Radiator["Gamma_rad"] = Gamma_rad
         self.Radiator["Gamma_rad_ShotNoise"] = Gamma_rad_ShotNoise
         # print('f=', f[260:280])   # for 270 GHz
@@ -1369,13 +1468,13 @@ class GammaUp(object):
         plt.show()
 
 
-class TiedSphericalGaussianMixture(GaussianMixture):
-    def _m_step(self, X, log_resp):
-        super(TiedSphericalGaussianMixture, self)._m_step(X, log_resp)
-        self.covariances_.fill(self.covariances_.mean())
-        if np.any(np.less_equal(self.covariances_, 0.0)):
-            raise ValueError(estimate_precision_error_message)
-        self.precisions_cholesky_ = 1. / np.sqrt(self.covariances_)
+# class TiedSphericalGaussianMixture(GaussianMixture):
+#     def _m_step(self, X, log_resp):
+#         super(TiedSphericalGaussianMixture, self)._m_step(X, log_resp)
+#         self.covariances_.fill(self.covariances_.mean())
+#         if np.any(np.less_equal(self.covariances_, 0.0)):
+#             raise ValueError(estimate_precision_error_message)
+#         self.precisions_cholesky_ = 1. / np.sqrt(self.covariances_)
 
 
 class GMMFit(object):
@@ -1541,13 +1640,13 @@ class GMMFit(object):
         #
         # init_covariances = np.array([0.00016722, 0.00016722, 0.00016722, 0.00016722, 0.00016722])
 
-        gmm = TiedSphericalGaussianMixture(
-            n_components=N,
-            covariance_type='spherical',
-            max_iter=300, tol=5e-7,
-            means_init=minit, n_init=5) \
-            .fit(combined_bucket)
-
+        # gmm = TiedSphericalGaussianMixture(
+        #     n_components=N,
+        #     covariance_type='spherical',
+        #     max_iter=300, tol=5e-7,
+        #     means_init=minit, n_init=5) \
+        #     .fit(combined_bucket)
+        gmm = None
         state['gmm'] = gmm
         state['scale_factor'] = scale_factor
         state['means'] = scale_factor * gmm.means_

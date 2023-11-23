@@ -4,13 +4,10 @@ import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
 import matplotlib.font_manager as font_manager
-from matplotlib.ticker import ScalarFormatter, NullFormatter
+from matplotlib.ticker import ScalarFormatter, NullFormatter, FormatStrFormatter
 import os
 import matplotlib
 #matplotlib.use("tkAgg")
-
-# plot for main text or for supplement?
-supplement = False
 
 if 1: # import CST data
     ### parameters to be tuned
@@ -142,7 +139,7 @@ if 1:
     Gamma_withBase = []  # total parity rate with baseline
     Gamma_withBase_tot = []
     l_i = 50
-    r_i = 610 if not supplement else 1000
+    r_i = 1000
     polarization_factor = 0.5
 
     for i in range(len(Area)):
@@ -156,6 +153,28 @@ if 1:
         Gamma_re.append(Gamma_absorbed_coherent)
         Gamma_re_tot.append(Gamma_absorbed_coherent+Gamma_absorbed_noise)
 
+    pgJ1Q2 = []
+    x_qp2photon = []
+    powers_radiated_coherent = []  # photon received
+    powers_radiated_incoherent = []
+
+    for i in range(len(Area)):
+        if f[i] < 92:
+            powers_radiated_coherent.append(0)
+            powers_radiated_incoherent.append(0)
+            continue
+
+        # coherent radiation:
+        power_radiated_coherent = PhotonFlux[i] * f[i]
+        # radiation from shot noise:
+        power_radiated_incoherent = 0
+        for j in range(len(Area)):
+            power_radiated_incoherent += ShotNoiseFlux[i][j] * f[j]
+
+        powers_radiated_coherent.append(power_radiated_coherent * 6.63e-34 * 1e18)
+        powers_radiated_incoherent.append(power_radiated_incoherent * 6.63e-34 * 1e18)
+
+
     ratio = 0.045#*0.9177**2# for 190 GHz peak, 3.6, for 270 GHz, 7.0
     # ratio = 1  # for 190 GHz peak, 3.6, for 270 GHz, 7.0
     base = 110
@@ -167,31 +186,50 @@ if 1:
             Gamma_withBase_tot.append(base)
             Gamma_withBase.append(base)
 
-    fig, axs = plt.subplots(2, figsize=(50, 22),
-                            gridspec_kw={'height_ratios': [2, 3], 'hspace': 0.75})
+    fig, axs = plt.subplots(2, figsize=(36, 22),
+                            gridspec_kw={'height_ratios': [3, 3], 'hspace': 0.6})
 
-    axs[0].plot(f, eJ1, color="red", marker="o", markersize=4,linewidth=8,
-                label='                ')
-    axs[0].plot(f_Q2, eQ2, color="blue", marker="o", markersize=4,linewidth=8,
-                label='                ')
-    axs[0].plot(f_Q2, eJ1*eQ2, color="purple", marker="o", markersize=4,linewidth=8,
-                label='                ')
-    axs[0].set_ylabel('   ', color="black", fontsize=label_font)
     axs[0].set_yscale('log')
     axs[0].set_xlim([l_i, r_i])
-    axs[0].set_ylim([5e-7, 2e-1])
-    axs[0].set_yticks([1e-5, 1e-3, 1e-1])
+    axs[0].set_ylim([0.02, 200])
+    # axs[1].legend(loc=2, prop=legend_font, frameon=False)
+    axs[0].set_ylabel("Radiated Power (aW)", color="black", fontsize=tick_font)
+    axs[0].set_xlabel("Transmitter Josephson Frequency (GHz)", color="black", fontsize=tick_font)
     axs[0].tick_params(labelsize=tick_font)
-    # axs[0].legend(loc=4, prop=legend_font)
+
+
+    axs[0].plot(f_Q2, powers_radiated_coherent, color="red", linestyle='-',  linewidth=8)
+    axs[0].plot(f_Q2, powers_radiated_incoherent, color="blue", linestyle='-',  linewidth=8)
+
+
+    def fj_to_delta(f):
+        return f / 46 / 2
+
+    def delta_to_fj(delta):
+        return 46 * delta * 2
+
+    axs[0].axvspan(368, 1100, facecolor='0.2', alpha=0.1)
+    secax = axs[0].secondary_xaxis('top', functions=(fj_to_delta, delta_to_fj))
+    secax.tick_params(labelsize=tick_font)
+    secax.xaxis.set_major_formatter(FormatStrFormatter('%2d'))
+    secax.set_xticks(np.arange(0, 27, 2))
+    secax.set_xlabel("Transmitter Voltage Bias ($\Delta/e$)", fontsize=tick_font, labelpad=15)
+    secax.tick_params(axis="x", direction="in", which='both')
+    secax.tick_params(axis="y", direction="in", which='both')
+
+    secax.tick_params(axis="x", width=1, length=6, which='both')
+    secax.tick_params(axis="y", width=1, length=3, which='minor')
+    secax.tick_params(axis="y", width=1, length=6, which='major')
+
     axs[0].tick_params(axis="x", direction="in", which='both')
     axs[0].tick_params(axis="y", direction="in", which='both')
+
     axs[0].tick_params(axis="x", width=1, length=6, which='both')
-    axs[0].tick_params(axis="y", width=1, length=6, which='major')
     axs[0].tick_params(axis="y", width=1, length=3, which='minor')
+    axs[0].tick_params(axis="y", width=1, length=6, which='major')
 
-    # axs[0].set_ylabel("$e_{\mathrm{c}}$)", color="black", fontsize=label_font)
 
-    if supplement: axs[1].plot(f_Q2, Gamma_withBase, color="green", linestyle='-',  linewidth=8)
+    axs[1].plot(f_Q2, Gamma_withBase, color="green", linestyle='-',  linewidth=8)
     axs[1].plot(f_Q2, Gamma_withBase_tot, color="purple", linestyle='-',  linewidth=8)
 
     axs[1].plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, color="black", linewidth=6,
@@ -199,12 +237,9 @@ if 1:
     # axs[1].plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, 'o', color="black")
     axs[1].axhline(y=base, c='k', linestyle='--')
 
-    # axs[1].set_xlabel("Transmitter Frequency (GHz)", color="black",
-    #                   fontsize=label_font)
-    # axs[1].set_ylabel("$\Gamma_{\mathrm{p}}$ ($\mathrm{s^{-1}}$)", color="black", fontsize=label_font)
     axs[1].set_yscale('log')
     axs[1].set_xlim([l_i, r_i])
-    axs[1].set_ylim([100, 1100 if not supplement else 11000])
+    axs[1].set_ylim([100, 11000])
     # axs[1].legend(loc=2, prop=legend_font, frameon=False)
     axs[1].tick_params(labelsize=tick_font)
 
@@ -214,9 +249,9 @@ if 1:
     def delta_to_fj(delta):
         return 92 * delta
 
-    axs[1].axvspan(368,610 if not supplement else 1100,facecolor='0.2', alpha=0.1)
+    axs[1].axvspan(368,1100,facecolor='0.2', alpha=0.1)
     secax = axs[1].secondary_xaxis('top', functions=(fj_to_delta, delta_to_fj))
-    secax.tick_params(labelsize=tick_font)
+    #secax.tick_params(labelsize=tick_font)
     secax.set_xticks(np.arange(2,22,2))
 
     axs[1].tick_params(axis="x", direction="in", which='both')
@@ -226,6 +261,7 @@ if 1:
     axs[1].tick_params(axis="y", width=1, length=3, which='minor')
     axs[1].tick_params(axis="y", width=1, length=6, which='major')
 
+    secax.set_xlabel("Transmitter Voltage Bias ($\Delta/e$)", fontsize=tick_font, labelpad=15)
     secax.tick_params(axis="x", direction="in", which='both')
     secax.tick_params(axis="y", direction="in", which='both')
 
@@ -236,75 +272,15 @@ if 1:
     freq_l = 175
     freq_r = 310
 
+    axs[1].set_xlabel("Transmitter Josephson Frequency (GHz)", color="black", fontsize=tick_font)
 
     # fig.align_ylabels(axs)
 
     #path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
     #name = '\XmonSpectroscopy.pdf' if not supplement else '\XmonSpectroscopy_HighFrequency.pdf'
-    name = 'XmonSpectroscopy.pdf' if not supplement else 'XmonSpectroscopy_HighFrequency.pdf'
+    name = 'XmonSpectroscopy_Supplement.pdf'
     plt.savefig(name, format='pdf', bbox_inches='tight', dpi=1500)
 
     #plt.savefig(path+name, format='pdf', bbox_inches='tight', dpi=1500)
     plt.show()
     # plt.tight_layout()
-
-if 0:   # inset
-
-    label_font = 16
-    tick_font = 24
-    legend_font = 15
-
-    pgJ1Q2 = []
-    x_qp2photon = []
-    Gamma_re = []  # photon received
-    Gamma_withBase = []  # total parity rate with baseline
-    l_i = 50
-    r_i = 1000
-    polarization_factor = 0.5
-
-    for i in range(len(Area)):
-        Gamma_absorbed = polarization_factor * PhotonFlux[i] * Area[i] * eQ2[i]*4
-        Gamma_re.append(Gamma_absorbed)
-
-    #ratio = 0.05  # for 190 GHz peak, 3.6, for 270 GHz, 7.0
-    base = 110
-    for i in range(len(pgJ1)):
-        if f[i] >= 92:
-            Gamma_withBase.append(ratio * Gamma_re[i] + 1 * base)
-        else:
-            Gamma_withBase.append(base)
-
-    fig1, ax = plt.subplots(figsize=(7,3))
-    # plt.plot(f_Q2, Gamma_withBase, color="purple", linestyle='-',  linewidth=5)
-    # plt.yscale('log')
-    # plt.tick_params(axis="x", direction="in")
-    # plt.tick_params(axis="y", direction="in")
-
-    ax.plot(f_Q2, Gamma_withBase, color="purple", linestyle='-',  linewidth=5)
-    ax.plot([J * f_SIM for J in Q2_J1Bias], Q2_J1ParityRate, color="black", linestyle='None',
-                   marker="o", markersize=8)
-    ax.set_yscale('log')
-    # ax.ticklabel_format(axis="y", style='sci')
-    ax.set_xlim([230, 310])
-    ax.set_ylim([100, 1200])
-    ax.tick_params(labelsize=tick_font)
-    ax.tick_params(axis="x", direction="in", which='both')
-    ax.tick_params(axis="y", direction="in", which='both')
-
-    ax.tick_params(axis="x", width=2, length=6, which='both')
-    ax.tick_params(axis="y", width=2, length=6, which='minor')
-    ax.tick_params(axis="y", width=2, length=12, which='major')
-    # ax.tick_params(axis="y", width=1, length=10, which='major')
-    # ax.get_yaxis().get_major_formatter().set_scientific(False)
-    # ax.ticklabel_format(style='sci')
-
-    # ax.set_yticks([2e2, 4e2, 6e2])
-    # ax.yaxis.set_major_formatter(ScalarFormatter())
-    # ax.yaxis.set_minor_formatter(NullFormatter())
-    # ax.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
-
-    #path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
-    # plt.savefig('XmonSpectroscopyInset.pdf', format='pdf', bbox_inches='tight', dpi=1200, transparent='True')
-    #plt.savefig(path+'\XmonSpectroscopyInset.pdf', format='pdf', bbox_inches='tight', dpi=1200, transparent='True')
-    plt.show()
-

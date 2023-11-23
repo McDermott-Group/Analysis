@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from antennalib import AntennaCoupling, getPhotonRate
 import numpy as np
 import matplotlib
-matplotlib.use("QtAgg")
+#matplotlib.use("QtAgg")
 
 if 1:
     """
@@ -277,8 +277,8 @@ Calculate effective blackbody temperature
 # print('PRQ4=', PRQ4[0])
 
 
-label_font = 14
-tick_font = 14
+label_font = 18
+tick_font = 18
 legend_font = 12
 
 f_SIM_OctW = 0.96758 * 0.95  # Xmon match data
@@ -291,9 +291,9 @@ Q1_base = np.mean(Q1_PSD_OctWeak[:, 1][:8])
 Q2_base = np.mean(Q2_PSD_OctWeak[:, 1][:8])
 Q4_base = np.mean(Q4_PSD_OctWeak[:, 1][:8])
 
-fig, axs = plt.subplots(2, figsize=(6, 7),
-                        gridspec_kw={'height_ratios': [2.5, 3],
-                                     'hspace': 0.15})
+fig, axs = plt.subplots(2, figsize=(9, 7),
+                        gridspec_kw={'height_ratios': [2, 3],
+                                     'hspace': 0.6})
 
 f_l = 50
 f_r = 535
@@ -305,7 +305,7 @@ ld2=3
 # axs[0].plot(f_SFQ, eSFQ_4, color="green", linestyle='--', linewidth=ld2, label='Transmitter')
 # axs[0].plot(f_SFQ, eSFQ_4, color=[0, 1, 0], linestyle='--', linewidth=ld2, label='Transmitter')
 axs[0].plot(f_SFQ, eSFQ_4, color="darkgreen", linestyle='--', linewidth=ld2, label='            ')
-axs[0].plot(f_SFQ, eSFQ_4_qp, color="green", linestyle='--', linewidth=ld2, label='            ')
+# axs[0].plot(f_SFQ, eSFQ_4_qp, color="green", linestyle='--', linewidth=ld2, label='            ')
 
 axs[0].plot(f_SFQ, eQ1, linewidth=ld2, color="red", label='            ')
 axs[0].plot(f_SFQ, eQ4, linewidth=ld2, color="black", label='   ')
@@ -313,7 +313,7 @@ axs[0].plot(f_SFQ, eQ2, linewidth=ld2, color="blue", label='   ')
 axs[0].set_xlim([f_l, f_r])
 axs[0].set_ylim([4e-5, 1e-1])
 axs[0].set_yscale('log')
-# axs[0].legend(loc=4, ncol=2, frameon=False, prop={'size': 13})
+axs[0].legend(loc=4, ncol=2, frameon=False, prop={'size': 13})
 axs[0].tick_params(labelsize=tick_font)
 
 axs[0].tick_params(axis="x", direction="in", which='both')
@@ -343,7 +343,27 @@ axs[1].tick_params(axis="x", width=1, length=4, which='both')
 axs[1].tick_params(axis="y", width=1, length=3, which='minor')
 axs[1].tick_params(axis="y", width=1, length=6, which='major')
 
+axs[1].axvspan(368, 620, facecolor='0.2', alpha=0.1)
+
+def fj_to_delta(f):
+    return f / 92
+
+
+def delta_to_fj(delta):
+    return 92 * delta
+secax = axs[1].secondary_xaxis('top', functions=(fj_to_delta, delta_to_fj))
+secax.tick_params(labelsize=tick_font)
+secax.set_xticks(np.arange(0, 10, 1))
+secax.set_xlabel("Transmitter Voltage Bias ($\Delta/e$)", fontsize=label_font, labelpad=4)
+secax.tick_params(axis="x", direction="in", which='both')
+secax.tick_params(axis="y", direction="in", which='both')
+
+secax.tick_params(axis="x", width=1, length=6, which='both')
+secax.tick_params(axis="y", width=1, length=3, which='minor')
+secax.tick_params(axis="y", width=1, length=6, which='major')
+
 plt.tight_layout()
 # path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
 # plt.savefig(path + '\Circmon.pdf', bbox_inches='tight', format='pdf', dpi=1200, transparent=True)
+plt.savefig('Circmon.pdf', bbox_inches='tight', format='pdf', dpi=1200, transparent=True)
 plt.show()

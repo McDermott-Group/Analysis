@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.font_manager as font_manager
 import os
 import matplotlib
-matplotlib.use("QtAgg")
+#matplotlib.use("QtAgg")
 
 if 1: # import CST data
     ### parameters to be tuned
@@ -146,6 +146,7 @@ if 1:   # one plot
     plt.yscale('log')
     plt.xlim([50, 620])
     plt.ylim([80, 1000])
+
     # plt.xlim([50, 1200])
     # plt.ylim([80, 3000])
     # axs[1].grid(True, which="both")
@@ -160,16 +161,32 @@ if 1:   # one plot
     plt.xlabel("Transmitter Josephson frequency (GHz)", color="black",
                       fontsize=label_font)
 
+    axs = plt.gca()
+    axs.axvspan(368,620, facecolor='0.2', alpha=0.1)
 
 
+    def fj_to_delta(f):
+        return f / 92
 
-    # axs[1].set_ylabel("$\Gamma_{\mathrm{P}}$ (s$^{-1}$)", color="black", fontsize=label_font)
+    def delta_to_fj(delta):
+        return 92 * delta
 
+    secax = axs.secondary_xaxis('top', functions=(fj_to_delta, delta_to_fj))
+    secax.tick_params(labelsize=tick_font)
+    secax.set_xticks(np.arange(0, 10, 1))
+    secax.set_xlabel("Transmitter Voltage Bias ($\Delta/e$)", fontsize=label_font, labelpad=10)
+    secax.tick_params(axis="x", direction="in", which='both')
+    secax.tick_params(axis="y", direction="in", which='both')
+
+    secax.tick_params(axis="x", width=1, length=6, which='both')
+    secax.tick_params(axis="y", width=1, length=3, which='minor')
+    secax.tick_params(axis="y", width=1, length=6, which='major')
 
     # fig.align_ylabels(axs)
     plt.tight_layout()
-    path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
-    plt.savefig(path+'\XmonQ123Parity.pdf', format='pdf', bbox_inches='tight', dpi=1200)
+    path = '..'# 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
+    #plt.savefig(path+'\XmonQ123Parity.pdf', format='pdf', bbox_inches='tight', dpi=1200)
+    plt.savefig('XmonQ123Parity.pdf', format='pdf', bbox_inches='tight', dpi=1200)
     plt.show()
 
 if 0:   # one plot+zoom in
@@ -233,5 +250,6 @@ if 0:   # one plot+zoom in
     plt.tight_layout()
     # path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
     # plt.savefig(path+'\XmonQ123Parity.pdf', format='pdf', bbox_inches='tight', dpi=1200)
+    plt.savefig('XmonQ123Parity.pdf', format='pdf', bbox_inches='tight', dpi=1200)
     plt.show()
 

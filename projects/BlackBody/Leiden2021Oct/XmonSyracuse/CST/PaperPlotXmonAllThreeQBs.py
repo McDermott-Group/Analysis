@@ -266,6 +266,6 @@ if 1:
     fig.align_ylabels(axs)
     plt.tight_layout()
     #path = 'Z:\mcdermott-group\data\Antenna\PaperWriting\Figs\FiguresFromPythonandOthersForIllustrator'
-    #plt.savefig(path+'\XmonQ123Parity_P1.pdf', format='pdf', bbox_inches='tight', dpi=1200)
+    #plt.savefig('XmonQ123Parity_P1.pdf', format='pdf', bbox_inches='tight', dpi=1200)
     plt.show()
 
