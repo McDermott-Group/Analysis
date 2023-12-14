@@ -3,7 +3,8 @@ from dataChest import *
 from dataChest import dataChest as dc
 import os
 
-DATACHEST_ROOT = '/Volumes/smb/mcdermott-group/data'
+# DATACHEST_ROOT = '/Volumes/smb/mcdermott-group/data'
+DATACHEST_ROOT = 'Z:\\mcdermott-group\data'
 
 base_path =  ['windowJJs', 'DiodeBoxMapping_IVData']
 
