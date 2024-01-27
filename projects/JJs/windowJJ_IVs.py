@@ -16,19 +16,6 @@ paths = [os.path.join(*([DATACHEST_ROOT] + expt_path)) for expt_path in expt_pat
 
 for i,path in enumerate(paths):
     expt_path = expt_paths[i]
-    for data_set in os.listdir(path):
-        try:
-            d = dataChest(os.path.join(path), data_set)
-            d.cd(expt_path)
-            d.openDataset(data_set, modify=False)
-            junction = JJ(expt_path, [data_set], [device_name])
-            if "DIODE" in device_name.upper():
-                junction.diodeCurrentFromOutputVoltage()
-            junction.plotLogIvsV(save=False,autocenter_mode='gap')
-            # junction.plotIvsV(save=False,autocenter_mode='gap')
-        except Exception as e:
-            print('Error Opening Dataset: {0}'.format(e))
-            continue
     for dataSet in os.listdir(path):
         # try:
         d = dataChest(os.path.join(path), dataSet)
@@ -36,12 +23,6 @@ for i,path in enumerate(paths):
         d.openDataset(dataSet,modify=False)
         junction = JJ(expt_path, [dataSet], [device_name])
         if "DIODE" in device_name.upper():
-            junction.diodeCurrentFromOutputVoltage()
-        #junction.plotLogIvsV(save=False)
-        #junction.plotIvsV(save=False)
-        junction.plotAppended(save=False) # added this
-        junction.plotAppendedLogIvsV(save=False)
-            # junction.autocenter()
-        #except Exception as e:
-            #print('Error Opening Dataset: {0}'.format(e))
-            #continue
+            junction._diode_current_from_output_voltage()
+        junction.plot_I_vs_V(save=False, autocenter_mode='both',remove_jumps=True)
+        junction.plot_I_vs_V(save=False, autocenter_mode='both', remove_jumps=False)

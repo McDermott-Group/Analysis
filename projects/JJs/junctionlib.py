@@ -12,7 +12,17 @@ import platform
 DATACHEST_ROOT = '/Volumes/smb/mcdermott-group/data/' if 'macOS' in platform.platform() else 'Z:\\mcdermott-group\\data\\'
 
 class JJ(object):
+    """"
+        Class for analyzing JJ IV Sweeps
+    """
     def __init__(self, path, files, device_names, gap=190e-6):
+        """Instantiate JJ for files associated with given devices.
+
+        :param path: path containing the IV files.
+        :param files: hdf5 files to open in data chest.
+        :param device_names: human-readable device identifiers (mostly used for plotting).
+        :param gap: Delta/e, in Volts
+        """
         d = dataChest(path)
         self.I = []
         self.V = []
@@ -21,9 +31,8 @@ class JJ(object):
         self.device_names = []
         for i, file in enumerate(files):
             d.openDataset(file)
-            variables = d.getVariables()
             data = d.getData(variablesList=['Current','Voltage'])
-            self.SeriesResistance = d.getParameter('AC Resistance In [kOhms]')*1e3
+            self.Rs = d.getParameter('AC Resistance In [kOhms]') * 1e3
             self.I.append(data[:,0])
             self.V.append(data[:,1])
             self.files.append(files[i])
@@ -31,7 +40,53 @@ class JJ(object):
         self.path = path
         self.gap = gap
 
-    def plotLogIvsV(self, save=False, save_path=None, save_name=None,autocenter_mode='supercurrent'):
+
+    def plot_I_vs_V(self, save=False, save_path=None, save_name=None, autocenter_mode='supercurrent', remove_jumps = False):
+        """Plot the centered IV on a linear scale.
+
+        :param save: specifies whether to save the plot. When false, plot will be displayed in interactive mode.
+        :param save_path:  path for saving the plot. When None, defaults to '../Figures/'.
+        :param save_name: name for saving the plot. When None, defaults to 'Log_' + the hdf5 file name.
+        :param autocenter_mode: 'supercurrent','gap', or 'both'. Specifies whether zero voltage is set by using the
+                                vertical feature at V=0, at twice the gap, or both.
+        :param remove_jumps: remove the jump from the supercurrent branch to the resistive branch?
+        :return: None
+        """
+        if remove_jumps:
+            self._plot_I_vs_V_removing_jumps()
+        else:
+            self._plot_I_vs_V_raw()
+
+    def plot_log_I_vs_V(self, save=False, save_path=None, save_name=None, autocenter_mode='supercurrent', remove_jumps=False):
+        """Plot the centered IV on a semilog(y) scale.
+
+        :param save: specifies whether to save the plot. When false, plot will be displayed in interactive mode.
+        :param save_path:  path for saving the plot. When None, defaults to '../Figures/'.
+        :param save_name: name for saving the plot. When None, defaults to 'Log_' + the hdf5 file name.
+        :param autocenter_mode: 'supercurrent','gap', or 'both'. Specifies whether zero voltage is set by using the
+                                vertical feature at V=0, at twice the gap, or both.
+        :param remove_jumps: remove the jump from the supercurrent branch to the resistive branch?
+        :return: None
+        """
+        if remove_jumps:
+            self._plot_I_vs_V_removing_jumps()
+        else:
+            self._plot_I_vs_V_raw()
+        if remove_jumps:
+            self._plot_log_I_vs_V_removing_jumps()
+        else:
+            self._plot_log_I_vs_V_raw()
+
+    def _plot_log_I_vs_V_raw(self, save=False, save_path=None, save_name=None, autocenter_mode='supercurrent'):
+        """Plot the centered IV on a semilog(y) scale.
+
+        :param save: specifies whether to save the plot. When false, plot will be displayed in interactive mode.
+        :param save_path:  path for saving the plot. When None, defaults to '../Figures/'.
+        :param save_name: name for saving the plot. When None, defaults to 'Log_' + the hdf5 file name.
+        :param autocenter_mode: 'supercurrent','gap', or 'both'. Specifies whether zero voltage is set by using the
+                                vertical feature at V=0, at twice the gap, or both.
+        :return: None
+        """
         self.autocenter(mode=autocenter_mode)
         for idx, file in enumerate(self.files):
             fig = plt.figure()
@@ -53,7 +108,16 @@ class JJ(object):
                 plt.ion()
                 plt.show()
 
-    def plotIvsV(self, save=False, save_path=None, save_name=None,autocenter_mode = 'supercurrent'):
+    def _plot_I_vs_V_raw(self, save=False, save_path=None, save_name=None, autocenter_mode ='supercurrent'):
+        """Plot the centered IV on a linear scale.
+
+        :param save: specifies whether to save the plot. When false, plot will be displayed in interactive mode.
+        :param save_path:  path for saving the plot. When None, defaults to '../Figures/'.
+        :param save_name: name for saving the plot. When None, defaults to the hdf5 file name.
+        :param autocenter_mode: 'supercurrent','gap', or 'both'. Specifies whether zero voltage is set by using the
+                                vertical feature at V=0, at twice the gap, or both.
+        :return: None
+        """
         self.autocenter(mode=autocenter_mode)
         for idx, file in enumerate(self.files):
             fig = plt.figure()
@@ -77,8 +141,8 @@ class JJ(object):
                 plt.ion()
                 plt.show()
 
-    def plotAppended(self, save=False, save_path=None, save_name=None):
-        gap2 = self.Sophiaautocenter()
+    def _plot_I_vs_V_removing_jumps(self, save=False, save_path=None, save_name=None, autocenter_mode='supercurrent'):
+        self.autocenter(mode=autocenter_mode)
         for idx, file in enumerate(self.files):
             v = self.V[idx]
             i = self.I[idx]
@@ -88,9 +152,9 @@ class JJ(object):
             v_localmin = []
             v_localmax = []
             for j in range(len(v)-1):
-                if v[j] < -1.3*gap2 and v[j-1] > v[j] and v[j] < v[j+1]:
+                if v[j] < -1.3*self.gap and v[j-1] > v[j] and v[j] < v[j+1]:
                     v_localmin.append(v[j])
-                elif v[j] > 1.3*gap2 and v[j-1] < v[j] and v[j] > v[j+1]:
+                elif v[j] > 1.3*self.gap and v[j-1] < v[j] and v[j] > v[j+1]:
                     v_localmax.append(v[j])
                 else:
                     pass
@@ -147,9 +211,8 @@ class JJ(object):
                 plt.ion()
                 plt.show()
 
-    def plotAppendedLogIvsV(self, save=False, save_path=None, save_name=None):
-        self.autocenter()
-        gap2 = self.Sophiaautocenter()
+    def _plot_log_I_vs_V_removing_jumps(self, save=False, save_path=None, save_name=None, autocenter_mode='supercurrent'):
+        self.autocenter(mode=autocenter_mode)
         for idx, file in enumerate(self.files):
             v = self.V[idx]
             i = self.I[idx]
@@ -159,9 +222,9 @@ class JJ(object):
             v_localmin = []
             v_localmax = []
             for j in range(len(v) - 1):
-                if v[j] < -1.3 * gap2 and v[j - 1] > v[j] and v[j] < v[j + 1]:
+                if v[j] < -1.3 * self.gap and v[j - 1] > v[j] and v[j] < v[j + 1]:
                     v_localmin.append(v[j])
-                elif v[j] > 1.3 * gap2 and v[j - 1] < v[j] and v[j] > v[j + 1]:
+                elif v[j] > 1.3 * self.gap and v[j - 1] < v[j] and v[j] > v[j + 1]:
                     v_localmax.append(v[j])
                 else:
                     pass
@@ -217,70 +280,44 @@ class JJ(object):
                 plt.ion()
                 plt.show()
 
-    def autocenter(self):
     def autocenter(self,mode='supercurrent'):
+        """Modify the voltage(V) attribute of JJ object to center the supercurrent at V=0.
+
+        :param mode: 'supercurrent','gap', or 'both'. Specifies whether zero voltage is set by using the
+                    vertical feature at V=0, at twice the gap, or the average of both.
+        :return: None
+        """
         for idx, file in enumerate(self.files):
             self.V[idx] = self.V[idx] - np.mean(self.V[idx])
             v = self.V[idx]
             i = self.I[idx]
             i = np.abs(i)
-            # offset = v[np.argmin(i)]
-            # v = v - offset
             if mode == 'supercurrent' or mode == 'both':
-                offset = self.vertSearch(v, i, -1.25*self.gap, 1.25*self.gap)
+                offset = self._vert_search(v, i, -0.8 * self.gap, 0.8 * self.gap)
                 v = v - offset
-
             if mode == 'gap' or mode == 'both':
                 a = 4.5 if mode == 'gap' else 3.0
                 b = 0.1 if mode == 'gap' else 1.0
-                gap1 = self.vertSearch(v, i, -a*self.gap, -b*self.gap)
-                gap2 = self.vertSearch(v, i, b*self.gap, a*self.gap)
+                gap1 = self._vert_search(v, i, -a * self.gap, -b * self.gap)
+                gap2 = self._vert_search(v, i, b * self.gap, a * self.gap)
                 avg_factor = 2 if mode == 'gap' else 3
-                v = v -(gap1+gap2)/avg_factor #This is the average of the THREE vertical search results
-            # plt.figure()
-            # plt.axvline(0)
-            # plt.axvline(gap1-(gap1+gap2)/2)
-            # plt.axvline(gap2-(gap1+gap2)/2)
-            # v=v-(gap1+gap2)/2
-            a,b = self.fitLine(v,i,np.min(v),0.99*np.min(v))
-            c,d = self.fitLine(v,i,0.99*np.max(v),np.max(v))
+                v = v -(gap1+gap2)/avg_factor
+
+            a,b = self._fit_line(v, i, np.min(v), 0.99 * np.min(v))
+            c,d = self._fit_line(v, i, 0.99 * np.max(v), np.max(v))
             self.R = 1/np.min(np.abs([a,c]))
-            # plt.plot([np.min(v),np.max(v)],[a*np.min(v)+b,a*np.max(v)+b])
-            # c,d = self.fitLine(v,i,2.5*self.gap,5*self.gap,slope=a)
-            # plt.plot([np.min(v),np.max(v)],[c*np.min(v)+d,c*np.max(v)+d])
-            # plt.plot(v,i)
-            # plt.show()
             self.V[idx] = v
 
-    def Sophiaautocenter(self):
-        for idx, file in enumerate(self.files):
-            self.V[idx] = self.V[idx] - np.mean(self.V[idx])
-            v = self.V[idx]
-            i = self.I[idx]
-            i = np.abs(i)
-            # offset = v[np.argmin(i)]
-            # v = v - offset
-            offset = self.vertSearch(v, i, -0.75*self.gap, 0.75*self.gap)
-            v = v - offset
-            gap1 = self.vertSearch(v, i, -2.5*self.gap, -1.5*self.gap)
-            gap2 = self.vertSearch(v, i, 1.5*self.gap, 2.5*self.gap)
-            v = v -(gap1+gap2)/3 #This is the average of the THREE vertical search results
-            # plt.figure()
-            # plt.axvline(0)
-            # plt.axvline(gap1-(gap1+gap2)/2)
-            # plt.axvline(gap2-(gap1+gap2)/2)
-            # v=v-(gap1+gap2)/2
-            # a,b = self.fitLine(v,i,-5*self.gap,-2.5*self.gap)
-            # plt.plot([np.min(v),np.max(v)],[a*np.min(v)+b,a*np.max(v)+b])
-            # c,d = self.fitLine(v,i,2.5*self.gap,5*self.gap,slope=a)
-            # plt.plot([np.min(v),np.max(v)],[c*np.min(v)+d,c*np.max(v)+d])
-            # plt.plot(v,i)
-            plt.show()
-            self.V[idx] = v
-            return(gap2)
+    def _vert_search(self, v, i, vmin, vmax, n_roll = 21):
+        """Search for vertical features in specified portion of IV curve, used to autocenter.
 
-    def vertSearch(self, v, i, vmin, vmax):
-        n_roll = 21
+        :param v: voltage.
+        :param i: current.
+        :param vmin: minimum voltage in span to search.
+        :param vmax: maximum voltage in span to search.
+        :param n_roll: number of points in rolling average to smooth curve.
+        :return: voltage corresponding to steepest jump.
+        """
         v_tmp = []
         i_tmp = []
         for j in range(len(v)):
@@ -292,7 +329,17 @@ class JJ(object):
         i_tmp = np.convolve(i_tmp, np.ones(n_roll) / n_roll, mode='valid')
         didv = np.abs(np.diff(i_tmp) / np.diff(v_tmp))
         return v_tmp[np.argmax(didv)]
-    def fitLine(self, v, i, vmin, vmax, slope = None):
+
+    def _fit_line(self, v, i, vmin, vmax, slope = None):
+        """Fit a line to specified portion of IV curve
+
+        :param v: voltage.
+        :param i: current.
+        :param vmin: minimum voltage in span to fit.
+        :param vmax: maximum voltage in span to fit.
+        :param slope: slope of line, if goal is to find intercept only.  If None, both slope and intercept will be fit.
+        :return: [slope, intercept]
+        """
         v_tmp = []
         i_tmp = []
         for j in range(len(v)):
@@ -301,41 +348,44 @@ class JJ(object):
                 i_tmp.append(i[j])
         def lin(x, a, b):
             return a*x + b
-
-        def linFixedSlope(x, b):
+        def lin_fixed_slope(x, b):
             return slope*x + b
 
         if slope is None:
             popt, cov = curve_fit(lin, v_tmp, i_tmp)
             return popt
         else:
-            popt, cov = curve_fit(linFixedSlope, v_tmp, i_tmp)
+            popt, cov = curve_fit(lin_fixed_slope, v_tmp, i_tmp)
             return slope,popt[0]
-    def removeJump(self, v, i):
-        v_tmp = []
-        i_tmp = []
-        positive_sweep = True
-        for j in range(len(v)):
-            if v[j] >= 0 and v[j] <= 2*self.gap and positive_sweep:
-                continue
-            if v[j] <= 0 and v[j] >= 2*self.gap and not positive_sweep:
-                continue
-    def fitReferenceLine(self, v, i):
+
+    def _fit_reference_line(self, v, i):
+        """Used to fit the calibration data.
+
+        :param v: voltage.
+        :param i: current.
+        :return: [slope, intercept]
+        """
         def lin(x, a, b):
             return a * x + b
 
         popt, cov = curve_fit(lin, v, i,p0=[2/350.0, 0.0])
         return popt
-    def diodeCurrentFromOutputVoltage(self):
+    def _diode_current_from_output_voltage(self, cal_file='/windowJJs/Calibrations/20231201_cal.csv'):
+        """Correct the current (I) attribute of JJ object for the non-linearity of diode box.
+
+        :param cal_file: File containing IV data using the diode box going into a known, linear resistance.
+        :return: None
+        """
+
         cal_data = np.loadtxt(DATACHEST_ROOT+'/windowJJs/Calibrations/20231201_cal.csv',delimiter=',')
         v_cal = cal_data[:, 0].T
         i_cal = cal_data[:, 1].T
-        posSlope,posInt = self.fitReferenceLine(v_cal[v_cal > 1.5],i_cal[v_cal > 1.5])
-        negSlope, negInt = self.fitReferenceLine(v_cal[v_cal < -1.5],i_cal[v_cal < -1.5])
+        posSlope,posInt = self._fit_reference_line(v_cal[v_cal > 1.5], i_cal[v_cal > 1.5])
+        negSlope, negInt = self._fit_reference_line(v_cal[v_cal < -1.5], i_cal[v_cal < -1.5])
         i_cal = [negSlope*v+negInt for v in np.arange(-20, np.min(v_cal), 0.1)] + list(i_cal) + [posSlope*v+posInt for v in np.arange(np.max(v_cal),20, 0.1)]
         v_cal = [v for v in np.arange(-20, np.min(v_cal), 0.1)] + list(v_cal) + [v for v in np.arange(np.max(v_cal), 20, 0.1)]
 
         for idx, file in enumerate(self.files):
-            v_out = self.I[idx]*self.SeriesResistance
+            v_out = self.I[idx]*self.Rs
             i_mapped = np.interp(v_out,v_cal,i_cal)
             self.I[idx] = i_mapped

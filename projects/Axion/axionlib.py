@@ -1,6 +1,6 @@
 from datetime import datetime
 from scipy import signal
-from dataChest import dataChest as dc
+from dataChest import *
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,9 +12,9 @@ matplotlib.use("TkAgg")
 DATACHEST_ROOT = '/Volumes/smb/mcdermott-group/data/' if 'macOS' in platform.platform() else 'Z:\\mcdermott-group\\data\\'
 
 class FitFunc:
-    '''
-    Class contains only static fit functions for use with curve_fit; never any need to instantiate
-    '''
+    """Class contains only static fit functions for use with curve_fit; never any need to instantiate.
+
+    """
     def __init__(self):
         pass
 
@@ -23,23 +23,33 @@ class FitFunc:
         return a * np.exp(b * t) + c
 
 class SaveHelper:
-    '''
-    Helper class contains only static methods; never any need to instantiate
-    '''
+    """Helper class contains only static methods; never any need to instantiate.
+
+    """
     def __init__(self):
         pass
 
 class DataChestHelper:
-    '''
-    Helper class contains only static methods; never any need to instantiate
-    '''
+    """Helper class contains only static methods; never any need to instantiate.
+
+    """
     def __init__(self):
         pass
 
 
 class T1(object):
+    """For fitting, plotting, and analyzing T1 experiments.
+
+    """
     def __init__(self, path, file, dependent_variable='Single Shot Occupation'):
-        d = dc.dataChest(path)
+        """Instantiate with given file for analysis.
+
+        :param path: path containing data files.
+        :param file: hdf5 file to open in data chest.
+        :param dependent_variable: dependent variable for fitting, plotting, and analyzing.
+        """
+
+        d = dataChest(path)
         d.openDataset(file)
         variables = d.getVariables()
         independents = variables[0]
@@ -55,6 +65,14 @@ class T1(object):
         self._dependent_variable_values = data[:,1]
 
     def plot(self, fit=True, save=False, save_path=None, save_name=None):
+        """Plot the T1 data.
+
+        :param fit: fit the data and plot fit with data?
+        :param save: save the plot (and the extracted T1 and P1, if fit)?
+        :param save_path: save path for figures.  If None, defaults to '../Figures/'.
+        :param save_name: save name for figure.  If None, defaults to hdf5 file name.
+        :return:
+        """
         #need to edit
         fig = plt.figure()
         plt.title('Q{:1d}: T1'.format(self._qubit_id))
@@ -84,6 +102,11 @@ class T1(object):
             plt.show()
 
     def fit(self, save):
+        """Fit the data
+
+        :param save: update data chest with T1 and P1?
+        :return: [T1, P1]
+        """
         try:
             popt, pcov = curve_fit(FitFunc.exp, self._idle_gate_times, self._dependent_variable_values,p0=[1,(-1/15),0])
         except:
@@ -91,23 +114,47 @@ class T1(object):
             popt, pcov = curve_fit(FitFunc.exp, self._idle_gate_times,
                                    self._dependent_variable_values, p0=[0.5, (-1 / 1), 0.5])
         if save:
-            self.update_dataChest(int(-100/popt[1])/100,round(popt[2],4))
+            self._update_dataChest(int(-100 / popt[1]) / 100, round(popt[2], 4))
         return popt
 
-    def update_dataChest(self, t1,p1):
-        d = dc.dataChest(self._path)
+    def _update_dataChest(self, t1, p1):
+        """Updates data chest with the fit values for T1 and P1.
+
+        :param t1: T1 to save to data chest
+        :param p1: P1 to save to data chest
+        :return:
+        """
+        d = dataChest(self._path)
         d.openDataset(self._file, modify = True)
         d.addParameter('Fit T1', t1, 'us', overwrite = True)
         d.addParameter('Fit P1', p1, overwrite=True)
         d.addParameter('Fit Date Stamp', datetime.now().strftime("%Y-%m-%d"), overwrite = True)
 
 class T2(object):
+    """For fitting, plotting, and analyzing T2* experiments.
+
+    """
     def __init__(self, path, file, dependent_variable='Single Shot Occupation'):
+        """Instantiate with given file for analysis.
+
+        :param path: path containing data files.
+        :param file: hdf5 file to open in data chest.
+        :param dependent_variable: dependent variable for fitting, plotting, and analyzing.
+        """
         pass
 
 class P1(object):
+    """For fitting, plotting, and analyzing all types of P1 experiments
+
+    """
     def __init__(self, path, file, dependent_variable='Single Shot Occupation'):
-        d = dc.dataChest(path)
+        """Instantiate with given file for analysis.
+
+        :param path: path containing data files.
+        :param file: hdf5 file to open in data chest.
+        :param dependent_variable: dependent variable for fitting, plotting, and analyzing.
+        """
+        d = dataChest(path)
         d.openDataset(file)
         variables = d.getVariables()
         independents = variables[0]
@@ -119,7 +166,16 @@ class P1(object):
         self._dependent_variable_name = dependent_variable
 
     def plot_versus_radiator_frequency(self, bias_offset=0, bias_conversion=2*10*484, save=False, save_path=None, save_name=None):
-        #need to edit
+        """Plots P1 data vs JJ Radiator Frequency
+
+        :param bias_offset: Voltage offset to substract from OPX output voltage
+        :param bias_conversion: Factor to take into account line attenutation to get on chip voltage, then 484GHz/mV, to convert V to f
+        :param save: Save the plot?
+        :param save_path: Save path. If None, defaults to '../Figures'
+        :param save_name: Save name. If None, defaults to hdf5 file name.
+        :return: None.
+        """
+
         fig = plt.figure()
         plt.title('P1 vs Radiator Bias')
         plt.semilogy([(b-bias_offset)*bias_conversion for b in self._biases], self._dependent_variable_values, marker='.', linestyle='None')
@@ -140,6 +196,15 @@ class P1(object):
             plt.show()
 
     def plot_versus_radiator_flux(self, bias_offset=0, bias_conversion=1, save=False, save_path=None, save_name=None):
+        """Plots P1 data at fixed JJ Radiator Frequency versus JJ Radiator Flux Bias
+
+        :param bias_offset: Bias offset
+        :param bias_conversion: Conversion factor between OPX voltage and current on-chip, based on line attenuation.
+        :param save: Save the plot?
+        :param save_path: Save path. If None, defaults to '../Figures'
+        :param save_name: Save name. If None, defaults to hdf5 file name.
+        :return: None.
+        """
         #need to edit
         fig = plt.figure()
         plt.title('P1 vs Radiator Flux')
@@ -159,8 +224,18 @@ class P1(object):
             plt.show()
 
 class Parity(object):
+    """For fitting, plotting, and analyzing parity experiments
+
+    """
     def __init__(self, path, file, rad_id=None, parity_guess=100):
-        d = dc.dataChest(path)
+        """Instantiate with given file for analysis.
+
+        :param path: path containing data files.
+        :param file: hdf5 file to open in data chest.
+        :param rad_id: the radiator ID, for old files where the value was not saved to data chest.
+        :param parity_guess: a guess for the parity switching rate, in Hz.  Used to assist in fitting.
+        """
+        d = dataChest(path)
         d.openDataset(file)
         variables = d.getVariables()
         data = d.getData()
@@ -185,6 +260,10 @@ class Parity(object):
         self._psd()
 
     def _psd(self):
+        """Estimate the PSD from the data using signal.periodogram
+
+        :return: None
+        """
         state = self._data
         n_max = self._iterations
 
@@ -196,14 +275,27 @@ class Parity(object):
         self._f = freqs[1:]
 
     def psd(self):
+        """f, PSD computed from the time record
+
+        :return: [f, PSD]
+        """
         return self._f, self._psd
 
     def fit_psd(self):
+        """f, fit PSD
+
+        :return: f, fit PSD
+        """
         if self._fit_psd is None:
             self.fit()
         return self._f, self._fit_psd
 
     def fit(self, save=False):
+        """fit to the PSD data
+
+        :param save: Update data chest with parity rate and fidelity from fit?
+        :return: parity switching rate, fidelity
+        """
         fs=self._repetition_rate
         def fit_PSD_target_function(f, T_parity, F_map):
             return 2 * (4 * F_map ** 2 / T_parity) / ((2 / T_parity) ** 2 + (2 * np.pi * f) ** 2) + 2 * (
@@ -241,6 +333,15 @@ class Parity(object):
         return 1 / T_parity, F_map
 
     def plot(self, fit=True, save=False, save_path=None, save_name=None, title=None):
+        """Plot the PSD data and, optionally, the fit to the data
+
+        :param fit: Plot the fit? (And do the fitting if not yet done.)
+        :param save: Save the plot and update data chest with fit? If False, plots in interactive mode.
+        :param save_path: Path to save the plot. If None, defaults to '../Figures/'
+        :param save_name: Save name for the plot. If None, defaults to the hdf5 file name
+        :param title: human-readable plot title.  Currently not implemented, but can add in future if useful.
+        :return: None
+        """
         fig=plt.figure()
         f,psd = self.psd()
         plt.loglog(f,psd)
@@ -269,15 +370,21 @@ class Parity(object):
             plt.ion()
             plt.show()
 
-
     def update_dataChest(self):
-        d = dc.dataChest(self._path)
+        """Update DataChest with fit information.
+
+        :return: None
+        """
+        d = dataChest(self._path)
         d.openDataset(self._file, modify = True)
         d.addParameter('Fit Parity Rate', self._parity_rate, 'Hz', overwrite = True)
         d.addParameter('Fit Fidelity', self._fit_fidelity, overwrite=True)
         d.addParameter('Fit Date Stamp', datetime.now().strftime("%Y-%m-%d"), overwrite = True)
 
 class IQBlobs(object):
+    """For plotting IQ blobs
+
+    """
     _Igs = []
     _Qgs = []
     _Ies = []
@@ -285,7 +392,12 @@ class IQBlobs(object):
     _qubit_id = 0
 
     def __init__(self, path, files):
-        d = dc.dataChest(path)
+        """Instantiate with files containing IQ data to plot.
+
+        :param path: path containing data files.
+        :param files: list hdf5 files with Ig, Ie, Qg, and Qe data to plot.
+        """
+        d = dataChest(path)
         self._path = path
         for file in files:
             d.openDataset(file)
@@ -306,6 +418,13 @@ class IQBlobs(object):
                     raise Exception('Problem with Dependent Variables. Check that this is the right experiment.')
 
     def plot(self, save=False, save_path=None, save_name=None):
+        """Plot the IQ Blobs
+
+        :param save: Save the plot? If False, plots in interactive mode.
+        :param save_path: Path for saving the plot. If None, defaults to '../Figures'.
+        :param save_name: Save name for plot. If None, defaults to hdf5 file name.
+        :return:
+        """
         fig = plt.figure()
         plt.title('Q{:1d}: IQ Data'.format(self._qubit_id))
         plt.xlabel('I (a.u.)')
@@ -327,8 +446,18 @@ class IQBlobs(object):
             plt.show()
 
 class TwoDimensionalRamsey(object):
+    """For plotting 2D Ramsey Scans
+
+    """
     def __init__(self, path, file, dependent_variable="Single Shot Occupation", sequence_name="X/2-Idle-Y/2"):
-        d = dc.dataChest(path)
+        """Instantiate with given file for plotting.
+
+        :param path: path containing data files.
+        :param file: hdf5 file to open in data chest.
+        :param dependent_variable: dependent variable for fitting, plotting, and analyzing.
+        :param sequence_name: human-readable name of Ramsey sequence, for plotting, etc.
+        """
+        d = dataChest(path)
         d.openDataset(file)
         variables = d.getVariables()
         data = d.getData()
@@ -360,6 +489,13 @@ class TwoDimensionalRamsey(object):
         self._dependent_variable_values = self._dependent_variable_values.transpose()
 
     def plot(self, save=False, save_path=None, save_name=None):
+        """Plot the 2D Ramsey Scan
+
+        :param save: Save the plot? If False, displays in interactive mode. (Not yet implemented).
+        :param save_path: Save path. If None, defaults to '../Figures'. (Not yet implemented).
+        :param save_name: Save name. If None, defaults to hdf5 file name. (Not yet implemented).
+        :return:
+        """
         fig = plt.figure()
         plt.xlabel('{0} ({1})'.format(self._independent_1[0].decode(),self._independent_1[3].decode()))
         plt.ylabel('{0} ({1})'.format(self._independent_2[0].decode(),self._independent_2[3].decode()))

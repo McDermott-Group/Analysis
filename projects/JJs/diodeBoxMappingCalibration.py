@@ -23,17 +23,17 @@ for i,path in enumerate(paths):
             d.cd(expt_path)
             d.openDataset(dataSet,modify=False)
             junction = JJ(expt_path, [dataSet], [''])
-            junction.plotIvsV(save=False)
+            junction._plot_I_vs_V_raw(save=False)
 
             if "Diode" not in dataSet:
-                popt = junction.fitReferenceLine(junction.V[0],junction.I[0])
+                popt = junction._fit_reference_line(junction.V[0], junction.I[0])
                 plt.figure()
                 plt.title("Resistance = {:.2f}$\Omega$".format(1.0/popt[0]))
                 plt.plot(junction.V[0],junction.I[0])
                 plt.plot([-0.0003,0.0003],[popt[0]*-0.0003+popt[1],popt[0]*0.0003+popt[1]])
                 plt.show()
                 reference_resistance = popt[0]
-                junction.diodeCurrentFromOutputVoltage()
+                junction._diode_current_from_output_voltage()
             else:
                 output_voltage = junction.I[0]*1e6
                 output_current = junction.V[0]/reference_resistance
