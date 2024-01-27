@@ -29,3 +29,19 @@ for i,path in enumerate(paths):
         except Exception as e:
             print('Error Opening Dataset: {0}'.format(e))
             continue
+    for dataSet in os.listdir(path):
+        # try:
+        d = dataChest(os.path.join(path), dataSet)
+        d.cd(expt_path)
+        d.openDataset(dataSet,modify=False)
+        junction = JJ(expt_path, [dataSet], [device_name])
+        if "DIODE" in device_name.upper():
+            junction.diodeCurrentFromOutputVoltage()
+        #junction.plotLogIvsV(save=False)
+        #junction.plotIvsV(save=False)
+        junction.plotAppended(save=False) # added this
+        junction.plotAppendedLogIvsV(save=False)
+            # junction.autocenter()
+        #except Exception as e:
+            #print('Error Opening Dataset: {0}'.format(e))
+            #continue
