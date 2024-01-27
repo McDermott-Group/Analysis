@@ -6,20 +6,21 @@ import os
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 import matplotlib
-from dataChest import dataChest as dc
+from dataChest import *
+import platform
 
-DATACHEST_ROOT = '/Volumes/smb/mcdermott-group/data/'
+DATACHEST_ROOT = '/Volumes/smb/mcdermott-group/data/' if 'macOS' in platform.platform() else 'Z:\\mcdermott-group\\data\\'
 
 class JJ(object):
     def __init__(self, path, files, device_names, gap=190e-6):
-        d = dc.dataChest(path)
+        d = dataChest(path)
         self.I = []
         self.V = []
+        self.R = 0
         self.files = []
         self.device_names = []
         for i,file in enumerate(files):
             d.openDataset(file)
-            variables = d.getVariables()
             data = d.getData(variablesList=['Current','Voltage'])
             self.SeriesResistance = d.getParameter('AC Resistance In [kOhms]')*1e3
             self.I.append(data[:,0])
@@ -29,8 +30,8 @@ class JJ(object):
         self.path = path
         self.gap = gap
 
-    def plotLogIvsV(self, save=False, save_path=None, save_name=None):
-        self.autocenter()
+    def plotLogIvsV(self, save=False, save_path=None, save_name=None,autocenter_mode='supercurrent'):
+        self.autocenter(mode=autocenter_mode)
         for idx, file in enumerate(self.files):
             fig = plt.figure()
             plt.plot(self.V[idx],[np.log10(i) if i > 0 else np.log10(-1*i) for i in self.I[idx]])
@@ -51,13 +52,14 @@ class JJ(object):
                 plt.ion()
                 plt.show()
 
-    def plotIvsV(self, save=False, save_path=None, save_name=None):
-        self.autocenter()
+    def plotIvsV(self, save=False, save_path=None, save_name=None,autocenter_mode = 'supercurrent'):
+        self.autocenter(mode=autocenter_mode)
         for idx, file in enumerate(self.files):
             fig = plt.figure()
-            plt.axvline(0)
+            plt.axvline(0,color='black')
+            plt.axhline(0,color='black')
             plt.plot(self.V[idx], self.I[idx])
-            plt.title(file + ' ({0})'.format(self.device_names[idx]))
+            plt.title(file + ' ({:<})\n R={:2d}$\Omega$'.format(self.device_names[idx],int(self.R)))
             plt.xlabel('Voltage (V)')
             plt.ylabel('Current (A)')
             if save:
@@ -74,7 +76,7 @@ class JJ(object):
                 plt.ion()
                 plt.show()
 
-    def autocenter(self):
+    def autocenter(self,mode='supercurrent'):
         for idx, file in enumerate(self.files):
             self.V[idx] = self.V[idx] - np.mean(self.V[idx])
             v = self.V[idx]
@@ -82,22 +84,30 @@ class JJ(object):
             i = np.abs(i)
             # offset = v[np.argmin(i)]
             # v = v - offset
-            offset = self.vertSearch(v, i, -0.75*self.gap, 0.75*self.gap)
-            v = v - offset
-            gap1 = self.vertSearch(v, i, -2.5*self.gap, -1.5*self.gap)
-            gap2 = self.vertSearch(v, i, 1.5*self.gap, 2.5*self.gap)
-            v = v -(gap1+gap2)/3 #This is the average of the THREE vertical search results
+            if mode == 'supercurrent' or mode == 'both':
+                offset = self.vertSearch(v, i, -1.25*self.gap, 1.25*self.gap)
+                v = v - offset
+
+            if mode == 'gap' or mode == 'both':
+                a = 4.5 if mode == 'gap' else 3.0
+                b = 0.1 if mode == 'gap' else 1.0
+                gap1 = self.vertSearch(v, i, -a*self.gap, -b*self.gap)
+                gap2 = self.vertSearch(v, i, b*self.gap, a*self.gap)
+                avg_factor = 2 if mode == 'gap' else 3
+                v = v -(gap1+gap2)/avg_factor #This is the average of the THREE vertical search results
             # plt.figure()
             # plt.axvline(0)
             # plt.axvline(gap1-(gap1+gap2)/2)
             # plt.axvline(gap2-(gap1+gap2)/2)
             # v=v-(gap1+gap2)/2
-            # a,b = self.fitLine(v,i,-5*self.gap,-2.5*self.gap)
+            a,b = self.fitLine(v,i,np.min(v),0.99*np.min(v))
+            c,d = self.fitLine(v,i,0.99*np.max(v),np.max(v))
+            self.R = 1/np.min(np.abs([a,c]))
             # plt.plot([np.min(v),np.max(v)],[a*np.min(v)+b,a*np.max(v)+b])
             # c,d = self.fitLine(v,i,2.5*self.gap,5*self.gap,slope=a)
             # plt.plot([np.min(v),np.max(v)],[c*np.min(v)+d,c*np.max(v)+d])
             # plt.plot(v,i)
-            plt.show()
+            # plt.show()
             self.V[idx] = v
 
     def vertSearch(self, v, i, vmin, vmax):

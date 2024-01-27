@@ -248,7 +248,7 @@ if 1:
     plt.show()
     # plt.tight_layout()
 
-if 0:   # inset
+if 1:   # inset
 
     label_font = 16
     tick_font = 24

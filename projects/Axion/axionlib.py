@@ -1,54 +1,74 @@
 from datetime import datetime
 from scipy import signal
-from dataChest import *
+from dataChest import dataChest as dc
 import os
+import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
+import platform
 import matplotlib
 matplotlib.use("TkAgg")
 
-DATACHEST_ROOT = 'C:\\Local Data\\' #'Z:\\mcdermott-group\\data\\'
+DATACHEST_ROOT = '/Volumes/smb/mcdermott-group/data/' if 'macOS' in platform.platform() else 'Z:\\mcdermott-group\\data\\'
 
-def save_or_show_fig(save_path, save_name):
-    pass
+class FitFunc:
+    '''
+    Class contains only static fit functions for use with curve_fit; never any need to instantiate
+    '''
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def exp(t, a, b, c):
+        return a * np.exp(b * t) + c
+
+class SaveHelper:
+    '''
+    Helper class contains only static methods; never any need to instantiate
+    '''
+    def __init__(self):
+        pass
+
+class DataChestHelper:
+    '''
+    Helper class contains only static methods; never any need to instantiate
+    '''
+    def __init__(self):
+        pass
 
 
 class T1(object):
-
     def __init__(self, path, file, dependent_variable='Single Shot Occupation'):
-        d = dataChest(path)
+        d = dc.dataChest(path)
         d.openDataset(file)
         variables = d.getVariables()
-        data = d.getData()
         independents = variables[0]
+        if 'Idle Gate Time' not in independents:
+            raise Exception('For T1 analysis, independent variable must be idle gate time.')
         dependents = variables[1]
+        data = d.getData(variablesList=[independents[0], dependent_variable])
         self._path = path
         self._file = file
         self._qubit_id = d.getParameter('Qubit ID')
         self._idle_gate_times = data[:,0]/1000
-        self._dependent_variable_values = []
         self._dependent_variable_name = dependent_variable
-        #there absolutely has to be a better way of doing this, but:
-        for i in range(len(dependents)):
-            if dependents[i][0].decode() == dependent_variable:
-                self._dependent_variable_values = data[:, i + len(independents)]
-                break
+        self._dependent_variable_values = data[:,1]
 
     def plot(self, fit=True, save=False, save_path=None, save_name=None):
         #need to edit
         fig = plt.figure()
         plt.title('Q{:1d}: T1'.format(self._qubit_id))
-        plt.plot(self._idle_gate_times, self._dependent_variable_values, marker='.', linestyle='None')  # (b-0.062)*(490)*(0.02)*484
+        plt.plot(self._idle_gate_times, self._dependent_variable_values, marker='.', linestyle='None')
         plt.xlabel('Idle Gate Time (us)')
         plt.ylabel(self._dependent_variable_name)
         if fit:
             fit_parameters = self.fit(save)
             t1=(-1/fit_parameters[1])
-            if t1 > 2:
+            if t1 > 4:
                 plt.title('Q{:1d}: T1 = {:2d}us'.format(self._qubit_id,int(t1)))
             else:
                 plt.title('Q{:1d}: T1 = {:.2f}us'.format(self._qubit_id, t1))
-            plt.plot(self._idle_gate_times, [fit_parameters[0]*np.exp(fit_parameters[1]*t)+fit_parameters[2] for t in self._idle_gate_times])
+            plt.plot(self._idle_gate_times, FitFunc.exp(self._idle_gate_times,*fit_parameters))
         if save:
             if save_path is None:
                 save_path = os.path.join(*self._path[:-1])
@@ -65,52 +85,44 @@ class T1(object):
 
     def fit(self, save):
         try:
-            popt, pcov = curve_fit(lambda t, a, b, c: a * np.exp(b * t) + c, self._idle_gate_times, self._dependent_variable_values,p0=[1,(-1/15),0])
+            popt, pcov = curve_fit(FitFunc.exp, self._idle_gate_times, self._dependent_variable_values,p0=[1,(-1/15),0])
         except:
             #The fit above tends to fail in the BB experiments when T1 is small and P1 is big. This is a quick fix:
-            popt, pcov = curve_fit(lambda t, a, b, c: a * np.exp(b * t) + c, self._idle_gate_times,
+            popt, pcov = curve_fit(FitFunc.exp, self._idle_gate_times,
                                    self._dependent_variable_values, p0=[0.5, (-1 / 1), 0.5])
         if save:
             self.update_dataChest(int(-100/popt[1])/100,round(popt[2],4))
         return popt
 
     def update_dataChest(self, t1,p1):
-        d = dataChest(self._path)
+        d = dc.dataChest(self._path)
         d.openDataset(self._file, modify = True)
         d.addParameter('Fit T1', t1, 'us', overwrite = True)
         d.addParameter('Fit P1', p1, overwrite=True)
         d.addParameter('Fit Date Stamp', datetime.now().strftime("%Y-%m-%d"), overwrite = True)
 
 class T2(object):
-
     def __init__(self, path, file, dependent_variable='Single Shot Occupation'):
         pass
 
 class P1(object):
-
     def __init__(self, path, file, dependent_variable='Single Shot Occupation'):
-        d = dataChest(path)
+        d = dc.dataChest(path)
         d.openDataset(file)
         variables = d.getVariables()
-        data = d.getData()
         independents = variables[0]
-        dependents = variables[1]
-        #there absolutely has to be a better way of doing this, but:
+        data = d.getData(variablesList=[independents[0], dependent_variable])
         self._file = file
         self._path = path
         self._biases = data[:,0]
-        self._dependent_variable_values = []
+        self._dependent_variable_values = data[:,1]
         self._dependent_variable_name = dependent_variable
-        for i in range(len(dependents)):
-            if dependents[i][0].decode() == dependent_variable:
-                self._dependent_variable_values = data[:, i + len(independents)]
-                break
 
     def plot_versus_radiator_frequency(self, bias_offset=0, bias_conversion=2*10*484, save=False, save_path=None, save_name=None):
         #need to edit
         fig = plt.figure()
         plt.title('P1 vs Radiator Bias')
-        plt.semilogy([(b-bias_offset)*bias_conversion for b in self._biases], self._dependent_variable_values, marker='.', linestyle='None')  # (b-0.062)*(490)*(0.02)*484
+        plt.semilogy([(b-bias_offset)*bias_conversion for b in self._biases], self._dependent_variable_values, marker='.', linestyle='None')
         plt.xlabel('Radiator Bias (GHz)')
         plt.ylabel(self._dependent_variable_name)
         if save:
@@ -127,11 +139,11 @@ class P1(object):
             plt.ion()
             plt.show()
 
-    def plot_versus_radiator_flux(self, bias_conversion=2*10*484, save=False, save_path=None, save_name=None):
+    def plot_versus_radiator_flux(self, bias_offset=0, bias_conversion=1, save=False, save_path=None, save_name=None):
         #need to edit
         fig = plt.figure()
         plt.title('P1 vs Radiator Flux')
-        plt.semilogy([(b)*bias_conversion for b in self._biases], self._dependent_variable_values, marker='.', linestyle='None')  # (b-0.062)*(490)*(0.02)*484
+        plt.semilogy([b*bias_conversion+bias_offset for b in self._biases], self._dependent_variable_values, marker='.', linestyle='None')
         plt.xlabel('Radiator Flux Bias (mA)')
         plt.ylabel(self._dependent_variable_name)
         if save:
@@ -147,9 +159,8 @@ class P1(object):
             plt.show()
 
 class Parity(object):
-
-    def __init__(self, path, file, rad_id=None):
-        d = dataChest(path)
+    def __init__(self, path, file, rad_id=None, parity_guess=100):
+        d = dc.dataChest(path)
         d.openDataset(file)
         variables = d.getVariables()
         data = d.getData()
@@ -158,6 +169,7 @@ class Parity(object):
         self._reps = int(np.amax(data[1]) + 1)  # Number of Reps
         self._data = []
         self._fit_psd = None
+        self._parity_guess = parity_guess
         for i in range(self._iterations):
             b = []
             result = list(np.where(data[0].astype(int) == i))
@@ -169,10 +181,7 @@ class Parity(object):
         self._qubit_id = d.getParameter('Qubit ID')
         self._rad_id = rad_id if rad_id is not None else d.getParameter('Radiator ID')
         self._bias = d.getParameter('JB{:1d} Voltage Bias'.format(self._rad_id))[0]
-        try:            #For Older Data
-            self._repetition_rate = 1e9/d.getParameter('Time Per Iteration')[0]
-        except:
-            self._repetition_rate = 1e9/100000
+        self._repetition_rate = 1e9/d.getParameter('Time Per Iteration')[0]
         self._psd()
 
     def _psd(self):
@@ -201,14 +210,15 @@ class Parity(object):
                         1 - F_map ** 2) / fs
 
         initial_guess_fidelity = np.arange(0, 1, 0.05)
-        initial_guess_parity = np.logspace(-1, 1, 4)
+        lower_parity_guess = int(np.floor(np.log10(self._parity_guess/100)))
+        initial_guess_parity = np.logspace(lower_parity_guess, lower_parity_guess+6, 7)
         covariance = float('inf')
         best_r_squared = float('inf')
         freqs,ave_psd = self.psd()
         for igf in initial_guess_fidelity:
             for igp in initial_guess_parity:
                 params_curr, params_covariance_curr = curve_fit(
-                    fit_PSD_target_function, freqs[20:], ave_psd[20:], p0=[igp, igf], bounds=([0.1, 0], [10, 1]),
+                    fit_PSD_target_function, freqs[5:], ave_psd[5:], p0=[igp, igf], bounds=([10**lower_parity_guess, 0], [10**(lower_parity_guess+6), 1]),
                     method='trf')
 
                 residuals = ave_psd - fit_PSD_target_function(freqs, *params_curr)
@@ -250,10 +260,10 @@ class Parity(object):
             if save_name is None:
                 save_name = self._file.replace('.', '_')
             plt.ioff()
-            if not os.path.exists(DATACHEST_ROOT+save_path+'\\Figures\\'):
-                os.makedirs(DATACHEST_ROOT+save_path+'\\Figures\\')
-            print((DATACHEST_ROOT+save_path+ '\\Figures\\' + save_name))
-            plt.savefig(DATACHEST_ROOT+save_path+ '\\Figures\\' + save_name)
+            if not os.path.exists(DATACHEST_ROOT+save_path+'/Figures/'):
+                os.makedirs(DATACHEST_ROOT+save_path+'/Figures/')
+            print((DATACHEST_ROOT+save_path+ '/Figures/' + save_name))
+            plt.savefig(DATACHEST_ROOT+save_path+ '/Figures/' + save_name)
             plt.close(fig)
         else:
             plt.ion()
@@ -261,12 +271,11 @@ class Parity(object):
 
 
     def update_dataChest(self):
-        d = dataChest(self._path)
+        d = dc.dataChest(self._path)
         d.openDataset(self._file, modify = True)
         d.addParameter('Fit Parity Rate', self._parity_rate, 'Hz', overwrite = True)
         d.addParameter('Fit Fidelity', self._fit_fidelity, overwrite=True)
         d.addParameter('Fit Date Stamp', datetime.now().strftime("%Y-%m-%d"), overwrite = True)
-        d.addParameter('Time Per Iteration', int(1e9/self._repetition_rate), overwrite=True)
 
 class IQBlobs(object):
     _Igs = []
@@ -276,7 +285,7 @@ class IQBlobs(object):
     _qubit_id = 0
 
     def __init__(self, path, files):
-        d = dataChest(path)
+        d = dc.dataChest(path)
         self._path = path
         for file in files:
             d.openDataset(file)
@@ -318,9 +327,8 @@ class IQBlobs(object):
             plt.show()
 
 class TwoDimensionalRamsey(object):
-
     def __init__(self, path, file, dependent_variable="Single Shot Occupation", sequence_name="X/2-Idle-Y/2"):
-        d = dataChest(path)
+        d = dc.dataChest(path)
         d.openDataset(file)
         variables = d.getVariables()
         data = d.getData()
@@ -362,18 +370,3 @@ class TwoDimensionalRamsey(object):
         c = plt.pcolor(np.log(self._independent_1_values),self._independent_2_values,self._dependent_variable_values)
         fig.colorbar(c)
         plt.show()
-
-class AxionTools:
-
-    def __init__(self, base_path, user, device_name, dates, experiment_base_name):
-        self._base_path = base_path
-        self._user = user
-        self._device_name = device_name
-        self._dates = dates
-        self._experiment_base_name = experiment_base_name
-
-        self._expt_paths = [base_path + [user] + [device_name] + [d] + [experiment_base_name.replace(" ", "_")] for d in dates]
-        self._paths = [os.path.join(*([r'Z:\mcdermott-group\data'] + expt_path)) for expt_path in self._expt_paths]
-
-    def filter_and_enumerate(self, qb_ids):
-        pass
