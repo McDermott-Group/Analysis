@@ -87,7 +87,7 @@ def ringdown_fit_bare(t, I, Q, f0=4.8E9, tstart=5, tstop=150, n_roll_avg=20, plo
     # fit to exponential decay with some positive offset as noise floor
     N = n_roll_avg
     y_smooth = np.convolve(y, np.ones(N) / N, mode='valid')
-    x_smooth = range(len(y_smooth)) * tstep
+    x_smooth = list(range(len(y_smooth))) * tstep
 
     def ringdown(params, xs):
         A = params['A'].value
@@ -202,7 +202,7 @@ def ringdown_fit_single_old(path, tstart=5, tstop=150, n_periods=1, tau_guess=10
     # fit to exponential decay with some positive offset as noise floor
     N = int(n_periods / (abs(f0 - LO) * 1E-6 * tstep))
     y_smooth = np.convolve(y, np.ones(N) / N, mode='valid')
-    x_smooth = range(len(y_smooth)) * tstep
+    x_smooth = list(range(len(y_smooth))) * tstep
 
     def ringdown(params, xs):
         A = params['A'].value
@@ -466,7 +466,7 @@ def ringup_fit_single(path, tof_adjust=-10, n_periods=100, Qc_guess=50e6, Qi_gue
     # fit to exponential decay with some positive offset as noise floor
     N = int(n_periods / (abs(f0 - LO) * 1E-6 * tstep))
     y_smooth = np.convolve(y, np.ones(N) / N, mode='valid')
-    x_smooth = range(len(y_smooth)) * tstep
+    x_smooth = list(range(len(y_smooth))) * tstep
 
     def ringup(params, xs):
         Qc = params['Qc'].value

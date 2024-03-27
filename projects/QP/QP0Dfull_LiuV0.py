@@ -12,7 +12,7 @@ Chuanhong Liu
 For the up transition rate calculation
 
 """
-from __future__ import division
+
 # from pylab import plot, xlabel, ylabel, show
 import matplotlib.pyplot as plt
 import random

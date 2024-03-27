@@ -1,4 +1,4 @@
-from SFQlib import T1_QP_1D, T2_1D, T1_QP_2D, T1_QP_2D_Linear
+from .SFQlib import T1_QP_1D, T2_1D, T1_QP_2D, T1_QP_2D_Linear
 import numpy as np
 
 

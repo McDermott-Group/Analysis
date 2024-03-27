@@ -22,7 +22,7 @@ expt_paths =  [base_path + [user] + [device_name] + [d] + [experiment_base_name.
 paths = [os.path.join(*([r'Z:\mcdermott-group\data'] + expt_path)) for expt_path in expt_paths]
 
 f01s = []
-for i in tqdm(range(len(paths))):
+for i in tqdm(list(range(len(paths)))):
     path = paths[i]
     expt_path = expt_paths[i]
     for dataSet in os.listdir(path):

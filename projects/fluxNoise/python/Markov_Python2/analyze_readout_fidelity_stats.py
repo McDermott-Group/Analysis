@@ -1,8 +1,8 @@
 """
 This is for test the analyze_QPTunneling_pomegranate.py robustness against noise.
 """
-from analyze_QPTunneling_pomegranate import *
-from heatedmap import *
+from .analyze_QPTunneling_pomegranate import *
+from .heatedmap import *
 
 t_meas = 0.2  # units ms
 t_QP = 10.0  # units ms

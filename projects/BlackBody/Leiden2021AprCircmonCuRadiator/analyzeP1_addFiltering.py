@@ -47,10 +47,10 @@ P1_file = [QP_path.format(user, date, experiment_name_P1, experiment_name_P1) + 
 
 # This gets me all the parameters--most importantly the IQ centers and stdevsp
 variables = noiselib.loadmat_ExptVars(P1_file[0])
-print(variables.keys())
+print(list(variables.keys()))
 # This gets me all the data
 data=noiselib.loadmat(P1_file[0])
-print(data.keys())
+print(list(data.keys()))
 
 Is_pre=data['Is_pre']
 Qs_pre=data['Qs_pre']

@@ -252,7 +252,7 @@ class Up_array(object):
         GammaUp_std_err = np.append(self.GammaUp_std_err,
                                     array_tempUpUpError[2])
 
-        zipped_lists_temp = zip(temp, temp)
+        zipped_lists_temp = list(zip(temp, temp))
         print('zipped_lists_temp=', zipped_lists_temp)
         sorted_zipped_lists_temp = sorted(zipped_lists_temp)
         print('sorted_zipped_lists_temp=', sorted_zipped_lists_temp)
@@ -260,13 +260,13 @@ class Up_array(object):
             [element for _, element in sorted_zipped_lists_temp])
         print('sorted_temp=', sorted_temp)
 
-        zipped_lists_GammaUp_std_err = zip(temp, GammaUp_std_err)
+        zipped_lists_GammaUp_std_err = list(zip(temp, GammaUp_std_err))
         sorted_zipped_lists_GammaUp_std_err = sorted(
             zipped_lists_GammaUp_std_err)
         sorted_temp_std_err = np.array(
             [element for _, element in sorted_zipped_lists_GammaUp_std_err])
 
-        zipped_lists_GammaUp = zip(temp, GammaUp)
+        zipped_lists_GammaUp = list(zip(temp, GammaUp))
         sorted_zipped_lists_GammaUp = sorted(zipped_lists_GammaUp)
         sorted_temp = np.array(
             [element for _, element in sorted_zipped_lists_GammaUp])
@@ -1210,7 +1210,7 @@ class AntennaCoupling(object):
             P_f.append(p_f)
             S_f.append(s_f)
             # incoherent radiation:
-            for j in Gamma_Rad_ShotNoise.keys():
+            for j in list(Gamma_Rad_ShotNoise.keys()):
                 #at josephson frequency f[j]...
                 SN_f[j][i] = Gamma_Rad_ShotNoise[j][i] / (Area * Absorption[i])
 
@@ -1392,7 +1392,7 @@ class GammaUp(object):
         Gamma_Up_1D = self.Gamma_Up_1D
         Gamma_Up_1D_error = self.Gamma_Up_1D_Error
 
-        zipped_lists_temp = zip(temp, temp)
+        zipped_lists_temp = list(zip(temp, temp))
         # print('zipped_lists_temp=', zipped_lists_temp)
         sorted_zipped_lists_temp = sorted(zipped_lists_temp)
         # print('sorted_zipped_lists_temp=', sorted_zipped_lists_temp)
@@ -1400,14 +1400,14 @@ class GammaUp(object):
             [element for _, element in sorted_zipped_lists_temp])
         # print('sorted_temp=', sorted_temp)
 
-        zipped_lists_Gamma_Up_1D = zip(temp, Gamma_Up_1D)
+        zipped_lists_Gamma_Up_1D = list(zip(temp, Gamma_Up_1D))
         sorted_zipped_lists_Gamma_Up_1D = sorted(zipped_lists_Gamma_Up_1D)
         # print('sorted_zipped_lists_Gamma_Up_1D=', sorted_zipped_lists_Gamma_Up_1D)
         sorted_Gamma_Up_1D = np.array(
             [element for _, element in sorted_zipped_lists_Gamma_Up_1D])
         # print('sorted_Gamma_Up_1D=', sorted_Gamma_Up_1D)
 
-        zipped_lists_Gamma_Up_1D_error = zip(temp, Gamma_Up_1D_error)
+        zipped_lists_Gamma_Up_1D_error = list(zip(temp, Gamma_Up_1D_error))
         sorted_zipped_lists_Gamma_Up_1D_error = sorted(
             zipped_lists_Gamma_Up_1D_error)
         # print('sorted_zipped_lists_Gamma_Up_1D_error=', sorted_zipped_lists_Gamma_Up_1D_error)
@@ -1763,7 +1763,7 @@ class GammaUp_New(object):
         Gamma_Up_1D = self.Gamma_Up_1D
         Gamma_Up_1D_error = self.Gamma_Up_1D_Error
 
-        zipped_lists_temp = zip(temp, temp)
+        zipped_lists_temp = list(zip(temp, temp))
         # print('zipped_lists_temp=', zipped_lists_temp)
         sorted_zipped_lists_temp = sorted(zipped_lists_temp)
         # print('sorted_zipped_lists_temp=', sorted_zipped_lists_temp)
@@ -1771,14 +1771,14 @@ class GammaUp_New(object):
             [element for _, element in sorted_zipped_lists_temp])
         # print('sorted_temp=', sorted_temp)
 
-        zipped_lists_Gamma_Up_1D = zip(temp, Gamma_Up_1D)
+        zipped_lists_Gamma_Up_1D = list(zip(temp, Gamma_Up_1D))
         sorted_zipped_lists_Gamma_Up_1D = sorted(zipped_lists_Gamma_Up_1D)
         # print('sorted_zipped_lists_Gamma_Up_1D=', sorted_zipped_lists_Gamma_Up_1D)
         sorted_Gamma_Up_1D = np.array(
             [element for _, element in sorted_zipped_lists_Gamma_Up_1D])
         # print('sorted_Gamma_Up_1D=', sorted_Gamma_Up_1D)
 
-        zipped_lists_Gamma_Up_1D_error = zip(temp, Gamma_Up_1D_error)
+        zipped_lists_Gamma_Up_1D_error = list(zip(temp, Gamma_Up_1D_error))
         sorted_zipped_lists_Gamma_Up_1D_error = sorted(
             zipped_lists_Gamma_Up_1D_error)
         # print('sorted_zipped_lists_Gamma_Up_1D_error=', sorted_zipped_lists_Gamma_Up_1D_error)

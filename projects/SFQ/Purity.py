@@ -1,4 +1,4 @@
-from SFQlib import RB, RB_AllGates, Purity
+from .SFQlib import RB, RB_AllGates, Purity
 import numpy as np
 
 

@@ -2,7 +2,7 @@
 Analyze the up transition rate based on SFQ pulses
 """
 
-from SFQlib import QP_Up
+from .SFQlib import QP_Up
 import numpy as np
 
 

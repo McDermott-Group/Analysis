@@ -1,4 +1,4 @@
-from SFQlib import DeepSubharmonics
+from .SFQlib import DeepSubharmonics
 import matplotlib.pyplot as plt
 import numpy as np
 

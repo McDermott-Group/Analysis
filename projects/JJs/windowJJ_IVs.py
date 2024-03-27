@@ -1,4 +1,4 @@
-from junctionlib import *
+from .junctionlib import *
 from dataChest import *
 import os
 import platform

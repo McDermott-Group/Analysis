@@ -1,4 +1,4 @@
-from SFQlib import RB_ORBIT
+from .SFQlib import RB_ORBIT
 import numpy as np
 
 

@@ -1,4 +1,4 @@
-from SFQlib import add_CST_SimResultFromTxt
+from .SFQlib import add_CST_SimResultFromTxt
 import numpy as np
 import matplotlib.pyplot as plt
 from copy import copy
