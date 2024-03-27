@@ -13,8 +13,7 @@ data_type = 'Projected_Occupation'
 
 T1_J2_Q3 =[]
 
-J2_Bias_Q3=list(np.arange(0,486,2))
-J2_Bias_Q3.sort()
+J2_Bias_Q3=sorted(np.arange(0,486,2))
 suffix = 'mVJ2'
 for it,J2B in enumerate(J2_Bias_Q3):
     print(it)

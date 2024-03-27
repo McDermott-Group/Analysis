@@ -418,9 +418,9 @@ class ScanImporter(object):
         return self.numberOfScans()
 
     def __getitem__(self, item):
-        if type(item) is int:
+        if isinstance(item, int):
             return self.scans[item]
-        elif type(item) is str:
+        elif isinstance(item, str):
             r = []
             for i,sampleId in enumerate(self.sampleIds):
                 if sampleId == item:

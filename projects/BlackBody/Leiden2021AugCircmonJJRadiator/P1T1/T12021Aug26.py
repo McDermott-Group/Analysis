@@ -21,8 +21,7 @@ T1_J2_Q2 =[]
 T1_J2_Q3 =[]
 T1_J2_Q4 =[]
 
-J2_Bias_Q1=list(np.arange(0,20,10)*1000)+list(np.arange(20,40,1)*1000)+list(np.arange(40,100,10)*1000)
-J2_Bias_Q1.sort()
+J2_Bias_Q1=sorted(list(np.arange(0,20,10)*1000)+list(np.arange(20,40,1)*1000)+list(np.arange(40,100,10)*1000))
 suffix = 'uDACJ2'
 for it,J2B in enumerate(J2_Bias_Q1):
     print(it)

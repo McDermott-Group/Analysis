@@ -16,7 +16,7 @@ class QPTunneling(object):
         self.n_rows = 0
     
     def add_datasets(self, file_path, data_str='Single_Shot_Occupations'):
-        if type(file_path) == str:
+        if isinstance(file_path, str):
             file_path = [file_path]
         for f in file_path:
             data = noiselib.loadmat(f)

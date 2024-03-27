@@ -339,8 +339,7 @@ class ChargeOffset(object):
         for path in paths:
             all_files += glob.glob(path+'*.mat')
         all_times = [os.path.getctime(f) for f in all_files]
-        all = list(zip(all_times, all_files))
-        all.sort()
+        all = sorted(zip(all_times, all_files))
         all_times, all_files = list(zip(*all)) # undoes zip, now sorted
         closest_time_index = np.searchsorted(all_times, times)
         return [all_files[i] for i in closest_time_index]

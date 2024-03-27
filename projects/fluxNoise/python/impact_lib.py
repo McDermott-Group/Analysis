@@ -336,7 +336,7 @@ class Controller(QtGui.QApplication):
         self.event_files = event_files
         self.txt_data = []
 
-        if type(pdfs_file) != list:
+        if not isinstance(pdfs_file, list):
             pdfs_file = [pdfs_file]
         PDFs = [np.load(p_file, allow_pickle=True).tolist() for p_file in pdfs_file]
 

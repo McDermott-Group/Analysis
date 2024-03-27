@@ -30,7 +30,7 @@ class QPTunneling_Wilen(object):
         self.one_over_f = False
 
     def add_datasets(self, file_path, data_str='Charge_Parity_Trace', simulate=False):
-        if type(file_path) == str:
+        if isinstance(file_path, str):
             file_path = [file_path]
         f_l = file_path[0]
         sample_rate = noiselib.loadmat_ExptVars(f_l)['Total_Time']

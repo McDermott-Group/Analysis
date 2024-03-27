@@ -354,7 +354,7 @@ def path_to_num(path):
     
     
 def matpaths(Q, date, fileName, fileNums, fluxNoise='fluxNoise2', **kwargs):
-    if type(fileNums) == str:
+    if isinstance(fileNums, str):
         fileNums = kwargs[fileNums]
     if not isinstance(fileNums, (list, np.array)):
         fileNums = [[fileNums]]

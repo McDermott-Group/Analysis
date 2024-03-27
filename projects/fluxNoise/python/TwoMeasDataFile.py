@@ -12,12 +12,12 @@ class TwoMeasDataFile(object):
         self.path = path
         data = noiselib.loadmat( path )
         # self.o_charge = np.array(data[charge_var], dtype=np.bool)
-        if type(charge_var) == str:
+        if isinstance(charge_var, str):
             self.o_charge = np.array(data[charge_var], dtype=np.bool)
         else:
             self.os_charge = [np.array(data[var], dtype=np.bool) for var in meas_var]
             self.o_charge = np.logical_xor(*self.os_charge)
-        if type(meas_var) == str:
+        if isinstance(meas_var, str):
             self.o_meas = np.array(data[meas_var], dtype=np.bool)
             self.meas_var = meas_var
         else:

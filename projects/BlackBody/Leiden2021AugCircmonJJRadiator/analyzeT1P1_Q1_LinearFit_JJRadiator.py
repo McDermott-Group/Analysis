@@ -21,10 +21,9 @@ data_type = 'Weighted_Occupation'
 P1_avg = []
 T1_avg = []
 
-J2Bs=list(np.arange(35000,42000,500))+list(np.arange(42500,63000,500))
+J2Bs=sorted(list(np.arange(35000,42000,500))+list(np.arange(42500,63000,500)))
 # J2Bs = (list(np.arange(0,101,10)) + list(np.arange(35, 56, 2))) #August18
 # J2Bs = list(np.arange(100,980,20)) #August17
-J2Bs.sort()
 # suffix = 'mDACJ2'
 suffix = 'uDACJ2'
 for it,J2B in enumerate(J2Bs):

@@ -50,11 +50,11 @@ def make_CO_from_datasets(ds_list):
         else:
             base = 'fluxNoise2'
         CO.add_dataset(charge_path.format(base, d['Q'], d['path_charge']))
-        if 'exclude_data' in d and type(d['exclude_data'])==dict:
+        if 'exclude_data' in d and isinstance(d['exclude_data'], dict):
             for q,ex in list(d['exclude_data'].items()):
                 for start,end in ex:
                     CO.limit_dataset(q,start=start,end=end)
-        if 'exclude_data' in d and type(d['exclude_data'])==list:
+        if 'exclude_data' in d and isinstance(d['exclude_data'], list):
             for start,end in d['exclude_data']:
                 CO.limit_dataset('Q1',start=start,end=end)
             try:
