@@ -38,5 +38,5 @@ plt.legend()
 plt.show()
 
 for qubit_number in (1,2,4):
-    print get_bias_list(qubit_number)
-    print data_dict[qubit_number]
+    print(get_bias_list(qubit_number))
+    print(data_dict[qubit_number])

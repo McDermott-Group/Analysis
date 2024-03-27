@@ -52,7 +52,7 @@ def load_hits(hit_type):
 
 def start_file_lock():
     while pickle.load( open(dump_path+'dump_saveInProgress.dat','rb') ):
-        print('.', end=' ')
+        print('.')
         time.sleep(1)
     pickle.dump( True, open(dump_path+'dump_saveInProgress.dat','wb') )
     

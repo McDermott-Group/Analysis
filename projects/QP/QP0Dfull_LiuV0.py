@@ -117,7 +117,7 @@ for i in range(ne):
         # else:
         #     phonon_factor = 1
 
-        # print ('phonon_factor=', phonon_factor)
+        # print('phonon_factor=', phonon_factor)
 
         # print('PhononTemp=', np.heaviside(e[j] - e[i], 0.5))
         # each time step = dt/tau0 = s

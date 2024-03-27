@@ -32,7 +32,7 @@ for JB in JBlist:
 
     QPT_Q.get_fit()
     # print(QB_id)
-    # print (J2Bias, '[{:.1f}]'.format(QPT_Q.params[0]))
+    # print(J2Bias, '[{:.1f}]'.format(QPT_Q.params[0]))
     rate = QPT_Q.params[0]  # units is Hz
     rate = int(rate*100)/100.0
     # print('rate=', rate)

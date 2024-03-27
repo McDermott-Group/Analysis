@@ -1424,7 +1424,7 @@ class GammaUp(object):
         Temp = self.temp
         # print('type(Temp)=', type(Temp))
         QB_id = self.QB_id
-        # print ('Temp=', Temp)
+        # print('Temp=', Temp)
         Gamma_Up_1D = np.array(self.Gamma_Up_1D)
         Gamma_Up_1D_error = np.array(self.Gamma_Up_1D_Error)
         GammaErrorMinus = np.array(Gamma_Up_1D - Gamma_Up_1D_error)
@@ -1794,7 +1794,7 @@ class GammaUp_New(object):
         self._sort_temp()
         Temp = self.temp
         QB_id = self.QB_id
-        # print ('Temp=', Temp)
+        # print('Temp=', Temp)
         Gamma_Up_1D = np.array(self.Gamma_Up_1D)
         Gamma_Up_1D_error = np.array(self.Gamma_Up_1D_Error)
         GammaErrorMinus = np.array(Gamma_Up_1D - Gamma_Up_1D_error)

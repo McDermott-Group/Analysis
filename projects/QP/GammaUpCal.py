@@ -16,9 +16,9 @@ if 1:
 
     gammadown_simple = (1.0/(1.414*1e4*5e-15)) * 10 ** 1.5 * 2 * sum(n)
 
-    print ('gammaup=', gammaup/1e6, 'MHz')
-    print ('gammadow_=', gammadown/1e6, 'MHz')
-    print ('gammadown simple=', gammadown_simple/1e6, 'MHz')
+    print('gammaup=', gammaup/1e6, 'MHz')
+    print('gammadow_=', gammadown/1e6, 'MHz')
+    print('gammadown simple=', gammadown_simple/1e6, 'MHz')
     print('x_qp=', 2*sum(n))
 
 if 0:

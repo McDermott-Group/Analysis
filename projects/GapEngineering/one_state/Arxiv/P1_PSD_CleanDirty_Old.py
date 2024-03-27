@@ -120,7 +120,7 @@ class OneState(object):
             for i_os in parity_jump_count_list:
                 avg = self._get_one_state_avg(os=i_os, n=1)
                 self.parity_jump = np.append((self.parity_jump), avg)
-        # print (len(self.parity_time_trace_list[0]))
+        # print(len(self.parity_time_trace_list[0]))
 
     def _get_one_state_avg(self, os, n):
         one_state_array = np.asarray(os)

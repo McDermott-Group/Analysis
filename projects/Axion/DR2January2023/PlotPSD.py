@@ -84,7 +84,7 @@ for i in range(len(paths)):
         try:
             print(dataSet)
             d = dataChest(os.path.join(path),dataSet)
-            d.cd(expt_path)zz
+            d.cd(expt_path)
             d.openDataset(dataSet)
         except Exception as e:
             print(e)

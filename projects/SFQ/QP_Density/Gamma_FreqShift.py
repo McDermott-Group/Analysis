@@ -12,9 +12,9 @@ SFQ_pulse = data_2d[:, 0]
 T_Ramsey = data_2d[:, 1]
 Freq_shift = -1000/T_Ramsey
 Phase_slips = SFQ_pulse * f_SFQ * 3
-# print ('SFQ_pulse=', SFQ_pulse)
-# print ('T_Ramsey=', T_Ramsey)
-# print ('Freq_shift=', Freq_shift)
+# print('SFQ_pulse=', SFQ_pulse)
+# print('T_Ramsey=', T_Ramsey)
+# print('Freq_shift=', Freq_shift)
 
 # plt.plot(SFQ_pulse, Freq_shift, label='freq_shift')
 # plt.xlabel('SFQ pulse length (ns)')

@@ -33,7 +33,7 @@ for J2Bias in J2Q2Biaslist:
 
     QPT_Q.get_fit()
     # print(QB_id)
-    # print (J2Bias, '[{:.1f}]'.format(QPT_Q.params[0]))
+    # print(J2Bias, '[{:.1f}]'.format(QPT_Q.params[0]))
     J2_QPT_2D.append([J2Bias, QPT_Q.params[0]])
 
 print('QB_id=', QB_id)

@@ -139,7 +139,7 @@ class OneState(object):
             for i_os in parity_trace_list:
 
                 """plot"""
-                # print ('i_os=', i_os[:100])
+                # print('i_os=', i_os[:100])
                 # i_os is an array, i_os = [-1.0, -1.0, 1.0, 1.0, ...]
                 avg = self._get_one_state_avg(os=i_os, n=n)
                 self.parity_trace_avg = np.append(self.parity_trace_avg, avg)

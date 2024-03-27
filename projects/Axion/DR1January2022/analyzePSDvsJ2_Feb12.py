@@ -48,7 +48,7 @@ for QB_id in QBs:
         avg_fidelity, avg_parity, parity_uncertainty =plotFittedPSD_Harrison(QPT_Q, save=True, name='{} with J2 ={} mV {}GHz'.
                                   format(QB_id, str(J2Bias), str(0.48*2*(J2Bias-30))),excluded_points=ep,concatenate_records=cr,ylim=[10 ** (-5), 10 ** (-3)])
         # print(QB_id)
-        # print (J2Bias, '[{:.1f}]'.format(QPT_Q.params[0]))
+        # print(J2Bias, '[{:.1f}]'.format(QPT_Q.params[0]))
         fparity[QB_id].append(avg_parity)
         uparity[QB_id].append(parity_uncertainty)
         fidelity[QB_id].append(avg_fidelity)

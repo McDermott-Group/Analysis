@@ -161,7 +161,7 @@ plt.show()
 
 # o_data_p.plot(style='k--')
 
-# print (type(o_data_p.rolling(100).mean()))
+# print(type(o_data_p.rolling(100).mean()))
 
 
 

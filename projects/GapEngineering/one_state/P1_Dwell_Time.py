@@ -184,14 +184,14 @@ class OneState(object):
 
     def _get_tpt_list(self):
         g_tpt_list, e_tpt_list = self.g_list_norm[:], self.e_list_norm[:]
-        # print ('g_tpt_list=', g_tpt_list[:10])
+        # print('g_tpt_list=', g_tpt_list[:10])
         # g_tpt_list, e_tpt_list = self.g_list, self.e_list
         t = self.t  # unit time in units of us
         for i, p in enumerate(g_tpt_list):
             g_tpt_list[i] = i * p * t
         for i, p in enumerate(e_tpt_list):
             e_tpt_list[i] = i * p * t
-        # print ('g_tpt_list=', g_tpt_list[:10])
+        # print('g_tpt_list=', g_tpt_list[:10])
         self.g_tpt_list = g_tpt_list
         self.e_tpt_list = e_tpt_list
 

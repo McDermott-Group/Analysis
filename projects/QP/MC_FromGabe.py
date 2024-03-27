@@ -181,7 +181,7 @@ def MC_Energy_Branching(E_p_0, Delta, iters):
 E_ph = np.linspace(0.01*Delta_K,14*Delta_K,10)
 n_qp = np.zeros(len(E_ph))
 for i in range(len(E_ph)):
-    print (i)
+    print(i)
     n_qp[i] = MC_Energy_Branching(E_ph[i],Delta_K,1000)/(E_ph[i]/Delta_K)
     print(n_qp)
 fig = plt.figure(figsize=(12,8), dpi= 100, facecolor='w', edgecolor='k')

@@ -278,7 +278,7 @@ class ChargeOffset(object):
         print("    pB' = {:.4f} \u00B1 {:.3f}".format(pBp,d_pBp))
         print('    p_obs = {}/{} = {:.4f} \u00B1 {:.3f}'.format( (q1 + q2 + q3 + q4),
                                             np.sum( bothMeas ), p_obs, d_p_obs ))
-        print('    pC = {:.3f} \u00B1 {:.4f}'.format(pC, d_pC)))
+        print('    pC = {:.3f} \u00B1 {:.4f}'.format(pC, d_pC))
         print('    pC/mean(pA,pB) = {:.3f} \u00B1 {:.4f}'.format( pCp, d_pCp ))
         print('    gA,gB = {:.3f} \u00B1 {:.4f} mHz, {:.3f} \u00B1 {:.4f} mHz'.format( 
                            1e3*gA, 1e3*d_gA, 1e3*gB, 1e3*d_gB ))
